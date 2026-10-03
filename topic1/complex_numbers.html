@@ -175,7 +175,7 @@
     <div class="flex items-center gap-2"><button id="quiz-reset" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button>
     <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 5</span></div>
   </div>
-  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 </section>
 
 </main>
@@ -364,6 +364,7 @@ function renderQuiz(id, QS) {
 
 /* ===== Review of Complex Numbers ===== */
 const r2 = v => (Math.abs(v) < 5e-3 ? 0 : v).toFixed(2);
+const pn = v => (+r2(v) < 0 ? '(' + r2(v) + ')' : r2(v)); // operand after + / - : wrap negatives
 const sgnJ = (y, d = 2) => (y < 0 ? ' - j' : ' + j') + Math.abs(y).toFixed(d);
 const angDeg = (x, y) => Math.atan2(y, x) / DEG;
 function debounce(f, ms = 120) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => f(...a), ms); }; }
@@ -419,7 +420,8 @@ function setZ(x, y, src) {
   Z.x = Math.max(-10, Math.min(10, x)); Z.y = Math.max(-10, Math.min(10, y));
   const m = Math.hypot(Z.x, Z.y), th = angDeg(Z.x, Z.y);
   if (src !== 'xy') { $('s-x').value = Z.x; $('s-y').value = Z.y; }
-  if (src !== 'pol') { $('s-m').value = m; $('s-th').value = Math.round(th); }
+  // polar sliders follow, also when a polar input was clipped by the |x|,|y| ≤ 10 window
+  if (src !== 'pol' || Z.x !== x || Z.y !== y) { $('s-m').value = m; $('s-th').value = Math.round(th); }
   $('v-x').textContent = Z.x.toFixed(1); $('v-y').textContent = Z.y.toFixed(1);
   $('v-m').textContent = m.toFixed(2); $('v-th').textContent = th.toFixed(1) + '°';
   drawPlane(); cpMathD();
@@ -459,7 +461,7 @@ animate(cvE, dt => {
   const T = t => x0 + (E.t - t) / tw * (x1 - x0);
   plotFrame(c, { x: x0, y: cy - R - 10, w: x1 - x0, h: 2 * R + 20 }, [0, 1], [-1.6, 1.6], { bg: '#ffffff' });
   line(c, x0, cy, x1, cy, COL.axis, 1);
-  label(c, '← earlier time', x1 - 4, cy + R + 26, COL.muted, '500 12px Inter, sans-serif', 'right');
+  label(c, 'earlier time →', x1 - 4, cy + R + 26, COL.muted, '500 12px Inter, sans-serif', 'right');
   const Y = v => cy - v * u;
   const n = 300, pr = [], pi = [];
   for (let i = 0; i <= n; i++) { const t = E.t - tw * i / n; const a = w * t + ph; pr.push([T(t), Y(A * Math.cos(a))]); pi.push([T(t), Y(A * Math.sin(a))]); }
@@ -511,11 +513,11 @@ const opMathD = debounce(R => {
   let rows = [`<div class="text-sky-800">$$z_1 = ${r2(x1)}${sgnJ(y1)} = ${pol(x1, y1)}$$</div>`];
   if (op !== 'conj') rows.push(`<div class="text-amber-800">$$z_2 = ${r2(x2)}${sgnJ(y2)} = ${pol(x2, y2)}$$</div>`);
   if (op === 'add' || op === 'sub') { const s = op === 'add' ? '+' : '-';
-    rows.push(`<div class="text-slate-800">$$z_1 ${s} z_2 = (${r2(x1)} ${s} ${r2(x2)}) + j(${r2(y1)} ${s} ${r2(y2)})$$</div>`);
+    rows.push(`<div class="text-slate-800">$$z_1 ${s} z_2 = (${r2(x1)} ${s} ${pn(x2)}) + j(${r2(y1)} ${s} ${pn(y2)})$$</div>`);
     rows.push(`<div class="text-emerald-800 font-bold border-t border-slate-200 pt-1">$$= ${r2(x)}${sgnJ(y)} = ${pol(x, y)}$$</div>`); }
   if (op === 'mul') {
     rows.push(`<div class="text-slate-800">$$\\text{Polar: } (${m1.toFixed(2)})(${m2.toFixed(2)})\\angle(${t1.toFixed(1)}^\\circ ${t2 < 0 ? '-' : '+'} ${Math.abs(t2).toFixed(1)}^\\circ) = ${(m1 * m2).toFixed(2)}\\angle ${(t1 + t2).toFixed(1)}^\\circ$$</div>`);
-    rows.push(`<div class="text-slate-800">$$\\text{Rect: } (${r2(x1 * x2)} - ${r2(y1 * y2)}) + j(${r2(x1 * y2)} + ${r2(x2 * y1)})$$</div>`);
+    rows.push(`<div class="text-slate-800">$$\\text{Rect: } (${r2(x1 * x2)} - ${pn(y1 * y2)}) + j(${r2(x1 * y2)} + ${pn(x2 * y1)})$$</div>`);
     rows.push(`<div class="text-emerald-800 font-bold border-t border-slate-200 pt-1">$$z_1z_2 = ${r2(x)}${sgnJ(y)} = ${pol(x, y)}$$</div>`); }
   if (op === 'div') {
     if (m2 < 1e-9) rows.push('<div class="text-rose-700 font-bold">Division by zero — choose z₂ ≠ 0.</div>'); else {
@@ -538,7 +540,9 @@ renderQuiz('quiz-box', [
   { q: 'For $z_1 = 3e^{j\\pi/6}$ and $z_2 = 2e^{j\\pi/3}$, the product $z_1z_2$ is…', o: ['$6e^{j\\pi/18}$', '$6e^{j\\pi/2} = j6$', '$5e^{j\\pi/2}$', '$1.5e^{-j\\pi/6}$'], a: 1,
     e: 'Magnitudes multiply ($3\\times2 = 6$) and angles add ($\\pi/6 + \\pi/3 = \\pi/2$), giving $6e^{j\\pi/2} = j6$.' },
   { q: 'Multiplying a complex number by $j$…', o: ['doubles its magnitude', 'rotates it by $+90^\\circ$ without changing its magnitude', 'reflects it across the real axis', 'rotates it by $180^\\circ$'], a: 1,
-    e: '$j = 1\\angle 90^\\circ$, so $jz = |z|\\angle(\\theta + 90^\\circ)$. This is why $d/dt \\rightarrow j\\omega$ shifts a phasor forward by a quarter cycle. Reflection across the real axis is the conjugate.' }
+    e: '$j = 1\\angle 90^\\circ$, so $jz = |z|\\angle(\\theta + 90^\\circ)$. This is why $d/dt \\rightarrow j\\omega$ shifts a phasor forward by a quarter cycle. Reflection across the real axis is the conjugate.' },
+  { q: 'For $z = 3 + j4$, the product $zz^*$ equals…', o: ['$5$', '$-7 + j24$', '$7$', '$25$'], a: 3,
+    e: '$zz^* = (3 + j4)(3 - j4) = 9 + 16 = 25 = |z|^2$, always real and non-negative. In polar form the angles $\\theta$ and $-\\theta$ cancel; toggle $z^*$ in the simulation to see the mirror image.' }
 ]);
 window.addEventListener('load', () => { setZ(3, 4); drawOps(); });
 

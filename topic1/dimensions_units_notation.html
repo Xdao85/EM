@@ -115,9 +115,9 @@
 <section id="prefixes" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
   <div>
-    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Scaling factors</span>
+    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
     <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Multiple and Submultiple Prefixes</h2>
-    <p class="text-sm text-slate-700 mt-1 leading-relaxed">Electromagnetic quantities span more than 30 orders of magnitude — from the 1.6×10⁻¹⁹ C charge of an electron to the 5000 km wavelength of 60 Hz power. Prefixes keep the numbers readable.</p>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">Electromagnetic quantities span more than 30 orders of magnitude — from the $1.6\times10^{-19}$ C charge of an electron to the 5000 km wavelength of 60 Hz power. Prefixes keep the numbers readable.</p>
   </div>
 </div>
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -156,8 +156,8 @@
 <section id="dimlab" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
   <div>
-    <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Unit algebra</span>
-    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Interactive Simulation 2 · Dimensional Analysis Lab</h2>
+    <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Dimensional Analysis Lab</h2>
     <p class="text-sm text-slate-700 mt-1 leading-relaxed">Every valid equation must have the same dimensions on both sides. Build a product of quantities with exponents and the lab reduces it to fundamental units (kg, m, s, C) and names the result.</p>
   </div>
 </div>
@@ -187,7 +187,7 @@
     <div class="flex items-center gap-2"><button id="quiz-reset" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button>
     <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 5</span></div>
   </div>
-  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 </section>
 
 </main>
@@ -380,7 +380,7 @@ const PNAME = { E: 'exa', P: 'peta', T: 'tera', G: 'giga', M: 'mega', k: 'kilo',
 const EXAMPLES = {
   m: [[0.84e-15, 'proton radius'], [5.3e-11, 'hydrogen atom'], [1e-9, 'DNA width ~ nm'], [5e-7, 'green light λ'], [7e-5, 'human hair'], [1e-3, 'mm-wave λ (300 GHz)'], [0.125, 'Wi-Fi λ (2.4 GHz)'], [1.7, 'person'], [3, 'FM radio λ'], [5e6, '60 Hz λ'], [6.37e6, 'Earth radius'], [1.5e11, 'Earth–Sun']],
   Hz: [[50, 'power grid'], [1e3, 'audio tone'], [1e6, 'AM radio'], [1e8, 'FM radio'], [2.4e9, 'Wi-Fi'], [3e10, 'radar / satellite'], [3e13, 'thermal IR'], [5.5e14, 'green light'], [1e16, 'ultraviolet'], [3e18, 'X-rays'], [1e20, 'gamma rays']],
-  s: [[3.3e-18, 'light crosses an atom'], [1e-15, 'optical cycle ~ fs'], [3.3e-9, 'light travels 1 m'], [3e-10, '3 GHz clock period'], [1e-6, 'µs pulse'], [1.67e-2, '60 Hz period'], [1, 'heartbeat'], [8.64e4, 'one day'], [3.15e7, 'one year']],
+  s: [[3.3e-19, 'light crosses an atom'], [1e-15, 'optical cycle ~ fs'], [3.3e-9, 'light travels 1 m'], [3e-10, '3 GHz clock period'], [1e-6, 'µs pulse'], [1.67e-2, '60 Hz period'], [1, 'heartbeat'], [8.64e4, 'one day'], [3.15e7, 'one year']],
   F: [[1e-16, 'transistor gate'], [1e-12, 'pF ceramic chip'], [1e-10, '1 m of coax (≈100 pF)'], [1e-7, '0.1 µF decoupling'], [1e-3, 'electrolytic'], [1, 'supercapacitor'], [3000, 'large supercap']]
 };
 let unit = 'm';
@@ -497,7 +497,7 @@ function dimCalc() {
   const nm = ['kg', 'm', 's', 'C'];
   const base = clean.map((x, j) => x ? `\\mathrm{${nm[j]}}${x === 1 ? '' : '^{' + fracTeX(x) + '}'}` : '').filter(Boolean).join('\\,');
   $('dim-base').innerHTML = `$$${base || '1\\ (\\text{dimensionless})'}$$`;
-  $('dim-badges').innerHTML = ['M (kg)', 'L (m)', 'T (s)', 'Q (C)'].map((t, j) => `<div class="rounded-xl border border-slate-200 bg-white p-2"><div class="text-sm text-slate-600">${t}</div><div class="text-lg font-bold font-mono ${clean[j] ? 'text-rose-700' : 'text-slate-600'}">${fracTeX(clean[j]).replace('\\frac{1}{2}', '½').replace('\\frac{3}{2}', '3/2')}</div></div>`).join('');
+  $('dim-badges').innerHTML = ['M (kg)', 'L (m)', 'T (s)', 'Q (C)'].map((t, j) => `<div class="rounded-xl border border-slate-200 bg-white p-2"><div class="text-sm text-slate-600">${t}</div><div class="text-lg font-bold font-mono ${clean[j] ? 'text-rose-700' : 'text-slate-600'}">${fracTeX(clean[j]).replace('\\frac{1}{2}', '½').replace(/\\frac\{(\d+)\}\{2\}/, '$1/2')}</div></div>`).join('');
   const hit = NAMED.find(n => n[0].every((x, j) => x === clean[j]));
   const nb = $('dim-name');
   if (hit) { nb.className = 'p-3 rounded-xl border text-sm bg-emerald-50 border-emerald-300 text-emerald-800'; nb.innerHTML = `<b>Unit: ${hit[1]}</b>${hit[2] ? ' — the result is ' + hit[2] + '.' : ''}`; }
@@ -516,7 +516,9 @@ renderQuiz('quiz-box', [
   { q: 'Reduced to fundamental units, $1/\\sqrt{\\mu_0\\varepsilon_0}$ has the dimensions of…', o: ['an impedance (Ω)', 'a velocity (m/s)', 'a frequency (Hz)', 'it is dimensionless'], a: 1,
     e: '$[\\mu_0][\\varepsilon_0] = (\\mathrm{kg\\,m\\,C^{-2}})(\\mathrm{C^2 s^2 kg^{-1} m^{-3}}) = \\mathrm{s^2/m^2}$, so the inverse square root is m/s. Its value, $3\\times10^8$ m/s, is the speed of light.' },
   { q: 'Wi-Fi operates at 2.4 GHz. The same frequency in MHz is…', o: ['240 MHz', '2400 MHz', '24 000 MHz', '0.0024 MHz'], a: 1,
-    e: 'giga ($10^9$) to mega ($10^6$) is a factor of $10^3$: $2.4\\times10^{9} = 2400\\times10^{6}$ Hz.' }
+    e: 'giga ($10^9$) to mega ($10^6$) is a factor of $10^3$: $2.4\\times10^{9} = 2400\\times10^{6}$ Hz.' },
+  { q: 'In this course, what does the tilde in $\\widetilde{\\mathbf{E}}$ denote?', o: ['The phasor of the sinusoidal field $\\mathbf{E}(t)$', 'A unit vector along $\\mathbf{E}$', 'The magnitude of $\\mathbf{E}$', 'The time average of $\\mathbf{E}(t)$'], a: 0,
+    e: '$\\widetilde{\\mathbf{E}}$ is the complex phasor, related to the instantaneous field by $\\mathbf{E}(t) = \\mathfrak{Re}[\\widetilde{\\mathbf{E}}\\,e^{j\\omega t}]$. A circumflex marks a unit vector and medium-weight italic $E$ the magnitude.' }
 ]);
 window.addEventListener('load', () => { drawScale(); convert(); $('dim-presets').querySelector('.chip').click(); });
 

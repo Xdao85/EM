@@ -1,0 +1,38 @@
+/* portal.css: styles shared by welcome.html and portal/*.html
+   (plus the few Tailwind utilities they use that are not in tailwind.css) */
+body { font-family: 'Inter', system-ui, sans-serif; }
+.card { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,.03); transition: border-color .2s, transform .2s, box-shadow .2s; }
+a.card:hover, button.card:hover { border-color: rgba(2,132,199,.45); transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(15,23,42,.25); }
+a.card:focus-visible, .chip:focus-visible, .seg button:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; }
+.chip { padding: .35rem .8rem; border-radius: 9999px; font-size: .875rem; font-weight: 600; border: 1px solid #e2e8f0; color: #475569; background: #fff; transition: all .15s; }
+.chip:hover { background: #f8fafc; }
+.chip.on, .chip[aria-pressed="true"] { background: #0f172a; border-color: #0f172a; color: #fff; }
+.seg button { padding: .4rem .9rem; font-size: .875rem; font-weight: 600; color: #475569; border-radius: .5rem; }
+.seg button.on { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+@keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fade { animation: fade-in .35s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .fade { animation: none; } a.card:hover { transform: none; } }
+.balance { text-wrap: balance; }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 60; background: #0f172a; color: #fff; padding: .5rem .9rem; border-radius: .5rem; font-weight: 600; }
+.skip:focus { left: 8px; }
+.tile { display: flex; flex-direction: column; gap: .5rem; }
+.tile:hover .tile-go { transform: translateX(3px); }
+.tile-go { transition: transform .15s; }
+.hl { background: #fef08a; color: inherit; border-radius: 2px; }
+#q::-webkit-search-cancel-button { display: none; }
+kbd { font-family: inherit; font-size: .8125rem; padding: .05rem .4rem; border: 1px solid #cbd5e1; border-bottom-width: 2px; border-radius: .35rem; background: #f8fafc; color: #0f172a; }
+/* current page in the top navigation */
+#top-nav a.is-here { background: #0f172a; border-color: #0f172a; color: #fff; }
+/* page heading badge */
+.badge { display: inline-block; font-size: .875rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; border-radius: .375rem; padding: .25rem .5rem; }
+
+/* Tailwind utilities used by the portal pages but missing from tailwind.css */
+.max-w-6xl { max-width: 72rem; } .max-w-full { max-width: 100%; } .max-w-xl { max-width: 36rem; }
+.mt-10 { margin-top: 2.5rem; } .pt-2\.5 { padding-top: .625rem; } .py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+.text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+.shadow-sky-700\/20 { --tw-shadow-color: rgba(3,105,161,.2); --tw-shadow: var(--tw-shadow-colored); }
+@media (min-width: 640px) { .sm\:block { display: block; } }
+@media (min-width: 1024px) { .lg\:grid-cols-\[minmax\(0\2c 1fr\)_minmax\(0\2c 26rem\)\] { grid-template-columns: minmax(0,1fr) minmax(0,26rem); } }
+.-mt-6 { margin-top: -1.5rem; } .pt-4 { padding-top: 1rem; } .align-top { vertical-align: top; }
+.min-h-\[4rem\] { min-height: 4rem; } .min-w-\[56rem\] { min-width: 56rem; }
+.text-indigo-800 { color: rgb(55 48 163); }

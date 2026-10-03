@@ -125,7 +125,8 @@
   /** Signed number for use after an operator: 2 -> "2.0", -2 -> "(-2.0)". */
   EM.paren = function (v, digits) {
     var t = Number(v).toFixed(digits == null ? 1 : digits);
-    return Number(v) < 0 ? '(' + t + ')' : t;
+    if (/^-0(\.0*)?$/.test(t)) t = t.slice(1);          // -0.04 -> "0.0", not "(-0.0)"
+    return t.charAt(0) === '-' ? '(' + t + ')' : t;
   };
 
   /** Mark a multiple-choice question after the student answered:
@@ -718,126 +719,6 @@
   };
 
   /* ------------------------------------------------------------------------
-     Unit-vector hats (x̂, φ̂, θ̂ …) written as letter + combining U+0302.
-     Many fonts (UI and monospace) draw that hat beside or between letters.
-     1) Text on the page: each hatted letter is replaced by real math (KaTeX).
-     2) Text drawn on canvases: the letter is drawn plain and a hat is drawn above it.
-     ------------------------------------------------------------------------ */
-  // A hatted letter written either as letter + U+0302, or as a precomposed letter (ŷ ẑ â …).
-  // Only stand-alone symbols are converted (no letter directly before or after), so ordinary words are untouched.
-  var PRE = { 'â':'a','ĉ':'c','ê':'e','ĝ':'g','ĥ':'h','î':'i','ĵ':'j','ô':'o','ŝ':'s','û':'u','ŵ':'w','ŷ':'y','ẑ':'z',
-              'Â':'A','Ĉ':'C','Ê':'E','Ĝ':'G','Ĥ':'H','Î':'I','Ĵ':'J','Ô':'O','Ŝ':'S','Û':'U','Ŵ':'W','Ŷ':'Y','Ẑ':'Z' };
-  var PRE_CLASS = Object.keys(PRE).join('');
-  var HAT_RE = new RegExp('(?<![\\p{L}])(?:([A-Za-z\\u0370-\\u03FF])\\u0302|([' + PRE_CLASS + ']))(?![\\p{L}\\u0302])', 'gu');
-  var HAT_TEST = new RegExp('(?<![\\p{L}])(?:[A-Za-z\\u0370-\\u03FF]\\u0302|[' + PRE_CLASS + '])(?![\\p{L}\\u0302])', 'u');
-  var GREEK = { 'α':'alpha','β':'beta','γ':'gamma','θ':'theta','φ':'phi','ϕ':'phi','ρ':'rho','σ':'sigma','ω':'omega','ε':'varepsilon','μ':'mu','τ':'tau','ψ':'psi','λ':'lambda','η':'eta' };
-  var hatCache = {};
-  function hatHTML(ch) {
-    if (hatCache[ch]) return hatCache[ch];
-    var tex = GREEK[ch] ? '\\hat{\\boldsymbol{\\' + GREEK[ch] + '}}' : '\\hat{\\mathbf{' + ch + '}}';
-    var html;
-    try { html = window.katex.renderToString(tex, { throwOnError: true }); } catch (e) { html = null; }
-    return (hatCache[ch] = html);
-  }
-  var SKIP = /^(SCRIPT|STYLE|TEXTAREA|OPTION|SELECT|TITLE|CODE|PRE|NOSCRIPT)$/;
-  function fixHatsIn(root) {
-    if (!window.katex || !root) return;
-    var nodes = [], w;
-    if (root.nodeType === 3) nodes = [root];
-    else { w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); var n; while ((n = w.nextNode())) if (HAT_TEST.test(n.nodeValue)) nodes.push(n); }
-    nodes.forEach(function (t) {
-      var p = t.parentNode;
-      if (!p || !HAT_TEST.test(t.nodeValue) || SKIP.test(p.nodeName) || (p.closest && p.closest('.katex, svg, [contenteditable]'))) return;
-      var frag = document.createDocumentFragment(), txt = t.nodeValue, last = 0, m;
-      HAT_RE.lastIndex = 0;
-      while ((m = HAT_RE.exec(txt))) {
-        var html = hatHTML(m[1] || PRE[m[2]]); if (!html) continue;
-        m[1] = m[1] || PRE[m[2]];
-        if (m.index > last) frag.appendChild(document.createTextNode(txt.slice(last, m.index)));
-        var sp = document.createElement('span'); sp.className = 'em-hat'; sp.innerHTML = html;   // KaTeX already carries MathML for screen readers
-        frag.appendChild(sp); last = m.index + m[0].length;
-      }
-      if (last === 0) return;
-      if (last < txt.length) frag.appendChild(document.createTextNode(txt.slice(last)));
-      p.replaceChild(frag, t);
-    });
-  }
-  EM.fixHats = fixHatsIn;
-  var hatQueue = [], hatPending = false;
-  function flushHats() { hatPending = false; var q = hatQueue; hatQueue = []; q.forEach(fixHatsIn); }
-  function watchHats() {
-    fixHatsIn(document.body);
-    if (!('MutationObserver' in window)) return;
-    new MutationObserver(function (muts) {
-      muts.forEach(function (mu) {
-        if (mu.type === 'characterData') { if (HAT_TEST.test(mu.target.nodeValue)) hatQueue.push(mu.target); }
-        else mu.addedNodes.forEach(function (n) { if ((n.nodeType === 3 && HAT_TEST.test(n.nodeValue)) || (n.nodeType === 1 && HAT_TEST.test(n.textContent))) hatQueue.push(n); });
-      });
-      if (hatQueue.length && !hatPending) { hatPending = true; requestAnimationFrame(flushHats); }
-    }).observe(document.body, { childList: true, subtree: true, characterData: true });
-  }
-
-  (function patchCanvasHats() {
-    var C = window.CanvasRenderingContext2D; if (!C || C.prototype.__emHat) return;
-    var orig = C.prototype.fillText;
-    C.prototype.__emHat = true;
-    var origStroke = C.prototype.strokeText;      // outline/halo pass: draw the letters only, the fill pass adds the hat
-    C.prototype.strokeText = function (text, x, y, maxWidth) {
-      text = String(text).replace(/\u0302/g, '');
-      return maxWidth === undefined ? origStroke.call(this, text, x, y) : origStroke.call(this, text, x, y, maxWidth);
-    };
-    C.prototype.fillText = function (text, x, y, maxWidth) {
-      text = String(text);
-      if (HAT_TEST.test(text)) text = text.replace(HAT_RE, function (all, base, pre) { return (base || PRE[pre]) + '\u0302'; });   // ŷ → y + hat, drawn below
-      if (text.indexOf('\u0302') === -1) return maxWidth === undefined ? orig.call(this, text, x, y) : orig.call(this, text, x, y, maxWidth);
-      var plain = text.replace(/\u0302/g, '');
-      if (maxWidth === undefined) orig.call(this, plain, x, y); else orig.call(this, plain, x, y, maxWidth);
-      var total = this.measureText(plain).width, a = this.textAlign;
-      var left = (a === 'center') ? x - total / 2 : (a === 'right' || a === 'end') ? x - total : x;
-      var fs = parseFloat((this.font.match(/(\d+(?:\.\d+)?)px/) || [0, 12])[1]);
-      var pos = 0, out = '';
-      this.save();
-      this.strokeStyle = this.fillStyle; this.lineWidth = Math.max(1, fs * 0.075); this.lineCap = 'round'; this.lineJoin = 'round';
-      for (var i = 0; i < text.length; i++) {
-        var ch = text[i];
-        if (ch === '\u0302') {
-          var base = out.slice(-1), before = out.slice(0, -1);
-          var x0 = left + this.measureText(before).width, cw = this.measureText(base).width;
-          var mt = this.measureText(base), top = y - (mt.actualBoundingBoxAscent || fs * 0.7);
-          var cx = x0 + cw / 2, hw = Math.max(fs * 0.17, cw * 0.32), h = fs * 0.16;
-          this.beginPath(); this.moveTo(cx - hw, top - fs * 0.06); this.lineTo(cx, top - fs * 0.06 - h); this.lineTo(cx + hw, top - fs * 0.06); this.stroke();
-          continue;
-        }
-        out += ch;
-      }
-      this.restore();
-    };
-  })();
-
-  /* Module header: section buttons in one row; fade the edge that has more buttons behind it,
-     let the mouse wheel scroll the row sideways, and keep the button you are on in view. */
-  function setupHeaderNav() {
-    var nav = document.querySelector('header.sticky nav'); if (!nav) return;
-    function update() {
-      // try the full-size buttons first; if they overflow, switch to compact buttons
-      nav.classList.remove('compact');
-      if (nav.scrollWidth > nav.clientWidth + 2) nav.classList.add('compact');
-      var max = nav.scrollWidth - nav.clientWidth;
-      nav.classList.toggle('fade-l', nav.scrollLeft > 2);
-      nav.classList.toggle('fade-r', max > 2 && nav.scrollLeft < max - 2);
-    }
-    nav.addEventListener('scroll', update, { passive: true });
-    nav.addEventListener('wheel', function (e) {
-      if (nav.scrollWidth <= nav.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      nav.scrollLeft += e.deltaY; e.preventDefault();
-    }, { passive: false });
-    nav.addEventListener('focusin', function (e) { if (e.target.scrollIntoView) e.target.scrollIntoView({ block: 'nearest', inline: 'nearest' }); });
-    if ('ResizeObserver' in window) new ResizeObserver(update).observe(nav);
-    window.addEventListener('resize', update);
-    update();
-  }
-
-  /* ------------------------------------------------------------------------
      5. Editing helper: open any page with ?twdev to load the Tailwind CDN,
         so newly added Tailwind classes work while you edit (needs internet).
         Without ?twdev only the classes compiled into tailwind.css exist.
@@ -853,8 +734,6 @@
      ------------------------------------------------------------------------ */
   function firstRender() {
     EM.typeset(document.body);
-    watchHats();
-    setupHeaderNav();
     requestAnimationFrame(function () { docEl.classList.remove('em-pending'); });
   }
   if (document.readyState === 'loading') {

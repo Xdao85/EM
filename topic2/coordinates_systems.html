@@ -140,7 +140,7 @@
                     <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 5</span>
                 </div>
             </div>
-            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
     </main>
 
@@ -167,7 +167,9 @@
             { q: 'The surface $\\theta = \\theta_1$ (with $0 < \\theta_1 < \\pi/2$) in spherical coordinates is', o: ['A sphere', 'A cone with its apex at the origin', 'A half-plane', 'A cylinder'], a: 1,
               e: 'All points at a fixed angle $\\theta_1$ from the $+z$ axis form a cone. A fixed $R$ gives a sphere (the wireframe shell in the spherical overlay) and a fixed $\\phi$ a half-plane.' },
             { q: 'In cylindrical coordinates, which is the correct right-hand cyclic relation?', o: ['$\\hat{\\mathbf{r}}\\times\\hat{\\mathbf{z}} = \\boldsymbol{\\hat{\\phi}}$', '$\\boldsymbol{\\hat{\\phi}}\\times\\hat{\\mathbf{r}} = \\hat{\\mathbf{z}}$', '$\\hat{\\mathbf{z}}\\times\\hat{\\mathbf{r}} = \\boldsymbol{\\hat{\\phi}}$', '$\\hat{\\mathbf{r}}\\times\\boldsymbol{\\hat{\\phi}} = -\\hat{\\mathbf{z}}$'], a: 2,
-              e: 'The cyclic order is $(\\hat{\\mathbf{r}}, \\boldsymbol{\\hat{\\phi}}, \\hat{\\mathbf{z}})$: $\\hat{\\mathbf{r}}\\times\\boldsymbol{\\hat{\\phi}} = \\hat{\\mathbf{z}}$, $\\boldsymbol{\\hat{\\phi}}\\times\\hat{\\mathbf{z}} = \\hat{\\mathbf{r}}$, $\\hat{\\mathbf{z}}\\times\\hat{\\mathbf{r}} = \\boldsymbol{\\hat{\\phi}}$.' }
+              e: 'The cyclic order is $(\\hat{\\mathbf{r}}, \\boldsymbol{\\hat{\\phi}}, \\hat{\\mathbf{z}})$: $\\hat{\\mathbf{r}}\\times\\boldsymbol{\\hat{\\phi}} = \\hat{\\mathbf{z}}$, $\\boldsymbol{\\hat{\\phi}}\\times\\hat{\\mathbf{z}} = \\hat{\\mathbf{r}}$, $\\hat{\\mathbf{z}}\\times\\hat{\\mathbf{r}} = \\boldsymbol{\\hat{\\phi}}$.' },
+            { q: 'Point $P$ has Cartesian coordinates $(1, 1, \\sqrt{2})$. Its spherical coordinates $(R, \\theta, \\phi)$ are', o: ['$(2, 45^\\circ, 45^\\circ)$', '$(\\sqrt{2}, 45^\\circ, 45^\\circ)$', '$(2, 135^\\circ, 45^\\circ)$', '$(4, 45^\\circ, 45^\\circ)$'], a: 0,
+              e: '$R = \\sqrt{1 + 1 + 2} = 2$, $\\theta = \\cos^{-1}(z/R) = \\cos^{-1}(\\sqrt{2}/2) = 45^\\circ$ and $\\phi = \\tan^{-1}(y/x) = 45^\\circ$.' }
         ];
         function renderQuiz() {
             const box = $('quiz-container'), n = QUIZ.length, odd = n % 2 === 1;

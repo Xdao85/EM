@@ -130,7 +130,7 @@
   <div>
     <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Spectrum allocation</span>
     <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Radio Frequency Bands</h2>
-    <p class="text-sm text-slate-700 mt-1 leading-relaxed">ITU band designations. Each band spans one decade of frequency. Click a row to jump to it in the explorer.</p>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">ITU band designations. From VLF upward each band spans one decade of frequency (ELF is shown here as the whole range below 3 kHz). Click a row to jump to it in the explorer.</p>
   </div>
 </div>
   <div class="overflow-x-auto rounded-2xl border border-slate-200">
@@ -148,7 +148,7 @@
     <div class="flex items-center gap-2"><button id="quiz-reset" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button>
     <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 5</span></div>
   </div>
-  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 </section>
 
 </main>
@@ -515,7 +515,9 @@ renderQuiz('quiz-box', [
   { q: 'FM radio stations (88–108 MHz) are in which ITU band?', o: ['MF', 'HF', 'VHF', 'UHF'], a: 2,
     e: 'VHF spans 30–300 MHz (wavelengths 10 m – 1 m). FM at 100 MHz has $\\lambda = 3$ m.' },
   { q: 'A plane wave in vacuum has $E_0 = 30$ V/m. Its magnetic amplitude $B_0$ is about…', o: ['$30$ T', '$0.1\\ \\mu$T', '$1\\ \\mu$T', '$9\\times10^{9}$ T'], a: 1,
-    e: '$B_0 = E_0/c = 30/(3\\times10^8) = 1\\times10^{-7}$ T = 0.1 µT. Magnetic fields of radio waves are tiny in tesla, yet carry half the wave energy.' }
+    e: '$B_0 = E_0/c = 30/(3\\times10^8) = 1\\times10^{-7}$ T = 0.1 µT. Magnetic fields of radio waves are tiny in tesla, yet carry half the wave energy.' },
+  { q: 'A microwave oven operates at 2.45 GHz. Its free-space wavelength is about…', o: ['12.2 cm', '1.22 m', '1.22 cm', '12.2 m'], a: 0,
+    e: '$\\lambda = c/f = (3\\times10^8)/(2.45\\times10^9) \\approx 0.122$ m = 12.2 cm, inside the UHF band (1 m – 10 cm) near its upper edge.' }
 ]);
 window.addEventListener('load', updSpec);
 

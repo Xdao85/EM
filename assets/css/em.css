@@ -229,33 +229,3 @@ button[data-j]:not(:disabled):active { transform: scale(.985); }
 .em-q-reveal, .em-q-correct-chosen { background-color: #ecfdf5 !important; border-color: #047857 !important; color: #064e3b !important; opacity: 1 !important; }
 .em-q-wrong { opacity: 1 !important; }
 .em-q-tag { color: inherit; }
-
-/* hatted unit vectors rendered by em.js (x̂ → KaTeX) inside normal text, buttons and readouts */
-.em-hat .katex { font-size: 1.05em; }
-
-/* ==========================================================================
-   Module page header: one even row on every page
-   - title on the left, section buttons on the right, always the same height;
-   - all section buttons get the same box and height (some pages mixed plain text and boxed buttons);
-   - if the buttons do not fit, the row scrolls sideways (fading edge shows there is more) instead of wrapping.
-   ========================================================================== */
-header.sticky > div { flex-wrap: nowrap !important; gap: 1rem; }
-header.sticky > div > :first-child { flex-shrink: 0; min-width: 0; }
-header.sticky nav { flex-wrap: nowrap !important; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
-  min-width: 0; flex: 0 1 auto; padding: 2px; scroll-behavior: smooth; }
-header.sticky nav::-webkit-scrollbar { display: none; }
-header.sticky nav > * { flex-shrink: 0; white-space: nowrap; display: inline-flex !important; align-items: center; gap: .375rem;
-  height: 34px; padding: 0 .75rem !important; border: 1px solid transparent; border-radius: .5rem; line-height: 1; }
-/* buttons that had no box of their own (only a hover colour) get a neutral box; 'hover:bg-…' must not count as a box */
-header.sticky nav > *:not([class^="bg-"]):not([class*=" bg-"]) { background: #f8fafc; border-color: #e2e8f0; }
-header.sticky nav > *:not([class^="bg-"]):not([class*=" bg-"]):hover { background: #f1f5f9; }
-header.sticky nav.fade-r { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
-header.sticky nav.fade-l { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); }
-header.sticky nav.fade-l.fade-r { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
-@media (max-width: 767px) {
-  header.sticky > div { flex-wrap: wrap !important; }
-  header.sticky nav { width: 100%; }
-}
-/* when the buttons do not fit, first make them compact (no icons, tighter padding) before scrolling */
-header.sticky nav.compact > * { padding: 0 .6rem !important; gap: 0; }
-header.sticky nav.compact > * > svg, header.sticky nav.compact > * > i { display: none !important; }

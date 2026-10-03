@@ -137,11 +137,11 @@
     <div class="flex items-center gap-2"><button id="quiz-reset" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button>
     <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 5</span></div>
   </div>
-  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 </section>
 
 </main>
-<footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Traveling Waves</footer>
+<footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Travelling Waves</footer>
 <script>
 /* ===== Shared page toolkit (canvas, UI, quiz, animation) ===== */
 const $ = id => document.getElementById(id);
@@ -431,7 +431,9 @@ renderQuiz('quiz-box', [
   { q: 'What is the unit of the attenuation constant $\\alpha$?', o: ['rad/m', 'Hz', 'Np/m', 'dB·s'], a: 2,
     e: '$\\alpha x$ is a dimensionless exponent measured in nepers, so $\\alpha$ is in Np/m. It converts to dB/m with $8.686\\,\\alpha$.' },
   { q: 'With $\\alpha = 0.2$ Np/m, at what distance has the amplitude fallen to $1/e$ of its initial value?', o: ['0.2 m', '2 m', '5 m', '8.686 m'], a: 2,
-    e: '$e^{-\\alpha x} = e^{-1}$ when $x = 1/\\alpha = 5$ m. Set $\\alpha = 0.2$ in Simulation 2 and the amber marker sits at 5 m.' }
+    e: '$e^{-\\alpha x} = e^{-1}$ when $x = 1/\\alpha = 5$ m. Set $\\alpha = 0.2$ in Simulation 2 and the amber marker sits at 5 m.' },
+  { q: 'In a lossless medium with fixed $u_p$, doubling the frequency…', o: ['doubles $\\lambda$', 'leaves $\\lambda$ unchanged and doubles $\\beta$', 'halves $u_p$', 'halves $\\lambda$ and doubles $\\beta$'], a: 3,
+    e: '$\\lambda = u_p/f$ halves, and $\\beta = 2\\pi/\\lambda = \\omega/u_p$ doubles. In Simulation 1, doubling $f$ while halving $\\lambda$ leaves the readout $u_p = f\\lambda$ unchanged.' }
 ]);
 
 lucide.createIcons();

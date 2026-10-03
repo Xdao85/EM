@@ -115,6 +115,7 @@
 
         <section id="unit" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
             <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
                 <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Vector, Magnitude and Unit Vector</h2>
                 <p class="text-sm text-slate-600 mt-1">Set the components of $\mathbf{A}$ and, if you like, move its tail away from the origin: a vector is fixed by magnitude and direction, not by where it is drawn. Drag the view to rotate it.</p>
             </div>
@@ -161,6 +162,7 @@
 
         <section id="algebra" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
             <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
                 <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Vector Algebra: $\mathbf{A} \pm \mathbf{B}$, $\mathbf{A}\cdot\mathbf{B}$, $\mathbf{A}\times\mathbf{B}$</h2>
                 <p class="text-sm text-slate-600 mt-1">Choose an operation. Addition uses the head-to-tail (parallelogram) rule; the dot product shows the projection of $\mathbf{A}$ on $\mathbf{B}$; the cross product shows the parallelogram whose area is $|\mathbf{A}\times\mathbf{B}|$ and the right-hand-rule sweep from $\mathbf{A}$ to $\mathbf{B}$.</p>
             </div>
@@ -212,13 +214,13 @@
                     <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
                     <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
                 </div>
-                <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
             </div>
             <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
     </main>
 
-    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600"></footer>
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Basic Laws of Vector Algebra</footer>
 
     <script>
         // =========================================================
@@ -391,9 +393,14 @@
             const fb = $(`q${i}-feedback`);
             fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
                               : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
-            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Not quite. ') + item.why;
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
             typeset([fb]);
             setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
         }
 
         // ---------- Animation loop: only visible canvases are redrawn ----------
@@ -628,7 +635,8 @@
             { q: 'Which of these is a unit vector?', opts: ['$\\hat{\\mathbf{x}} + \\hat{\\mathbf{y}}$', '$(\\hat{\\mathbf{x}} + \\hat{\\mathbf{y}} + \\hat{\\mathbf{z}})/\\sqrt{3}$', '$(\\hat{\\mathbf{x}} + \\hat{\\mathbf{y}} + \\hat{\\mathbf{z}})/3$', '$2\\hat{\\mathbf{z}}$'], ans: 1, why: 'Its magnitude is $\\sqrt{3}/\\sqrt{3} = 1$. This is the unit vector along the cube diagonal, with $\\alpha = \\beta = \\gamma \\approx 54.7°$.' },
             { q: '$\\mathbf{A} = 2\\hat{\\mathbf{x}} + 3\\hat{\\mathbf{y}} - \\hat{\\mathbf{z}}$ and $\\mathbf{B} = -\\hat{\\mathbf{y}} + 4\\hat{\\mathbf{z}}$. What is $\\mathbf{A}\\cdot\\mathbf{B}$?', opts: ['$-7$', '$7$', '$1$', '$-3$'], ans: 0, why: '$A_xB_x + A_yB_y + A_zB_z = 0 - 3 - 4 = -7$. Negative, so $\\theta_{AB} > 90°$ (about $117°$).' },
             { q: 'Which statement about $\\mathbf{A}\\times\\mathbf{B}$ is FALSE?', opts: ['It is perpendicular to both $\\mathbf{A}$ and $\\mathbf{B}$', 'Its magnitude equals the parallelogram area $AB\\sin\\theta_{AB}$', '$\\mathbf{A}\\times\\mathbf{B} = \\mathbf{B}\\times\\mathbf{A}$', 'It is zero when $\\mathbf{A} \\parallel \\mathbf{B}$'], ans: 2, why: 'The cross product is anticommutative: $\\mathbf{B}\\times\\mathbf{A} = -\\mathbf{A}\\times\\mathbf{B}$.' },
-            { q: 'Points $P_1 = (1, 2, 3)$ and $P_2 = (4, 6, 3)$. The distance vector $\\mathbf{R}_{12}$ from $P_1$ to $P_2$ and its length are', opts: ['$3\\hat{\\mathbf{x}} + 4\\hat{\\mathbf{y}}$, $5$', '$5\\hat{\\mathbf{x}} + 8\\hat{\\mathbf{y}} + 6\\hat{\\mathbf{z}}$, $\\sqrt{125}$', '$-3\\hat{\\mathbf{x}} - 4\\hat{\\mathbf{y}}$, $5$', '$3\\hat{\\mathbf{x}} + 4\\hat{\\mathbf{y}}$, $7$'], ans: 0, why: '$\\mathbf{R}_{12} = \\mathbf{R}_2 - \\mathbf{R}_1 = 3\\hat{\\mathbf{x}} + 4\\hat{\\mathbf{y}} + 0\\hat{\\mathbf{z}}$, with $|\\mathbf{R}_{12}| = 5$.' }
+            { q: 'Points $P_1 = (1, 2, 3)$ and $P_2 = (4, 6, 3)$. The distance vector $\\mathbf{R}_{12}$ from $P_1$ to $P_2$ and its length are', opts: ['$3\\hat{\\mathbf{x}} + 4\\hat{\\mathbf{y}}$, $5$', '$5\\hat{\\mathbf{x}} + 8\\hat{\\mathbf{y}} + 6\\hat{\\mathbf{z}}$, $\\sqrt{125}$', '$-3\\hat{\\mathbf{x}} - 4\\hat{\\mathbf{y}}$, $5$', '$3\\hat{\\mathbf{x}} + 4\\hat{\\mathbf{y}}$, $7$'], ans: 0, why: '$\\mathbf{R}_{12} = \\mathbf{R}_2 - \\mathbf{R}_1 = 3\\hat{\\mathbf{x}} + 4\\hat{\\mathbf{y}} + 0\\hat{\\mathbf{z}}$, with $|\\mathbf{R}_{12}| = 5$.' },
+            { q: 'For $\\mathbf{A} = \\hat{\\mathbf{x}} + \\hat{\\mathbf{y}}$ and $\\mathbf{B} = \\hat{\\mathbf{y}} + \\hat{\\mathbf{z}}$, $\\mathbf{A}\\times\\mathbf{B}$ equals', opts: ['$\\hat{\\mathbf{x}} + \\hat{\\mathbf{y}} + \\hat{\\mathbf{z}}$', '$-\\hat{\\mathbf{x}} + \\hat{\\mathbf{y}} - \\hat{\\mathbf{z}}$', '$\\hat{\\mathbf{y}}$', '$\\hat{\\mathbf{x}} - \\hat{\\mathbf{y}} + \\hat{\\mathbf{z}}$'], ans: 3, why: 'The determinant gives $\\hat{\\mathbf{x}}(1\\cdot1 - 0\\cdot1) - \\hat{\\mathbf{y}}(1\\cdot1 - 0\\cdot0) + \\hat{\\mathbf{z}}(1\\cdot1 - 1\\cdot0) = \\hat{\\mathbf{x}} - \\hat{\\mathbf{y}} + \\hat{\\mathbf{z}}$. It is perpendicular to both, and its magnitude $\\sqrt{3} = AB\\sin 60°$ is the parallelogram area.' }
         ]);
 
     </script>

@@ -97,7 +97,7 @@
     <button id="b-done" class="tbtn" onclick="toggleDone()" title="Mark module as completed  (M)"><i data-lucide="circle-check" class="w-4 h-4"></i><span class="hide-sm" id="b-done-t">Mark done</span></button>
     <button id="b-notes" class="tbtn" onclick="toggleNotes()" title="My notes for this module  (N)"><i data-lucide="notebook-pen" class="w-4 h-4"></i><span class="hide-sm">Notes</span></button>
     <button class="tbtn hide-sm" onclick="copyLink()" title="Copy a direct link to this module"><i data-lucide="link" class="w-4 h-4"></i></button>
-    <a id="b-newtab" class="tbtn hide-sm" href="welcome.html" target="_blank" rel="noopener" title="Open this page in a new tab" aria-label="Open this page in a new tab"><i data-lucide="external-link" class="w-4 h-4"></i></a>
+    <button class="tbtn hide-sm" onclick="openTab()" title="Open this module in a new tab"><i data-lucide="external-link" class="w-4 h-4"></i></button>
     <button class="tbtn" onclick="setFocus(true)" title="Presentation mode  (F)"><i data-lucide="presentation" class="w-4 h-4"></i><span class="hide-sm">Present</span></button>
     <button class="tbtn hide-sm" onclick="toggleFullscreen()" title="Full screen"><i data-lucide="maximize" class="w-4 h-4"></i></button>
   </div>
@@ -249,6 +249,7 @@ function findSection(file){ return ALL.find(s => s.file === file) || null; }
 function stripTeX(s){ return s.replace(/\$[^$]*\$/g, "").replace(/\s+/g, " "); }
 
 const WELCOME = "welcome.html";
+const PORTAL_PAGES = {"portal/modules.html": "All modules", "portal/maxwell.html": "Maxwell's equations", "portal/guide.html": "Study & teaching", "portal/reference.html": "Quick reference"};
 const frame = document.getElementById('frame');
 let state = loadState();
 let current = null;
@@ -321,7 +322,6 @@ function route(){
 }
 function open(file, push = true){
   if (push) { if (fileFromHash() !== file) { location.hash = '/' + file; return; } }
-  try { if (notesTimer) saveNotesNow(); } catch (_) {}   // keep notes typed just before switching page on the page they belong to (notes code may not be set up yet on first load)
   current = findSection(file);
   const abs = new URL(file, location.href).href;
   if (frame.dataset.src !== file) {
@@ -350,10 +350,7 @@ function setActive(file){
     }
   });
 }
-/* overview sub-pages (portal/*.html): friendly titles in the top bar */
-const PORTAL_PAGES = {'portal/modules.html':'All modules', 'portal/maxwell.html':"Maxwell's equations", 'portal/guide.html':'Study & teaching', 'portal/reference.html':'Quick reference'};
 function updateCrumb(){
-  syncNewTabLink();
   const t = document.getElementById('crumb-topic'), h = document.getElementById('crumb-title');
   const i = current ? ALL.indexOf(current) : -1;
   document.getElementById('b-prev').disabled = i < 0;
@@ -363,10 +360,10 @@ function updateCrumb(){
     h.textContent = current.id + '  ' + current.title;
     document.title = current.id + ' ' + current.title + ' · Electromagnetics';
     document.getElementById('focus-id').textContent = current.id;
-  } else if (PORTAL_PAGES[frame.dataset.src]) {
-    t.textContent = 'Overview'; h.textContent = PORTAL_PAGES[frame.dataset.src];
+  } else if (frame.dataset.src && PORTAL_PAGES[frame.dataset.src]) {
+    t.textContent = 'Portal'; h.textContent = PORTAL_PAGES[frame.dataset.src];
     document.title = PORTAL_PAGES[frame.dataset.src] + ' · Electromagnetics';
-    document.getElementById('focus-id').textContent = 'Home';
+    document.getElementById('focus-id').textContent = '—';
   } else if (frame.dataset.src && frame.dataset.src !== WELCOME) {
     t.textContent = 'Page'; h.textContent = frame.dataset.src;
     document.title = 'Electromagnetics Course';
@@ -435,14 +432,7 @@ function copyLink(){
   (navigator.clipboard?.writeText(url) || Promise.reject()).then(() => toast('Link copied — share it with your class'))
     .catch(() => { prompt('Copy this link:', url); });
 }
-/* "Open in new tab" is a real link (id b-newtab) whose address follows the page on screen. A link the user clicks
-   is allowed everywhere (popup blockers, pages opened from disk, Ctrl/middle-click, right-click "open in new tab");
-   a scripted window.open() was blocked in some of those cases, so the button looked dead. */
-function syncNewTabLink(){
-  const el = document.getElementById('b-newtab'); if (!el) return;
-  el.href = new URL(current ? current.file : (frame.dataset.src || WELCOME), location.href).href;
-}
-function openTab(){ syncNewTabLink(); document.getElementById('b-newtab').click(); }
+function openTab(){ window.open(current ? current.file : WELCOME, '_blank'); }
 function toast(msg){
   const t = document.getElementById('toast'); t.textContent = msg;
   t.style.opacity = 1; t.style.transform = 'translate(-50%,0)';
@@ -458,17 +448,15 @@ function loadNotes(){
   document.getElementById('b-notes').classList.toggle('on', !!state.notes[notesKey()]);
 }
 let notesTimer;
-function saveNotesNow(){                       // write the textarea to storage immediately
-  clearTimeout(notesTimer); notesTimer = null;
-  const v = notesText.value.trim();
-  if (v) state.notes[notesKey()] = notesText.value; else delete state.notes[notesKey()];
-  saveState(state); document.getElementById('notes-saved').textContent = 'Saved in this browser';
-  document.getElementById('b-notes').classList.toggle('on', !!v);
-}
 notesText.addEventListener('input', () => {
   document.getElementById('notes-saved').textContent = 'Saving…';
   clearTimeout(notesTimer);
-  notesTimer = setTimeout(saveNotesNow, 400);
+  notesTimer = setTimeout(() => {
+    const v = notesText.value.trim();
+    if (v) state.notes[notesKey()] = notesText.value; else delete state.notes[notesKey()];
+    saveState(state); document.getElementById('notes-saved').textContent = 'Saved in this browser';
+    document.getElementById('b-notes').classList.toggle('on', !!v);
+  }, 400);
 });
 function toggleNotes(on){
   const open = on === undefined ? !document.body.classList.contains('notes-open') : on;
@@ -476,9 +464,6 @@ function toggleNotes(on){
   if (open) setTimeout(() => notesText.focus(), 260);
 }
 function exportNotes(){
-  // Save what is in the box first: before, notes typed less than 0.4 s before pressing the button were not
-  // saved yet, so Export said "No notes yet" (or left out the latest text).
-  if (notesTimer) saveNotesNow();
   const lines = ['# My Electromagnetics notes', ''];
   const keys = Object.keys(state.notes);
   if (!keys.length) { toast('No notes yet'); return; }
@@ -488,11 +473,8 @@ function exportNotes(){
     lines.push('## ' + (s ? s.id + ' ' + s.title : 'Course overview'), '', state.notes[f].trim(), '');
   });
   const blob = new Blob([lines.join('\n')], {type:'text/markdown'});
-  // the link must be in the page for some browsers (older Safari/Firefox) to start the download
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'electromagnetics_notes.md';
-  a.style.display = 'none'; document.body.appendChild(a); a.click();
-  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
-  toast('Notes exported: electromagnetics_notes.md');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'electromagnetics_notes.md'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
 /* ---------- search ---------- */

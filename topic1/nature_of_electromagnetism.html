@@ -49,7 +49,7 @@
     <p class="text-slate-700 text-sm sm:text-base leading-relaxed">Four fundamental forces govern the physical universe. Electromagnetism is the one we engineer with: it acts between charges, extends to infinity, and — through fields that change in time — carries energy and information as waves.</p>
   </div>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 space-y-2"><span class="text-sm uppercase font-bold text-rose-700 tracking-wider">Strongest</span>
-  <h3 class="text-base font-bold text-slate-900">Nuclear force</h3><p class="text-sm text-slate-700 leading-relaxed">Binds protons and neutrons, but acts only over nuclear distances (~$10^{-15}$ m).</p>
+  <h3 class="text-base font-bold text-slate-900">Nuclear force</h3><p class="text-sm text-slate-700 leading-relaxed">Binds protons and neutrons, but acts only over nuclear distances <span class="whitespace-nowrap">($\sim 10^{-15}$ m)</span>.</p>
   <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm font-semibold">relative strength ~ $1$</div></div><div class="glass-card rounded-2xl p-5 space-y-2"><span class="text-sm uppercase font-bold text-sky-800 tracking-wider">Dominant at atomic scale</span>
   <h3 class="text-base font-bold text-slate-900">Electromagnetic force</h3><p class="text-sm text-slate-700 leading-relaxed">Acts between all charged particles; holds atoms, molecules and solids together.</p>
   <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm font-semibold">relative strength ~ $10^{-2}$</div></div><div class="glass-card rounded-2xl p-5 space-y-2"><span class="text-sm uppercase font-bold text-amber-800 tracking-wider">Radioactivity</span>
@@ -222,7 +222,7 @@
     <div class="flex items-center gap-2"><button id="quiz-reset" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button>
     <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 5</span></div>
   </div>
-  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 </section>
 
 </main>
@@ -615,7 +615,9 @@ renderQuiz('quiz-box', [
   { q: 'A negative test charge is placed in the field of a positive point charge $Q$. The force on it points…', o: ['along $\\mathbf{E}$, away from $Q$', 'opposite to $\\mathbf{E}$, toward $Q$', 'perpendicular to $\\mathbf{E}$', 'there is no force'], a: 1,
     e: '$\\mathbf{F} = q\'\\mathbf{E}$ with $q\' < 0$ reverses the direction: the field points away from $Q$ but the force points toward it (attraction).' },
   { q: 'A long straight wire carries $I = 10$ A. The magnetic flux density 2 cm from it is…', o: ['$10\\ \\mu$T', '$100\\ \\mu$T', '$1$ mT', '$0.1\\ \\mu$T'], a: 1,
-    e: '$B = \\dfrac{\\mu_0 I}{2\\pi r} = \\dfrac{(4\\pi\\times10^{-7})(10)}{2\\pi(0.02)} = 1\\times10^{-4}$ T = 100 µT, about twice Earth\'s field.' }
+    e: '$B = \\dfrac{\\mu_0 I}{2\\pi r} = \\dfrac{(4\\pi\\times10^{-7})(10)}{2\\pi(0.02)} = 1\\times10^{-4}$ T = 100 µT, about twice Earth\'s field.' },
+  { q: 'In which branch of electromagnetics are $\\mathbf{E}$ and $\\mathbf{B}$ coupled, so that $\\nabla\\times\\mathbf{E} \\neq 0$?', o: ['Electromagnetics (time-varying fields)', 'Electrostatics', 'Magnetostatics', 'None; $\\mathbf{E}$ and $\\mathbf{B}$ are never coupled'], a: 0,
+    e: 'Only when the fields vary in time does a changing $\\mathbf{B}$ generate $\\mathbf{E}$ (and vice versa), which makes waves and induction possible. Electrostatics has $\\nabla\\times\\mathbf{E} = 0$, and magnetostatics deals with static $\\mathbf{B}$ from steady currents.' }
 ]);
 window.addEventListener('load', () => { drawCmp(); drawLab(); drawEF(); });
 

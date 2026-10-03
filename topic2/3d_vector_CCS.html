@@ -110,6 +110,7 @@
 
         <section id="sim" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
             <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation</span>
                 <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Transform a Vector Attached at a Point $P$</h2>
                 <p class="text-sm text-slate-600 mt-1">Enter $\mathbf{A}$ in any system at a point $P$. The page converts it to the other two systems <em>at the same point</em> and draws the decomposition along the base vectors you choose. Switch on "position vector" to reproduce the special case $\mathbf{A} = \overrightarrow{OP}$.</p>
             </div>
@@ -312,13 +313,13 @@
                     <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
                     <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
                 </div>
-                <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
             </div>
             <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
     </main>
 
-    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600"></footer>
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Transformations between Systems</footer>
 
     <script>
         // =========================================================
@@ -413,9 +414,14 @@
             const fb = $(`q${i}-feedback`);
             fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
                               : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
-            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Not quite. ') + item.why;
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
             typeset([fb]);
             setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
         }
 
         // ---------- Animation loop: only visible canvases are redrawn ----------
@@ -598,10 +604,11 @@
 
         renderQuiz([
             { q: 'The cylindrical component $A_\\phi$ of a Cartesian vector $\\mathbf{A}$ at a point with azimuth $\\phi$ is', opts: ['$A_x\\cos\\phi + A_y\\sin\\phi$', '$-A_x\\sin\\phi + A_y\\cos\\phi$', '$A_x\\sin\\phi - A_y\\cos\\phi$', '$\\sqrt{A_x^2 + A_y^2}$'], ans: 1, why: '$A_\\phi = \\mathbf{A}\\cdot\\hat{\\boldsymbol{\\phi}}$ with $\\hat{\\boldsymbol{\\phi}} = -\\hat{\\mathbf{x}}\\sin\\phi + \\hat{\\mathbf{y}}\\cos\\phi$.' },
-            { q: 'The constant vector $\\mathbf{A} = \\hat{\\mathbf{z}}$ in spherical coordinates is', opts: ['$\\hat{\\mathbf{R}}$', '$\\hat{\\mathbf{R}}\\cos\\theta - \\hat{\\boldsymbol{\\theta}}\\sin\\theta$', '$\\hat{\\mathbf{R}}\\sin\\theta + \\hat{\\boldsymbol{\\theta}}\\cos\\theta$', '$\\hat{\\boldsymbol{\\phi}}$'], ans: 1, why: '$A_R = \\hat{\\mathbf{z}}\\cdot\\hat{\\mathbf{R}} = \\cos\\theta$ and $A_{theta} = \\hat{\\mathbf{z}}\\cdot\\hat{\\boldsymbol{\\theta}} = -\\sin\\theta$. The components change with $\\theta$ even though the vector is uniform.' },
-            { q: 'Why does $\\mathbf{A}$ come out the same in all three systems?', opts: ['Coincidence of the chosen numbers', 'The transformation matrix is orthogonal (a rotation)', 'Because $A_z$ is the same in all systems', 'It does not; only the direction is preserved'], ans: 1, why: 'The rows of the matrix are orthonormal base vectors, so the transformation is a rotation, which preserves lengths and dot products.' },
+            { q: 'The constant vector $\\mathbf{A} = \\hat{\\mathbf{z}}$ in spherical coordinates is', opts: ['$\\hat{\\mathbf{R}}$', '$\\hat{\\mathbf{R}}\\cos\\theta - \\hat{\\boldsymbol{\\theta}}\\sin\\theta$', '$\\hat{\\mathbf{R}}\\sin\\theta + \\hat{\\boldsymbol{\\theta}}\\cos\\theta$', '$\\hat{\\boldsymbol{\\phi}}$'], ans: 1, why: '$A_R = \\hat{\\mathbf{z}}\\cdot\\hat{\\mathbf{R}} = \\cos\\theta$ and $A_\\theta = \\hat{\\mathbf{z}}\\cdot\\hat{\\boldsymbol{\\theta}} = -\\sin\\theta$. The components change with $\\theta$ even though the vector is uniform.' },
+            { q: 'Why does $|\\mathbf{A}|$ come out the same in all three systems?', opts: ['Coincidence of the chosen numbers', 'The transformation matrix is orthogonal (a rotation)', 'Because $A_z$ is the same in all systems', 'It does not; only the direction is preserved'], ans: 1, why: 'The rows of the matrix are orthonormal base vectors, so the transformation is a rotation, which preserves lengths and dot products.' },
             { q: 'The position vector of $P(r, \\phi, z)$ in cylindrical coordinates is', opts: ['$\\hat{\\mathbf{r}}\\,r + \\hat{\\boldsymbol{\\phi}}\\,\\phi + \\hat{\\mathbf{z}}\\,z$', '$\\hat{\\mathbf{r}}\\,r + \\hat{\\mathbf{z}}\\,z$', '$\\hat{\\mathbf{r}}\\,r$', '$\\hat{\\mathbf{x}}\\,r + \\hat{\\mathbf{z}}\\,z$'], ans: 1, why: '$\\phi$ is an angle, not a length, and the direction information is already in $\\hat{\\mathbf{r}}(\\phi)$. Turn on "position vector" to see $A_\\phi = 0$.' },
-            { q: 'A vector has cylindrical components $(A_r, A_\\phi, A_z) = (0, 2, 0)$ at $\\phi = 90°$. Its Cartesian form is', opts: ['$2\\hat{\\mathbf{y}}$', '$-2\\hat{\\mathbf{x}}$', '$2\\hat{\\mathbf{x}}$', '$-2\\hat{\\mathbf{y}}$'], ans: 1, why: 'At $\\phi = 90°$, $\\hat{\\boldsymbol{\\phi}} = -\\hat{\\mathbf{x}}\\sin 90° + \\hat{\\mathbf{y}}\\cos 90° = -\\hat{\\mathbf{x}}$, so $\\mathbf{A} = -2\\hat{\\mathbf{x}}$.' }
+            { q: 'A vector has cylindrical components $(A_r, A_\\phi, A_z) = (0, 2, 0)$ at $\\phi = 90°$. Its Cartesian form is', opts: ['$2\\hat{\\mathbf{y}}$', '$-2\\hat{\\mathbf{x}}$', '$2\\hat{\\mathbf{x}}$', '$-2\\hat{\\mathbf{y}}$'], ans: 1, why: 'At $\\phi = 90°$, $\\hat{\\boldsymbol{\\phi}} = -\\hat{\\mathbf{x}}\\sin 90° + \\hat{\\mathbf{y}}\\cos 90° = -\\hat{\\mathbf{x}}$, so $\\mathbf{A} = -2\\hat{\\mathbf{x}}$.' },
+            { q: 'At a point with $\\theta = 90°$ and $\\phi = 90°$, the spherical components $(A_R, A_\\theta, A_\\phi)$ of $\\mathbf{A} = \\hat{\\mathbf{x}}$ are', opts: ['$(1, 0, 0)$', '$(0, 0, 1)$', '$(0, -1, 0)$', '$(0, 0, -1)$'], ans: 3, why: 'There $\\hat{\\mathbf{R}} = \\hat{\\mathbf{y}}$, $\\hat{\\boldsymbol{\\theta}} = -\\hat{\\mathbf{z}}$ and $\\hat{\\boldsymbol{\\phi}} = -\\hat{\\mathbf{x}}\\sin 90° + \\hat{\\mathbf{y}}\\cos 90° = -\\hat{\\mathbf{x}}$, so $A_R = A_\\theta = 0$ and $A_\\phi = \\hat{\\mathbf{x}}\\cdot\\hat{\\boldsymbol{\\phi}} = -1$.' }
         ]);
 
     </script>

@@ -1,113 +1,106 @@
 <!DOCTYPE html>
-<html class="em-pending" lang="en" data-root="../">
+<html class="em-pending" lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Study & teaching · Electromagnetics Course Portal</title>
-    <link rel="stylesheet" href="../assets/vendor/katex/katex.min.css">
+<title>Study & teaching | Electromagnetics Course Portal</title>
+<meta name="description" content="How to study a module, and how to present and share the portal in class.">
     <link rel="stylesheet" href="../assets/css/tailwind.css">
     <link rel="stylesheet" href="../assets/css/em.css">
-    <script src="../assets/vendor/katex/katex.min.js"></script>
-    <script src="../assets/vendor/katex/auto-render.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/portal.css">
     <script src="../assets/js/em.js"></script>
 <script src="../assets/vendor/lucide/lucide.min.js"></script>
-<style>
-  body { font-family: 'Inter', system-ui, sans-serif; }
-  .glass-panel { background: rgba(255,255,255,.85); border: 1px solid rgba(15,23,42,.08); backdrop-filter: blur(8px); }
-  .card { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,.03); transition: border-color .2s, transform .2s, box-shadow .2s; }
-  a.card:hover, button.card:hover { border-color: rgba(2,132,199,.45); transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(15,23,42,.25); }
-  a.card:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; }
-  .chip { padding: .35rem .8rem; border-radius: 9999px; font-size: .875rem; font-weight: 600; border: 1px solid #e2e8f0; color: #475569; background: #fff; transition: all .15s; }
-  .chip:hover { background: #f8fafc; }
-  .chip.on { background: #0f172a; border-color: #0f172a; color: #fff; }
-  .seg button { padding: .4rem .9rem; font-size: .875rem; font-weight: 600; color: #475569; border-radius: .5rem; }
-  .seg button.on { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
-  ::-webkit-scrollbar { width: 8px; height: 6px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
-  @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-  .fade { animation: fade-in .35s ease-out both; }
-  .ring-track { stroke: #e2e8f0; } .ring-val { stroke: #059669; transition: stroke-dashoffset .6s ease; }
-  .balance { text-wrap: balance; }
-  nav a { white-space: nowrap; }
-  .skip { position: absolute; left: -999px; top: 8px; z-index: 60; background: #0f172a; color: #fff; padding: .5rem .9rem; border-radius: .5rem; font-weight: 600; }
-  .skip:focus { left: 8px; }
-  .stat b { display: block; font-size: 1.5rem; line-height: 1.1; font-weight: 800; color: #0f172a; font-variant-numeric: tabular-nums; }
-  .stat span { font-size: .875rem; color: #475569; }
-  .pg-wrap { position: relative; }
-  .pg-handle { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 9999px; touch-action: none; cursor: grab; outline: none; }
-  .pg-handle:active { cursor: grabbing; }
-  .pg-handle:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #0369a1; }
-  .chip[aria-pressed="true"], .chip.on { background: #0f172a; border-color: #0f172a; color: #fff; }
-  .hl { background: #fef08a; color: inherit; border-radius: 2px; }
-  #q::-webkit-search-cancel-button { display: none; }
-</style>
 </head>
 <body class="min-h-screen flex flex-col bg-white text-slate-900">
 <a href="#main" class="skip">Skip to content</a>
-<header id="portal-header" class="border-b border-slate-200 px-4 lg:px-8 py-3"></header>
-<main id="main" class="flex-grow">
-<section class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8">
-  <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">Study &amp; teaching</h1>
-  <p class="text-base text-slate-700 mt-2 max-w-3xl">A four-step routine for each module, and practical notes for presenting and sharing the portal in class.</p>
-</section>
-<!-- How to study -->
-<section id="study" class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 scroll-mt-20">
-  <span class="text-sm font-bold uppercase tracking-wider text-emerald-800 bg-emerald-400/10 rounded-md px-2 py-1">For students</span>
-  <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2 mb-6">How to study a module</h2>
-  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <div class="card rounded-xl p-5 space-y-2"><div class="w-10 h-10 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 flex items-center justify-center"><i data-lucide="book-open" class="w-5 h-5"></i></div><h3 class="text-base font-bold text-slate-900">1 · Read the idea</h3><p class="text-sm text-slate-700 leading-relaxed">Start with the theory section. Write each boxed formula in your own notes and say what every symbol means and what its unit is.</p></div>
-    <div class="card rounded-xl p-5 space-y-2"><div class="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center"><i data-lucide="sliders-horizontal" class="w-5 h-5"></i></div><h3 class="text-base font-bold text-slate-900">2 · Predict, then simulate</h3><p class="text-sm text-slate-700 leading-relaxed">Before you move a slider, predict what will happen. Then test it. A wrong prediction is the most useful moment of the lesson.</p></div>
-    <div class="card rounded-xl p-5 space-y-2"><div class="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center"><i data-lucide="pencil-ruler" class="w-5 h-5"></i></div><h3 class="text-base font-bold text-slate-900">3 · Work the examples</h3><p class="text-sm text-slate-700 leading-relaxed">Cover the solution and try each worked example on paper first. Use the simulation readouts to check your numbers.</p></div>
-    <div class="card rounded-xl p-5 space-y-2"><div class="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center"><i data-lucide="circle-check-big" class="w-5 h-5"></i></div><h3 class="text-base font-bold text-slate-900">4 · Quiz and mark done</h3><p class="text-sm text-slate-700 leading-relaxed">Take the 5-question quiz and read every explanation, including the ones you got right. Then press <b>Mark done</b> in the toolbar.</p></div>
-  </div>
-  <div class="mt-5 rounded-xl bg-slate-100/90 border border-slate-200 p-4 text-sm text-slate-700 flex gap-3">
-    <i data-lucide="lightbulb" class="w-5 h-5 text-amber-800 shrink-0 mt-0.5"></i>
-    <p>Use the <b>Notes</b> button in the toolbar to keep private notes for each module. <b>Export all notes</b> downloads them as one Markdown file for revision before the exam.</p>
-  </div>
-</section>
 
-<!-- For instructors -->
-<section id="teach" class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 scroll-mt-20">
-  <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 rounded-md px-2 py-1">For instructors</span>
-  <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2 mb-6">Teaching with the portal</h2>
-  <div class="grid lg:grid-cols-3 gap-4">
-    <div class="card rounded-xl p-5 space-y-3">
-      <h3 class="text-base font-bold text-slate-900 flex items-center gap-2"><i data-lucide="presentation" class="w-5 h-5 text-amber-800"></i> Presenting in class</h3>
-      <ul class="text-sm text-slate-700 space-y-2 list-disc pl-5">
-        <li>Press <b>Present</b> (or <kbd class="px-1.5 border rounded bg-slate-50">F</kbd>) to hide the menu and toolbar; step through modules with <kbd class="px-1.5 border rounded bg-slate-50">[</kbd> and <kbd class="px-1.5 border rounded bg-slate-50">]</kbd>.</li>
-        <li>Use <kbd class="px-1.5 border rounded bg-slate-50">Ctrl</kbd> <kbd class="px-1.5 border rounded bg-slate-50">+</kbd> to enlarge text and formulas for the back row.</li>
-        <li>Run each simulation live and ask the class to predict the result before you change a parameter.</li>
-      </ul>
-      <button id="btn-present" class="card w-full rounded-lg px-4 py-2 text-sm font-semibold text-amber-800 hidden">Start presentation mode</button>
-    </div>
-    <div class="card rounded-xl p-5 space-y-3">
-      <h3 class="text-base font-bold text-slate-900 flex items-center gap-2"><i data-lucide="link" class="w-5 h-5 text-amber-800"></i> Sharing modules</h3>
-      <ul class="text-sm text-slate-700 space-y-2 list-disc pl-5">
-        <li>The <b>link</b> button in the toolbar copies a direct address such as <code class="text-sky-800">index.html#/topic1/phasors.html</code>, which opens the portal on that module.</li>
-        <li>Put these links in your LMS, slides or homework sheets.</li>
-        <li>Every page also works on its own and can be opened in a new tab.</li>
-      </ul>
-    </div>
-    <div class="card rounded-xl p-5 space-y-3">
-      <h3 class="text-base font-bold text-slate-900 flex items-center gap-2"><i data-lucide="messages-square" class="w-5 h-5 text-amber-800"></i> Lesson pattern</h3>
-      <ol class="text-sm text-slate-700 space-y-2 list-decimal pl-5">
-        <li><b>Hook</b>: open the simulation first and pose one question.</li>
-        <li><b>Theory</b>: derive the key formula on the page.</li>
-        <li><b>Check</b>: solve one worked example together with numbers from the simulation.</li>
-        <li><b>Exit ticket</b>: students take the module quiz and mark it done.</li>
-      </ol>
+<header class="border-b border-slate-200 px-4 lg:px-8 py-3">
+  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    <a href="../welcome.html" data-file="welcome.html" class="nav flex items-center gap-3">
+      <div class="p-2.5 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="radio" class="w-6 h-6"></i></div>
+      <div>
+        <p class="text-lg font-bold tracking-tight bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600 bg-clip-text text-transparent">ECE Electromagnetics</p>
+        <p class="text-sm text-slate-600">Interactive course portal</p>
+      </div>
+    </a>
+    <nav id="top-nav" aria-label="Portal pages" class="flex gap-1.5 text-sm font-medium overflow-x-auto max-w-full"></nav>
+  </div>
+</header>
+
+<main id="main" class="flex-grow max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <span class="badge text-emerald-800 bg-emerald-400/10">Study & teaching</span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mt-2">How to use the portal</h1>
+      <p class="text-base text-slate-700 mt-2 max-w-3xl">A four-step routine for each module, the keyboard shortcuts of the portal, and suggestions for using the simulations in class.</p>
     </div>
   </div>
-</section>
+  <section aria-labelledby="study-h">
+    <h2 id="study-h" class="text-2xl font-bold text-slate-900 mb-4">For students: how to study a module</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="card rounded-xl p-5 space-y-2"><div class="w-10 h-10 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 flex items-center justify-center"><i data-lucide="book-open" class="w-5 h-5"></i></div><h3 class="text-base font-bold text-slate-900">1 · Read the idea</h3><p class="text-sm text-slate-700 leading-relaxed">Start with the theory section. Write each boxed formula in your own notes and say what every symbol means and what its unit is.</p></div>
+      <div class="card rounded-xl p-5 space-y-2"><div class="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800 flex items-center justify-center"><i data-lucide="sliders-horizontal" class="w-5 h-5"></i></div><h3 class="text-base font-bold text-slate-900">2 · Predict, then simulate</h3><p class="text-sm text-slate-700 leading-relaxed">Before you move a slider, predict what will happen. Then test it. A wrong prediction is the most useful moment of the lesson.</p></div>
+      <div class="card rounded-xl p-5 space-y-2"><div class="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center"><i data-lucide="pencil-ruler" class="w-5 h-5"></i></div><h3 class="text-base font-bold text-slate-900">3 · Work the examples</h3><p class="text-sm text-slate-700 leading-relaxed">Cover the solution and try each worked example on paper first. Use the simulation readouts to check your numbers.</p></div>
+      <div class="card rounded-xl p-5 space-y-2"><div class="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center"><i data-lucide="circle-check-big" class="w-5 h-5"></i></div><h3 class="text-base font-bold text-slate-900">4 · Quiz and mark done</h3><p class="text-sm text-slate-700 leading-relaxed">Take the 5-question quiz and read every explanation, including the ones you got right. Then press <b>Mark done</b> in the toolbar.</p></div>
+    </div>
+    <div class="mt-4 rounded-xl bg-slate-100/90 border border-slate-200 p-4 text-sm text-slate-700 flex gap-3">
+      <i data-lucide="lightbulb" class="w-5 h-5 text-amber-800 shrink-0 mt-0.5"></i>
+      <p>Open the course through <a href="../index.html" class="font-semibold text-sky-800 hover:underline">index.html</a> to get the menu, progress tracking and the <b>Notes</b> drawer: it keeps private notes for each module, and <b>Export all notes</b> downloads them as one Markdown file for revision before the exam.</p>
+    </div>
+  </section>
 
+  <section aria-labelledby="keys-h" class="card rounded-xl p-5">
+    <h2 id="keys-h" class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2"><i data-lucide="keyboard" class="w-5 h-5 text-sky-800"></i> Keyboard shortcuts (in index.html)</h2>
+    <dl class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2 text-sm text-slate-700">
+      <div class="flex items-center gap-3"><dt class="w-16 shrink-0"><kbd>[</kbd> <kbd>]</kbd></dt><dd>Previous / next module</dd></div>
+      <div class="flex items-center gap-3"><dt class="w-16 shrink-0"><kbd>M</kbd></dt><dd>Mark the module done</dd></div>
+      <div class="flex items-center gap-3"><dt class="w-16 shrink-0"><kbd>N</kbd></dt><dd>Open the notes drawer</dd></div>
+      <div class="flex items-center gap-3"><dt class="w-16 shrink-0"><kbd>/</kbd></dt><dd>Search the menu</dd></div>
+      <div class="flex items-center gap-3"><dt class="w-16 shrink-0"><kbd>F</kbd> <kbd>Esc</kbd></dt><dd>Enter / leave presentation mode</dd></div>
+      <div class="flex items-center gap-3"><dt class="w-16 shrink-0"><kbd>?</kbd></dt><dd>Show all shortcuts</dd></div>
+    </dl>
+  </section>
 
+  <section aria-labelledby="teach-h">
+    <h2 id="teach-h" class="text-2xl font-bold text-slate-900 mb-4">For instructors: teaching with the portal</h2>
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="card rounded-xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2"><i data-lucide="presentation" class="w-5 h-5 text-amber-800"></i> Presenting in class</h3>
+        <ul class="text-sm text-slate-700 space-y-2 list-disc pl-5">
+          <li>Press <b>Present</b> (or <kbd>F</kbd>) to hide the menu and toolbar; step through modules with <kbd>[</kbd> and <kbd>]</kbd>.</li>
+          <li>Use <kbd>Ctrl</kbd> <kbd>+</kbd> to enlarge text and formulas for the back row.</li>
+          <li>Run each simulation live and ask the class to predict the result before you change a parameter.</li>
+        </ul>
+        <button type="button" id="btn-present" class="card w-full rounded-lg px-4 py-2 text-sm font-semibold text-amber-800 hidden">Start presentation mode</button>
+      </div>
+      <div class="card rounded-xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2"><i data-lucide="link" class="w-5 h-5 text-amber-800"></i> Sharing modules</h3>
+        <ul class="text-sm text-slate-700 space-y-2 list-disc pl-5">
+          <li>The <b>link</b> button in the toolbar copies a direct address such as <code class="text-sky-800">index.html#/topic1/phasors.html</code>, which opens the portal on that module.</li>
+          <li>Put these links in your LMS, slides or homework sheets.</li>
+          <li>Every page also works on its own and can be opened in a new tab.</li>
+        </ul>
+      </div>
+      <div class="card rounded-xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2"><i data-lucide="messages-square" class="w-5 h-5 text-amber-800"></i> Lesson pattern</h3>
+        <ol class="text-sm text-slate-700 space-y-2 list-decimal pl-5">
+          <li><b>Hook</b>: open the simulation first and pose one question.</li>
+          <li><b>Theory</b>: derive the key formula on the page.</li>
+          <li><b>Check</b>: solve one worked example together with numbers from the simulation.</li>
+          <li><b>Exit ticket</b>: students take the module quiz and mark it done.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
 </main>
-<footer class="border-t border-slate-200 py-5 px-4 text-center text-sm text-slate-600 mt-8">
-  <a href="../welcome.html" data-file="welcome.html" class="nav font-medium text-sky-800 hover:underline">← Back to the overview</a>
-  <span class="mx-2">·</span> Notation follows Ulaby, <i>Fundamentals of Applied Electromagnetics</i>
+
+<footer class="border-t border-slate-200 py-5 px-4 text-center text-sm text-slate-600 mt-10">
+  Electromagnetics Course Portal — Topics 1 to 5 · Notation follows Ulaby & Umberto Ravaioli, <i>Fundamentals of Applied Electromagnetics</i>, 8th Edition, Pearson.
 </footer>
+
 <script src="../assets/js/portal.js"></script>
 <script>
-portalHeader('portal/guide.html');
+topNav();
 if (inShell) { const b = document.getElementById('btn-present'); b.classList.remove('hidden'); b.onclick = () => parent.postMessage({em:'focus'}, '*'); }
 portalReady();
 </script>

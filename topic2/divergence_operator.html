@@ -192,13 +192,13 @@
                     <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
                     <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
                 </div>
-                <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
             </div>
             <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
     </main>
 
-    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600"></footer>
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Divergence of a Vector Field</footer>
 
     <script>
         // =========================================================
@@ -371,9 +371,14 @@
             const fb = $(`q${i}-feedback`);
             fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
                               : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
-            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Not quite. ') + item.why;
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
             typeset([fb]);
             setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
         }
 
         // ---------- Animation loop: only visible canvases are redrawn ----------
@@ -1281,7 +1286,7 @@
                 { label: 'r r̂ + z ẑ', f: ['r', '0', 'z'], res: '3', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(r^2) + 1 = 3' },
                 { label: 'r̂ / r (line charge)', f: ['1/r', '0', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(1) = 0 \\quad (r \\ne 0)' },
                 { label: 'r φ̂ (rotation)', f: ['0', 'r', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial r}{\\partial\\phi} = 0' },
-                { label: 'r² r̂ (uniform ρ-like)', f: ['r^2', '0', '0'], res: '3r', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(r^3) = 3r' },
+                { label: 'r² r̂', f: ['r^2', '0', '0'], res: '3r', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(r^3) = 3r' },
                 { label: 'r cos φ r̂ − r sin φ φ̂', f: ['r*cos(phi)', '-r*sin(phi)', '0'], res: 'cos(phi)', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\,2r\\cos\\phi - \\frac{1}{r}\\,r\\cos\\phi = \\cos\\phi' }
             ],
             sph: [
@@ -1294,14 +1299,27 @@
         };
         initOperatorPage({ kind: 'div', presets: PRESETS, symbol: '∇·F', P0: [1.2, -0.9, 0.7] });
         renderQuiz([
-            { q: 'The divergence of a vector field at a point is defined as', opts: ['The circulation per unit area', 'The net outward flux per unit volume, as the volume shrinks to zero', 'The magnitude of the field', 'The rate of change along the field lines'], ans: 1, why: '$\\nabla\\cdot\\mathbf{F} = \\lim_{\\Delta v\\to 0}\\oint\\mathbf{F}\\cdot d\\mathbf{s}/\\Delta v$. The cube test on this page computes exactly that ratio.' },
+            { q: 'The divergence of a vector field at a point is defined as', opts: ['The circulation per unit area', 'The net outward flux per unit volume, as the volume shrinks to zero', 'The magnitude of the field', 'The rate of change along the field lines'], ans: 1, why: '$\\nabla\\cdot\\mathbf{F} = \\lim_{\\Delta v\\to 0}\\oint\\mathbf{F}\\cdot d\\mathbf{s}/\\Delta v$. Its sign tells whether $P$ is a source ($>0$) or a sink ($<0$).' },
             { q: 'For $\\mathbf{F} = \\hat{\\mathbf{R}}/R^2$, $\\nabla\\cdot\\mathbf{F}$ at $R \\neq 0$ is', opts: ['$-2/R^3$', '$1/R^2$', '$0$', '$3$'], ans: 2, why: '$\\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left(R^2\\cdot\\frac{1}{R^2}\\right) = 0$. All the flux ($4\\pi$) comes from the origin, where the divergence is a delta function. This is Coulomb\'s field of a point charge.' },
             { q: 'A field with $\\nabla\\cdot\\mathbf{F} = 0$ everywhere is called', opts: ['Irrotational', 'Conservative', 'Solenoidal', 'Harmonic'], ans: 2, why: 'Solenoidal (divergence-free) fields have no sources or sinks. Magnetic flux density is always solenoidal: $\\nabla\\cdot\\mathbf{B} = 0$.' },
             { q: 'What is $\\nabla\\cdot\\mathbf{F}$ for $\\mathbf{F} = x^2\\hat{\\mathbf{x}} + y^2\\hat{\\mathbf{y}} + z^2\\hat{\\mathbf{z}}$ at $(1, 0, -1)$?', opts: ['$0$', '$2$', '$4$', '$-2$'], ans: 0, why: '$\\nabla\\cdot\\mathbf{F} = 2x + 2y + 2z = 2 + 0 - 2 = 0$.' },
-            { q: "Gauss's law in differential form, $\\nabla\\cdot\\mathbf{D} = \\rho_{\\mathrm{v}}$, together with the divergence theorem gives", opts: ['$\\oint_C\\mathbf{D}\\cdot d\\mathbf{l} = Q$', '$\\oint_S\\mathbf{D}\\cdot d\\mathbf{s} = Q_{\\mathrm{enc}}$', '$\\mathbf{D} = \\varepsilon\\mathbf{E}$', '$\\nabla\\times\\mathbf{E} = 0$'], ans: 1, why: 'Integrating over a volume: $\\int_V\\nabla\\cdot\\mathbf{D}\\,dv = \\oint_S\\mathbf{D}\\cdot d\\mathbf{s} = \\int_V\\rho_{\\mathrm{v}}\\,dv = Q_{\\mathrm{enc}}$, the integral form of Gauss\'s law.' }
+            { q: "Gauss's law in differential form, $\\nabla\\cdot\\mathbf{D} = \\rho_{\\mathrm{v}}$, together with the divergence theorem gives", opts: ['$\\oint_C\\mathbf{D}\\cdot d\\mathbf{l} = Q$', '$\\oint_S\\mathbf{D}\\cdot d\\mathbf{s} = Q_{\\mathrm{enc}}$', '$\\mathbf{D} = \\varepsilon\\mathbf{E}$', '$\\nabla\\times\\mathbf{E} = 0$'], ans: 1, why: 'Integrating over a volume: $\\int_V\\nabla\\cdot\\mathbf{D}\\,dv = \\oint_S\\mathbf{D}\\cdot d\\mathbf{s} = \\int_V\\rho_{\\mathrm{v}}\\,dv = Q_{\\mathrm{enc}}$, the integral form of Gauss\'s law.' },
+            { q: 'For $\\mathbf{F} = \\hat{\\mathbf{r}}\\,r$ in cylindrical coordinates, $\\nabla\\cdot\\mathbf{F}$ is', opts: ['$1$', '$0$', '$3$', '$2$'], ans: 3, why: '$\\frac{1}{r}\\frac{\\partial}{\\partial r}(r\\cdot r) = \\frac{2r}{r} = 2$. In Cartesian form $\\mathbf{F} = x\\hat{\\mathbf{x}} + y\\hat{\\mathbf{y}}$ and $\\nabla\\cdot\\mathbf{F} = 1 + 1 = 2$, the same uniform source everywhere.' }
         ]);
         startLoop();
 
+    </script>
+    <script>
+        // ---- Default inputs loaded when the page opens ----
+        function loadWorkedExample() {
+            const ex = { f: ['3*x^2', '2*z', 'x^2*z'], P: [2, -2, 0] };
+            EM.clickChip('sys-group', 'cart');
+            if (Array.isArray(ex.f)) ex.f.forEach((v, i) => { document.getElementById('in-f' + i).value = v; });
+            else document.getElementById('in-f').value = ex.f;
+            document.getElementById('btn-apply').click();
+            ex.P.forEach((v, i) => EM.setControl('p' + i, v));
+        }
+        window.addEventListener('load', () => setTimeout(loadWorkedExample, 0));
     </script>
 </body>
 </html>
