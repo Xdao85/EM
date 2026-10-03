@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divergence and Stokes Theorems - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/em.css">
+    <script src="../assets/vendor/katex/katex.min.js"></script>
+    <script src="../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="orbit" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Divergence &amp; Stokes's Theorems</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Theorems</button>
+                <button onclick="scrollToSection('divthm')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="radiation" class="w-3.5 h-3.5"></i><span>Divergence</span></button>
+                <button onclick="scrollToSection('stokes')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i><span>Stokes</span></button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Vector Calculus · Integral Theorems</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">From Local Derivatives to Global Integrals</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">Divergence and curl are defined as limits of flux per volume and circulation per area. Adding those tiny contributions over a finite region, the interior pieces cancel and only the boundary survives. These two theorems turn Maxwell's equations back and forth between their differential and integral forms.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-500/10 px-2.5 py-1 rounded-md">Divergence Theorem</span>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\int_V \nabla\cdot\mathbf{F}\,dv = \oint_S \mathbf{F}\cdot d\mathbf{s}$$</div>
+                    <p class="text-sm text-slate-700">$S$ is the closed surface enclosing $V$, with $d\mathbf{s}$ pointing outward. Applied to $\nabla\cdot\mathbf{D} = \rho_{\mathrm{v}}$ it gives Gauss's law $\oint_S\mathbf{D}\cdot d\mathbf{s} = Q$.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">Stokes's Theorem</span>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\int_S (\nabla\times\mathbf{F})\cdot d\mathbf{s} = \oint_C \mathbf{F}\cdot d\mathbf{l}$$</div>
+                    <p class="text-sm text-slate-700">$C$ is the boundary of the open surface $S$; the direction of $C$ and of $d\mathbf{s}$ follow the right-hand rule. Applied to $\nabla\times\mathbf{H} = \mathbf{J}$ it gives Ampère's law $\oint_C\mathbf{H}\cdot d\mathbf{l} = I$.</p>
+                </div>
+            </div>
+        </section>
+
+                <section id="divthm" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-500/10 px-2.5 py-1 rounded-md">Divergence Theorem</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">$\int_V \nabla\cdot\mathbf{F}\,dv = \oint_S \mathbf{F}\cdot d\mathbf{s}$</h2>
+                <p class="text-sm text-slate-600 mt-1">The total source strength inside a volume equals the net outward flux through its closed surface. Surface patches are colored by the outward flux density $\mathbf{F}\cdot\hat{\mathbf{n}}$ (red out, blue in). Move the center to see what happens when a singular source leaves or enters the volume.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <div id="divthm-shape" class="flex flex-wrap gap-1.5"><button data-v="sphere" class="chip on">Sphere</button><button data-v="cyl" class="chip">Cylinder</button><button data-v="cube" class="chip">Cube</button></div>
+                        <span class="mx-1 text-slate-600">|</span>
+                        <div id="divthm-view" class="flex flex-wrap gap-1.5"><button data-v="iso" class="chip">3D</button><button data-v="top" class="chip">Top</button><button data-v="front" class="chip">Front</button></div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <button id="divthm-tg-field" class="chip on">Field F</button>
+                        <button id="divthm-tg-norm" class="chip on-emerald">Normals</button>
+                        <button id="divthm-tg-heat" class="chip on-rose">Color by F·n̂</button>
+                    </div>
+                    <div class="relative h-[440px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="divthm-cv" class="w-full h-full"></canvas></div>
+                </div>
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="glass-card rounded-2xl p-4 space-y-2 text-sm">
+                        <p class="font-semibold text-slate-900">Vector field $\mathbf{F}(x, y, z)$</p>
+                        <div class="flex items-center gap-2"><label for="divthm-f0" class="w-12 text-sm font-semibold text-slate-700 font-mono">F<sub>x</sub> =</label><input id="divthm-f0" type="text" spellcheck="false" class="divthm-in flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white font-mono text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-600/40"></div><div class="flex items-center gap-2"><label for="divthm-f1" class="w-12 text-sm font-semibold text-slate-700 font-mono">F<sub>y</sub> =</label><input id="divthm-f1" type="text" spellcheck="false" class="divthm-in flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white font-mono text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-600/40"></div><div class="flex items-center gap-2"><label for="divthm-f2" class="w-12 text-sm font-semibold text-slate-700 font-mono">F<sub>z</sub> =</label><input id="divthm-f2" type="text" spellcheck="false" class="divthm-in flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white font-mono text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-600/40"></div>
+                        <div class="flex items-center justify-between gap-2"><p id="divthm-err" class="text-sm text-rose-700 font-medium"></p><button id="divthm-apply" class="px-4 py-2 rounded-lg bg-sky-700 hover:bg-sky-800 text-white font-semibold shrink-0">Apply</button></div>
+                        <div id="divthm-presets" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 space-y-2 text-sm">
+                        <div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Size $a$</span><input type="range" id="divthm-a" min="0.5" max="2.5" step="0.05" value="1.5" class="flex-1 min-w-0 accent-amber-600"><span id="divthm-val-a" class="w-12 shrink-0 text-right font-mono text-amber-800"></span></div>
+                        <div id="divthm-hrow" class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Height $h$</span><input type="range" id="divthm-h" min="0.5" max="4" step="0.05" value="2.5" class="flex-1 min-w-0 accent-amber-600"><span id="divthm-val-h" class="w-12 shrink-0 text-right font-mono text-amber-800"></span></div>
+                        <div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Center $x_0$</span><input type="range" id="divthm-x0" min="-1.5" max="1.5" step="0.05" value="0" class="flex-1 min-w-0 accent-indigo-600"><span id="divthm-val-x0" class="w-12 shrink-0 text-right font-mono text-indigo-700"></span></div>
+                        <div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Center $y_0$</span><input type="range" id="divthm-y0" min="-1.5" max="1.5" step="0.05" value="0" class="flex-1 min-w-0 accent-indigo-600"><span id="divthm-val-y0" class="w-12 shrink-0 text-right font-mono text-indigo-700"></span></div>
+                        <div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Center $z_0$</span><input type="range" id="divthm-z0" min="-1.5" max="1.5" step="0.05" value="0" class="flex-1 min-w-0 accent-indigo-600"><span id="divthm-val-z0" class="w-12 shrink-0 text-right font-mono text-indigo-700"></span></div>
+                        <div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Mesh $N$</span><input type="range" id="divthm-n" min="2" max="40" step="1" value="12" class="flex-1 min-w-0 accent-slate-600"><span id="divthm-val-n" class="w-12 shrink-0 text-right font-mono text-slate-700"></span></div>
+                    </div>
+                    <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm">
+                        <div class="flex justify-between gap-2"><span class="font-sans text-slate-600">$\int_V\nabla\cdot\mathbf{F}\,dv$</span><span id="divthm-lhs" class="text-rose-700 font-bold"></span></div>
+                        <div class="flex justify-between gap-2"><span class="font-sans text-slate-600">$\oint_S\mathbf{F}\cdot d\mathbf{s}$</span><span id="divthm-rhs" class="text-sky-800 font-bold"></span></div>
+                        <div class="flex justify-between gap-2 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Difference</span><span id="divthm-diff" class="text-slate-900 font-bold"></span></div>
+                        <div class="flex justify-between gap-2"><span class="font-sans text-slate-600">Exact</span><span id="divthm-exact" class="text-emerald-800 font-bold text-right"></span></div>
+                        <div class="flex justify-between gap-2"><span class="font-sans text-slate-600">Extrapolated ($N\to\infty$)</span><span id="divthm-extra" class="text-indigo-700 font-bold"></span></div>
+                        <div class="border-t border-slate-200 pt-2 font-sans text-slate-600">Outward flux through each face</div>
+                        <div id="divthm-faces" class="space-y-1"></div>
+                    </div>
+                    <p id="divthm-note" class="hidden text-sm p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800"></p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div class="lg:col-span-7"><div class="relative h-56 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="divthm-conv" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-3">
+                    <div class="glass-card rounded-2xl p-4 space-y-1">
+                        <p class="text-sm font-bold text-rose-700 uppercase tracking-wider">Closed form of $\nabla\cdot\mathbf{F}$</p>
+                        <div id="divthm-sym" class="text-sm text-slate-800 tex-box"></div>
+                    </div>
+                    <p class="text-sm text-slate-600">The volume integral uses $dv = R^2\sin\theta\,dR\,d\theta\,d\phi$ (sphere), $r\,dr\,d\phi\,dz$ (cylinder) or $dx\,dy\,dz$ (cube); the surface integral uses the matching $d\mathbf{s}$. Both converge to the same number as $N$ grows.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="stokes" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-500/10 px-2.5 py-1 rounded-md">Stokes's Theorem</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">$\int_S (\nabla\times\mathbf{F})\cdot d\mathbf{s} = \oint_C \mathbf{F}\cdot d\mathbf{l}$</h2>
+                <p class="text-sm text-slate-600 mt-1">Three different surfaces share the same boundary $C$: the circle of radius $a$ centered at $(x_0, y_0)$ in the plane $z = z_0$, traversed counter-clockwise (seen from $+z$). With upward normals the curl flux is the same through all of them and equals the circulation around $C$.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <div id="stokes-shape" class="flex flex-wrap gap-1.5"><button data-v="disk" class="chip on">Flat disk</button><button data-v="hemi" class="chip">Hemisphere</button><button data-v="para" class="chip">Paraboloid</button></div>
+                        <span class="mx-1 text-slate-600">|</span>
+                        <div id="stokes-view" class="flex flex-wrap gap-1.5"><button data-v="iso" class="chip">3D</button><button data-v="top" class="chip">Top</button><button data-v="front" class="chip">Front</button></div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <button id="stokes-tg-field" class="chip on">Field F</button>
+                        <button id="stokes-tg-norm" class="chip on-emerald">Normals</button>
+                        <button id="stokes-tg-heat" class="chip on-rose">Color by (∇×F)·n̂</button>
+                        <button id="stokes-tg-anim" class="chip">Walk around C</button>
+                    </div>
+                    <div class="relative h-[440px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="stokes-cv" class="w-full h-full"></canvas></div>
+                </div>
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="glass-card rounded-2xl p-4 space-y-2 text-sm">
+                        <p class="font-semibold text-slate-900">Vector field $\mathbf{F}(x, y, z)$</p>
+                        <div class="flex items-center gap-2"><label for="stokes-f0" class="w-12 text-sm font-semibold text-slate-700 font-mono">F<sub>x</sub> =</label><input id="stokes-f0" type="text" spellcheck="false" class="stokes-in flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white font-mono text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-600/40"></div><div class="flex items-center gap-2"><label for="stokes-f1" class="w-12 text-sm font-semibold text-slate-700 font-mono">F<sub>y</sub> =</label><input id="stokes-f1" type="text" spellcheck="false" class="stokes-in flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white font-mono text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-600/40"></div><div class="flex items-center gap-2"><label for="stokes-f2" class="w-12 text-sm font-semibold text-slate-700 font-mono">F<sub>z</sub> =</label><input id="stokes-f2" type="text" spellcheck="false" class="stokes-in flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white font-mono text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-600/40"></div>
+                        <div class="flex items-center justify-between gap-2"><p id="stokes-err" class="text-sm text-rose-700 font-medium"></p><button id="stokes-apply" class="px-4 py-2 rounded-lg bg-sky-700 hover:bg-sky-800 text-white font-semibold shrink-0">Apply</button></div>
+                        <div id="stokes-presets" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 space-y-2 text-sm">
+                        <div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Size $a$</span><input type="range" id="stokes-a" min="0.5" max="2.5" step="0.05" value="1.5" class="flex-1 min-w-0 accent-amber-600"><span id="stokes-val-a" class="w-12 shrink-0 text-right font-mono text-amber-800"></span></div>
+                        <div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Center $x_0$</span><input type="range" id="stokes-x0" min="-1.5" max="1.5" step="0.05" value="0" class="flex-1 min-w-0 accent-indigo-600"><span id="stokes-val-x0" class="w-12 shrink-0 text-right font-mono text-indigo-700"></span></div>
+                        <div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Center $y_0$</span><input type="range" id="stokes-y0" min="-1.5" max="1.5" step="0.05" value="0" class="flex-1 min-w-0 accent-indigo-600"><span id="stokes-val-y0" class="w-12 shrink-0 text-right font-mono text-indigo-700"></span></div>
+                        <div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Plane $z_0$</span><input type="range" id="stokes-z0" min="-1.5" max="1.5" step="0.05" value="0" class="flex-1 min-w-0 accent-indigo-600"><span id="stokes-val-z0" class="w-12 shrink-0 text-right font-mono text-indigo-700"></span></div>
+                        <div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Mesh $N$</span><input type="range" id="stokes-n" min="2" max="40" step="1" value="12" class="flex-1 min-w-0 accent-slate-600"><span id="stokes-val-n" class="w-12 shrink-0 text-right font-mono text-slate-700"></span></div>
+                    </div>
+                    <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm">
+                        <div class="flex justify-between gap-2"><span class="font-sans text-slate-600">$\int_S(\nabla\times\mathbf{F})\cdot d\mathbf{s}$</span><span id="stokes-lhs" class="text-rose-700 font-bold"></span></div>
+                        <div class="flex justify-between gap-2"><span class="font-sans text-slate-600">$\oint_C\mathbf{F}\cdot d\mathbf{l}$</span><span id="stokes-rhs" class="text-sky-800 font-bold"></span></div>
+                        <div class="flex justify-between gap-2 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Difference</span><span id="stokes-diff" class="text-slate-900 font-bold"></span></div>
+                        <div class="flex justify-between gap-2"><span class="font-sans text-slate-600">Exact</span><span id="stokes-exact" class="text-emerald-800 font-bold text-right"></span></div>
+                        <div class="flex justify-between gap-2"><span class="font-sans text-slate-600">Extrapolated ($N\to\infty$)</span><span id="stokes-extra" class="text-indigo-700 font-bold"></span></div>
+                        <div class="flex justify-between gap-2 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Running $\int\mathbf{F}\cdot d\mathbf{l}$ (animation)</span><span id="stokes-run" class="text-violet-700 font-bold"></span></div>
+                    </div>
+                    <p id="stokes-note" class="hidden text-sm p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800"></p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div class="lg:col-span-7"><div class="relative h-56 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="stokes-conv" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-3">
+                    <div class="glass-card rounded-2xl p-4 space-y-1">
+                        <p class="text-sm font-bold text-sky-800 uppercase tracking-wider">Closed form of $\nabla\times\mathbf{F}$</p>
+                        <div id="stokes-sym" class="text-sm text-slate-800 tex-box"></div>
+                    </div>
+                    <p class="text-sm text-slate-600">Convergence check: both sides are computed with the midpoint rule on an $N$-point mesh (the curl by central differences). As $N$ grows the two curves meet. Switch the surface: the limit does not change, because only the boundary matters.</p>
+                </div>
+            </div>
+        </section>
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600"></footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Score: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Not quite. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // mini3d — dependency-free 3-D view on a 2-D canvas (z is up)
+        // drag to rotate, wheel to zoom, double-click to reset
+        // =========================================================
+        const V3 = {
+            add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+            sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+            mul: (a, s) => [a[0] * s, a[1] * s, a[2] * s],
+            dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+            cross: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+            len: a => Math.hypot(a[0], a[1], a[2]),
+            unit: a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+        };
+        class View3D {
+            constructor(id, opts = {}) {
+                this.id = id; this.yaw = opts.yaw ?? 0.5; this.pitch = opts.pitch ?? 0.4; this.zoom = opts.zoom ?? 1; this.range = opts.range ?? 6; this.center = opts.center || [0, 0, 0];
+                this.def = { yaw: this.yaw, pitch: this.pitch, zoom: this.zoom }; this.onChange = opts.onChange || (() => {});
+                const cv = $(id); let last = null;
+                cv.style.touchAction = 'none';
+                cv.addEventListener('pointerdown', e => { if (this.pick && this.pick(e)) return; last = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+                cv.addEventListener('pointermove', e => { if (!last) return; this.yaw -= (e.clientX - last[0]) * 0.01; this.pitch = clamp(this.pitch + (e.clientY - last[1]) * 0.01, -1.55, 1.55); last = [e.clientX, e.clientY]; this.onChange(); });
+                const up = () => { last = null; cv.style.cursor = 'grab'; };
+                cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+                cv.addEventListener('wheel', e => { e.preventDefault(); this.zoom = clamp(this.zoom * (e.deltaY > 0 ? 0.9 : 1.1), 0.4, 4); this.onChange(); }, { passive: false });
+                cv.addEventListener('dblclick', () => this.reset());
+                cv.style.cursor = 'grab';
+            }
+            reset() { Object.assign(this, this.def); this.onChange(); }
+            setView(v) {
+                const V = { iso: [0.5, 0.4], top: [-Math.PI / 2, 1.5499], front: [-Math.PI / 2, 0], side: [0, 0], low: [0.5, 0.12] }[v];
+                if (V) { this.yaw = V[0]; this.pitch = V[1]; this.onChange(); }
+            }
+            begin() {
+                const c = setupCanvas(this.id); if (!c) return null;
+                this.ctx = c.ctx; this.w = c.w; this.h = c.h; this.s = Math.min(c.w, c.h) / (2 * this.range) * this.zoom;
+                this.cy_ = Math.cos(this.yaw); this.sy_ = Math.sin(this.yaw); this.cp = Math.cos(this.pitch); this.sp = Math.sin(this.pitch);
+                return this;
+            }
+            // camera coords: X right, Y up, D toward the viewer
+            cam([x0, y0, z0]) {
+                const x = x0 - this.center[0], y = y0 - this.center[1], z = z0 - this.center[2];
+                const X = -x * this.sy_ + y * this.cy_, Y0 = x * this.cy_ + y * this.sy_;   // viewer azimuth = yaw
+                return [X, z * this.cp - Y0 * this.sp, z * this.sp + Y0 * this.cp];
+            }
+            P(p) { const [X, Y, D] = this.cam(p); return [this.w / 2 + X * this.s, this.h / 2 - Y * this.s, D]; }
+            line(a, b, color, width = 1.5, dash = null, alpha = 1) { const A = this.P(a), B = this.P(b); line(this.ctx, A[0], A[1], B[0], B[1], color, width, dash, alpha); }
+            poly(pts, color, width = 1.5, dash = null, alpha = 1, close = false, fill = null) {
+                const ctx = this.ctx; ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+                ctx.beginPath(); pts.forEach((p, i) => { const [x, y] = this.P(p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); if (close) ctx.closePath();
+                if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (color) ctx.stroke(); ctx.restore();
+            }
+            arrow(from, vec, color, width = 2.5, head = 11, alpha = 1, dash = null) {
+                const A = this.P(from), B = this.P(V3.add(from, vec));
+                arrow(this.ctx, A[0], A[1], B[0] - A[0], B[1] - A[1], color, alpha, width, head, dash);
+            }
+            dot(p, color, r = 5) { const [x, y] = this.P(p); dot(this.ctx, x, y, color, r); }
+            text(p, t, color, font = 'bold 13px Inter, sans-serif', dx = 0, dy = 0) { const [x, y] = this.P(p); label(this.ctx, t, x + dx, y + dy, color, font, 'center'); }
+            axes(L = 5, labels = ['x', 'y', 'z'], color = COL.slate) {
+                const dirs = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+                dirs.forEach((d, i) => { this.line(V3.mul(d, -L * 0.35), [0, 0, 0], color, 1, [3, 3], 0.6); this.arrow([0, 0, 0], V3.mul(d, L), color, 1.6, 9, 0.9); this.text(V3.mul(d, L * 1.08), labels[i], color, 'italic bold 14px Inter, sans-serif'); });
+            }
+            grid(L = 5, step = 1, z = 0, color = COL.grid) {
+                for (let v = -L; v <= L + 1e-9; v += step) { this.line([v, -L, z], [v, L, z], color, 1); this.line([-L, v, z], [L, v, z], color, 1); }
+            }
+            circle(c, r, n1, n2, color, width = 1.2, dash = null, alpha = 1, a0 = 0, a1 = 2 * Math.PI) {   // n1, n2: orthonormal in-plane axes
+                const pts = []; for (let k = 0; k <= 64; k++) { const t = a0 + (a1 - a0) * k / 64; pts.push(V3.add(c, V3.add(V3.mul(n1, r * Math.cos(t)), V3.mul(n2, r * Math.sin(t))))); }
+                this.poly(pts, color, width, dash, alpha);
+            }
+        }
+        function viewButtons(id, view) { const g = $(id); if (!g) return; g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => view.setView(b.dataset.v))); }
+
+        // =========================================================
+        // Coordinate systems and basis vectors (Ulaby conventions)
+        // =========================================================
+        const COORD = {
+            cart2cyl: ([x, y, z]) => [Math.hypot(x, y), Math.atan2(y, x), z],
+            cart2sph: ([x, y, z]) => { const R = Math.hypot(x, y, z); return [R, R ? Math.acos(clamp(z / R, -1, 1)) : 0, Math.atan2(y, x)]; },
+            cyl2cart: ([r, p, z]) => [r * Math.cos(p), r * Math.sin(p), z],
+            sph2cart: ([R, t, p]) => [R * Math.sin(t) * Math.cos(p), R * Math.sin(t) * Math.sin(p), R * Math.cos(t)],
+            basisCyl: p => [[Math.cos(p), Math.sin(p), 0], [-Math.sin(p), Math.cos(p), 0], [0, 0, 1]],
+            basisSph: (t, p) => [[Math.sin(t) * Math.cos(p), Math.sin(t) * Math.sin(p), Math.cos(t)], [Math.cos(t) * Math.cos(p), Math.cos(t) * Math.sin(p), -Math.sin(t)], [-Math.sin(p), Math.cos(p), 0]]
+        };
+        const toCartVec = (comp, basis) => V3.add(V3.add(V3.mul(basis[0], comp[0]), V3.mul(basis[1], comp[1])), V3.mul(basis[2], comp[2]));
+        const fromCartVec = (v, basis) => basis.map(b => V3.dot(v, b));
+
+        // =========================================================
+        // Safe expression parser (no eval) + numerical vector calculus
+        // =========================================================
+        const FUNCS = { sin: Math.sin, cos: Math.cos, tan: Math.tan, asin: Math.asin, acos: Math.acos, atan: Math.atan, sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh, asinh: Math.asinh, acosh: Math.acosh, atanh: Math.atanh,
+            exp: Math.exp, log: Math.log, ln: Math.log, sqrt: Math.sqrt, abs: Math.abs, sec: v => 1 / Math.cos(v), csc: v => 1 / Math.sin(v), cot: v => 1 / Math.tan(v) };
+        const CONSTS = { pi: Math.PI, e: Math.E };
+        const VARS = ['x', 'y', 'z', 'r', 'phi', 'R', 'theta'];
+        function parseExpr(src) {
+            const toks = []; let i = 0; const s = String(src).replace(/\*\*/g, '^').replace(/·|×/g, '*').replace(/π/g, 'pi').replace(/θ/g, 'theta').replace(/φ/g, 'phi');
+            const NAMES = [...Object.keys(FUNCS), 'pow', ...Object.keys(CONSTS), ...VARS].sort((a, b) => b.length - a.length);
+            const splitId = w => {      // "xy" → x·y, "Rsin" → R·sin (longest known name first)
+                if (NAMES.includes(w)) return [w]; const out = []; let k = 0;
+                while (k < w.length) { const nm = NAMES.find(n => w.startsWith(n, k)); if (!nm) throw new Error(`Unknown name "${w}"`); out.push(nm); k += nm.length; }
+                return out;
+            };
+            while (i < s.length) {
+                const ch = s[i];
+                if (/\s/.test(ch)) { i++; continue; }
+                if (/[0-9.]/.test(ch)) { let j = i; while (j < s.length && /[0-9.eE]/.test(s[j]) && !(/[eE]/.test(s[j]) && !/[0-9+\-]/.test(s[j + 1] || ''))) { if (/[eE]/.test(s[j]) && /[+\-]/.test(s[j + 1])) j++; j++; } toks.push({ t: 'n', v: parseFloat(s.slice(i, j)) }); i = j; }
+                else if (/[A-Za-z_]/.test(ch)) { let j = i; while (j < s.length && /[A-Za-z_0-9]/.test(s[j])) j++; splitId(s.slice(i, j)).forEach(v => toks.push({ t: 'id', v })); i = j; }
+                else if ('+-*/^(),'.includes(ch)) { toks.push({ t: ch }); i++; }
+                else throw new Error(`Unexpected character "${ch}"`);
+            }
+            let p = 0;
+            const peek = () => toks[p], eat = t => { if (!toks[p] || toks[p].t !== t) throw new Error(`Expected "${t}"`); return toks[p++]; };
+            function primary() {
+                const tk = toks[p++];
+                if (!tk) throw new Error('Unexpected end of expression');
+                if (tk.t === 'n') return { k: 'n', v: tk.v };
+                if (tk.t === '(') { const e = expr(); eat(')'); return e; }
+                if (tk.t === 'id') {
+                    if (peek() && peek().t === '(') { if (!FUNCS[tk.v] && tk.v !== 'pow') throw new Error(`Unknown function "${tk.v}"`); p++; const args = [expr()]; while (peek() && peek().t === ',') { p++; args.push(expr()); } eat(')'); return tk.v === 'pow' ? { k: '^', a: args[0], b: args[1] } : { k: 'f', f: tk.v, a: args[0] }; }
+                    if (FUNCS[tk.v] && peek() && peek().t !== '(') return { k: 'f', f: tk.v, a: power() };   // sin x, ln r
+                    if (tk.v in CONSTS) return { k: 'n', v: CONSTS[tk.v], name: tk.v };
+                    if (VARS.includes(tk.v)) return { k: 'v', v: tk.v };
+                    throw new Error(`Unknown variable "${tk.v}"`);
+                }
+                throw new Error(`Unexpected "${tk.t}"`);
+            }
+            function power() { const b = primary(); if (peek() && peek().t === '^') { p++; return { k: '^', a: b, b: unary() }; } return b; }
+            function unary() { if (peek() && (peek().t === '-' || peek().t === '+')) { const op = toks[p++].t; const a = unary(); return op === '-' ? { k: 'neg', a } : a; } return power(); }
+            function term() { let a = unary(); while (peek() && (peek().t === '*' || peek().t === '/' || peek().t === '(' || peek().t === 'id' || peek().t === 'n')) { const op = (peek().t === '*' || peek().t === '/') ? toks[p++].t : '*'; a = { k: op, a, b: unary() }; } return a; }
+            function expr() { let a = term(); while (peek() && (peek().t === '+' || peek().t === '-')) { const op = toks[p++].t; a = { k: op, a, b: term() }; } return a; }
+            const ast = expr();
+            if (p < toks.length) throw new Error('Unexpected input after expression');
+            return ast;
+        }
+        function compileAst(n) {
+            switch (n.k) {
+                case 'n': return () => n.v;
+                case 'v': return s => s[n.v];
+                case 'neg': { const a = compileAst(n.a); return s => -a(s); }
+                case 'f': { const a = compileAst(n.a), f = FUNCS[n.f]; return s => f(a(s)); }
+                case '^': { const a = compileAst(n.a), b = compileAst(n.b); return s => Math.pow(a(s), b(s)); }
+                case '+': { const a = compileAst(n.a), b = compileAst(n.b); return s => a(s) + b(s); }
+                case '-': { const a = compileAst(n.a), b = compileAst(n.b); return s => a(s) - b(s); }
+                case '*': { const a = compileAst(n.a), b = compileAst(n.b); return s => a(s) * b(s); }
+                case '/': { const a = compileAst(n.a), b = compileAst(n.b); return s => a(s) / b(s); }
+            }
+        }
+        const TEXV = { x: 'x', y: 'y', z: 'z', r: 'r', phi: '\\phi', R: 'R', theta: '\\theta' };
+        function astTex(n, parent = 0) {
+            const wrap = (t, prec) => prec < parent ? `\\left(${t}\\right)` : t;
+            switch (n.k) {
+                case 'n': return n.name === 'pi' ? '\\pi' : n.name === 'e' ? 'e' : String(+n.v.toFixed(6));
+                case 'v': return TEXV[n.v];
+                case 'neg': return wrap('-' + astTex(n.a, 3), 2);
+                case 'f': return `\\${n.f === 'ln' ? 'ln' : ['sec', 'csc', 'cot', 'sinh', 'cosh', 'tanh', 'sin', 'cos', 'tan', 'exp', 'log'].includes(n.f) ? n.f : 'operatorname{' + n.f + '}'}\\left(${astTex(n.a)}\\right)`.replace('\\sqrt\\left(', '\\sqrt{').replace(/\\operatorname\{sqrt\}\\left\((.*)\\right\)$/, '\\sqrt{$1}');
+                case '^': return wrap(`{${astTex(n.a, 5)}}^{${astTex(n.b)}}`, 4);
+                case '+': return wrap(`${astTex(n.a, 1)} + ${astTex(n.b, 1)}`, 1);
+                case '-': return wrap(`${astTex(n.a, 1)} - ${astTex(n.b, 2)}`, 1);
+                case '*': return wrap(`${astTex(n.a, 2)}\\,${astTex(n.b, 3)}`, 2);
+                case '/': return wrap(`\\frac{${astTex(n.a)}}{${astTex(n.b)}}`, 3);
+            }
+        }
+        function makeFn(src) { const ast = parseExpr(src); return { f: compileAst(ast), tex: astTex(ast), src }; }
+
+        // system coordinates u → full scope (all variable names available)
+        const SYS = {
+            cart: { vars: ['x', 'y', 'z'], hats: ['\\hat{\\mathbf{x}}', '\\hat{\\mathbf{y}}', '\\hat{\\mathbf{z}}'], names: ['x', 'y', 'z'], plain: ['x̂', 'ŷ', 'ẑ'] },
+            cyl: { vars: ['r', 'phi', 'z'], hats: ['\\hat{\\mathbf{r}}', '\\boldsymbol{\\hat{\\phi}}', '\\hat{\\mathbf{z}}'], names: ['r', 'φ', 'z'], plain: ['r̂', 'φ̂', 'ẑ'] },
+            sph: { vars: ['R', 'theta', 'phi'], hats: ['\\hat{\\mathbf{R}}', '\\boldsymbol{\\hat{\\theta}}', '\\boldsymbol{\\hat{\\phi}}'], names: ['R', 'θ', 'φ'], plain: ['R̂', 'θ̂', 'φ̂'] }
+        };
+        function scopeOf(sys, u) {
+            let c;
+            if (sys === 'cart') c = u; else if (sys === 'cyl') c = COORD.cyl2cart(u); else c = COORD.sph2cart(u);
+            const [x, y, z] = c, cy = COORD.cart2cyl(c), sp = COORD.cart2sph(c);
+            const phi = sys === 'cyl' ? u[1] : sys === 'sph' ? u[2] : cy[1];
+            return { x, y, z, r: cy[0], phi, R: sp[0], theta: sys === 'sph' ? u[1] : sp[1] };
+        }
+        const evalAt = (fn, sys, u) => fn.f(scopeOf(sys, u));
+        function dPart(g, u, i, order = 1) {     // numerical partial derivative of g(u) w.r.t. u[i]
+            const h = 1e-4 * Math.max(1, Math.abs(u[i])), up = u.slice(), dn = u.slice();
+            up[i] += h; dn[i] -= h;
+            if (order === 1) return (g(up) - g(dn)) / (2 * h);
+            return (g(up) - 2 * g(u) + g(dn)) / (h * h);
+        }
+        // Gradient, divergence, curl, Laplacian in Cartesian, cylindrical and spherical coordinates
+        const OPS = {
+            grad(fn, sys, u) {
+                const g = v => evalAt(fn, sys, v), d = i => dPart(g, u, i);
+                if (sys === 'cart') return [d(0), d(1), d(2)];
+                if (sys === 'cyl') return [d(0), d(1) / u[0], d(2)];
+                return [d(0), d(1) / u[0], d(2) / (u[0] * Math.sin(u[1]))];
+            },
+            div(F, sys, u) {
+                const c = i => v => evalAt(F[i], sys, v);
+                if (sys === 'cart') return dPart(c(0), u, 0) + dPart(c(1), u, 1) + dPart(c(2), u, 2);
+                if (sys === 'cyl') { const r = u[0]; return dPart(v => v[0] * c(0)(v), u, 0) / r + dPart(c(1), u, 1) / r + dPart(c(2), u, 2); }
+                const R = u[0], st = Math.sin(u[1]);
+                return dPart(v => v[0] * v[0] * c(0)(v), u, 0) / (R * R) + dPart(v => Math.sin(v[1]) * c(1)(v), u, 1) / (R * st) + dPart(c(2), u, 2) / (R * st);
+            },
+            curl(F, sys, u) {
+                const c = i => v => evalAt(F[i], sys, v), d = (g, i) => dPart(g, u, i);
+                if (sys === 'cart') return [d(c(2), 1) - d(c(1), 2), d(c(0), 2) - d(c(2), 0), d(c(1), 0) - d(c(0), 1)];
+                if (sys === 'cyl') { const r = u[0]; return [d(c(2), 1) / r - d(c(1), 2), d(c(0), 2) - d(c(2), 0), (d(v => v[0] * c(1)(v), 0) - d(c(0), 1)) / r]; }
+                const R = u[0], st = Math.sin(u[1]);
+                return [(d(v => Math.sin(v[1]) * c(2)(v), 1) - d(c(1), 2)) / (R * st), (d(c(0), 2) / st - d(v => v[0] * c(2)(v), 0)) / R, (d(v => v[0] * c(1)(v), 0) - d(c(0), 1)) / R];
+            },
+            lap(fn, sys, u) {
+                const g = v => evalAt(fn, sys, v), d2 = i => dPart(g, u, i, 2), d1 = i => dPart(g, u, i, 1);
+                if (sys === 'cart') return d2(0) + d2(1) + d2(2);
+                if (sys === 'cyl') { const r = u[0]; return d2(0) + d1(0) / r + d2(1) / (r * r) + d2(2); }
+                const R = u[0], t = u[1], st = Math.sin(t);
+                return d2(0) + 2 * d1(0) / R + (d2(1) + Math.cos(t) / st * d1(1)) / (R * R) + d2(2) / (R * R * st * st);
+            }
+        };
+        // system-component vector at point u → Cartesian vector
+        function sysVecToCart(comp, sys, u) {
+            if (sys === 'cart') return comp;
+            if (sys === 'cyl') return toCartVec(comp, COORD.basisCyl(u[1]));
+            return toCartVec(comp, COORD.basisSph(u[1], u[2]));
+        }
+        function sysToCart(sys, u) { return sys === 'cart' ? u : sys === 'cyl' ? COORD.cyl2cart(u) : COORD.sph2cart(u); }
+        function cartToSys(sys, c) { return sys === 'cart' ? c : sys === 'cyl' ? COORD.cart2cyl(c) : COORD.cart2sph(c); }
+        const fmtN = (v, d = 3) => !isFinite(v) ? '—' : (Math.abs(v) < 5 * Math.pow(10, -d) ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-3 ? v.toExponential(2) : (+v.toFixed(d)).toString()));
+        const fmtVec = (v, sys, d = 3) => v.map((c, i) => `${i ? (c < 0 && fmtN(c, d) !== '0' ? '− ' : '+ ') : (c < 0 && fmtN(c, d) !== '0' ? '−' : '')}${fmtN(Math.abs(c), d)} ${SYS[sys].plain[i]}`).join(' ');
+
+        // =========================================================
+        // Symbolic engine: differentiation + simplification + TeX
+        // (works on the parser's AST; any input function gets a closed form)
+        // =========================================================
+        const SY = (() => {
+            const N = v => ({ k: 'n', v }), C = name => ({ k: 'n', v: CONSTS[name], name });
+            const isNum = a => a.k === 'n' && !a.name, isZero = a => isNum(a) && a.v === 0, isOne = a => isNum(a) && a.v === 1;
+            const V = v => ({ k: 'v', v }), Fn = (f, a) => ({ k: 'f', f, a });
+            const add = (...t) => ({ k: '+', t }), mul = (...t) => ({ k: '*', t }), pow = (a, b) => ({ k: '^', a, b });
+            const neg = a => mul(N(-1), a), sub = (a, b) => add(a, neg(b)), div = (a, b) => mul(a, pow(b, N(-1)));
+            // parser AST → normalized n-ary form
+            function norm(n) {
+                switch (n.k) {
+                    case 'n': return n.name ? C(n.name) : N(n.v);
+                    case 'v': return V(n.v);
+                    case 'neg': return neg(norm(n.a));
+                    case 'f': return Fn(n.f === 'log' ? 'ln' : n.f, norm(n.a));
+                    case '^': return pow(norm(n.a), norm(n.b));
+                    case '+': return add(norm(n.a), norm(n.b));
+                    case '-': return sub(norm(n.a), norm(n.b));
+                    case '*': return mul(norm(n.a), norm(n.b));
+                    case '/': return div(norm(n.a), norm(n.b));
+                    default: return n;
+                }
+            }
+            const key = n => n.k === 'n' ? (n.name || String(+n.v.toPrecision(12))) : n.k === 'v' ? n.v : n.k === 'f' ? `${n.f}(${key(n.a)})` : n.k === '^' ? `(${key(n.a)})^(${key(n.b)})` : `${n.k}[${n.t.map(key).join(',')}]`;
+            function subst(n, map) {
+                if (n.k === 'v') return map[n.v] ? map[n.v] : n;
+                if (n.k === 'f') return Fn(n.f, subst(n.a, map));
+                if (n.k === '^') return pow(subst(n.a, map), subst(n.b, map));
+                if (n.t) return { k: n.k, t: n.t.map(c => subst(c, map)) };
+                return n;
+            }
+            const DF = {
+                sin: u => Fn('cos', u), cos: u => neg(Fn('sin', u)), tan: u => pow(Fn('cos', u), N(-2)),
+                asin: u => pow(sub(N(1), pow(u, N(2))), N(-0.5)), acos: u => neg(pow(sub(N(1), pow(u, N(2))), N(-0.5))), atan: u => pow(add(N(1), pow(u, N(2))), N(-1)),
+                asinh: u => pow(add(pow(u, N(2)), N(1)), N(-0.5)), acosh: u => pow(add(pow(u, N(2)), N(-1)), N(-0.5)), atanh: u => pow(sub(N(1), pow(u, N(2))), N(-1)),
+                sinh: u => Fn('cosh', u), cosh: u => Fn('sinh', u), tanh: u => pow(Fn('cosh', u), N(-2)),
+                exp: u => Fn('exp', u), ln: u => pow(u, N(-1)), sqrt: u => mul(N(0.5), pow(Fn('sqrt', u), N(-1))), abs: u => div(u, Fn('abs', u)),
+                sec: u => mul(Fn('sec', u), Fn('tan', u)), csc: u => neg(mul(Fn('csc', u), Fn('cot', u))), cot: u => neg(pow(Fn('sin', u), N(-2)))
+            };
+            const dep = (n, x) => n.k === 'v' ? n.v === x : n.k === 'n' ? false : n.k === 'f' ? dep(n.a, x) : n.k === '^' ? dep(n.a, x) || dep(n.b, x) : n.t.some(c => dep(c, x));
+            function d(n, x) {
+                if (!dep(n, x)) return N(0);
+                switch (n.k) {
+                    case 'v': return N(1);
+                    case '+': return add(...n.t.map(c => d(c, x)));
+                    case '*': return add(...n.t.map((c, i) => mul(...n.t.map((o, j) => i === j ? d(o, x) : o))));
+                    case 'f': return mul(DF[n.f](n.a), d(n.a, x));
+                    case '^': if (!dep(n.b, x)) return mul(n.b, pow(n.a, add(n.b, N(-1))), d(n.a, x));
+                        return mul(n, add(mul(d(n.b, x), Fn('ln', n.a)), mul(n.b, d(n.a, x), pow(n.a, N(-1)))));
+                }
+            }
+            // ---------- simplifier ----------
+            const EXACT = { sin: [[0, 0]], cos: [[0, 1]], tan: [[0, 0]], exp: [[0, 1]], ln: [[1, 0]], sqrt: [[0, 0], [1, 1], [4, 2], [9, 3]], cosh: [[0, 1]], sinh: [[0, 0]], atan: [[0, 0]], asin: [[0, 0]], abs: [] };
+            const splitCoef = n => { if (n.k === 'n' && !n.name) return [n.v, N(1)]; if (n.k === '*') { const c = n.t.filter(isNum), r = n.t.filter(t => !isNum(t)); const cv = c.reduce((p, q) => p * q.v, 1); return [cv, r.length === 0 ? N(1) : r.length === 1 ? r[0] : mul(...r)]; } return [1, n]; };
+            function S(n, depth = 0) {
+                if (depth > 40) return n;
+                switch (n.k) {
+                    case 'n': case 'v': return n;
+                    case 'f': {
+                        const a = S(n.a, depth + 1);
+                        if (isNum(a)) { const e = (EXACT[n.f] || []).find(([x]) => x === a.v); if (e) return N(e[1]); if (n.f === 'abs') return N(Math.abs(a.v)); }
+                        if (isNum(a) && a.v < 0 && ['sin', 'tan', 'sinh', 'tanh', 'asin', 'atan'].includes(n.f)) return S(neg(Fn(n.f, N(-a.v))), depth + 1);
+                        if (isNum(a) && a.v < 0 && ['cos', 'cosh'].includes(n.f)) return Fn(n.f, N(-a.v));
+                        if (n.f === 'tan') return S(div(Fn('sin', a), Fn('cos', a)), depth + 1);
+                        if (n.f === 'cot') return S(div(Fn('cos', a), Fn('sin', a)), depth + 1);
+                        if (n.f === 'sec') return S(pow(Fn('cos', a), N(-1)), depth + 1);
+                        if (n.f === 'csc') return S(pow(Fn('sin', a), N(-1)), depth + 1);
+                        if (n.f === 'ln' && a.k === 'f' && a.f === 'exp') return a.a;
+                        if (n.f === 'exp' && a.k === 'f' && a.f === 'ln') return a.a;
+                        if (n.f === 'sqrt' && a.k === '^' && isNum(a.b) && a.b.v === 2) return Fn('abs', a.a);
+                        return Fn(n.f, a);
+                    }
+                    case '^': {
+                        const a = S(n.a, depth + 1), b = S(n.b, depth + 1);
+                        if (isZero(b)) return N(1); if (isOne(b)) return a;
+                        if (isNum(a) && isNum(b)) { const v = Math.pow(a.v, b.v); if (isFinite(v) && Math.abs(v - Math.round(v * 1e6) / 1e6) < 1e-12) return N(v); }
+                        if (isOne(a)) return N(1);
+                        if (isZero(a) && isNum(b) && b.v > 0) return N(0);
+                        if (a.k === '^' && isNum(b) && isNum(a.b) && (Number.isInteger(b.v) || !(a.b.v % 2 === 0))) return S(pow(a.a, N(a.b.v * b.v)), depth + 1);
+                        if (a.k === 'f' && a.f === 'sqrt' && isNum(b) && b.v % 2 === 0) return S(pow(a.a, N(b.v / 2)), depth + 1);
+                        if (a.k === '*' && isNum(b) && Number.isInteger(b.v)) return S(mul(...a.t.map(f => pow(f, b))), depth + 1);
+                        if (a.k === 'f' && a.f === 'exp') return S(Fn('exp', mul(a.a, b)), depth + 1);
+                        return pow(a, b);
+                    }
+                    case '*': {
+                        let fs = []; n.t.map(c => S(c, depth + 1)).forEach(c => c.k === '*' ? fs.push(...c.t) : fs.push(c));
+                        let coef = 1; const bases = new Map(); const other = [];
+                        for (const f of fs) {
+                            if (isNum(f)) { coef *= f.v; continue; }
+                            let base = f, ex = N(1);
+                            if (f.k === '^' && isNum(f.b)) { base = f.a; ex = f.b; }
+                            if (f.k === 'f' && f.f === 'exp') { other.push(f); continue; }
+                            const kk = key(base); if (!bases.has(kk)) bases.set(kk, [base, 0, []]);
+                            if (isNum(ex)) bases.get(kk)[1] += ex.v; else bases.get(kk)[2].push(ex);
+                        }
+                        if (coef === 0) return N(0);
+                        // merge exponentials: e^a e^b = e^{a+b}
+                        const exps = other.filter(f => f.k === 'f' && f.f === 'exp');
+                        const out = [];
+                        for (const [, [base, e]] of bases) { if (Math.abs(e) > 1e-12) out.push(Math.abs(e - 1) < 1e-12 ? base : S(pow(base, N(+e.toFixed(10))), depth + 1)); }
+                        if (exps.length === 1) out.push(exps[0]); else if (exps.length > 1) { const e = S(Fn('exp', add(...exps.map(f => f.a))), depth + 1); if (!isOne(e)) out.push(e); }
+                        // re-flatten (powers of products may expand)
+                        let flat = []; out.forEach(o => o.k === '*' ? flat.push(...o.t) : flat.push(o));
+                        if (flat.some(o => o.k === '*' || isNum(o))) { const r = S(mul(N(coef), ...flat), depth + 1); return r; }
+                        if (flat.length === 0) return N(coef);
+                        // distribute over a single sum (makes 1/r·(r A + B) → A + B/r)
+                        const sums = flat.filter(o => o.k === '+');
+                        if (sums.length === 1 && depth < 30) { const rest = flat.filter(o => o !== sums[0]); return S(add(...sums[0].t.map(t => mul(N(coef), ...rest, t))), depth + 1); }
+                        flat.sort((p, q) => key(p) < key(q) ? -1 : 1);
+                        if (coef === 1) return flat.length === 1 ? flat[0] : mul(...flat);
+                        return mul(N(coef), ...flat);
+                    }
+                    case '+': {
+                        let ts = []; n.t.map(c => S(c, depth + 1)).forEach(c => c.k === '+' ? ts.push(...c.t) : ts.push(c));
+                        const groups = new Map(); let cst = 0;
+                        for (const t of ts) { if (isNum(t)) { cst += t.v; continue; } const [cv, r] = splitCoef(t), kk = key(r); if (!groups.has(kk)) groups.set(kk, [r, 0]); groups.get(kk)[1] += cv; }
+                        // sin²u + cos²u → 1 (same coefficient and same co-factors)
+                        for (const [kk, g] of [...groups]) {
+                            if (!g[1]) continue;
+                            const facs = g[0].k === '*' ? g[0].t : [g[0]];
+                            for (let idx = 0; idx < facs.length; idx++) {
+                                const f = facs[idx]; if (!(f.k === '^' && isNum(f.b) && f.b.v === 2 && f.a.k === 'f' && f.a.f === 'sin')) continue;
+                                const rest = facs.filter((_, i) => i !== idx), twin = S(mul(pow(Fn('cos', f.a.a), N(2)), ...rest), depth + 1), k2 = key(twin);
+                                const g2 = groups.get(k2); if (!g2 || Math.abs(g2[1] - g[1]) > 1e-12) continue;
+                                const c = g[1]; g[1] = 0; g2[1] = 0;
+                                const nt = rest.length ? S(mul(N(c), ...rest), depth + 1) : N(c);
+                                if (isNum(nt)) cst += nt.v; else { const [cv2, r2] = splitCoef(nt), k3 = key(r2); if (!groups.has(k3)) groups.set(k3, [r2, 0]); groups.get(k3)[1] += cv2; }
+                                break;
+                            }
+                        }
+                        const out = [];
+                        for (const [, [r, cv]] of groups) { if (Math.abs(cv) < 1e-12) continue; out.push(cv === 1 ? r : S(mul(N(+cv.toFixed(12)), r), depth + 1)); }
+                        if (Math.abs(cst) > 1e-12) out.push(N(+cst.toFixed(12)));
+                        if (!out.length) return N(0);
+                        return out.length === 1 ? out[0] : add(...out);
+                    }
+                }
+                return n;
+            }
+            const simp = n => { let a = n, k0 = ''; for (let i = 0; i < 4; i++) { a = S(a); const k1 = key(a); if (k1 === k0) break; k0 = k1; } return numZero(a) ? N(0) : a; };
+            // identically zero? (catches cancellations the rule-based simplifier misses, e.g. ∇·(r̂/r))
+            const PTS = [[0.73, -1.21, 0.58], [-1.37, 0.44, 1.12], [0.91, 1.63, -0.77], [2.05, -0.36, 1.49], [-0.52, -1.88, -1.03], [1.31, 0.29, 2.2]];
+            function numZero(n) {
+                if (n.k === 'n') return false;
+                let ok = 0;
+                for (const [x, y, z] of PTS) { const r = Math.hypot(x, y), R = Math.hypot(x, y, z); let v; try { v = ev(n, { x, y, z, r, R, phi: Math.atan2(y, x) + Math.PI, theta: Math.acos(z / R) }); } catch (e) { v = NaN; }
+                    if (!isFinite(v)) continue; if (Math.abs(v) > 1e-9) return false; ok++; }
+                return ok >= 4;
+            }
+            // ---------- numeric evaluation ----------
+            function ev(n, s) {
+                switch (n.k) {
+                    case 'n': return n.v; case 'v': return s[n.v];
+                    case 'f': { const a = ev(n.a, s); return n.f === 'ln' ? Math.log(a) : FUNCS[n.f](a); }
+                    case '^': return Math.pow(ev(n.a, s), ev(n.b, s));
+                    case '+': return n.t.reduce((p, c) => p + ev(c, s), 0);
+                    case '*': return n.t.reduce((p, c) => p * ev(c, s), 1);
+                }
+            }
+            // ---------- TeX ----------
+            const TV = { x: 'x', y: 'y', z: 'z', r: 'r', phi: '\\phi', R: 'R', theta: '\\theta' };
+            function numTex(v) {
+                if (Number.isInteger(v)) return String(v);
+                for (let q = 2; q <= 12; q++) { const p = Math.round(v * q); if (Math.abs(p / q - v) < 1e-9) return `${p < 0 ? '-' : ''}\\frac{${Math.abs(p)}}{${q}}`; }
+                return String(+v.toPrecision(5));
+            }
+            const FT = { sin: '\\sin', cos: '\\cos', tan: '\\tan', sec: '\\sec', csc: '\\csc', cot: '\\cot', sinh: '\\sinh', cosh: '\\cosh', tanh: '\\tanh', ln: '\\ln', asin: '\\sin^{-1}', acos: '\\cos^{-1}', atan: '\\tan^{-1}', asinh: '\\sinh^{-1}', acosh: '\\cosh^{-1}', atanh: '\\tanh^{-1}' };
+            const needParen = a => a.k === '+' || (a.k === '*') || (a.k === 'n' && a.v < 0);
+            function atomTex(a) { const t = tex(a); return (a.k === '+' || a.k === '*' || (isNum(a) && (a.v < 0 || !Number.isInteger(a.v)))) ? `\\left(${t}\\right)` : t; }
+            function fTex(f, a, ex) {
+                if (f === 'sqrt') return ex ? `\\left(\\sqrt{${tex(a)}}\\right)^{${ex}}` : `\\sqrt{${tex(a)}}`;
+                if (f === 'exp') return (ex ? `\\left(e^{${tex(a)}}\\right)^{${ex}}` : `e^{${tex(a)}}`);
+                if (f === 'abs') return `\\left|${tex(a)}\\right|` + (ex ? `^{${ex}}` : '');
+                const simple = a.k === 'v' || (a.k === '*' && a.t.length === 2 && isNum(a.t[0]) && a.t[1].k === 'v');
+                const arg = simple ? tex(a) : `\\left(${tex(a)}\\right)`;
+                const nm = FT[f] || `\\operatorname{${f}}`;
+                return ex ? (nm.includes('^{-1}') ? `\\left(${nm}${arg}\\right)^{${ex}}` : `${nm}^{${ex}}${simple ? ' ' : ''}${arg}`) : `${nm}${simple ? ' ' : ''}${arg}`;
+            }
+            function powTex(base, e) {   // e: positive number or node
+                const et = typeof e === 'number' ? numTex(e) : tex(e);
+                if (typeof e === 'number' && e === 0.5) return base.k === 'f' ? `\\sqrt{${tex(base)}}` : `\\sqrt{${tex(base)}}`;
+                if (typeof e === 'number' && e === 1) return base.k === '+' ? `\\left(${tex(base)}\\right)` : tex(base);
+                if (base.k === 'f') return fTex(base.f, base.a, et);
+                const bt = (base.k === 'v' || (base.k === 'n' && base.name) || (isNum(base) && base.v >= 0 && Number.isInteger(base.v))) ? tex(base) : `\\left(${tex(base)}\\right)`;
+                return `{${bt}}^{${et}}`;
+            }
+            function tex(n) {
+                switch (n.k) {
+                    case 'n': return n.name === 'pi' ? '\\pi' : n.name === 'e' ? 'e' : numTex(n.v);
+                    case 'v': return TV[n.v] || n.v;
+                    case 'f': return fTex(n.f, n.a);
+                    case '^': return isNum(n.b) && n.b.v < 0 ? `\\frac{1}{${powTex(n.a, -n.b.v)}}` : powTex(n.a, isNum(n.b) ? n.b.v : n.b);
+                    case '+': {
+                        const ts = n.t.slice().sort((p, q) => (isNum(p) ? 1 : 0) - (isNum(q) ? 1 : 0));
+                        return ts.map((t, i) => { const [cv] = splitCoef(t); const s = cv < 0 ? tex(mul(N(-1), t)) : tex(t); const st = cv < 0 ? tex(simp(mul(N(-1), t))) : tex(t); return (i === 0 ? (cv < 0 ? '-' : '') : (cv < 0 ? ' - ' : ' + ')) + st; }).join('');
+                    }
+                    case '*': {
+                        let coef = 1; const num = [], den = [];
+                        n.t.forEach(f => { if (isNum(f)) coef *= f.v; else if (f.k === '^' && isNum(f.b) && f.b.v < 0) den.push(f.b.v === -1 ? f.a : pow(f.a, N(-f.b.v))); else num.push(f); });
+                        const rank = f => { const b = f.k === '^' ? f.a : f; if (b.k === 'v') return 'a' + ['x', 'y', 'z', 'r', 'R', 'phi', 'theta'].indexOf(b.v); if (b.k === 'n') return 'b'; if (b.k === 'f') return b.f === 'exp' ? 'e' : b.f === 'sqrt' ? 'd' : 'c' + key(b); return 'f'; };
+                        num.sort((p, q) => rank(p) < rank(q) ? -1 : 1); den.sort((p, q) => rank(p) < rank(q) ? -1 : 1);
+                        const part = arr => arr.map(f => f.k === '+' ? `\\left(${tex(f)}\\right)` : f.k === '^' ? tex(f) : tex(f)).join('\\,');
+                        const sign = coef < 0 ? '-' : '', ac = Math.abs(coef);
+                        let cN = ac, cD = 1; if (!Number.isInteger(ac)) { for (let q = 2; q <= 12; q++) { const p = Math.round(ac * q); if (Math.abs(p / q - ac) < 1e-9) { cN = p; cD = q; break; } } }
+                        if (!Number.isInteger(cN)) { cN = +ac.toPrecision(5); cD = 1; }
+                        const nt = (cN === 1 && num.length ? '' : String(cN) + (num.length ? '\\,' : '')) + part(num);
+                        if (!den.length && cD === 1) return sign + (nt || '1');
+                        const dt = (cD !== 1 ? String(cD) + (den.length ? '\\,' : '') : '') + part(den);
+                        return `${sign}\\frac{${nt || '1'}}{${dt}}`;
+                    }
+                }
+                return '?';
+            }
+            // display-only: pull factors common to every term of a sum out front
+            function pretty(n) {
+                if (n.k === 'f') return Fn(n.f, pretty(n.a));
+                if (n.k === '^') return pow(pretty(n.a), n.b);
+                if (n.k === '*') return mul(...n.t.map(pretty));
+                if (n.k !== '+') return n;
+                const ts = n.t.map(pretty);
+                const facList = t => { const fs = t.k === '*' ? t.t : [t]; const m = new Map(); fs.forEach(f => { if (isNum(f)) return; const b = f.k === '^' && isNum(f.b) ? f.a : f, e = f.k === '^' && isNum(f.b) ? f.b.v : 1; m.set(key(b), [b, e]); }); return m; };
+                const lists = ts.map(facList), common = [];
+                for (const [k, [b, e]] of lists[0]) { if (b.k === '+') continue; let emin = e, ok = true; for (const L of lists.slice(1)) { const q = L.get(k); if (!q || Math.sign(q[1]) !== Math.sign(e)) { ok = false; break; } emin = e > 0 ? Math.min(emin, q[1]) : Math.max(emin, q[1]); } if (ok) common.push([b, emin]); }
+                if (!common.length || ts.length < 2) return add(...ts);
+                const inner = simp(add(...ts.map(t => mul(t, ...common.map(([b, e]) => pow(b, N(-e)))))));
+                const cf = common.map(([b, e]) => e === 1 ? b : pow(b, N(e)));
+                return mul(...cf, inner.k === '+' ? inner : inner);
+            }
+            const texP = n => tex(pretty(n));
+            return { norm, subst, d, simp, ev, tex, texP, pretty, key, N, V, Fn, add, mul, pow, neg, sub, div, isZero: n => isZero(n) };
+        })();
+
+        // system-variable substitutions so any variable may appear in any system
+        const SYSUB = (() => {
+            const P = s => SY.norm(parseExpr(s));
+            return {
+                cart: { r: P('sqrt(x^2+y^2)'), R: P('sqrt(x^2+y^2+z^2)'), phi: P('atan(y/x)'), theta: P('acos(z/sqrt(x^2+y^2+z^2))') },
+                cyl: { x: P('r*cos(phi)'), y: P('r*sin(phi)'), R: P('sqrt(r^2+z^2)'), theta: P('acos(z/sqrt(r^2+z^2))') },
+                sph: { x: P('R*sin(theta)*cos(phi)'), y: P('R*sin(theta)*sin(phi)'), z: P('R*cos(theta)'), r: P('R*sin(theta)') }
+            };
+        })();
+        const symIn = (src, sys) => SY.simp(SY.subst(SY.norm(parseExpr(src)), SYSUB[sys]));
+        // symbolic ∇, ∇·, ∇×, ∇² (Ulaby formulas); inputs are sources (strings), results are normalized ASTs
+        const SYMOPS = (() => {
+            const { d, simp, mul, add, sub, div, pow, V, N, Fn } = SY;
+            const r = V('r'), R = V('R'), sT = Fn('sin', V('theta'));
+            return {
+                grad(f, sys) {
+                    if (sys === 'cart') return ['x', 'y', 'z'].map(v => simp(d(f, v)));
+                    if (sys === 'cyl') return [d(f, 'r'), div(d(f, 'phi'), r), d(f, 'z')].map(simp);
+                    return [d(f, 'R'), div(d(f, 'theta'), R), div(d(f, 'phi'), mul(R, sT))].map(simp);
+                },
+                div(F, sys) {
+                    if (sys === 'cart') return simp(add(d(F[0], 'x'), d(F[1], 'y'), d(F[2], 'z')));
+                    if (sys === 'cyl') return simp(add(div(d(mul(r, F[0]), 'r'), r), div(d(F[1], 'phi'), r), d(F[2], 'z')));
+                    return simp(add(div(d(mul(pow(R, N(2)), F[0]), 'R'), pow(R, N(2))), div(d(mul(sT, F[1]), 'theta'), mul(R, sT)), div(d(F[2], 'phi'), mul(R, sT))));
+                },
+                curl(F, sys) {
+                    if (sys === 'cart') return [sub(d(F[2], 'y'), d(F[1], 'z')), sub(d(F[0], 'z'), d(F[2], 'x')), sub(d(F[1], 'x'), d(F[0], 'y'))].map(simp);
+                    if (sys === 'cyl') return [sub(div(d(F[2], 'phi'), r), d(F[1], 'z')), sub(d(F[0], 'z'), d(F[2], 'r')), div(sub(d(mul(r, F[1]), 'r'), d(F[0], 'phi')), r)].map(simp);
+                    return [div(sub(d(mul(sT, F[2]), 'theta'), d(F[1], 'phi')), mul(R, sT)), div(sub(div(d(F[0], 'phi'), sT), d(mul(R, F[2]), 'R')), R), div(sub(d(mul(R, F[1]), 'R'), d(F[0], 'theta')), R)].map(simp);
+                },
+                lap(f, sys) {
+                    if (sys === 'cart') return simp(add(...['x', 'y', 'z'].map(v => d(d(f, v), v))));
+                    if (sys === 'cyl') return simp(add(div(d(mul(r, d(f, 'r')), 'r'), r), div(d(d(f, 'phi'), 'phi'), pow(r, N(2))), d(d(f, 'z'), 'z')));
+                    return simp(add(div(d(mul(pow(R, N(2)), d(f, 'R')), 'R'), pow(R, N(2))), div(d(mul(sT, d(f, 'theta')), 'theta'), mul(pow(R, N(2)), sT)), div(d(d(f, 'phi'), 'phi'), mul(pow(R, N(2)), pow(sT, N(2))))));
+                }
+            };
+        })();
+
+        // =========================================================
+        // Stokes's theorem and the divergence theorem, verified numerically
+        // =========================================================
+        const TAU = 2 * Math.PI;
+        const mixW = (rgb, a) => `rgba(${rgb.join(',')},${a.toFixed(3)})`;
+        const heat = t => t >= 0 ? mixW([225, 29, 72], 0.08 + 0.4 * clamp(t, 0, 1)) : mixW([2, 132, 199], 0.08 + 0.4 * clamp(-t, 0, 1));
+        const fmt4 = v => !isFinite(v) ? '—' : Math.abs(v) < 5e-5 ? '0.0000' : v.toFixed(4);
+        const r2c = c => c[0] * c[0] + c[1] * c[1];
+        const insideVol = (s, a, h, c) => s === 'sphere' ? V3.len(c) < a : s === 'cyl' ? Math.hypot(c[0], c[1]) < a && Math.abs(c[2]) < h / 2 : Math.max(...c.map(Math.abs)) < a;
+        // exact values; c = region center (for Stokes: circle center and plane height), in the field's coordinates
+        const PRE = {
+            stokes: [
+                { l: '−y x̂ + x ŷ', f: ['-y', 'x', '0'], ex: a => 2 * Math.PI * a * a, exl: '2πa²' },
+                { l: 'y x̂ (shear)', f: ['y', '0', '0'], ex: a => -Math.PI * a * a, exl: '−πa²' },
+                { l: '−y³ x̂ + x³ ŷ', f: ['-y^3', 'x^3', '0'], ex: (a, h, s, c) => 3 * Math.PI * (a ** 4 / 2 + a * a * r2c(c)), exl: '3π[a⁴/2 + a²(x₀²+y₀²)]' },
+                { l: 'z x̂ + x ŷ + y ẑ', f: ['z', 'x', 'y'], ex: a => Math.PI * a * a, exl: 'πa²' },
+                { l: 'yz x̂ − xz ŷ', f: ['y*z', '-x*z', '0'], ex: (a, h, s, c) => -2 * Math.PI * a * a * c[2], exl: '−2πa²z₀' },
+                { l: 'φ̂/r (line current)', f: ['-y/(x^2+y^2)', 'x/(x^2+y^2)', '0'], ex: (a, h, s, c) => Math.hypot(c[0], c[1]) < a ? TAU : 0, exl: '2π if C encircles the z-axis', sing: 'line' },
+                { l: 'x x̂ + y ŷ + z ẑ', f: ['x', 'y', 'z'], ex: () => 0, exl: '0 (curl-free)' }
+            ],
+            divthm: [
+                { l: 'x x̂ + y ŷ + z ẑ', f: ['x', 'y', 'z'], ex: (a, h, s) => 3 * VOL(a, h, s), exl: '3 × volume' },
+                { l: 'x³ x̂ + y³ ŷ + z³ ẑ', f: ['x^3', 'y^3', 'z^3'], ex: (a, h, s, c) => (s === 'sphere' ? 12 * Math.PI * a ** 5 / 5 : s === 'cyl' ? 3 * (Math.PI * a ** 4 / 2 * h + Math.PI * a * a * h ** 3 / 12) : 24 * a ** 5) + 3 * VOL(a, h, s) * V3.dot(c, c), exl: '∫3R² dv' },
+                { l: '−y x̂ + x ŷ', f: ['-y', 'x', '0'], ex: () => 0, exl: '0 (solenoidal)' },
+                { l: 'xy x̂ + yz ŷ + zx ẑ', f: ['x*y', 'y*z', 'z*x'], ex: (a, h, s, c) => VOL(a, h, s) * (c[0] + c[1] + c[2]), exl: 'V(x₀ + y₀ + z₀)' },
+                { l: 'R̂/R² (point charge)', f: ['x/(x^2+y^2+z^2)^1.5', 'y/(x^2+y^2+z^2)^1.5', 'z/(x^2+y^2+z^2)^1.5'], ex: (a, h, s, c) => insideVol(s, a, h, c) ? 4 * Math.PI : 0, exl: '4π if the origin is inside', sing: 'point' },
+                { l: 'r̂/r (line charge)', f: ['x/(x^2+y^2)', 'y/(x^2+y^2)', '0'], ex: (a, h, s, c) => lineFlux(s, a, h, c), exl: '2π × length of z-axis inside', sing: 'line' }
+            ]
+        };
+        const VOL = (a, h, s) => s === 'sphere' ? 4 / 3 * Math.PI * a ** 3 : s === 'cyl' ? Math.PI * a * a * h : 8 * a ** 3;
+        function lineFlux(s, a, h, c) {   // 2π per unit length of z-axis inside the volume
+            const d = Math.hypot(c[0], c[1]);
+            if (s === 'sphere') return d < a ? TAU * 2 * Math.sqrt(a * a - d * d) : 0;
+            if (s === 'cyl') return d < a ? TAU * h : 0;
+            return Math.max(Math.abs(c[0]), Math.abs(c[1])) < a ? TAU * 2 * a : 0;
+        }
+        const evF = (F, p) => F.map(f => f.f({ x: p[0], y: p[1], z: p[2], r: Math.hypot(p[0], p[1]), R: V3.len(p), phi: Math.atan2(p[1], p[0]), theta: Math.acos(clamp(p[2] / (V3.len(p) || 1), -1, 1)) }));
+        // field seen from a region centered at c: G(p) = F(p + c)
+        const shiftF = (F, c) => F.map(f => ({ src: f.src, f: sc => f.f(scopeOf('cart', [sc.x + c[0], sc.y + c[1], sc.z + c[2]])) }));
+
+        // ---------- geometry ----------
+        // Stokes surfaces: s ∈ [0,1], v ∈ [0,2π) → point and J = n ds / (ds dv) (upward)
+        function sSurf(shape, a, s, v) {
+            const c = Math.cos(v), sn = Math.sin(v);
+            if (shape === 'disk') { const r = s * a; return [[r * c, r * sn, 0], [0, 0, a * a * s]]; }
+            if (shape === 'hemi') { const t = s * Math.PI / 2, st = Math.sin(t), f = a * a * st * Math.PI / 2; return [[a * st * c, a * st * sn, a * Math.cos(t)], [st * c * f, st * sn * f, Math.cos(t) * f]]; }
+            const r = s * a, x = r * c, y = r * sn; return [[x, y, a * (1 - s * s)], [2 * x / a * r * a, 2 * y / a * r * a, r * a]];
+        }
+        function stokesLHS(F, shape, a, N) {
+            let sum = 0; const ds = 1 / N, M = 2 * N, dv = TAU / M;
+            for (let i = 0; i < N; i++) for (let j = 0; j < M; j++) { const [p, J] = sSurf(shape, a, (i + 0.5) * ds, (j + 0.5) * dv); sum += V3.dot(OPS.curl(F, 'cart', p), J) * ds * dv; }
+            return sum;
+        }
+        function stokesRHS(F, a, N) {
+            let sum = 0; const M = 4 * N, dt = TAU / M;
+            for (let k = 0; k < M; k++) { const t = (k + 0.5) * dt, p = [a * Math.cos(t), a * Math.sin(t), 0]; sum += V3.dot(evF(F, p), [-a * Math.sin(t), a * Math.cos(t), 0]) * dt; }
+            return sum;
+        }
+        // closed surfaces: list of patches {p (center), J (outward n·area), corners}
+        function closedPatches(shape, a, h, N) {
+            const P = [];
+            if (shape === 'sphere') {
+                const nt = N, np = 2 * N, dt = Math.PI / nt, dp = TAU / np, pt = (t, p) => COORD.sph2cart([a, t, p]);
+                for (let i = 0; i < nt; i++) for (let j = 0; j < np; j++) { const t = (i + 0.5) * dt, p = (j + 0.5) * dp, c = pt(t, p); P.push({ p: c, J: V3.mul(V3.unit(c), a * a * Math.sin(t) * dt * dp), q: [pt(i * dt, j * dp), pt((i + 1) * dt, j * dp), pt((i + 1) * dt, (j + 1) * dp), pt(i * dt, (j + 1) * dp)] }); }
+            } else if (shape === 'cyl') {
+                const np = 2 * N, nz = N, nr = N, dp = TAU / np, dz = h / nz, dr = a / nr, cp = (r, p, z) => [r * Math.cos(p), r * Math.sin(p), z];
+                for (let j = 0; j < np; j++) {
+                    const p = (j + 0.5) * dp;
+                    for (let k = 0; k < nz; k++) { const z = -h / 2 + (k + 0.5) * dz; P.push({ p: cp(a, p, z), J: V3.mul([Math.cos(p), Math.sin(p), 0], a * dp * dz), q: [cp(a, j * dp, z - dz / 2), cp(a, (j + 1) * dp, z - dz / 2), cp(a, (j + 1) * dp, z + dz / 2), cp(a, j * dp, z + dz / 2)] }); }
+                    for (let i = 0; i < nr; i++) for (const g of [1, -1]) { const r = (i + 0.5) * dr, z = g * h / 2; P.push({ p: cp(r, p, z), J: [0, 0, g * r * dr * dp], q: [cp(i * dr, j * dp, z), cp((i + 1) * dr, j * dp, z), cp((i + 1) * dr, (j + 1) * dp, z), cp(i * dr, (j + 1) * dp, z)] }); }
+                }
+            } else {
+                const d = 2 * a / N;
+                for (let k = 0; k < 3; k++) for (const g of [1, -1]) { const i1 = (k + 1) % 3, i2 = (k + 2) % 3;
+                    for (let u = 0; u < N; u++) for (let w = 0; w < N; w++) { const mk = (uu, ww) => { const c = [0, 0, 0]; c[k] = g * a; c[i1] = -a + uu * d; c[i2] = -a + ww * d; return c; };
+                        const J = [0, 0, 0]; J[k] = g * d * d; P.push({ p: mk(u + 0.5, w + 0.5), J, q: [mk(u, w), mk(u + 1, w), mk(u + 1, w + 1), mk(u, w + 1)] }); } }
+            }
+            return P;
+        }
+        function divLHS(F, shape, a, h, N) {
+            let sum = 0;
+            if (shape === 'sphere') { const dR = a / N, dt = Math.PI / N, dp = TAU / (2 * N);
+                for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) for (let k = 0; k < 2 * N; k++) { const R = (i + 0.5) * dR, t = (j + 0.5) * dt; sum += OPS.div(F, 'cart', COORD.sph2cart([R, t, (k + 0.5) * dp])) * R * R * Math.sin(t) * dR * dt * dp; } }
+            else if (shape === 'cyl') { const dr = a / N, dp = TAU / (2 * N), dz = h / N;
+                for (let i = 0; i < N; i++) for (let j = 0; j < 2 * N; j++) for (let k = 0; k < N; k++) { const r = (i + 0.5) * dr; sum += OPS.div(F, 'cart', [r * Math.cos((j + 0.5) * dp), r * Math.sin((j + 0.5) * dp), -h / 2 + (k + 0.5) * dz]) * r * dr * dp * dz; } }
+            else { const d = 2 * a / N; for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) for (let k = 0; k < N; k++) sum += OPS.div(F, 'cart', [-a + (i + 0.5) * d, -a + (j + 0.5) * d, -a + (k + 0.5) * d]) * d * d * d; }
+            return sum;
+        }
+        const divRHS = (F, shape, a, h, N) => closedPatches(shape, a, h, N).reduce((s, q) => s + V3.dot(evF(F, q.p), q.J), 0);
+
+        // ---------- generic section controller ----------
+        function section(k, cfg) {
+            const S = { k, shape: cfg.shape0, field: true, norm: true, heat: true, anim: false, F: null, G: null, pre: 0, conv: null, t: 0, cache: null };
+            const view = new View3D(k + '-cv', { range: 3.2, center: [0, 0, cfg.cz || 0], onChange: () => draw() });
+            viewButtons(k + '-view', view);
+            $(k + '-presets').innerHTML = PRE[k].map((p, i) => `<button data-i="${i}" class="chip">${p.l}</button>`).join('');
+            $(k + '-presets').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { PRE[k][+b.dataset.i].f.forEach((s, i) => $(`${k}-f${i}`).value = s); apply(); }));
+            function apply() {
+                const src = [0, 1, 2].map(i => $(`${k}-f${i}`).value.trim() || '0');
+                try { S.F = src.map(makeFn); setText(k + '-err', ''); } catch (e) { setText(k + '-err', '⚠ ' + e.message); return; }
+                S.pre = PRE[k].findIndex(p => JSON.stringify(p.f) === JSON.stringify(src));
+                $(k + '-presets').querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.i === S.pre));
+                // closed form of ∇×F or ∇·F for any input
+                let tx;
+                try { const res = SYMOPS[cfg.op](src.map(v => symIn(v, 'cart')), 'cart');
+                    if (Array.isArray(res)) { const parts = res.map((c, i) => { if (SY.isZero(c)) return null; const pc = SY.pretty(c), t = SY.tex(pc); if (pc.k === '+') return ` + ${SYS.cart.hats[i]}\\left(${t}\\right)`; const b = t.startsWith('-') ? t.slice(1) : t; return (t.startsWith('-') ? ' - ' : ' + ') + (pc.k === 'n' ? `${b}\\,${SYS.cart.hats[i]}` : `${SYS.cart.hats[i]}\\,${b}`); }).filter(Boolean);
+                        tx = parts.length ? parts.join('').replace(/^ \+ /, '').replace(/^ - /, '-') : '0'; }
+                    else tx = SY.texP(res);
+                    tx = `$$${cfg.opTex} = ${tx}$$`;
+                } catch (e) { tx = '<p class="text-sm text-slate-600">No closed form (function not supported symbolically); integrals are still computed numerically.</p>'; }
+                $(k + '-sym').innerHTML = tx; typeset([$(k + '-sym')]);
+                S.conv = null; update();
+            }
+            const par = () => ({ a: num(k + '-a'), h: $(k + '-h') ? num(k + '-h') : 0, n: +$(k + '-n').value, c: [num(k + '-x0'), num(k + '-y0'), num(k + '-z0')] });
+            function note(p, a, h, c) {
+                const el = $(k + '-note'); let t = '';
+                if (p && p.sing) {
+                    const inside = k === 'stokes' ? Math.hypot(c[0], c[1]) < a : (p.sing === 'point' ? insideVol(S.shape, a, h, c) : lineFlux(S.shape, a, h, c) > 0);
+                    const what = p.sing === 'point' ? 'the point source at the origin' : 'the singular z-axis';
+                    t = inside ? `${what[0].toUpperCase() + what.slice(1)} lies inside the region. Its ${k === 'stokes' ? 'curl' : 'divergence'} is a delta function that the sampled ${k === 'stokes' ? 'surface' : 'volume'} integral cannot see, so the left side stays ≈ 0 while the ${k === 'stokes' ? 'circulation' : 'flux'} does not. The theorem requires F to be smooth everywhere inside.`
+                               : `${what[0].toUpperCase() + what.slice(1)} is outside the region: F is smooth inside and both sides agree (≈ 0). Move the center to bring it inside.`;
+                }
+                el.textContent = t; el.classList.toggle('hidden', !t);
+            }
+            function update() {
+                const { a, h, n, c } = par();
+                setText(k + '-val-a', a.toFixed(2)); setText(k + '-val-n', n); if ($(k + '-h')) setText(k + '-val-h', h.toFixed(2));
+                ['x0', 'y0', 'z0'].forEach(q => setText(`${k}-val-${q}`, num(`${k}-${q}`).toFixed(2)));
+                if ($('divthm-hrow') && k === 'divthm') $('divthm-hrow').classList.toggle('hidden', S.shape !== 'cyl');
+                S.G = shiftF(S.F, c);
+                const [L, R] = cfg.calc(S.G, S.shape, a, h, n);
+                setText(k + '-lhs', fmt4(L)); setText(k + '-rhs', fmt4(R)); setText(k + '-diff', fmt4(L - R));
+                const p = PRE[k][S.pre]; setText(k + '-exact', p ? `${fmt4(p.ex(a, h, S.shape, c))}  (${p.exl})` : 'custom field');
+                if (cfg.faces) $(k + '-faces').innerHTML = cfg.faces(S.G, S.shape, a, h, n).map(([nm, v]) => `<div class="flex justify-between gap-2"><span class="font-sans text-slate-600">${nm}</span><span class="${v >= 0 ? 'text-rose-700' : 'text-sky-800'} font-bold">${fmt4(v)}</span></div>`).join('');
+                note(p, a, h, c);
+                S.cache = null; draw(); drawConv();
+            }
+            function draw() {
+                const { a, h, n, c } = par(); view.range = 1.35 * Math.max(a, h / 2) + 0.9 + 0.6 * Math.max(...c.map(Math.abs));
+                const v = view.begin(); if (!v || !S.G) return;
+                v.grid(Math.ceil(a + 1), 0.5, 0); v.axes(a + 1.3);
+                if (!S.cache) { const pts = cfg.patches(S.shape, a, h, Math.min(n, 14)), vals = pts.map(q => cfg.dens(S.G, q)); S.cache = { pts, vals, ref: Math.max(...vals.map(Math.abs).filter(isFinite), 1e-9) }; }
+                const { pts, vals, ref } = S.cache, T = p => V3.add(p, c);
+                pts.map((q, i) => [q, vals[i], v.P(T(q.p))[2]]).sort((x, y) => x[2] - y[2]).forEach(([q, val]) => v.poly(q.q.map(T), 'rgba(71,85,105,0.35)', 0.6, null, 1, true, S.heat ? heat(val / ref) : 'rgba(148,163,184,0.18)'));
+                if (cfg.boundary) cfg.boundary(v, a, c, S);
+                if (S.norm) pts.filter((q, i) => i % Math.max(1, Math.floor(pts.length / 40)) === 0).forEach(q => v.arrow(T(q.p), V3.mul(V3.unit(q.J), 0.35 * a), COL.emerald, 1.4, 6, 0.85));
+                if (S.field) {
+                    const g = [-1, -0.33, 0.33, 1].map(t => t * a * 1.15), P = [], Vs = [];
+                    for (const x of g) for (const y of g) for (const z of g) { const p = [x, y, z + (cfg.cz || 0)], F = evF(S.G, p); if (V3.len(F) > 1e-9 && isFinite(V3.len(F))) { P.push(T(p)); Vs.push(F); } }
+                    const m = [...Vs.map(V3.len)].sort((x, y) => x - y)[Math.floor(Vs.length * 0.85)] || 1;
+                    P.forEach((p, i) => { const F = Vs[i], L = 0.45 * a * Math.min(1, Math.sqrt(V3.len(F) / m)); v.arrow(V3.sub(p, V3.mul(F, L / V3.len(F) / 2)), V3.mul(F, L / V3.len(F)), COL.slate, 1.3, 6, 0.6); });
+                }
+                label(v.ctx, cfg.legend, 12, 22, COL.text, '600 13px Inter, sans-serif');
+                label(v.ctx, 'drag: rotate · wheel: zoom · double-click: reset', 10, v.h - 10, COL.muted, '12px Inter, sans-serif');
+            }
+            function drawConv() {
+                const cv = setupCanvas(k + '-conv'); if (!cv || !S.G) return; const { ctx, w, h: H } = cv, { a, h, n, c } = par();
+                const key = [S.shape, a, h, c.join(','), JSON.stringify(S.F.map(f => f.src))].join('|');
+                if (S.convKey !== key || !S.conv) { S.convKey = key; S.conv = [2, 3, 4, 6, 8, 12, 16, 24, 32, 40].map(N => [N, ...cfg.calc(S.G, S.shape, a, h, N)]);
+                    // Richardson extrapolation of the O(1/N²) midpoint rule from N = 32 and 40
+                    const r1 = S.conv[S.conv.length - 2], r2 = S.conv[S.conv.length - 1], X = (u, v2) => (1600 * v2 - 1024 * u) / 576;
+                    S.extra = [X(r1[1], r2[1]), X(r1[2], r2[2])]; }
+                setText(k + '-extra', (PRE[k][S.pre] && PRE[k][S.pre].sing ? '— | ' : `${fmt4(S.extra[0])} | `) + fmt4(S.extra[1]));
+                const p = PRE[k][S.pre], ex = p ? p.ex(a, h, S.shape, c) : NaN;
+                const ys = S.conv.flatMap(r => [r[1], r[2]]).concat(isFinite(ex) ? [ex] : []).filter(isFinite);
+                let lo = Math.min(...ys), hi = Math.max(...ys); if (hi - lo < 1e-6) { lo -= 1; hi += 1; } const pd = (hi - lo) * 0.12; lo -= pd; hi += pd;
+                const F = plotFrame(ctx, w, H, 0, 42, lo, hi, { left: 64, bottom: 36, xlabel: 'mesh resolution N', ylabel: 'integral value' });
+                [2, 10, 20, 30, 40].forEach(t => label(ctx, String(t), F.X(t), H - F.B + 15, COL.muted, '11px Inter, sans-serif', 'center'));
+                [lo + pd, hi - pd].forEach(y => label(ctx, fmt4(y), F.L - 6, F.Y(y) + 4, COL.muted, '11px Inter, sans-serif', 'right'));
+                if (isFinite(ex)) { line(ctx, F.L, F.Y(ex), w - F.R, F.Y(ex), COL.emerald, 1.4, [6, 4]); label(ctx, 'exact', w - F.R - 4, F.Y(ex) - 6, COL.emerald, '600 12px Inter, sans-serif', 'right'); }
+                [[1, COL.rose, 'left side'], [2, COL.sky, 'right side']].forEach(([i, cl, nm], j) => {
+                    ctx.save(); ctx.strokeStyle = cl; ctx.lineWidth = 2; ctx.beginPath(); S.conv.forEach((r, q) => { const X = F.X(r[0]), Y = F.Y(r[i]); q ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }); ctx.stroke(); ctx.restore();
+                    S.conv.forEach(r => dot(ctx, F.X(r[0]), F.Y(r[i]), cl, 3.5)); label(ctx, '● ' + nm, F.L + 12 + j * 100, F.T + 4, cl, '600 12px Inter, sans-serif');
+                });
+                line(ctx, F.X(n), F.T, F.X(n), H - F.B, COL.amber, 1.2, [3, 3]);
+            }
+            chipGroup(k + '-shape', s => { S.shape = s; S.conv = null; update(); });
+            [['field', 'on'], ['norm', 'on-emerald'], ['heat', 'on-rose'], ['anim', 'on-amber']].forEach(([key, cl]) => { const el = $(`${k}-tg-${key}`); if (el) el.addEventListener('click', e => { chipToggle(S, key, e.currentTarget, cl); if (key === 'anim') { S.t = 0; setText('stokes-run', S.anim ? '' : '—'); } draw(); }); });
+            $(k + '-apply').addEventListener('click', apply);
+            document.querySelectorAll(`.${k}-in`).forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); }));
+            onInputs([k + '-a', k + '-n', k + '-h', k + '-x0', k + '-y0', k + '-z0'].filter(id => $(id)), update);
+            if ('ResizeObserver' in window) new ResizeObserver(() => requestAnimationFrame(() => { draw(); drawConv(); })).observe($(k + '-cv').parentElement);
+            if (cfg.tick) animate(k + '-cv', dt => { if (S.anim && S.G) { cfg.tick(S, dt); draw(); } });
+            PRE[k][0].f.forEach((s, i) => $(`${k}-f${i}`).value = s); apply();
+            return S;
+        }
+
+        // running circulation along C (Stokes animation)
+        function runCirc(G, a, t) { let s = 0; const M = Math.max(8, Math.ceil(120 * t / TAU)), dt = t / M; for (let q = 0; q < M; q++) { const u = (q + 0.5) * dt; s += V3.dot(evF(G, [a * Math.cos(u), a * Math.sin(u), 0]), [-a * Math.sin(u), a * Math.cos(u), 0]) * dt; } return s; }
+        section('stokes', {
+            shape0: 'disk', cz: 0.6, op: 'curl', opTex: '\\nabla\\times\\mathbf{F}', legend: 'surface colored by (∇×F)·n̂ · boundary C counter-clockwise',
+            calc: (F, sh, a, h, n) => [stokesLHS(F, sh, a, n), stokesRHS(F, a, n)],
+            patches: (sh, a, h, n) => { const P = [], M = 2 * n; for (let i = 0; i < n; i++) for (let j = 0; j < M; j++) { const s0 = i / n, s1 = (i + 1) / n, v0 = j * TAU / M, v1 = (j + 1) * TAU / M, [p, J] = sSurf(sh, a, (i + 0.5) / n, (j + 0.5) * TAU / M);
+                P.push({ p, J, q: [sSurf(sh, a, s0, v0)[0], sSurf(sh, a, s1, v0)[0], sSurf(sh, a, s1, v1)[0], sSurf(sh, a, s0, v1)[0]] }); } return P; },
+            dens: (F, q) => V3.dot(OPS.curl(F, 'cart', q.p), V3.unit(q.J)),
+            tick: (S, dt) => { S.t += dt * 1.2; if (S.t > TAU) S.t -= TAU; const a = num('stokes-a'); setText('stokes-run', `${fmt4(runCirc(S.G, a, S.t))}  (${(S.t * 180 / Math.PI).toFixed(0)}°)`); },
+            boundary: (v, a, c, S) => {
+                v.circle(c, a, [1, 0, 0], [0, 1, 0], COL.violet, 3.2);
+                for (let q = 0; q < 6; q++) { const t = q * TAU / 6, p = V3.add(c, [a * Math.cos(t), a * Math.sin(t), 0]); v.arrow(p, [-0.35 * Math.sin(t), 0.35 * Math.cos(t), 0], COL.violet, 3, 11); }
+                v.text(V3.add(c, [a * 1.12, 0, 0]), 'C', COL.violet, 'bold 15px Inter, sans-serif', 0, 16);
+                if (S.anim) {   // walked arc colored by the sign of F·dl, and the walker with its F vector
+                    const pts = []; for (let q = 0; q <= 60; q++) pts.push(V3.add(c, [a * Math.cos(S.t * q / 60), a * Math.sin(S.t * q / 60), 0]));
+                    v.poly(pts, COL.amber, 5, null, 0.8);
+                    const u = S.t, p = [a * Math.cos(u), a * Math.sin(u), 0], F = evF(S.G, p), m = V3.len(F), dl = [-Math.sin(u), Math.cos(u), 0];
+                    if (m > 1e-9) v.arrow(V3.add(c, p), V3.mul(F, 0.7 * a / Math.max(m, 1e-9) * Math.min(1, m)), V3.dot(F, dl) >= 0 ? COL.rose : COL.sky, 2.8, 10);
+                    v.dot(V3.add(c, p), COL.amber, 7);
+                }
+            }
+        });
+        section('divthm', {
+            shape0: 'sphere', op: 'div', opTex: '\\nabla\\cdot\\mathbf{F}', legend: 'closed surface colored by outward F·n̂ (red: out, blue: in)',
+            calc: (F, sh, a, h, n) => [divLHS(F, sh, a, h, n), divRHS(F, sh, a, h, n)],
+            patches: (sh, a, h, n) => closedPatches(sh, a, h, Math.max(3, n)),
+            dens: (F, q) => V3.dot(evF(F, q.p), V3.unit(q.J)),
+            faces: (F, sh, a, h, n) => {
+                const P = closedPatches(sh, a, h, n), acc = new Map();
+                P.forEach(q => { const nm = sh === 'sphere' ? 'Sphere R = a' : sh === 'cyl' ? (Math.abs(q.J[2]) > 1e-12 ? (q.J[2] > 0 ? 'Top z = +h/2' : 'Bottom z = −h/2') : 'Side r = a') : ['x', 'y', 'z'].map((ax, i) => Math.abs(q.J[i]) > 1e-12 ? `Face ${q.J[i] > 0 ? '+' : '−'}${ax}` : null).find(Boolean);
+                    acc.set(nm, (acc.get(nm) || 0) + V3.dot(evF(F, q.p), q.J)); });
+                return [...acc.entries()];
+            }
+        });
+
+        renderQuiz([
+            { q: "Stokes's theorem requires the boundary $C$ and the surface normal to be related by", opts: ['Nothing; any orientation works', 'The right-hand rule', 'The normal must point toward the origin', 'The normal must be parallel to $\\mathbf{F}$'], ans: 1, why: 'With the fingers of the right hand along $C$, the thumb gives the direction of $d\\mathbf{s}$. Reversing one of them flips the sign of one side.' },
+            { q: 'For $\\mathbf{F} = -y\\hat{\\mathbf{x}} + x\\hat{\\mathbf{y}}$ and a circle of radius $a$ in the $xy$-plane, $\\oint_C\\mathbf{F}\\cdot d\\mathbf{l}$ equals', opts: ['$0$', '$\\pi a^2$', '$2\\pi a^2$', '$2\\pi a$'], ans: 2, why: '$\\nabla\\times\\mathbf{F} = 2\\hat{\\mathbf{z}}$, so the flux through the disk is $2\\cdot\\pi a^2$. Directly: $|\\mathbf{F}| = a$ along a circumference $2\\pi a$.' },
+            { q: 'Why do the disk, hemisphere and paraboloid give the same curl flux?', opts: ['They have the same area', 'They share the same boundary $C$, and $\\nabla\\cdot(\\nabla\\times\\mathbf{F}) = 0$', 'The field is uniform', 'Numerical coincidence'], ans: 1, why: 'Both integrals equal $\\oint_C\\mathbf{F}\\cdot d\\mathbf{l}$. Equivalently, the closed surface formed by two of them encloses zero net curl flux because $\\nabla\\cdot(\\nabla\\times\\mathbf{F}) = 0$.' },
+            { q: 'For $\\mathbf{F} = x\\hat{\\mathbf{x}} + y\\hat{\\mathbf{y}} + z\\hat{\\mathbf{z}}$, the outward flux through a sphere of radius $a$ is', opts: ['$4\\pi a^2$', '$4\\pi a^3$', '$\\tfrac43\\pi a^3$', '$0$'], ans: 1, why: '$\\nabla\\cdot\\mathbf{F} = 3$, so the flux is $3\\cdot\\tfrac43\\pi a^3 = 4\\pi a^3$. Directly: $\\mathbf{F}\\cdot\\hat{\\mathbf{R}} = a$ on a surface of area $4\\pi a^2$.' },
+            { q: 'For the point-charge field $\\hat{\\mathbf{R}}/R^2$, the numerical volume integral of $\\nabla\\cdot\\mathbf{F}$ is about 0 but the surface flux is $4\\pi$. Why?', opts: ['The divergence theorem is wrong', 'The field is singular at the origin; its divergence is $4\\pi\\delta(\\mathbf{R})$, which a sampled integral misses', 'Rounding error', 'The surface is not closed'], ans: 1, why: 'The theorem needs $\\mathbf{F}$ to be continuously differentiable inside $V$. For $\\hat{\\mathbf{R}}/R^2$ all the source sits at the origin, which is exactly the content of Gauss\'s law for a point charge.' }
+        ]);
+        startLoop();
+
+    </script>
+</body>
+</html>

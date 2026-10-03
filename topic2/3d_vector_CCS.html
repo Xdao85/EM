@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Transformations - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/em.css">
+    <script src="../assets/vendor/katex/katex.min.js"></script>
+    <script src="../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="repeat" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Vector Transformations</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Idea</button>
+                <button onclick="scrollToSection('sim')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="box" class="w-3.5 h-3.5"></i><span>Transformer</span></button>
+                <button onclick="scrollToSection('formulas')" class="px-3 py-1.5 rounded-lg text-indigo-700 hover:bg-indigo-500/10 transition">Matrices</button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Vector Analysis · Transformations Between Coordinate Systems</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">One Vector, Three Sets of Components</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">A vector is a geometric object; its components depend on the base vectors used to describe it. Because $\hat{\mathbf{r}}$, $\hat{\boldsymbol{\phi}}$, $\hat{\mathbf{R}}$, $\hat{\boldsymbol{\theta}}$ change direction from point to point, a vector's cylindrical or spherical components depend on <em>where</em> the vector is located, even when the vector itself is the same. Each component is simply a dot product with the base vector at that point.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">1. Projection</span>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$A_r = \mathbf{A}\cdot\hat{\mathbf{r}},\quad A_\phi = \mathbf{A}\cdot\hat{\boldsymbol{\phi}}$$</div>
+                    <p class="text-sm text-slate-700">Every transformation formula is a dot product with a base vector evaluated at the point of interest.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">2. Invariance</span>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$|\mathbf{A}| = \sqrt{A_x^2 + A_y^2 + A_z^2} = \sqrt{A_R^2 + A_\theta^2 + A_\phi^2}$$</div>
+                    <p class="text-sm text-slate-700">The transformation is a rotation (orthogonal matrix), so the magnitude does not change.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-500/10 px-2.5 py-1 rounded-md">3. Position Vector</span>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\overrightarrow{OP} = \hat{\mathbf{r}}\,r + \hat{\mathbf{z}}\,z = \hat{\mathbf{R}}\,R$$</div>
+                    <p class="text-sm text-slate-700">For the position vector evaluated at its own head, $A_\phi = 0$ and $A_\theta = 0$. For any other point they generally are not.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="sim" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Transform a Vector Attached at a Point $P$</h2>
+                <p class="text-sm text-slate-600 mt-1">Enter $\mathbf{A}$ in any system at a point $P$. The page converts it to the other two systems <em>at the same point</em> and draws the decomposition along the base vectors you choose. Switch on "position vector" to reproduce the special case $\mathbf{A} = \overrightarrow{OP}$.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-sm text-slate-600">Decompose along:</span>
+                        <div id="dec-group" class="flex flex-wrap gap-1.5"><button data-v="cart" class="chip">x̂ ŷ ẑ</button><button data-v="cyl" class="chip on">r̂ φ̂ ẑ</button><button data-v="sph" class="chip">R̂ θ̂ φ̂</button></div>
+                        <span class="mx-1 text-slate-600">|</span>
+                        <div id="view-group" class="flex flex-wrap gap-1.5"><button data-v="iso" class="chip">3D</button><button data-v="top" class="chip">Top</button><button data-v="front" class="chip">Front</button></div>
+                        <button id="tg-guides" class="chip on">Guides</button>
+                    </div>
+                    <div class="relative h-[480px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-3d" class="w-full h-full"></canvas></div>
+                </div>
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="glass-card rounded-2xl p-4 space-y-2 text-sm">
+                        <div class="flex flex-wrap items-center gap-1.5"><span class="font-semibold text-slate-900 mr-1">Input system</span><div id="in-group" class="flex flex-wrap gap-1.5"><button data-v="cart" class="chip on">Cartesian</button><button data-v="cyl" class="chip">Cylindrical</button><button data-v="sph" class="chip">Spherical</button></div></div>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 pt-1">
+                            <p class="font-semibold text-rose-700">Components of $\mathbf{A}$</p><p class="font-semibold text-amber-800">Point $P$</p>
+                            <div><span id="lab-c0" class="text-slate-700"></span> <span id="val-c0" class="font-mono text-rose-700"></span><input type="range" id="c0" min="-5" max="5" step="0.1" class="w-full accent-rose-600"></div>
+                            <div><span id="lab-q0" class="text-slate-700"></span> <span id="val-q0" class="font-mono text-amber-800"></span><input type="range" id="q0" class="w-full accent-amber-600"></div>
+                            <div><span id="lab-c1" class="text-slate-700"></span> <span id="val-c1" class="font-mono text-rose-700"></span><input type="range" id="c1" min="-5" max="5" step="0.1" class="w-full accent-rose-600"></div>
+                            <div><span id="lab-q1" class="text-slate-700"></span> <span id="val-q1" class="font-mono text-amber-800"></span><input type="range" id="q1" class="w-full accent-amber-600"></div>
+                            <div><span id="lab-c2" class="text-slate-700"></span> <span id="val-c2" class="font-mono text-rose-700"></span><input type="range" id="c2" min="-5" max="5" step="0.1" class="w-full accent-rose-600"></div>
+                            <div><span id="lab-q2" class="text-slate-700"></span> <span id="val-q2" class="font-mono text-amber-800"></span><input type="range" id="q2" class="w-full accent-amber-600"></div>
+                        </div>
+                        <button id="tg-posvec" class="chip">$\mathbf{A}$ = position vector of $P$</button>
+                    </div>
+                    <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm">
+                        <div class="flex justify-between gap-2"><span class="font-sans text-slate-600">$P$</span><span id="ro-p" class="text-amber-800 font-bold text-right"></span></div>
+                        <div class="flex justify-between gap-2 border-t border-slate-200 pt-2"><span class="font-sans text-sky-800 font-semibold">Cartesian</span><span id="ro-cart" class="text-slate-900 font-bold text-right"></span></div>
+                        <div class="flex justify-between gap-2"><span class="font-sans text-emerald-800 font-semibold">Cylindrical</span><span id="ro-cyl" class="text-slate-900 font-bold text-right"></span></div>
+                        <div class="flex justify-between gap-2"><span class="font-sans text-rose-700 font-semibold">Spherical</span><span id="ro-sph" class="text-slate-900 font-bold text-right"></span></div>
+                        <div class="flex justify-between gap-2 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$|\mathbf{A}|$ from each set</span><span id="ro-mag" class="text-indigo-700 font-bold text-right"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-4 text-sm space-y-2">
+                    <p class="font-bold text-emerald-800 uppercase tracking-wider">Cartesian → cylindrical at $P$</p>
+                    <div id="mat-cyl" class="font-mono overflow-x-auto"></div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-sm space-y-2">
+                    <p class="font-bold text-rose-700 uppercase tracking-wider">Cartesian → spherical at $P$</p>
+                    <div id="mat-sph" class="font-mono overflow-x-auto"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="formulas" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Transformation Matrices</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-5 text-sm text-slate-800 space-y-2">
+                    <p class="font-bold text-emerald-800 uppercase tracking-wider">Cartesian ↔ Cylindrical</p>
+                    $$\begin{bmatrix}A_r\\ A_\phi\\ A_z\end{bmatrix} = \begin{bmatrix}\cos\phi & \sin\phi & 0\\ -\sin\phi & \cos\phi & 0\\ 0 & 0 & 1\end{bmatrix}\begin{bmatrix}A_x\\ A_y\\ A_z\end{bmatrix}$$
+                    $$A_x = A_r\cos\phi - A_\phi\sin\phi,\qquad A_y = A_r\sin\phi + A_\phi\cos\phi$$
+                </div>
+                <div class="glass-card rounded-2xl p-5 text-sm text-slate-800 space-y-2">
+                    <p class="font-bold text-rose-700 uppercase tracking-wider">Cartesian ↔ Spherical</p>
+                    $$\begin{bmatrix}A_R\\ A_\theta\\ A_\phi\end{bmatrix} = \begin{bmatrix}\sin\theta\cos\phi & \sin\theta\sin\phi & \cos\theta\\ \cos\theta\cos\phi & \cos\theta\sin\phi & -\sin\theta\\ -\sin\phi & \cos\phi & 0\end{bmatrix}\begin{bmatrix}A_x\\ A_y\\ A_z\end{bmatrix}$$
+                    <p class="text-sm text-slate-600">The inverse is the transpose, because the rows are orthonormal base vectors.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse border border-slate-300 text-sm text-left">
+                    <thead>
+                        <tr class="bg-slate-100/80 text-slate-800 border-b border-slate-300">
+                            <th class="p-3 border border-slate-300 font-bold text-center">Transformation</th>
+                            <th class="p-3 border border-slate-300 font-bold text-center">Coordinate Variables</th>
+                            <th class="p-3 border border-slate-300 font-bold text-center">Unit Vectors</th>
+                            <th class="p-3 border border-slate-300 font-bold text-center">Vector Components</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-slate-800">
+                        <!-- Cartesian to Cylindrical -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="p-3 border border-slate-300 font-medium text-center bg-slate-50/30">Cartesian to<br>cylindrical</td>
+                            <td class="p-3 border border-slate-300">
+                                $r = \sqrt{x^2+y^2}$<br>
+                                $\phi = \tan^{-1}(y/x)$<br>
+                                $z = z$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $\hat{\mathbf{r}} = \hat{\mathbf{x}}\cos\phi + \hat{\mathbf{y}}\sin\phi$<br>
+                                $\hat{\boldsymbol{\phi}} = -\hat{\mathbf{x}}\sin\phi + \hat{\mathbf{y}}\cos\phi$<br>
+                                $\hat{\mathbf{z}} = \hat{\mathbf{z}}$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $A_r = A_x\cos\phi + A_y\sin\phi$<br>
+                                $A_\phi = -A_x\sin\phi + A_y\cos\phi$<br>
+                                $A_z = A_z$
+                            </td>
+                        </tr>
+                        <!-- Cylindrical to Cartesian -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="p-3 border border-slate-300 font-medium text-center bg-slate-50/30">Cylindrical to<br>Cartesian</td>
+                            <td class="p-3 border border-slate-300">
+                                $x = r\cos\phi$<br>
+                                $y = r\sin\phi$<br>
+                                $z = z$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $\hat{\mathbf{x}} = \hat{\mathbf{r}}\cos\phi - \hat{\boldsymbol{\phi}}\sin\phi$<br>
+                                $\hat{\mathbf{y}} = \hat{\mathbf{r}}\sin\phi + \hat{\boldsymbol{\phi}}\cos\phi$<br>
+                                $\hat{\mathbf{z}} = \hat{\mathbf{z}}$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $A_x = A_r\cos\phi - A_\phi\sin\phi$<br>
+                                $A_y = A_r\sin\phi + A_\phi\cos\phi$<br>
+                                $A_z = A_z$
+                            </td>
+                        </tr>
+                        <!-- Cartesian to Spherical -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="p-3 border border-slate-300 font-medium text-center bg-slate-50/30">Cartesian to<br>spherical</td>
+                            <td class="p-3 border border-slate-300">
+                                $R = \sqrt{x^2+y^2+z^2}$<br>
+                                $\theta = \tan^{-1}\left(\sqrt{x^2+y^2}/z\right)$<br>
+                                $\phi = \tan^{-1}(y/x)$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $\hat{\mathbf{R}} = \hat{\mathbf{x}}\sin\theta\cos\phi + \hat{\mathbf{y}}\sin\theta\sin\phi + \hat{\mathbf{z}}\cos\theta$<br>
+                                $\hat{\boldsymbol{\theta}} = \hat{\mathbf{x}}\cos\theta\cos\phi + \hat{\mathbf{y}}\cos\theta\sin\phi - \hat{\mathbf{z}}\sin\theta$<br>
+                                $\hat{\boldsymbol{\phi}} = -\hat{\mathbf{x}}\sin\phi + \hat{\mathbf{y}}\cos\phi$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $A_R = A_x\sin\theta\cos\phi + A_y\sin\theta\sin\phi + A_z\cos\theta$<br>
+                                $A_\theta = A_x\cos\theta\cos\phi + A_y\cos\theta\sin\phi - A_z\sin\theta$<br>
+                                $A_\phi = -A_x\sin\phi + A_y\cos\phi$
+                            </td>
+                        </tr>
+                        <!-- Spherical to Cartesian -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="p-3 border border-slate-300 font-medium text-center bg-slate-50/30">Spherical to<br>Cartesian</td>
+                            <td class="p-3 border border-slate-300">
+                                $x = R\sin\theta\cos\phi$<br>
+                                $y = R\sin\theta\sin\phi$<br>
+                                $z = R\cos\theta$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $\hat{\mathbf{x}} = \hat{\mathbf{R}}\sin\theta\cos\phi + \hat{\boldsymbol{\theta}}\cos\theta\cos\phi - \hat{\boldsymbol{\phi}}\sin\phi$<br>
+                                $\hat{\mathbf{y}} = \hat{\mathbf{R}}\sin\theta\sin\phi + \hat{\boldsymbol{\theta}}\cos\theta\sin\phi + \hat{\boldsymbol{\phi}}\cos\phi$<br>
+                                $\hat{\mathbf{z}} = \hat{\mathbf{R}}\cos\theta - \hat{\boldsymbol{\theta}}\sin\theta$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $A_x = A_R\sin\theta\cos\phi + A_\theta\cos\theta\cos\phi - A_\phi\sin\phi$<br>
+                                $A_y = A_R\sin\theta\sin\phi + A_\theta\cos\theta\sin\phi + A_\phi\cos\phi$<br>
+                                $A_z = A_R\cos\theta - A_\theta\sin\theta$
+                            </td>
+                        </tr>
+                        <!-- Cylindrical to Spherical -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="p-3 border border-slate-300 font-medium text-center bg-slate-50/30">Cylindrical to<br>spherical</td>
+                            <td class="p-3 border border-slate-300">
+                                $R = \sqrt{r^2+z^2}$<br>
+                                $\theta = \tan^{-1}(r/z)$<br>
+                                $\phi = \phi$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $\hat{\mathbf{R}} = \hat{\mathbf{r}}\sin\theta + \hat{\mathbf{z}}\cos\theta$<br>
+                                $\hat{\boldsymbol{\theta}} = \hat{\mathbf{r}}\cos\theta - \hat{\mathbf{z}}\sin\theta$<br>
+                                $\hat{\boldsymbol{\phi}} = \hat{\boldsymbol{\phi}}$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $A_R = A_r\sin\theta + A_z\cos\theta$<br>
+                                $A_\theta = A_r\cos\theta - A_z\sin\theta$<br>
+                                $A_\phi = A_\phi$
+                            </td>
+                        </tr>
+                        <!-- Spherical to Cylindrical -->
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="p-3 border border-slate-300 font-medium text-center bg-slate-50/30">Spherical to<br>cylindrical</td>
+                            <td class="p-3 border border-slate-300">
+                                $r = R\sin\theta$<br>
+                                $\phi = \phi$<br>
+                                $z = R\cos\theta$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $\hat{\mathbf{r}} = \hat{\mathbf{R}}\sin\theta + \hat{\boldsymbol{\theta}}\cos\theta$<br>
+                                $\hat{\boldsymbol{\phi}} = \hat{\boldsymbol{\phi}}$<br>
+                                $\hat{\mathbf{z}} = \hat{\mathbf{R}}\cos\theta - \hat{\boldsymbol{\theta}}\sin\theta$
+                            </td>
+                            <td class="p-3 border border-slate-300">
+                                $A_r = A_R\sin\theta + A_\theta\cos\theta$<br>
+                                $A_\phi = A_\phi$<br>
+                                $A_z = A_R\cos\theta - A_\theta\sin\theta$
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600"></footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}.${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Score: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Not quite. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // mini3d — dependency-free 3-D view on a 2-D canvas (z is up)
+        // drag to rotate, wheel to zoom, double-click to reset
+        // =========================================================
+        const V3 = {
+            add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+            sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+            mul: (a, s) => [a[0] * s, a[1] * s, a[2] * s],
+            dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+            cross: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+            len: a => Math.hypot(a[0], a[1], a[2]),
+            unit: a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+        };
+        class View3D {
+            constructor(id, opts = {}) {
+                this.id = id; this.yaw = opts.yaw ?? 0.5; this.pitch = opts.pitch ?? 0.4; this.zoom = opts.zoom ?? 1; this.range = opts.range ?? 6; this.center = opts.center || [0, 0, 0];
+                this.def = { yaw: this.yaw, pitch: this.pitch, zoom: this.zoom }; this.onChange = opts.onChange || (() => {});
+                const cv = $(id); let last = null;
+                cv.style.touchAction = 'none';
+                cv.addEventListener('pointerdown', e => { if (this.pick && this.pick(e)) return; last = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+                cv.addEventListener('pointermove', e => { if (!last) return; this.yaw -= (e.clientX - last[0]) * 0.01; this.pitch = clamp(this.pitch + (e.clientY - last[1]) * 0.01, -1.55, 1.55); last = [e.clientX, e.clientY]; this.onChange(); });
+                const up = () => { last = null; cv.style.cursor = 'grab'; };
+                cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+                cv.addEventListener('wheel', e => { e.preventDefault(); this.zoom = clamp(this.zoom * (e.deltaY > 0 ? 0.9 : 1.1), 0.4, 4); this.onChange(); }, { passive: false });
+                cv.addEventListener('dblclick', () => this.reset());
+                cv.style.cursor = 'grab';
+            }
+            reset() { Object.assign(this, this.def); this.onChange(); }
+            setView(v) {
+                const V = { iso: [0.5, 0.4], top: [-Math.PI / 2, 1.5499], front: [-Math.PI / 2, 0], side: [0, 0], low: [0.5, 0.12] }[v];
+                if (V) { this.yaw = V[0]; this.pitch = V[1]; this.onChange(); }
+            }
+            begin() {
+                const c = setupCanvas(this.id); if (!c) return null;
+                this.ctx = c.ctx; this.w = c.w; this.h = c.h; this.s = Math.min(c.w, c.h) / (2 * this.range) * this.zoom;
+                this.cy_ = Math.cos(this.yaw); this.sy_ = Math.sin(this.yaw); this.cp = Math.cos(this.pitch); this.sp = Math.sin(this.pitch);
+                return this;
+            }
+            cam([x0, y0, z0]) {
+                const x = x0 - this.center[0], y = y0 - this.center[1], z = z0 - this.center[2];
+                const X = -x * this.sy_ + y * this.cy_, Y0 = x * this.cy_ + y * this.sy_;
+                return [X, z * this.cp - Y0 * this.sp, z * this.sp + Y0 * this.cp];
+            }
+            P(p) { const [X, Y, D] = this.cam(p); return [this.w / 2 + X * this.s, this.h / 2 - Y * this.s, D]; }
+            line(a, b, color, width = 1.5, dash = null, alpha = 1) { const A = this.P(a), B = this.P(b); line(this.ctx, A[0], A[1], B[0], B[1], color, width, dash, alpha); }
+            poly(pts, color, width = 1.5, dash = null, alpha = 1, close = false, fill = null) {
+                const ctx = this.ctx; ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+                ctx.beginPath(); pts.forEach((p, i) => { const [x, y] = this.P(p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); if (close) ctx.closePath();
+                if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (color) ctx.stroke(); ctx.restore();
+            }
+            arrow(from, vec, color, width = 2.5, head = 11, alpha = 1, dash = null) {
+                const A = this.P(from), B = this.P(V3.add(from, vec));
+                arrow(this.ctx, A[0], A[1], B[0] - A[0], B[1] - A[1], color, alpha, width, head, dash);
+            }
+            dot(p, color, r = 5) { const [x, y] = this.P(p); dot(this.ctx, x, y, color, r); }
+            text(p, t, color, font = 'bold 13px Inter, sans-serif', dx = 0, dy = 0) { const [x, y] = this.P(p); label(this.ctx, t, x + dx, y + dy, color, font, 'center'); }
+            axes(L = 5, labels = ['x', 'y', 'z'], color = COL.slate) {
+                const dirs = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+                dirs.forEach((d, i) => { this.line(V3.mul(d, -L * 0.35), [0, 0, 0], color, 1, [3, 3], 0.6); this.arrow([0, 0, 0], V3.mul(d, L), color, 1.6, 9, 0.9); this.text(V3.mul(d, L * 1.08), labels[i], color, 'italic bold 14px Inter, sans-serif'); });
+            }
+            grid(L = 5, step = 1, z = 0, color = COL.grid) {
+                for (let v = -L; v <= L + 1e-9; v += step) { this.line([v, -L, z], [v, L, z], color, 1); this.line([-L, v, z], [L, v, z], color, 1); }
+            }
+            circle(c, r, n1, n2, color, width = 1.2, dash = null, alpha = 1, a0 = 0, a1 = 2 * Math.PI) {
+                const pts = []; for (let k = 0; k <= 64; k++) { const t = a0 + (a1 - a0) * k / 64; pts.push(V3.add(c, V3.add(V3.mul(n1, r * Math.cos(t)), V3.mul(n2, r * Math.sin(t))))); }
+                this.poly(pts, color, width, dash, alpha);
+            }
+        }
+        function viewButtons(id, view) { const g = $(id); if (!g) return; g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => view.setView(b.dataset.v))); }
+
+        // =========================================================
+        // Coordinate systems and basis vectors (Ulaby conventions)
+        // =========================================================
+        const COORD = {
+            cart2cyl: ([x, y, z]) => [Math.hypot(x, y), Math.atan2(y, x), z],
+            cart2sph: ([x, y, z]) => { const R = Math.hypot(x, y, z); return [R, R ? Math.acos(clamp(z / R, -1, 1)) : 0, Math.atan2(y, x)]; },
+            cyl2cart: ([r, p, z]) => [r * Math.cos(p), r * Math.sin(p), z],
+            sph2cart: ([R, t, p]) => [R * Math.sin(t) * Math.cos(p), R * Math.sin(t) * Math.sin(p), R * Math.cos(t)],
+            basisCyl: p => [[Math.cos(p), Math.sin(p), 0], [-Math.sin(p), Math.cos(p), 0], [0, 0, 1]],
+            basisSph: (t, p) => [[Math.sin(t) * Math.cos(p), Math.sin(t) * Math.sin(p), Math.cos(t)], [Math.cos(t) * Math.cos(p), Math.cos(t) * Math.sin(p), -Math.sin(t)], [-Math.sin(p), Math.cos(p), 0]]
+        };
+        const toCartVec = (comp, basis) => V3.add(V3.add(V3.mul(basis[0], comp[0]), V3.mul(basis[1], comp[1])), V3.mul(basis[2], comp[2]));
+        const fromCartVec = (v, basis) => basis.map(b => V3.dot(v, b));
+
+        // =========================================================
+        // Vector transformations between coordinate systems
+        // =========================================================
+        const D2R = Math.PI / 180;
+        const PS = {
+            cart: [['x', -3, 3, 0.05, 1], ['y', -3, 3, 0.05, 1], ['z', -3, 3, 0.05, 1]],
+            cyl: [['r', 0.05, 3.5, 0.05, 1], ['φ (°)', 0, 359, 1, D2R], ['z', -3, 3, 0.05, 1]],
+            sph: [['R', 0.1, 4, 0.05, 1], ['θ (°)', 1, 179, 1, D2R], ['φ (°)', 0, 359, 1, D2R]]
+        };
+        const CL = { cart: ['A_x', 'A_y', 'A_z'], cyl: ['A_r', 'A_φ', 'A_z'], sph: ['A_R', 'A_θ', 'A_φ'] };
+        const HATS = { cart: ['x̂', 'ŷ', 'ẑ'], cyl: ['r̂', 'φ̂', 'ẑ'], sph: ['R̂', 'θ̂', 'φ̂'] };
+        const S = { inSys: 'cart', dec: 'cyl', pos: false, guides: true, Pc: [1.5, -2, 1.2], Ac: [1, 2.5, 1.2] };
+        const toS = (sy, c) => { const u = sy === 'cart' ? c.slice() : sy === 'cyl' ? COORD.cart2cyl(c) : COORD.cart2sph(c); const i = sy === 'cyl' ? 1 : 2; if (sy !== 'cart' && u[i] < 0) u[i] += 2 * Math.PI; return u; };
+        const toC = (sy, u) => sy === 'cart' ? u.slice() : sy === 'cyl' ? COORD.cyl2cart(u) : COORD.sph2cart(u);
+        const basisAt = (sy, c) => { const u = toS(sy, c); return sy === 'cart' ? [[1, 0, 0], [0, 1, 0], [0, 0, 1]] : sy === 'cyl' ? COORD.basisCyl(u[1]) : COORD.basisSph(u[1], u[2]); };
+        const f2 = v => (Math.abs(v) < 5e-3 ? 0 : v).toFixed(2);
+        const comps = (sy, v) => v.map((c, i) => `${i ? (c < 0 && f2(c) !== '0.00' ? ' − ' : ' + ') : (c < 0 && f2(c) !== '0.00' ? '−' : '')}${f2(Math.abs(c))}${HATS[sy][i]}`).join('');
+        const view = new View3D('cv-3d', { range: 3.9, center: [0, 0, 1], onChange: () => draw() });
+        viewButtons('view-group', view);
+
+        function syncSliders() {
+            const sy = S.inSys, u = toS(sy, S.Pc), B = basisAt(sy, S.Pc), a = fromCartVec(S.Ac, B);
+            PS[sy].forEach(([lab, mn, mx, st, f], i) => { const el = $('q' + i); el.min = mn; el.max = mx; el.step = st; el.value = clamp(u[i] / f, mn, mx); setText('lab-q' + i, lab); });             [0, 1, 2].forEach(i => {$('c' + i).value = clamp(a[i], -5, 5); setText('lab-c' + i, CL[sy][i]); });
+        }
+        function readSliders() {
+            const sy = S.inSys;
+            S.Pc = toC(sy, PS[sy].map(([, , , , f], i) => num('q' + i) * f));
+            if (S.pos) { S.Ac = S.Pc.slice(); const a = fromCartVec(S.Ac, basisAt(sy, S.Pc)); [0, 1, 2].forEach(i => $('c' + i).value = clamp(a[i], -5, 5)); }
+            else S.Ac = toCartVec([0, 1, 2].map(i => num('c' + i)), basisAt(sy, S.Pc));
+        }
+        function matHTML(sy) {
+            const B = basisAt(sy, S.Pc), out = fromCartVec(S.Ac, B), lab = CL[sy];
+            const cell = v => `<td class="px-2 py-0.5 text-right">${f2(v)}</td>`;
+            return `<table class="text-sm"><tbody>${B.map((row, i) => `<tr><td class="pr-2 text-slate-600">${lab[i]}</td><td class="px-1 text-slate-600">${i === 1 ? '=' : ''}</td><td class="border-l border-slate-400 pl-1"></td>${row.map(cell).join('')}<td class="border-r border-slate-400 pr-1"></td><td class="px-1 text-slate-600">${i === 1 ? '·' : ''}</td><td class="border-l border-slate-400 pl-1"></td>${cell(S.Ac[i])}<td class="border-r border-slate-400 pr-1"></td><td class="px-1 text-slate-600">${i === 1 ? '=' : ''}</td><td class="px-2 font-bold text-slate-900">${f2(out[i])}</td></tr>`).join('')}</tbody></table>`;
+        }
+        function draw() {
+            readSliders();
+            const sy = S.inSys, P = S.Pc, A = S.Ac;
+            PS[sy].forEach(([, , , , f], i) => setText('val-q' + i, f === 1 ? num('q' + i).toFixed(2) : num('q' + i).toFixed(0) + '°'));
+            [0, 1, 2].forEach(i => setText('val-c' + i, num('c' + i).toFixed(1)));
+            const cy = fromCartVec(A, basisAt('cyl', P)), sp = fromCartVec(A, basisAt('sph', P)), uc = toS('cyl', P), us = toS('sph', P);
+            setText('ro-p', `(${P.map(f2).join(', ')}) = (${f2(uc[0])}, ${(uc[1] / D2R).toFixed(0)}°, ${f2(uc[2])})cyl = (${f2(us[0])}, ${(us[1] / D2R).toFixed(0)}°, ${(us[2] / D2R).toFixed(0)}°)sph`);
+            setText('ro-cart', comps('cart', A)); setText('ro-cyl', comps('cyl', cy)); setText('ro-sph', comps('sph', sp));
+            setText('ro-mag', [A, cy, sp].map(v => V3.len(v).toFixed(3)).join(' = '));
+            $('mat-cyl').innerHTML = matHTML('cyl');$('mat-sph').innerHTML = matHTML('sph');
+
+            const v = view.begin(); if (!v) return;
+            v.grid(4, 1, 0); v.axes(4.6);
+            const tail = S.pos ? [0, 0, 0] : P, m = V3.len(A);
+            if (S.guides) {
+                const Pp = [P[0], P[1], 0], r = Math.hypot(P[0], P[1]);
+                v.line(Pp, P, COL.muted, 1, [3, 3]); v.line([0, 0, 0], Pp, COL.muted, 1, [3, 3]);
+                if (r > 0.05) v.circle([0, 0, P[2]], r, [1, 0, 0], [0, 1, 0], COL.emerald, 1, [4, 4], 0.6);
+                if (S.dec === 'sph') { const R = V3.len(P); v.circle([0, 0, 0], R, V3.unit([P[0], P[1], 1e-9]), [0, 0, 1], COL.rose, 1, [4, 4], 0.6, -Math.PI / 2, Math.PI / 2); v.line([0, 0, 0], P, COL.rose, 1, [3, 3], 0.7); }
+            }
+            // basis vectors of the decomposition system at P
+            const B = basisAt(S.dec, P), cols = [COL.sky, COL.emerald, COL.indigo];
+            B.forEach((b, i) => { v.arrow(P, b, cols[i], 2, 8, 0.55); v.text(V3.add(P, V3.mul(b, 1.2)), HATS[S.dec][i], cols[i], 'bold 13px Inter, sans-serif'); });
+            // head-to-tail decomposition
+            const c = fromCartVec(A, B); let q = tail;
+            c.forEach((ci, i) => { if (Math.abs(ci) < 0.02) return; const d = V3.mul(B[i], ci); v.arrow(q, d, cols[i], 2.4, 10, 0.95, [6, 3]); v.text(V3.add(q, V3.mul(d, 0.5)), `${f2(ci)}`, cols[i], 'bold 12px Inter, sans-serif', 0, -10); q = V3.add(q, d); });
+            if (m > 1e-6) { v.arrow(tail, A, COL.rose, 3.6, 14); v.text(V3.add(V3.add(tail, A), V3.mul(A, 0.35 / m)), 'A', COL.rose, 'bold 16px Inter, sans-serif'); }
+            v.dot(P, COL.amber, 6); v.text(P, 'P', COL.amber, 'bold 15px Inter, sans-serif', -14, 14);
+            label(v.ctx, `components along ${HATS[S.dec].join(' ')} at P`, 12, 22, COL.text, '600 13px Inter, sans-serif');
+            label(v.ctx, 'drag: rotate · wheel: zoom · double-click: reset', 10, v.h - 10, COL.muted, '12px Inter, sans-serif');
+        }
+        function setIn(sy) { S.inSys = sy; syncSliders(); draw(); }
+        chipGroup('in-group', setIn);
+        chipGroup('dec-group', d => { S.dec = d; draw(); });
+        $('tg-guides').addEventListener('click', e => { chipToggle(S, 'guides', e.currentTarget, 'on'); draw(); });
+        $('tg-posvec').addEventListener('click', e => { chipToggle(S, 'pos', e.currentTarget, 'on-rose'); [0, 1, 2].forEach(i =>$('c' + i).disabled = S.pos); if (!S.pos) syncSliders(); draw(); });
+        onInputs(['c0', 'c1', 'c2', 'q0', 'q1', 'q2'], draw);
+        const redraw = () => requestAnimationFrame(draw);
+        if ('ResizeObserver' in window) { const ro = new ResizeObserver(redraw); ['cv-3d'].forEach(id => { const el = $(id); if (el) ro.observe(el.parentElement); }); }
+        window.addEventListener('resize', redraw);
+        setIn('cart');
+
+        renderQuiz([
+            { q: 'The cylindrical component $A_\\phi$ of a Cartesian vector $\\mathbf{A}$ at a point with azimuth $\\phi$ is', opts: ['$A_x\\cos\\phi + A_y\\sin\\phi$', '$-A_x\\sin\\phi + A_y\\cos\\phi$', '$A_x\\sin\\phi - A_y\\cos\\phi$', '$\\sqrt{A_x^2 + A_y^2}$'], ans: 1, why: '$A_\\phi = \\mathbf{A}\\cdot\\hat{\\boldsymbol{\\phi}}$ with $\\hat{\\boldsymbol{\\phi}} = -\\hat{\\mathbf{x}}\\sin\\phi + \\hat{\\mathbf{y}}\\cos\\phi$.' },
+            { q: 'The constant vector $\\mathbf{A} = \\hat{\\mathbf{z}}$ in spherical coordinates is', opts: ['$\\hat{\\mathbf{R}}$', '$\\hat{\\mathbf{R}}\\cos\\theta - \\hat{\\boldsymbol{\\theta}}\\sin\\theta$', '$\\hat{\\mathbf{R}}\\sin\\theta + \\hat{\\boldsymbol{\\theta}}\\cos\\theta$', '$\\hat{\\boldsymbol{\\phi}}$'], ans: 1, why: '$A_R = \\hat{\\mathbf{z}}\\cdot\\hat{\\mathbf{R}} = \\cos\\theta$ and $A_{theta} = \\hat{\\mathbf{z}}\\cdot\\hat{\\boldsymbol{\\theta}} = -\\sin\\theta$. The components change with $\\theta$ even though the vector is uniform.' },
+            { q: 'Why does $\\mathbf{A}$ come out the same in all three systems?', opts: ['Coincidence of the chosen numbers', 'The transformation matrix is orthogonal (a rotation)', 'Because $A_z$ is the same in all systems', 'It does not; only the direction is preserved'], ans: 1, why: 'The rows of the matrix are orthonormal base vectors, so the transformation is a rotation, which preserves lengths and dot products.' },
+            { q: 'The position vector of $P(r, \\phi, z)$ in cylindrical coordinates is', opts: ['$\\hat{\\mathbf{r}}\\,r + \\hat{\\boldsymbol{\\phi}}\\,\\phi + \\hat{\\mathbf{z}}\\,z$', '$\\hat{\\mathbf{r}}\\,r + \\hat{\\mathbf{z}}\\,z$', '$\\hat{\\mathbf{r}}\\,r$', '$\\hat{\\mathbf{x}}\\,r + \\hat{\\mathbf{z}}\\,z$'], ans: 1, why: '$\\phi$ is an angle, not a length, and the direction information is already in $\\hat{\\mathbf{r}}(\\phi)$. Turn on "position vector" to see $A_\\phi = 0$.' },
+            { q: 'A vector has cylindrical components $(A_r, A_\\phi, A_z) = (0, 2, 0)$ at $\\phi = 90°$. Its Cartesian form is', opts: ['$2\\hat{\\mathbf{y}}$', '$-2\\hat{\\mathbf{x}}$', '$2\\hat{\\mathbf{x}}$', '$-2\\hat{\\mathbf{y}}$'], ans: 1, why: 'At $\\phi = 90°$, $\\hat{\\boldsymbol{\\phi}} = -\\hat{\\mathbf{x}}\\sin 90° + \\hat{\\mathbf{y}}\\cos 90° = -\\hat{\\mathbf{x}}$, so $\\mathbf{A} = -2\\hat{\\mathbf{x}}$.' }
+        ]);
+
+    </script>
+</body>
+</html>

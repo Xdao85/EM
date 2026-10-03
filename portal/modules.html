@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en" data-root="../">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modules · Electromagnetics Course Portal</title>
+    <link rel="stylesheet" href="../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/em.css">
+    <script src="../assets/vendor/katex/katex.min.js"></script>
+    <script src="../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../assets/js/em.js"></script>
+<script src="../assets/vendor/lucide/lucide.min.js"></script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .glass-panel { background: rgba(255,255,255,.85); border: 1px solid rgba(15,23,42,.08); backdrop-filter: blur(8px); }
+  .card { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,.03); transition: border-color .2s, transform .2s, box-shadow .2s; }
+  a.card:hover, button.card:hover { border-color: rgba(2,132,199,.45); transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(15,23,42,.25); }
+  a.card:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; }
+  .chip { padding: .35rem .8rem; border-radius: 9999px; font-size: .875rem; font-weight: 600; border: 1px solid #e2e8f0; color: #475569; background: #fff; transition: all .15s; }
+  .chip:hover { background: #f8fafc; }
+  .chip.on { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .seg button { padding: .4rem .9rem; font-size: .875rem; font-weight: 600; color: #475569; border-radius: .5rem; }
+  .seg button.on { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  ::-webkit-scrollbar { width: 8px; height: 6px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fade { animation: fade-in .35s ease-out both; }
+  .ring-track { stroke: #e2e8f0; } .ring-val { stroke: #059669; transition: stroke-dashoffset .6s ease; }
+  .balance { text-wrap: balance; }
+  nav a { white-space: nowrap; }
+  .skip { position: absolute; left: -999px; top: 8px; z-index: 60; background: #0f172a; color: #fff; padding: .5rem .9rem; border-radius: .5rem; font-weight: 600; }
+  .skip:focus { left: 8px; }
+  .stat b { display: block; font-size: 1.5rem; line-height: 1.1; font-weight: 800; color: #0f172a; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: .875rem; color: #475569; }
+  .pg-wrap { position: relative; }
+  .pg-handle { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 9999px; touch-action: none; cursor: grab; outline: none; }
+  .pg-handle:active { cursor: grabbing; }
+  .pg-handle:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #0369a1; }
+  .chip[aria-pressed="true"], .chip.on { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .hl { background: #fef08a; color: inherit; border-radius: 2px; }
+  #q::-webkit-search-cancel-button { display: none; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+<a href="#main" class="skip">Skip to content</a>
+<header id="portal-header" class="border-b border-slate-200 px-4 lg:px-8 py-3"></header>
+<main id="main" class="flex-grow">
+<section class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8">
+  <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">Modules</h1>
+  <p class="text-base text-slate-700 mt-2 max-w-3xl">The roadmap shows the five topics in order; below it, search and filter every module. Press <kbd class="px-1.5 border rounded bg-slate-50">/</kbd> to search.</p>
+</section>
+<!-- Roadmap -->
+<section id="roadmap" class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 pb-4 scroll-mt-20">
+  <h2 class="text-2xl font-bold text-slate-900">Course roadmap</h2>
+  <p class="text-sm text-slate-700 mt-1 mb-6">Each topic relies on the one before it. Follow the order the first time; come back to any module later for review.</p>
+  <ol id="road" class="grid md:grid-cols-5 gap-4"></ol>
+</section>
+
+<!-- Modules -->
+<section id="modules" class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 pb-10 scroll-mt-20">
+  <h2 class="text-2xl font-bold text-slate-900 mb-4">All modules</h2>
+  <div class="glass-panel sticky top-2 md:top-2 z-30 rounded-xl p-3 mb-3 flex flex-wrap items-center gap-3 shadow-sm">
+    <div class="relative flex-1 min-w-[14rem]">
+      <label for="q" class="sr-only">Search modules</label>
+      <i data-lucide="search" class="w-4 h-4 text-slate-600 absolute left-3 top-1/2 -translate-y-1/2"></i>
+      <input id="q" type="search" placeholder="Search by title, topic or idea (e.g. phasor, Gauss, inductance)…" class="w-full pl-9 pr-16 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600" autocomplete="off">
+      <button type="button" id="q-clear" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-700 hover:text-slate-900 px-2 py-0.5 rounded-md hover:bg-slate-100" aria-label="Clear search">Clear</button>
+      <kbd id="q-kbd" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-600 border border-slate-300 rounded px-1.5 bg-slate-50 pointer-events-none">/</kbd>
+    </div>
+    <div id="chips-topic" class="flex flex-wrap gap-2" role="group" aria-label="Filter by topic"></div>
+    <select id="f-status" aria-label="Filter by status" class="text-sm rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700">
+      <option value="all">All modules</option><option value="todo">Not done yet</option><option value="done">Completed</option>
+    </select>
+  </div>
+  <p id="q-count" class="text-sm text-slate-600 mb-6" role="status" aria-live="polite"></p>
+  <div id="grid" class="space-y-10"></div>
+  <p id="empty" class="hidden text-center text-sm text-slate-600 pt-6 pb-10">No module matches your search.</p>
+</section>
+
+
+</main>
+<footer class="border-t border-slate-200 py-5 px-4 text-center text-sm text-slate-600 mt-8">
+  <a href="../welcome.html" data-file="welcome.html" class="nav font-medium text-sky-800 hover:underline">← Back to the overview</a>
+  <span class="mx-2">·</span> Notation follows Ulaby, <i>Fundamentals of Applied Electromagnetics</i>
+</footer>
+<script src="../assets/js/portal.js"></script>
+<script>
+portalHeader('portal/modules.html');
+/* Roadmap */
+function renderRoad(){
+  document.getElementById('road').innerHTML = COURSE.map((t, k) => { const c = COLORS[t.color];
+    const n = t.sections.filter(s => state.done[s.file]).length;
+    const next = t.sections.find(s => !state.done[s.file]) || t.sections[0];
+    return `<li class="card rounded-xl p-4 flex flex-col relative">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-9 h-9 rounded-lg ${c.bg} border ${c.border} ${c.text} font-bold font-mono text-sm flex items-center justify-center">${t.num}</span>
+        <span class="text-sm font-semibold ${c.text}">Topic ${t.id}</span>
+        ${k < COURSE.length-1 ? '<i data-lucide="arrow-right" class="hidden md:block w-4 h-4 text-slate-600 absolute -right-3.5 top-6 bg-white"></i>' : ''}
+      </div>
+      <h3 class="text-base font-bold text-slate-900 leading-snug">${t.title}</h3>
+      <p class="text-sm text-slate-600 mt-0.5">${t.sections.length} modules · ${t.sections.reduce((a, x) => a + x.figs, 0)} figures</p>
+      <ul class="mt-2 mb-3 space-y-1 text-sm text-slate-700 flex-1">${t.goals.map(g => `<li class="flex gap-1.5"><span class="${c.text}">•</span><span>${g}</span></li>`).join('')}</ul>
+      <div class="flex items-center gap-2 text-sm text-slate-600 mb-3"><span class="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden"><span class="block h-full ${c.bar} rounded-full" style="width:${100*n/t.sections.length}%"></span></span><span class="tabular-nums">${n}/${t.sections.length}</span></div>
+      <a href="${href(next.file)}" data-file="${next.file}" class="nav text-sm font-semibold ${c.text} hover:underline inline-flex items-center gap-1">${n === t.sections.length ? 'Review' : (n ? 'Continue' : 'Start')}: ${next.id} <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+    </li>`; }).join('');
+}
+
+/* Modules */
+let fTopic = 'all', fStatus = 'all', fq = '';
+function renderChips(){
+  const box = document.getElementById('chips-topic');
+  box.innerHTML = `<button class="chip on" data-t="all" aria-pressed="true">All</button>` + COURSE.map(t => `<button class="chip" data-t="${t.id}" aria-pressed="false" title="${t.title}">T${t.id}</button>`).join('');
+  box.querySelectorAll('.chip').forEach(b => b.onclick = () => { fTopic = b.dataset.t; box.querySelectorAll('.chip').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); renderGrid(); });
+}
+function badge(file){
+  if (state.done[file]) return '<span class="inline-flex items-center gap-1 text-sm font-semibold text-emerald-800"><svg viewBox="0 0 16 16" class="w-4 h-4"><circle cx="8" cy="8" r="7" fill="#059669"/><path d="M4.8 8.2l2.2 2.2 4.2-4.6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Done</span>';
+  if (state.visited[file]) return '<span class="text-sm font-semibold text-sky-800">Opened</span>';
+  return '';
+}
+function renderGrid(){
+  const q = fq.toLowerCase();
+  let shown = 0;
+  const html = COURSE.filter(t => fTopic === 'all' || t.id === fTopic).map(t => { const c = COLORS[t.color];
+    const secs = t.sections.filter(s => {
+      if (fStatus === 'done' && !state.done[s.file]) return false;
+      if (fStatus === 'todo' && state.done[s.file]) return false;
+      return !q || (s.id + ' ' + s.title + ' ' + stripTeX(s.desc) + ' ' + t.title).toLowerCase().includes(q);
+    });
+    shown += secs.length;
+    if (!secs.length) return '';
+    return `<div class="fade">
+      <div class="flex items-center gap-3 border-b border-slate-200 pb-3 mb-4">
+        <span class="w-10 h-10 rounded-xl ${c.bg} border ${c.border} ${c.text} font-bold font-mono text-sm flex items-center justify-center">${t.num}</span>
+        <div><h3 class="text-xl font-bold text-slate-900">Topic ${t.id}: ${t.title}</h3><p class="text-sm text-slate-600">${t.blurb}</p></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${secs.map(s => `
+        <a href="${href(s.file)}" data-file="${s.file}" class="nav card rounded-xl p-4 flex flex-col gap-2 group ${state.done[s.file] ? 'bg-emerald-50/40' : ''}">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold ${c.text} ${c.soft} rounded-md px-2 py-0.5">${s.id}</span>
+            <span class="flex items-center gap-2">${badge(s.file)}<i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-600 group-hover:text-sky-800"></i></span>
+          </div>
+          <h4 class="text-base font-bold text-slate-900 group-hover:text-sky-800">${s.title}</h4>
+          <p class="text-sm text-slate-700 leading-relaxed">${s.desc}</p>
+          <p class="mt-auto pt-1 text-sm text-slate-600">${s.figs} figure${s.figs === 1 ? '' : 's'} · ${s.qs} quiz question${s.qs === 1 ? '' : 's'}</p>
+        </a>`).join('')}</div></div>`; }).join('');
+  const grid = document.getElementById('grid'); grid.innerHTML = html;
+  document.getElementById('empty').classList.toggle('hidden', shown > 0);
+  document.getElementById('empty').textContent = (fStatus === 'done' && !fq && !ALL.some(x => state.done[x.file])) ? 'Nothing is marked done yet. Open a module and press Mark done in the toolbar.' : 'No module matches your search.';
+  document.getElementById('q-count').textContent = shown === ALL.length ? `${ALL.length} modules` : `${shown} of ${ALL.length} modules`;
+  bindNav(grid); lucide.createIcons(); typeset(grid);
+}
+(function () {
+  const q = document.getElementById('q'), clr = document.getElementById('q-clear'), kbd = document.getElementById('q-kbd');
+  let t = null;
+  const sync = () => { const has = q.value.length > 0; clr.classList.toggle('hidden', !has); kbd.classList.toggle('hidden', has); };
+  q.addEventListener('input', () => { sync(); clearTimeout(t); t = setTimeout(() => { fq = q.value.trim(); renderGrid(); }, 110); });
+  clr.addEventListener('click', () => { q.value = ''; sync(); fq = ''; renderGrid(); q.focus(); });
+  q.addEventListener('keydown', e => { if (e.key === 'Escape' && q.value) { e.preventDefault(); clr.click(); } });
+  document.addEventListener('keydown', e => {
+    if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+    const tag = (document.activeElement && document.activeElement.tagName) || '';
+    if (/INPUT|TEXTAREA|SELECT/.test(tag)) return;
+    e.preventDefault(); q.focus(); q.select(); q.scrollIntoView({block: 'center', behavior: 'smooth'});
+  });
+})();
+document.getElementById('f-status').addEventListener('change', e => { fStatus = e.target.value; renderGrid(); });
+
+
+function renderAll(){ renderRoad(); renderGrid(); bindNav(document); icons(); }
+renderChips();
+(function () {                         // topic chosen on the overview page
+  let t = null; try { t = localStorage.getItem('em-portal-topic'); localStorage.removeItem('em-portal-topic'); } catch(_) {}
+  if (t && COURSE.some(x => x.id === t)) { const b = document.querySelector(`#chips-topic .chip[data-t="${t}"]`); if (b) { b.click(); setTimeout(() => document.getElementById('modules').scrollIntoView({block:'start'}), 50); } }
+})();
+onState.push(renderAll);
+renderAll();
+portalReady();
+</script>
+</body>
+</html>

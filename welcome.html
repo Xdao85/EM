@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electromagnetics Course Portal | Overview</title>
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+    <link rel="stylesheet" href="assets/css/em.css">
+    <script src="assets/js/em.js"></script>
+<script src="assets/vendor/lucide/lucide.min.js"></script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .glass-panel { background: rgba(255,255,255,.85); border: 1px solid rgba(15,23,42,.08); backdrop-filter: blur(8px); }
+  .card { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,.03); transition: border-color .2s, transform .2s, box-shadow .2s; }
+  a.card:hover, button.card:hover { border-color: rgba(2,132,199,.45); transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(15,23,42,.25); }
+  a.card:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; }
+  .chip { padding: .35rem .8rem; border-radius: 9999px; font-size: .875rem; font-weight: 600; border: 1px solid #e2e8f0; color: #475569; background: #fff; transition: all .15s; }
+  .chip:hover { background: #f8fafc; }
+  .chip.on { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .seg button { padding: .4rem .9rem; font-size: .875rem; font-weight: 600; color: #475569; border-radius: .5rem; }
+  .seg button.on { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  ::-webkit-scrollbar { width: 8px; height: 6px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fade { animation: fade-in .35s ease-out both; }
+  .ring-track { stroke: #e2e8f0; } .ring-val { stroke: #059669; transition: stroke-dashoffset .6s ease; }
+  .balance { text-wrap: balance; }
+  nav a { white-space: nowrap; }
+  .skip { position: absolute; left: -999px; top: 8px; z-index: 60; background: #0f172a; color: #fff; padding: .5rem .9rem; border-radius: .5rem; font-weight: 600; }
+  .skip:focus { left: 8px; }
+  .stat b { display: block; font-size: 1.5rem; line-height: 1.1; font-weight: 800; color: #0f172a; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: .875rem; color: #475569; }
+  .pg-wrap { position: relative; }
+  .pg-handle { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 9999px; touch-action: none; cursor: grab; outline: none; }
+  .pg-handle:active { cursor: grabbing; }
+  .pg-handle:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #0369a1; }
+  .chip[aria-pressed="true"], .chip.on { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .hl { background: #fef08a; color: inherit; border-radius: 2px; }
+  #q::-webkit-search-cancel-button { display: none; }
+
+  .tile { display: flex; flex-direction: column; gap: .5rem; }
+  .tile:hover .tile-go { transform: translateX(3px); }
+  .tile-go { transition: transform .15s; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+<a href="#main" class="skip">Skip to content</a>
+
+<header class="border-b border-slate-200 px-4 lg:px-8 py-3">
+  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="p-2.5 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="radio" class="w-6 h-6"></i></div>
+      <div>
+        <p class="text-lg font-bold tracking-tight bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600 bg-clip-text text-transparent">ECE Electromagnetics</p>
+        <p class="text-sm text-slate-600">Interactive course portal</p>
+      </div>
+    </div>
+    <nav id="top-nav" aria-label="Portal pages" class="flex gap-1.5 text-sm font-medium overflow-x-auto max-w-full"></nav>
+  </div>
+</header>
+
+<main id="main" class="flex-grow max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+  <!-- Hero -->
+  <section class="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] gap-8 items-center">
+    <div class="space-y-5 fade">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10"><i data-lucide="zap" class="w-4 h-4"></i> Field theory &amp; waves</span>
+      <h1 class="balance text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight text-slate-900">Learn electromagnetics by <span class="bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600 bg-clip-text text-transparent">seeing the fields</span></h1>
+      <p class="text-base sm:text-lg text-slate-700 leading-relaxed max-w-xl">From waves and phasors to the full Maxwell equations, in <span id="n-mod">45</span> modules with interactive simulations, worked examples and a quiz in each.</p>
+      <div class="flex flex-wrap gap-3">
+        <a id="cta-main" href="topic1/dimensions_units_notation.html" data-file="topic1/dimensions_units_notation.html" class="nav inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-semibold text-base shadow-md shadow-sky-700/20">
+          <i data-lucide="play" class="w-5 h-5"></i><span id="cta-text">Start with 1.1</span></a>
+        <a href="portal/modules.html" data-file="portal/modules.html" class="nav inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-semibold text-base"><i data-lucide="layout-grid" class="w-5 h-5"></i> All modules</a>
+      </div>
+      <p id="cta-sub" class="text-sm text-slate-600 hidden"></p>
+    </div>
+
+    <!-- live playground: the field of two point charges -->
+    <div id="playground" class="card rounded-2xl p-3 fade" style="animation-delay:.08s">
+      <div class="flex items-center justify-between gap-2 px-1 pb-2">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-sky-800 flex items-center gap-1.5"><i data-lucide="mouse-pointer-click" class="w-4 h-4"></i> Try it: two charges</h2>
+        <span id="pg-status" class="text-sm font-semibold text-slate-700" aria-live="polite"></span>
+      </div>
+      <div class="pg-wrap rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+        <canvas id="pg-canvas" class="block w-full" style="height:clamp(210px,26vw,270px)" role="img" aria-label="Animated electric field lines of two point charges. Use the two charge handles to move them; Enter flips a sign."></canvas>
+        <div id="pg-h0" class="pg-handle" tabindex="0" role="button" aria-label="Charge q1"></div>
+        <div id="pg-h1" class="pg-handle" tabindex="0" role="button" aria-label="Charge q2"></div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 pt-2.5">
+        <button type="button" id="pg-flip0" class="chip">Flip q₁</button>
+        <button type="button" id="pg-flip1" class="chip">Flip q₂</button>
+        <button type="button" id="pg-reset" class="chip">Reset</button>
+        <button type="button" id="pg-pause" class="chip" aria-pressed="false">Pause</button>
+        <a href="topic3/coulomb_law.html" data-file="topic3/coulomb_law.html" class="nav ml-auto text-sm font-semibold text-sky-800 hover:underline whitespace-nowrap">3.3 Coulomb's Law →</a>
+      </div>
+      <p class="text-sm text-slate-600 pt-2 px-1">Drag a charge or click it to flip its sign. Colour shows the potential (blue +, red −).</p>
+    </div>
+  </section>
+
+  <!-- Topics = roadmap + progress -->
+  <section aria-labelledby="topics-h">
+    <div class="flex flex-wrap items-end justify-between gap-3 mb-4">
+      <div>
+        <h2 id="topics-h" class="text-2xl font-bold text-slate-900">Five topics, in order</h2>
+        <p class="text-sm text-slate-700 mt-1">Each topic builds on the one before. Click a topic to see its modules.</p>
+      </div>
+      <div class="flex items-center gap-3 text-sm">
+        <svg viewBox="0 0 100 100" class="w-10 h-10 -rotate-90" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke-width="12" class="ring-track"/><circle id="ring" cx="50" cy="50" r="42" fill="none" stroke-width="12" stroke-linecap="round" class="ring-val" stroke-dasharray="263.9" stroke-dashoffset="263.9"/></svg>
+        <span><b class="text-slate-900 tabular-nums"><span id="p-pct">0</span>%</b> <span class="text-slate-600">· <span id="p-done">0</span> done · <span id="p-seen">0</span> opened</span></span>
+        <button id="reset" class="text-rose-700 font-medium hover:underline">Reset</button>
+      </div>
+    </div>
+    <ol id="topics" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"></ol>
+    <p class="text-sm text-slate-600 mt-2">Progress is saved in this browser only.</p>
+  </section>
+
+  <!-- Explore: links to the sub-pages -->
+  <section aria-labelledby="explore-h">
+    <h2 id="explore-h" class="text-2xl font-bold text-slate-900 mb-4">Explore</h2>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <a href="portal/modules.html" data-file="portal/modules.html" class="nav card tile rounded-xl p-5">
+        <span class="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center"><i data-lucide="layout-grid" class="w-5 h-5"></i></span>
+        <h3 class="text-base font-bold text-slate-900">All modules</h3>
+        <p class="hidden sm:block text-sm text-slate-700 flex-1">Search and filter all <span class="n-mod">45</span> modules by topic, idea or status.</p>
+        <span class="text-sm font-semibold text-indigo-700">Open <span class="tile-go inline-block">→</span></span>
+      </a>
+      <a href="portal/maxwell.html" data-file="portal/maxwell.html" class="nav card tile rounded-xl p-5">
+        <span class="w-10 h-10 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center"><i data-lucide="sigma" class="w-5 h-5"></i></span>
+        <h3 class="text-base font-bold text-slate-900">Maxwell's equations</h3>
+        <p class="hidden sm:block text-sm text-slate-700 flex-1">The four laws the course builds towards, in differential, integral and phasor form.</p>
+        <span class="text-sm font-semibold text-rose-700">Open <span class="tile-go inline-block">→</span></span>
+      </a>
+      <a href="portal/guide.html" data-file="portal/guide.html" class="nav card tile rounded-xl p-5">
+        <span class="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
+        <h3 class="text-base font-bold text-slate-900">Study &amp; teaching</h3>
+        <p class="hidden sm:block text-sm text-slate-700 flex-1">How to study a module, and how to present and share the portal in class.</p>
+        <span class="text-sm font-semibold text-emerald-800">Open <span class="tile-go inline-block">→</span></span>
+      </a>
+      <a href="portal/reference.html" data-file="portal/reference.html" class="nav card tile rounded-xl p-5">
+        <span class="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center"><i data-lucide="book-marked" class="w-5 h-5"></i></span>
+        <h3 class="text-base font-bold text-slate-900">Quick reference</h3>
+        <p class="hidden sm:block text-sm text-slate-700 flex-1">Constants, key relations and vector-calculus identities on one page.</p>
+        <span class="text-sm font-semibold text-amber-800">Open <span class="tile-go inline-block">→</span></span>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-slate-200 py-5 px-4 text-center text-sm text-slate-600 mt-10">
+  Electromagnetics Course Portal — Topics 1 to 5 · Notation follows Ulaby, <i>Fundamentals of Applied Electromagnetics</i>
+</footer>
+
+<script src="assets/js/portal.js"></script>
+<script>
+/* top navigation (same list as the sub-pages) */
+document.getElementById('top-nav').innerHTML = PAGES.map(p => `<a href="${href(p.file)}" data-file="${p.file}" class="nav whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-white border-slate-200 text-slate-700 hover:bg-slate-50"><i data-lucide="${p.icon}" class="w-4 h-4"></i>${p.title}</a>`).join('');
+
+/* topic cards: roadmap and progress in one row; a click opens the module list filtered to that topic */
+function renderTopics(){
+  document.getElementById('topics').innerHTML = COURSE.map(t => { const c = COLORS[t.color];
+    const n = t.sections.filter(s => state.done[s.file]).length, figs = t.sections.reduce((a, s) => a + s.figs, 0);
+    return `<li><a href="${href('portal/modules.html')}" data-file="portal/modules.html" data-topic="${t.id}" class="nav card tile rounded-xl p-4 h-full">
+      <span class="flex items-center justify-between"><span class="w-9 h-9 rounded-lg ${c.bg} border ${c.border} ${c.text} font-bold font-mono text-sm flex items-center justify-center">${t.num}</span><span class="text-sm tabular-nums text-slate-600">${n}/${t.sections.length}</span></span>
+      <span class="text-base font-bold text-slate-900 leading-snug flex-1">${t.title}</span>
+      <span class="h-1.5 rounded-full bg-slate-100 overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="${t.sections.length}" aria-valuenow="${n}" aria-label="Topic ${t.id} modules done"><span class="block h-full ${c.bar} rounded-full" style="width:${100 * n / t.sections.length}%"></span></span>
+      <span class="text-sm text-slate-600">${t.sections.length} modules · ${figs} figures</span>
+    </a></li>`; }).join('');
+}
+function renderProgress(){
+  const done = ALL.filter(s => state.done[s.file]).length, seen = ALL.filter(s => state.visited[s.file]).length;
+  document.getElementById('p-pct').textContent = Math.round(100 * done / ALL.length);
+  document.getElementById('p-done').textContent = done;
+  document.getElementById('p-seen').textContent = seen;
+  document.getElementById('ring').style.strokeDashoffset = 263.9 * (1 - done / ALL.length);
+  const last = state.last && findSection(state.last), next = nextSection();
+  const cta = document.getElementById('cta-main'), sub = document.getElementById('cta-sub');
+  const target = next || ALL[0];
+  cta.href = href(target.file); cta.dataset.file = target.file;
+  document.getElementById('cta-text').textContent = next ? `Continue: ${next.id} ${next.title}` : 'Start with 1.1';
+  sub.textContent = next ? (last && last !== next ? `Last opened: ${last.id} ${last.title} (done)` : 'Pick up where you left off.') : '';
+  sub.classList.toggle('hidden', !next);
+}
+function renderAll(){ renderProgress(); renderTopics(); bindNav(document); icons(); }
+document.getElementById('reset').onclick = function () {
+  const b = this;
+  if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'Click again to reset'; setTimeout(() => { delete b.dataset.arm; b.textContent = 'Reset'; }, 3000); return; }
+  delete b.dataset.arm; b.textContent = 'Reset';
+  state.visited = {}; state.done = {}; state.last = null; saveState(state);
+  if (inShell) parent.postMessage({em:'reset'}, '*');
+  renderAll();
+};
+document.querySelectorAll('#n-mod, .n-mod').forEach(e => e.textContent = ALL.length);
+onState.push(renderAll);
+renderAll();
+
+/* ---------- Hero playground: streamlines of two point charges ---------- */
+(function () {
+  const cv = document.getElementById('pg-canvas'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const START = [{x: -0.9, y: 0, q: 1}, {x: 0.9, y: 0, q: -1}];
+  let Q = START.map(c => ({...c}));
+  const XR = 2.2, RAD = 15, BG = '248,250,252';
+  const handles = [document.getElementById('pg-h0'), document.getElementById('pg-h1')];
+  const status = document.getElementById('pg-status'), btnPause = document.getElementById('pg-pause');
+  let W = 0, H = 0, S = 1, parts = [], loop = null, paused = false, boost = 0;
+
+  const px = (x, y) => [W / 2 + x * S, H / 2 - y * S];
+  const wd = (X, Y) => [(X - W / 2) / S, (H / 2 - Y) / S];
+  const halfH = () => H / (2 * S);
+
+  function field(x, y) {                       // E and V of the two point charges (softened near the charge)
+    let ex = 0, ey = 0, v = 0;
+    for (const c of Q) {
+      const dx = x - c.x, dy = y - c.y, r2 = dx * dx + dy * dy + 0.0025, r = Math.sqrt(r2), k = c.q / (r2 * r);
+      v += c.q / r; ex += k * dx; ey += k * dy;
+    }
+    return [ex, ey, v];
+  }
+  function spawn(p) {
+    const pos = Q.filter(c => c.q > 0);
+    if (pos.length) { const c = pos[Math.floor(Math.random() * pos.length)], a = Math.random() * 6.2832; p.x = c.x + 0.09 * Math.cos(a); p.y = c.y + 0.09 * Math.sin(a); }
+    else { p.x = (Math.random() - 0.5) * 2 * XR; p.y = (Math.random() - 0.5) * 2 * halfH(); }
+    p.age = 0; p.life = 2.4 + Math.random() * 2.4; p.ox = p.x; p.oy = p.y; p.v = 0;
+  }
+  function step(dt) {
+    const sp = 1.1;                             // world units per second: same speed everywhere, so lines read as direction
+    for (const p of parts) {
+      const f = field(p.x, p.y), m = Math.hypot(f[0], f[1]) || 1;
+      p.ox = p.x; p.oy = p.y; p.v = f[2];
+      p.x += f[0] / m * sp * dt; p.y += f[1] / m * sp * dt; p.age += dt;
+      let dead = p.age > p.life || Math.abs(p.x) > XR + 0.1 || Math.abs(p.y) > halfH() + 0.1;
+      if (!dead) for (const c of Q) if (c.q < 0 && Math.hypot(p.x - c.x, p.y - c.y) < 0.08) { dead = true; break; }
+      if (dead) spawn(p);
+    }
+  }
+  const mix = (a, b, t) => a + (b - a) * t;
+  function colour(v) {                          // potential: blue (+), indigo (0), red (−)
+    const t = Math.tanh(v * 0.9);
+    const r = t >= 0 ? mix(99, 2, t) : mix(99, 225, -t), g = t >= 0 ? mix(102, 132, t) : mix(102, 29, -t), b = t >= 0 ? mix(241, 199, t) : mix(241, 72, -t);
+    return `rgba(${r | 0},${g | 0},${b | 0},0.85)`;
+  }
+  function paint(fade) {
+    ctx.fillStyle = `rgba(${BG},${fade})`; ctx.fillRect(0, 0, W, H);
+    ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+    for (const p of parts) {
+      const a = px(p.ox, p.oy), b = px(p.x, p.y);
+      ctx.strokeStyle = colour(p.v); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    }
+    Q.forEach((c, i) => {
+      const [X, Y] = px(c.x, c.y), col = c.q > 0 ? '#0369a1' : '#be123c';
+      ctx.beginPath(); ctx.arc(X, Y, RAD + 3, 0, 6.2832); ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(X, Y, RAD, 0, 6.2832); ctx.fillStyle = col; ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = '700 20px Inter, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(c.q > 0 ? '+' : '−', X, Y + 1);
+      ctx.fillStyle = '#334155'; ctx.font = '600 12px Inter, system-ui, sans-serif'; ctx.textBaseline = 'top';
+      ctx.fillText('q' + (i ? '₂' : '₁'), X, Y + RAD + 6);
+    });
+  }
+  function settle() {                           // paused / reduced motion: draw the finished streamlines once
+    ctx.fillStyle = `rgb(${BG})`; ctx.fillRect(0, 0, W, H);
+    parts.forEach(spawn); parts.forEach(p => { p.age = Math.random() * p.life * 0.5; });
+    for (let k = 0; k < 70; k++) { step(1 / 30); paint(0.02); }
+  }
+  function layout() {
+    Q.forEach((c, i) => { const [X, Y] = px(c.x, c.y); handles[i].style.left = X + 'px'; handles[i].style.top = Y + 'px'; });
+  }
+  function labels() {
+    const same = Q[0].q * Q[1].q > 0;
+    status.textContent = same ? `Like charges repel (both ${Q[0].q > 0 ? '+' : '−'})` : 'Opposite charges attract';
+    handles.forEach((h, i) => h.setAttribute('aria-label', `Charge q${i + 1}, ${Q[i].q > 0 ? 'positive' : 'negative'}. Drag or use the arrow keys to move it, Enter to flip its sign.`));
+  }
+  function changed() {
+    labels(); layout(); boost = 10;
+    if (paused || reduce) settle();
+  }
+  function clampQ(i) { Q[i].x = Math.max(-XR + 0.2, Math.min(XR - 0.2, Q[i].x)); Q[i].y = Math.max(-halfH() + 0.2, Math.min(halfH() - 0.2, Q[i].y)); }
+  function flip(i) { Q[i].q = -Q[i].q; changed(); }
+
+  handles.forEach((h, i) => {
+    let start = null, moved = false;
+    h.addEventListener('pointerdown', e => { try { h.setPointerCapture(e.pointerId); } catch (_) {} start = {x: e.clientX, y: e.clientY}; moved = false; });
+    h.addEventListener('pointermove', e => {
+      if (!start) return;
+      if (!moved && Math.hypot(e.clientX - start.x, e.clientY - start.y) < 4) return;
+      moved = true;
+      const r = cv.getBoundingClientRect(), w = wd(e.clientX - r.left, e.clientY - r.top);
+      Q[i].x = w[0]; Q[i].y = w[1]; clampQ(i); changed();
+    });
+    h.addEventListener('pointerup', () => { if (start && !moved) flip(i); start = null; });
+    h.addEventListener('pointercancel', () => { start = null; });
+    h.addEventListener('keydown', e => {
+      const d = 0.08; let hit = true;
+      if (e.key === 'ArrowLeft') Q[i].x -= d; else if (e.key === 'ArrowRight') Q[i].x += d;
+      else if (e.key === 'ArrowUp') Q[i].y += d; else if (e.key === 'ArrowDown') Q[i].y -= d;
+      else if (e.key === 'Enter' || e.key === ' ') { flip(i); e.preventDefault(); return; } else hit = false;
+      if (hit) { e.preventDefault(); clampQ(i); changed(); }
+    });
+  });
+  document.getElementById('pg-flip0').onclick = () => flip(0);
+  document.getElementById('pg-flip1').onclick = () => flip(1);
+  document.getElementById('pg-reset').onclick = () => { Q = START.map(c => ({...c})); changed(); };
+  function setPaused(v) {
+    paused = v; btnPause.setAttribute('aria-pressed', v); btnPause.textContent = v ? 'Play' : 'Pause';
+    if (loop) { v ? loop.pause() : loop.resume(); }
+    if (v) settle();
+  }
+  btnPause.onclick = () => setPaused(!paused);
+
+  function resize() {
+    const r = cv.getBoundingClientRect(); if (!r.width) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.round(r.width); H = Math.round(r.height); S = W / (2 * XR);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    Q.forEach((c, i) => clampQ(i));
+    const n = Math.max(80, Math.min(200, Math.round(W * H / 1000)));
+    parts = Array.from({length: n}, () => { const p = {}; spawn(p); p.age = Math.random() * p.life; return p; });
+    ctx.fillStyle = `rgb(${BG})`; ctx.fillRect(0, 0, W, H);
+    layout(); settle();                       // start with the streamlines already drawn instead of growing out of the charges
+  }
+  labels();
+  if ('ResizeObserver' in window) new ResizeObserver(resize).observe(cv); else resize();
+  if (reduce) { btnPause.classList.add('hidden'); }
+  else loop = EM.loop(cv, (t, dt) => { step(dt); paint(boost > 0 ? 0.35 : 0.10); if (boost > 0) boost--; });   // sleeps when off-screen
+})();
+
+portalReady();
+</script>
+</body>
+</html>

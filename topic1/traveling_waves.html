@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traveling Waves - Electromagnetics Module</title>
+    <link rel="stylesheet" href="../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/em.css">
+    <script src="../assets/vendor/katex/katex.min.js"></script>
+    <script src="../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../assets/js/em.js"></script>
+<script src="../assets/vendor/lucide/lucide.min.js"></script>
+<style>
+  body { background:#ffffff; color:#0f172a; font-family:'Inter',sans-serif; overflow-x:hidden; }
+  .glass-panel { background:rgba(255,255,255,.85); backdrop-filter:blur(12px); border:1px solid rgba(15,23,42,.08); box-shadow:0 1px 3px rgba(15,23,42,.06); }
+  .glass-card { background:rgba(241,245,249,.7); backdrop-filter:blur(8px); border:1px solid rgba(15,23,42,.08); transition:all .25s ease-in-out; }
+  .glass-card:hover { border-color:rgba(2,132,199,.45); }
+  canvas { touch-action:none; display:block; }
+  .eq { overflow-x:auto; overflow-y:hidden; }
+  .chip { padding:.35rem .75rem; border-radius:.6rem; font-size:.875rem; font-weight:600; border:1px solid #e2e8f0; background:#fff; color:#334155; transition:all .15s; }
+  .chip:hover { background:#f1f5f9; }
+  .chip.on { background:#0f172a; border-color:#0f172a; color:#fff; }
+  .btn { padding:.4rem .9rem; border-radius:.6rem; font-size:.875rem; font-weight:600; border:1px solid #e2e8f0; background:#fff; color:#334155; }
+  .btn:hover { background:#f1f5f9; }
+  input[type=range] { height:.4rem; cursor:pointer; }
+  select, input[type=number] { border:1px solid #cbd5e1; border-radius:.5rem; padding:.3rem .5rem; background:#fff; font-size:.875rem; }
+  ::-webkit-scrollbar { width:6px; height:6px; } ::-webkit-scrollbar-track { background:#f1f5f9; }
+  ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; } ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+<header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="waves" class="w-6 h-6"></i></div>
+      <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Traveling Waves</h1>
+    </div>
+    <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium"><button onclick="scrollToSection('dims')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="orbit" class="w-4 h-4"></i><span>1D, 2D & 3D</span></button><button onclick="scrollToSection('lossless')" class="px-3 py-1.5 rounded-lg text-indigo-700 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition flex items-center gap-1.5"><i data-lucide="activity" class="w-4 h-4"></i><span>Lossless Medium</span></button><button onclick="scrollToSection('lossy')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="trending-down" class="w-4 h-4"></i><span>Lossy Medium</span></button><button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4"></i><span>Quiz</span></button></nav>
+  </div>
+</header>
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+<section id="dims" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="max-w-3xl space-y-3">
+    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Waves</span>
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Traveling Waves</h2>
+    <p class="text-slate-700 text-sm sm:text-base leading-relaxed">A wave is a self-sustaining disturbance that carries energy from one point to another without carrying the medium with it. Electromagnetic waves, sound and water ripples all share the same mathematics: a quantity that depends on position and time through the combination $\omega t - \beta x$.</p>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 flex flex-col justify-between gap-3">
+  <div><div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-400/10 px-2.5 py-1 rounded-md">1-dimensional</span><i data-lucide="minus" class="w-4 h-4 text-sky-800"></i></div>
+  <h3 class="text-base font-bold text-slate-900">Wave on a string</h3><p class="text-sm text-slate-700 mt-2 leading-relaxed">The disturbance depends on one coordinate, $y(x,t)$. Example: a sinusoidal transverse wave travelling along a taut string.</p></div>
+  <div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden h-[120px]"><canvas id="cv-d1" class="w-full h-full"></canvas></div>
+</div><div class="glass-card rounded-2xl p-5 flex flex-col justify-between gap-3">
+  <div><div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-indigo-700 uppercase tracking-wider bg-indigo-400/10 px-2.5 py-1 rounded-md">2-dimensional</span><i data-lucide="disc" class="w-4 h-4 text-indigo-700"></i></div>
+  <h3 class="text-base font-bold text-slate-900">Circular surface wave</h3><p class="text-sm text-slate-700 mt-2 leading-relaxed">Ripples spread over a surface; the wavefronts are circles and the amplitude falls as energy spreads out (as $1/\sqrt{r}$).</p></div>
+  <div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden h-[120px]"><canvas id="cv-d2" class="w-full h-full"></canvas></div>
+</div><div class="glass-card rounded-2xl p-5 flex flex-col justify-between gap-3">
+  <div><div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-400/10 px-2.5 py-1 rounded-md">3-dimensional</span><i data-lucide="globe" class="w-4 h-4 text-rose-700"></i></div>
+  <h3 class="text-base font-bold text-slate-900">Spherical wave</h3><p class="text-sm text-slate-700 mt-2 leading-relaxed">A point source radiates in all directions; wavefronts are spheres and the amplitude falls as $1/R$ — like light from a lamp or a radio antenna far away.</p></div>
+  <div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden h-[120px]"><canvas id="cv-d3" class="w-full h-full"></canvas></div>
+</div></div>
+</section>
+
+<section id="lossless" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+  <div>
+    <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Sinusoidal Wave in a Lossless Medium</h2>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">The wave keeps its amplitude as it travels. The top plot is a snapshot in space; drag the amber probe to choose a position $x_0$, and the lower plot records $y(x_0, t)$ over time — the same wave seen by a stationary observer.</p>
+  </div>
+</div>
+  <div class="eq bg-slate-100/90 p-3 rounded-2xl border border-slate-200 text-center text-indigo-700">$$y(x,t) = A\cos\!\left(\frac{2\pi t}{T} \mp \frac{2\pi x}{\lambda} + \phi_0\right) = A\cos(\omega t \mp \beta x + \phi_0)$$</div>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-8 space-y-3">
+      <div class="relative h-[260px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-ll" class="w-full h-full"></canvas></div>
+      <div class="relative h-[170px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-lt" class="w-full h-full"></canvas></div>
+      <div class="glass-card rounded-2xl p-4 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3">
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Amplitude $A$</span><input type="range" id="s-A" min="0.2" max="2" step="0.1" value="1" class="flex-1 min-w-0 accent-sky-600"><span id="v-A" class="w-24 shrink-0 text-right font-mono font-semibold text-sky-800"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Wavelength $\lambda$</span><input type="range" id="s-lam" min="0.8" max="5" step="0.1" value="2" class="flex-1 min-w-0 accent-amber-600"><span id="v-lam" class="w-24 shrink-0 text-right font-mono font-semibold text-amber-800"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Frequency $f$</span><input type="range" id="s-f" min="0.1" max="1.5" step="0.05" value="0.5" class="flex-1 min-w-0 accent-indigo-600"><span id="v-f" class="w-24 shrink-0 text-right font-mono font-semibold text-indigo-700"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Phase $\phi_0$</span><input type="range" id="s-phi" min="-180" max="180" step="5" value="0" class="flex-1 min-w-0 accent-rose-600"><span id="v-phi" class="w-24 shrink-0 text-right font-mono font-semibold text-rose-700"></span></div>
+        <div class="flex flex-wrap items-center gap-2 md:col-span-2"><div id="ll-dir" class="flex gap-2"><button class="chip on" data-v="1">$-\beta x$: travels $+x$</button><button class="chip" data-v="-1">$+\beta x$: travels $-x$</button></div><button id="ll-play" class="btn"></button><button id="ll-reset" class="btn">Reset t = 0</button></div>
+      </div>
+    </div>
+    <div class="lg:col-span-4 space-y-3">
+      <div class="glass-card rounded-2xl p-5 space-y-2">
+        <h3 class="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4 text-sky-800"></i> Wave parameters</h3>
+        <div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">Period $T = 1/f$</span><span id="ro-T" class="font-mono font-bold text-sky-800 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$\omega = 2\pi f$</span><span id="ro-w" class="font-mono font-bold text-indigo-700 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$\beta = 2\pi/\lambda$</span><span id="ro-b" class="font-mono font-bold text-amber-800 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$u_p = f\lambda = \omega/\beta$</span><span id="ro-up" class="font-mono font-bold text-emerald-800 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">Elapsed time $t$</span><span id="ro-t" class="font-mono font-bold text-slate-700 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">Crest travel $u_p t$</span><span id="ro-dx" class="font-mono font-bold text-emerald-800 text-right"></span></div>
+      </div>
+      <div class="text-sm text-slate-700 bg-slate-100/90 p-3 rounded-xl border border-slate-200 flex gap-2"><i data-lucide="info" class="w-4 h-4 text-sky-800 shrink-0 mt-0.5"></i>
+        <span>Phase velocity follows from holding the phase constant: $\omega t - \beta x = \text{const} \Rightarrow u_p = dx/dt = \omega/\beta$. The spatial period is $\lambda$, the time period is $T$; one wavelength passes the probe every period.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="lossy" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+  <div>
+    <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Sinusoidal Wave in a Lossy Medium</h2>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">In a lossy medium part of the wave's energy is converted to heat, so the amplitude decays as $e^{-\alpha x}$. The attenuation constant $\alpha$ is measured in nepers per meter.</p>
+  </div>
+</div>
+  <div class="eq bg-slate-100/90 p-3 rounded-2xl border border-slate-200 text-center text-rose-700">$$y(x,t) = A\,e^{-\alpha x}\cos(\omega t - \beta x + \phi_0)$$</div>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-8 space-y-3">
+      <div class="relative h-[320px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-ly" class="w-full h-full"></canvas></div>
+      <div class="glass-card rounded-2xl p-4 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3">
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Attenuation $\alpha$</span><input type="range" id="s-al" min="0" max="1" step="0.02" value="0.3" class="flex-1 min-w-0 accent-rose-600"><span id="v-al" class="w-24 shrink-0 text-right font-mono font-semibold text-rose-700"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Amplitude $A$</span><input type="range" id="s-A2" min="0.2" max="2" step="0.1" value="1.2" class="flex-1 min-w-0 accent-sky-600"><span id="v-A2" class="w-24 shrink-0 text-right font-mono font-semibold text-sky-800"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Wavelength $\lambda$</span><input type="range" id="s-lam2" min="0.8" max="5" step="0.1" value="2" class="flex-1 min-w-0 accent-amber-600"><span id="v-lam2" class="w-24 shrink-0 text-right font-mono font-semibold text-amber-800"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Frequency $f$</span><input type="range" id="s-f2" min="0.1" max="1.5" step="0.05" value="0.5" class="flex-1 min-w-0 accent-indigo-600"><span id="v-f2" class="w-24 shrink-0 text-right font-mono font-semibold text-indigo-700"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Phase $\phi_0$</span><input type="range" id="s-phi2" min="-180" max="180" step="5" value="0" class="flex-1 min-w-0 accent-slate-600"><span id="v-phi2" class="w-24 shrink-0 text-right font-mono font-semibold text-slate-700"></span></div>
+        <div class="flex items-center gap-2"><button id="ly-play" class="btn"></button><button id="ly-dB" class="chip on">Show $1/e$ point</button></div>
+      </div>
+    </div>
+    <div class="lg:col-span-4 space-y-3">
+      <div class="glass-card rounded-2xl p-5 space-y-2">
+        <h3 class="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2"><i data-lucide="shield-alert" class="w-4 h-4 text-rose-700"></i> Attenuation</h3>
+        <div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">Depth $\delta = 1/\alpha$</span><span id="ro-d" class="font-mono font-bold text-rose-700 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$\alpha$ in dB/m ($8.686\,\alpha$)</span><span id="ro-db" class="font-mono font-bold text-amber-800 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">Amplitude at $x = 5$ m</span><span id="ro-a5" class="font-mono font-bold text-sky-800 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">Power ratio at 5 m</span><span id="ro-p5" class="font-mono font-bold text-indigo-700 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$u_p = f\lambda$</span><span id="ro-up2" class="font-mono font-bold text-emerald-800 text-right"></span></div>
+      </div>
+      <div class="text-sm text-slate-700 bg-slate-100/90 p-3 rounded-xl border border-slate-200 space-y-2">
+        <p>At $x = \delta = 1/\alpha$ the amplitude has fallen to $e^{-1} \approx 37\%$ of its initial value; in a good conductor this distance is the <b>skin depth</b> $\delta_s$.</p>
+        <p>Power scales as amplitude squared, so it decays as $e^{-2\alpha x}$: $1\ \mathrm{Np} = 8.686\ \mathrm{dB}$.</p>
+        <p>The frequency and wavelength are unchanged by the loss — only the envelope shrinks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+    <div class="flex items-center gap-2"><span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2></div>
+    <div class="flex items-center gap-2"><button id="quiz-reset" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button>
+    <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 5</span></div>
+  </div>
+  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+</section>
+
+</main>
+<footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Traveling Waves</footer>
+<script>
+/* ===== Shared page toolkit (canvas, UI, quiz, animation) ===== */
+const $ = id => document.getElementById(id);
+const TAU = 2 * Math.PI, DEG = Math.PI / 180;
+const COL = { sky:'#0284c7', rose:'#e11d48', amber:'#d97706', indigo:'#4f46e5', emerald:'#059669', purple:'#9333ea',
+  slate:'#334155', grid:'#e2e8f0', axis:'#64748b', text:'#0f172a', muted:'#64748b', teal:'#0d9488' };
+
+// Canvas CSS size is cached and refreshed by a ResizeObserver, so drawing a frame never forces a layout.
+const _cvSize = new WeakMap();
+const _cvRO = ('ResizeObserver' in window) ? new ResizeObserver(es => es.forEach(e => {
+  const b = e.target.getBoundingClientRect(); _cvSize.set(e.target, { width: b.width, height: b.height });
+})) : null;
+function setupCanvas(cv) {
+  let r = _cvSize.get(cv);
+  if (!r) { const b = cv.getBoundingClientRect(); r = { width: b.width, height: b.height }; if (_cvRO) { _cvSize.set(cv, r); _cvRO.observe(cv); } }
+  const d = window.devicePixelRatio || 1;
+  const w = Math.max(1, r.width), h = Math.max(1, r.height);
+  const W = Math.round(w * d), H = Math.round(h * d);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const c = cv.getContext('2d');
+  c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, w, h);
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  return { c, w, h };
+}
+function line(c, x1, y1, x2, y2, col, lw = 1, dash) {
+  c.save(); c.strokeStyle = col; c.lineWidth = lw; if (dash) c.setLineDash(dash);
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.restore();
+}
+function arrow(c, x1, y1, x2, y2, col, lw = 2, hs = 9) {
+  const L = Math.hypot(x2 - x1, y2 - y1); if (L < 0.5) return;
+  const a = Math.atan2(y2 - y1, x2 - x1), h = Math.min(hs, L * 0.6);
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw;
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - h * 0.7 * Math.cos(a), y2 - h * 0.7 * Math.sin(a)); c.stroke();
+  c.beginPath(); c.moveTo(x2, y2);
+  c.lineTo(x2 - h * Math.cos(a - 0.42), y2 - h * Math.sin(a - 0.42));
+  c.lineTo(x2 - h * Math.cos(a + 0.42), y2 - h * Math.sin(a + 0.42)); c.closePath(); c.fill(); c.restore();
+}
+function label(c, t, x, y, col = COL.text, font = '600 13px Inter, system-ui, sans-serif', align = 'left', base = 'middle', halo = true) {
+  c.save(); c.font = font; c.textAlign = align; c.textBaseline = base;
+  if (halo) { c.lineWidth = 3.5; c.strokeStyle = 'rgba(255,255,255,0.9)'; c.strokeText(t, x, y); }
+  c.fillStyle = col; c.fillText(t, x, y); c.restore();
+}
+function dot(c, x, y, r, col, stroke = '#fff') {
+  c.save(); c.fillStyle = col; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+  if (stroke) { c.strokeStyle = stroke; c.lineWidth = 2; c.stroke(); } c.restore();
+}
+function curve(c, pts, col, lw = 2, dash) {
+  if (!pts.length) return;
+  c.save(); c.strokeStyle = col; c.lineWidth = lw; if (dash) c.setLineDash(dash);
+  c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke(); c.restore();
+}
+/* plot frame: returns mapping helpers for a box */
+function plotFrame(c, box, xr, yr, opt = {}) {
+  const { x, y, w, h } = box;
+  const X = v => x + (v - xr[0]) / (xr[1] - xr[0]) * w;
+  const Y = v => y + h - (v - yr[0]) / (yr[1] - yr[0]) * h;
+  c.save(); c.fillStyle = opt.bg || '#ffffff'; c.fillRect(x, y, w, h);
+  c.strokeStyle = COL.grid; c.lineWidth = 1;
+  (opt.xt || []).forEach(v => { c.beginPath(); c.moveTo(X(v), y); c.lineTo(X(v), y + h); c.stroke(); });
+  (opt.yt || []).forEach(v => { c.beginPath(); c.moveTo(x, Y(v)); c.lineTo(x + w, Y(v)); c.stroke(); });
+  c.strokeStyle = '#cbd5e1'; c.strokeRect(x, y, w, h);
+  if (yr[0] < 0 && yr[1] > 0) line(c, x, Y(0), x + w, Y(0), COL.axis, 1.2);
+  c.restore();
+  const f = '500 12px Inter, system-ui, sans-serif';
+  (opt.xt || []).forEach(v => label(c, (opt.xf || String)(v), X(v), y + h + 12, COL.muted, f, 'center', 'middle', false));
+  (opt.yt || []).forEach(v => label(c, (opt.yf || String)(v), x - 6, Y(v), COL.muted, f, 'right', 'middle', false));
+  if (opt.xl) label(c, opt.xl, x + w, y + h + 28, COL.slate, '600 12px Inter, system-ui, sans-serif', 'right', 'middle', false);
+  if (opt.yl) label(c, opt.yl, x + 4, y - 10, COL.slate, '600 12px Inter, system-ui, sans-serif', 'left', 'middle', false);
+  return { X, Y };
+}
+function fmtSI(v, unit = '', digits = 3) {
+  if (!isFinite(v)) return '∞ ' + unit;
+  if (v === 0) return '0 ' + unit;
+  const P = [[1e24,'Y'],[1e21,'Z'],[1e18,'E'],[1e15,'P'],[1e12,'T'],[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n'],[1e-12,'p'],[1e-15,'f'],[1e-18,'a'],[1e-21,'z'],[1e-24,'y']];
+  const a = Math.abs(v);
+  for (const [s, p] of P) if (a >= s * 0.9995) return String(parseFloat((v / s).toPrecision(digits))) + ' ' + p + unit;
+  return v.toExponential(digits - 1) + ' ' + unit;
+}
+function fmtE(v, d = 3) { // 1.23×10⁻⁴
+  if (v === 0) return '0'; if (!isFinite(v)) return '∞';
+  const e = Math.floor(Math.log10(Math.abs(v))); const m = v / Math.pow(10, e);
+  if (e >= -2 && e <= 3) return v.toPrecision(d);
+  const sup = String(e).replace(/-/g, '⁻').replace(/\d/g, k => '⁰¹²³⁴⁵⁶⁷⁸⁹'[k]);
+  return m.toFixed(d - 1) + '×10' + sup;
+}
+function texE(v, d = 3) { // TeX scientific
+  if (v === 0) return '0'; const e = Math.floor(Math.log10(Math.abs(v)));
+  if (e >= -2 && e <= 3) return v.toPrecision(d);
+  return (v / Math.pow(10, e)).toFixed(d - 1) + '\\times 10^{' + e + '}';
+}
+const val = id => parseFloat($(id).value);
+/* bind sliders: map { id: fmt(v) } — slider #s-id, readout #v-id */
+function bindSliders(map, onChange) {
+  const upd = () => { for (const k in map) { const o = $('v-' + k); if (o) o.textContent = map[k](val('s-' + k)); } onChange && onChange(); };
+  for (const k in map) $('s-' + k).addEventListener('input', upd);
+  upd(); return upd;
+}
+function setSlider(k, v) { const s = $('s-' + k); s.value = v; s.dispatchEvent(new Event('input')); }
+/* chip group: buttons with data-v inside container; returns getter */
+function chipGroup(id, onChange) {
+  const box = $(id); let cur = (box.querySelector('.chip.on') || box.querySelector('.chip')).dataset.v;
+  box.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    box.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); cur = b.dataset.v; onChange && onChange(cur);
+  }));
+  return { get: () => cur, set: v => { const b = box.querySelector(`.chip[data-v="${v}"]`); if (b) b.click(); } };
+}
+function chipToggle(id, onChange) { const b = $(id); b.addEventListener('click', () => { b.classList.toggle('on'); onChange && onChange(b.classList.contains('on')); }); return () => b.classList.contains('on'); }
+/* pointer dragging on a canvas: hit(x,y)->key|null, move(key,x,y), end(key) */
+function draggable(cv, hit, move, end) {
+  let key = null;
+  const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  cv.addEventListener('pointerdown', e => { const [x, y] = pos(e); key = hit(x, y); if (key != null) { cv.setPointerCapture(e.pointerId); e.preventDefault(); move(key, x, y); } });
+  cv.addEventListener('pointermove', e => { const [x, y] = pos(e); if (key != null) move(key, x, y); else cv.style.cursor = hit(x, y) != null ? 'grab' : ''; });
+  const up = () => { if (key != null) { end && end(key); key = null; } };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+}
+/* animation loop — pauses canvases that are off-screen, and stops completely (0 frames/s)
+   when no animated canvas is visible or the tab is hidden; it restarts when one scrolls back in. */
+const _anim = { items: [], on: false, last: 0 };
+function _animKick() {
+  if (_anim.on) return;
+  _anim.on = true; _anim.last = performance.now();
+  requestAnimationFrame(_animTick);
+}
+function _animTick(now) {
+  const dt = Math.max(0, Math.min(0.05, (now - _anim.last) / 1000)); _anim.last = Math.max(_anim.last, now);
+  let any = false;
+  if (!document.hidden) _anim.items.forEach(i => { if (i.vis) { any = true; try { i.fn(dt); } catch (err) { console.error(err); } } });
+  if (any) requestAnimationFrame(_animTick); else _anim.on = false;
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) _animKick(); });
+function animate(el, fn) {
+  const it = { el, fn, vis: true }; _anim.items.push(it);
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(e => { it.vis = e.isIntersecting; if (it.vis) _animKick(); })).observe(el);
+  _animKick();
+}
+const _resize = [];
+function onResize(fn) { _resize.push(fn); }
+window.addEventListener('resize', () => _resize.forEach(f => f()));
+function playButton(id, state, key = 'run') {
+  const b = $(id);
+  const paint = () => { b.innerHTML = state[key] ? '❚❚ Pause' : '▶ Play'; };
+  b.addEventListener('click', () => { state[key] = !state[key]; paint(); }); paint();
+}
+function typeset(el) { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(el ? [el] : undefined).catch(() => {}); }
+function scrollToSection(id) { const el = $(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
+/* data-driven quiz — same visual format as the reference page (dimensions_units_notation) */
+function renderQuiz(id, QS) {
+  const box = $(id);
+  const card = (q, i) => `
+    <div class="glass-card rounded-2xl p-5 space-y-3 ${QS.length % 2 && i === QS.length - 1 ? 'md:col-span-2' : ''}" id="q${i}-card">
+      <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+      <p class="text-sm text-slate-800 font-medium leading-relaxed">${q.q}</p>
+      <div class="grid grid-cols-1 ${QS.length % 2 && i === QS.length - 1 ? 'md:grid-cols-2' : ''} gap-2 text-sm">${q.o.map((o, j) =>
+        `<button class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition text-slate-800 flex items-start gap-2" data-j="${j}"><span class="font-semibold text-slate-600 shrink-0">${String.fromCharCode(65 + j)}.</span><span>${o}</span></button>`).join('')}</div>
+      <div id="q${i}-fb" class="text-sm hidden p-2.5 rounded-xl"></div>
+    </div>`;
+  const draw = () => {
+    box.innerHTML = QS.map(card).join('');
+    let score = 0, done = 0;
+    const setScore = () => { const s = $('quiz-score'); if (s) s.textContent = `Score: ${score} / ${QS.length}`; };
+    QS.forEach((q, i) => box.querySelectorAll(`.q${i}-btn`).forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j; if ($(`q${i}-card`).dataset.done) return; $(`q${i}-card`).dataset.done = 1; done++;
+      const ok = j === q.a; if (ok) score++;
+      box.querySelectorAll(`.q${i}-btn`).forEach(x => { const k = +x.dataset.j; x.disabled = true; x.classList.remove('hover:border-slate-300', 'bg-slate-100');
+        if (k === q.a) x.classList.add('bg-emerald-500/10', 'border-emerald-500/40', 'text-emerald-800');
+        else if (k === j) x.classList.add('bg-rose-500/10', 'border-rose-500/40', 'text-rose-800');
+        else x.classList.add('bg-slate-100', 'opacity-60'); });
+      const fb = $(`q${i}-fb`);
+      fb.className = 'text-sm p-2.5 rounded-xl font-medium leading-relaxed border ' + (ok ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800' : 'bg-rose-500/10 border-rose-500/30 text-rose-700');
+      fb.innerHTML = `${ok ? '✓ Correct.' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + q.a) + '.'} <span class="font-normal text-slate-700">${q.e}</span>`;
+      setScore();
+      if (done === QS.length) { const r = $('quiz-reset'); if (r) r.classList.remove('hidden'); }
+      typeset(fb);
+    })));
+    setScore(); const r = $('quiz-reset'); if (r) r.classList.add('hidden');
+    typeset(box);
+  };
+  draw();
+  const r = $('quiz-reset'); if (r) r.addEventListener('click', draw);
+}
+
+/* ===== Traveling Waves ===== */
+/* ---------- mini demos ---------- */
+let tDemo = 0;
+animate($('cv-d1'), dt => {
+  tDemo += dt;
+  { const { c, w, h } = setupCanvas($('cv-d1')); line(c, 0, h / 2, w, h / 2, COL.grid);
+    const p = []; for (let x = 0; x <= w; x += 2) p.push([x, h / 2 - 28 * Math.cos(x * 0.05 - tDemo * 3)]); curve(c, p, COL.sky, 2.5);
+    const xc = ((tDemo * 3 / 0.05) % (TAU / 0.05)); for (let x = xc; x < w; x += TAU / 0.05) dot(c, x, h / 2 - 28, 4, COL.sky); arrow(c, w - 60, 14, w - 20, 14, COL.sky, 2, 8); }
+  { const { c, w, h } = setupCanvas($('cv-d2')); const cx = w / 2, cy = h / 2, M = Math.hypot(cx, cy);
+    for (let r = (tDemo * 30) % 22; r < M; r += 22) { c.strokeStyle = `rgba(79,70,229,${Math.max(0, 0.9 / Math.sqrt(1 + r / 12))})`; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.stroke(); }
+    dot(c, cx, cy, 4, COL.indigo, null); }
+  { const { c, w, h } = setupCanvas($('cv-d3')); const cx = w / 2, cy = h / 2, M = Math.hypot(cx, cy);
+    for (let r = (tDemo * 30) % 24; r < M; r += 24) { const a = Math.max(0, 1 / (1 + r / 15));
+      const g = c.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.1, cx, cy, r); g.addColorStop(0, `rgba(225,29,72,0)`); g.addColorStop(1, `rgba(225,29,72,${0.12 * a})`);
+      c.fillStyle = g; c.beginPath(); c.arc(cx, cy, r, 0, TAU); c.fill(); c.strokeStyle = `rgba(225,29,72,${0.9 * a})`; c.lineWidth = 1.8; c.stroke(); }
+    dot(c, cx, cy, 4, COL.rose, null); }
+});
+
+/* ---------- Sim 1: lossless ---------- */
+const LL = { t: 0, run: true, x0: 3 };
+playButton('ll-play', LL);
+$('ll-reset').addEventListener('click', () => { LL.t = 0; });
+const dirG = chipGroup('ll-dir');
+bindSliders({ A: v => v.toFixed(1), lam: v => v.toFixed(1) + ' m', f: v => v.toFixed(2) + ' Hz', phi: v => v + '°' }, () => {
+  const f = val('s-f'), lam = val('s-lam');
+  $('ro-T').textContent = (1 / f).toFixed(2) + ' s'; $('ro-w').textContent = (TAU * f).toFixed(2) + ' rad/s';
+  $('ro-b').textContent = (TAU / lam).toFixed(2) + ' rad/m'; $('ro-up').textContent = (f * lam).toFixed(2) + ' m/s';
+});
+const cvLL = $('cv-ll'), cvLT = $('cv-lt');
+const XR = 10; let LLbox = {};
+draggable(cvLL, (x, y) => Math.abs(x - LLbox.X(LL.x0)) < 14 ? 'p' : null, (k, x) => { LL.x0 = Math.max(0, Math.min(XR, LLbox.Xi(x))); });
+animate(cvLL, dt => {
+  if (LL.run) LL.t += dt;
+  const A = val('s-A'), lam = val('s-lam'), f = val('s-f'), ph = val('s-phi') * DEG, d = +dirG.get();
+  const w = TAU * f, b = TAU / lam, y = (x, t) => A * Math.cos(w * t - d * b * x + ph);
+  // spatial snapshot
+  { const { c, w: W, h: H } = setupCanvas(cvLL);
+    const box = { x: 44, y: 16, w: W - 64, h: H - 50 };
+    const F = plotFrame(c, box, [0, XR], [-2.2, 2.2], { xt: [0, 2, 4, 6, 8, 10], yt: [-2, -1, 0, 1, 2], xl: 'x (m)', yl: 'y(x, t)' });
+    LLbox = { X: F.X, Xi: px => (px - box.x) / box.w * XR };
+    const p = []; for (let i = 0; i <= 500; i++) { const x = XR * i / 500; p.push([F.X(x), F.Y(y(x, LL.t))]); } curve(c, p, COL.indigo, 3);
+    // crests: w t - d b x + ph = 2πn
+    let xc = (w * LL.t + ph) / (d * b); xc = ((xc % lam) + lam) % lam;
+    for (let x = xc; x <= XR; x += lam) dot(c, F.X(x), F.Y(A), 5, COL.emerald);
+    if (xc <= XR) arrow(c, F.X(xc), F.Y(A) - 14, F.X(xc) + d * 34, F.Y(A) - 14, COL.emerald, 2.2, 8);
+    // wavelength bracket
+    if (xc + lam <= XR) { const yy = F.Y(-A) + 14; line(c, F.X(xc), yy, F.X(xc + lam), yy, COL.amber, 1.5); line(c, F.X(xc), yy - 5, F.X(xc), yy + 5, COL.amber, 1.5); line(c, F.X(xc + lam), yy - 5, F.X(xc + lam), yy + 5, COL.amber, 1.5);
+      label(c, 'λ = ' + lam.toFixed(1) + ' m', F.X(xc + lam / 2), yy + 12, COL.amber, '600 12px Inter, sans-serif', 'center'); }
+    // probe
+    const px = F.X(LL.x0); line(c, px, box.y, px, box.y + box.h, COL.amber, 2, [5, 4]); dot(c, px, F.Y(y(LL.x0, LL.t)), 6, COL.amber);
+    label(c, 'probe x₀ = ' + LL.x0.toFixed(2) + ' m (drag)', px + 6, box.y + 10, COL.amber, '600 12px Inter, sans-serif');
+  }
+  // time record at probe
+  { const { c, w: W, h: H } = setupCanvas(cvLT);
+    const Tw = 10, t1 = Math.max(Tw, LL.t), t0 = t1 - Tw, box = { x: 44, y: 16, w: W - 64, h: H - 48 };
+    const xt = []; for (let k = Math.ceil(t0); k <= t1; k += 2) xt.push(k);
+    const F = plotFrame(c, box, [t0, t1], [-2.2, 2.2], { xt, yt: [-2, 0, 2], xl: 't (s)', yl: 'y(x₀, t)' });
+    const p = []; for (let i = 0; i <= 400; i++) { const t = t0 + Tw * i / 400; if (t > LL.t) break; p.push([F.X(t), F.Y(y(LL.x0, t))]); } curve(c, p, COL.amber, 2.5);
+    dot(c, F.X(LL.t), F.Y(y(LL.x0, LL.t)), 5, COL.amber);
+    // period bracket
+    const T = 1 / f; if (T < Tw * 0.9) { const tb = t1 - T - 0.2, yy = box.y + 10; line(c, F.X(tb), yy, F.X(tb + T), yy, COL.sky, 1.5); label(c, 'T = ' + T.toFixed(2) + ' s', F.X(tb + T / 2), yy + 12, COL.sky, '600 12px Inter, sans-serif', 'center'); }
+  }
+  $('ro-t').textContent = LL.t.toFixed(2) + ' s'; $('ro-dx').textContent = (d > 0 ? '+' : '−') + (f * lam * LL.t).toFixed(2) + ' m';
+});
+
+/* ---------- Sim 2: lossy ---------- */
+const LY = { t: 0, run: true };
+playButton('ly-play', LY);
+const showE = chipToggle('ly-dB');
+bindSliders({ al: v => v.toFixed(2) + ' Np/m', A2: v => v.toFixed(1), lam2: v => v.toFixed(1) + ' m', f2: v => v.toFixed(2) + ' Hz', phi2: v => v + '°' }, () => {
+  const al = val('s-al'), A = val('s-A2');
+  $('ro-d').textContent = al > 0 ? (1 / al).toFixed(2) + ' m' : '∞ (lossless)';
+  $('ro-db').textContent = (8.686 * al).toFixed(2) + ' dB/m';
+  $('ro-a5').textContent = (A * Math.exp(-5 * al)).toFixed(3) + ' (' + (100 * Math.exp(-5 * al)).toFixed(1) + '%)';
+  $('ro-p5').textContent = (100 * Math.exp(-10 * al)).toFixed(2) + '%  (−' + (43.43 * al).toFixed(1) + ' dB)';
+  $('ro-up2').textContent = (val('s-f2') * val('s-lam2')).toFixed(2) + ' m/s';
+});
+const cvLY = $('cv-ly');
+animate(cvLY, dt => {
+  if (LY.run) LY.t += dt;
+  const al = val('s-al'), A = val('s-A2'), lam = val('s-lam2'), f = val('s-f2'), ph = val('s-phi2') * DEG, w = TAU * f, b = TAU / lam;
+  const { c, w: W, h: H } = setupCanvas(cvLY);
+  const box = { x: 44, y: 16, w: W - 64, h: H - 50 };
+  const F = plotFrame(c, box, [0, XR], [-2.2, 2.2], { xt: [0, 2, 4, 6, 8, 10], yt: [-2, -1, 0, 1, 2], xl: 'x (m)', yl: 'y(x, t)' });
+  const env = [], envn = [], p = [], pl = [];
+  for (let i = 0; i <= 500; i++) { const x = XR * i / 500, e = A * Math.exp(-al * x);
+    env.push([F.X(x), F.Y(e)]); envn.push([F.X(x), F.Y(-e)]); p.push([F.X(x), F.Y(e * Math.cos(w * LY.t - b * x + ph))]); pl.push([F.X(x), F.Y(A * Math.cos(w * LY.t - b * x + ph))]); }
+  curve(c, pl, 'rgba(100,116,139,0.3)', 1.5, [4, 4]);
+  curve(c, env, COL.rose, 1.6, [6, 4]); curve(c, envn, COL.rose, 1.6, [6, 4]);
+  curve(c, p, COL.rose, 3);
+  label(c, '+A e^(−αx)', F.X(0.2), F.Y(A) - 12, COL.rose, '600 12px Inter, sans-serif');
+  label(c, 'grey: same wave with α = 0', box.x + box.w - 4, box.y + 12, COL.muted, '500 12px Inter, sans-serif', 'right');
+  if (showE() && al > 0 && 1 / al <= XR) { const xd = 1 / al, ye = A / Math.E;
+    line(c, F.X(xd), box.y, F.X(xd), box.y + box.h, COL.amber, 1.8, [4, 4]); line(c, box.x, F.Y(ye), F.X(xd), F.Y(ye), COL.amber, 1.2, [2, 3]);
+    dot(c, F.X(xd), F.Y(ye), 5, COL.amber); label(c, 'δ = 1/α: amplitude = A/e ≈ 37%', F.X(xd) + 6, F.Y(ye) - 14, COL.amber, '600 12px Inter, sans-serif'); }
+});
+
+renderQuiz('quiz-box', [
+  { q: 'What distinguishes a lossless medium from a lossy one?', o: ['The phase velocity is zero in a lossless medium', 'A lossless medium does not attenuate the wave ($\\alpha = 0$)', 'A lossy medium changes the wave frequency', 'A lossy medium increases the amplitude'], a: 1,
+    e: 'Loss only affects the envelope $e^{-\\alpha x}$. Frequency and wavelength are unchanged (see the grey reference wave in Simulation 2).' },
+  { q: 'How is the phase velocity related to wavelength and period?', o: ['$u_p = \\lambda/T = f\\lambda$', '$u_p = \\lambda T$', '$u_p = \\beta/\\omega$', '$u_p = T/\\lambda$'], a: 0,
+    e: 'A crest moves one wavelength in one period, so $u_p = \\lambda/T = f\\lambda$. Equivalently $u_p = \\omega/\\beta$ (not $\\beta/\\omega$).' },
+  { q: 'For $y(x,t) = 5\\cos(4\\pi t - 2\\pi x)$ with $x$ in m and $t$ in s, the phase velocity and direction are…', o: ['2 m/s along $-x$', '0.5 m/s along $+x$', '2 m/s along $+x$', '$4\\pi$ m/s along $+x$'], a: 2,
+    e: '$\\omega = 4\\pi$ rad/s and $\\beta = 2\\pi$ rad/m give $u_p = \\omega/\\beta = 2$ m/s. The minus sign between $\\omega t$ and $\\beta x$ means travel in $+x$. Also $\\lambda = 1$ m, $T = 0.5$ s.' },
+  { q: 'What is the unit of the attenuation constant $\\alpha$?', o: ['rad/m', 'Hz', 'Np/m', 'dB·s'], a: 2,
+    e: '$\\alpha x$ is a dimensionless exponent measured in nepers, so $\\alpha$ is in Np/m. It converts to dB/m with $8.686\\,\\alpha$.' },
+  { q: 'With $\\alpha = 0.2$ Np/m, at what distance has the amplitude fallen to $1/e$ of its initial value?', o: ['0.2 m', '2 m', '5 m', '8.686 m'], a: 2,
+    e: '$e^{-\\alpha x} = e^{-1}$ when $x = 1/\\alpha = 5$ m. Set $\\alpha = 0.2$ in Simulation 2 and the amber marker sits at 5 m.' }
+]);
+
+lucide.createIcons();
+</script>
+</body>
+</html>

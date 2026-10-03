@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dimensions, Units, and Notation - Electromagnetics Module</title>
+    <link rel="stylesheet" href="../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/em.css">
+    <script src="../assets/vendor/katex/katex.min.js"></script>
+    <script src="../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../assets/js/em.js"></script>
+<script src="../assets/vendor/lucide/lucide.min.js"></script>
+<style>
+  body { background:#ffffff; color:#0f172a; font-family:'Inter',sans-serif; overflow-x:hidden; }
+  .glass-panel { background:rgba(255,255,255,.85); backdrop-filter:blur(12px); border:1px solid rgba(15,23,42,.08); box-shadow:0 1px 3px rgba(15,23,42,.06); }
+  .glass-card { background:rgba(241,245,249,.7); backdrop-filter:blur(8px); border:1px solid rgba(15,23,42,.08); transition:all .25s ease-in-out; }
+  .glass-card:hover { border-color:rgba(2,132,199,.45); }
+  canvas { touch-action:none; display:block; }
+  .eq { overflow-x:auto; overflow-y:hidden; }
+  .chip { padding:.35rem .75rem; border-radius:.6rem; font-size:.875rem; font-weight:600; border:1px solid #e2e8f0; background:#fff; color:#334155; transition:all .15s; }
+  .chip:hover { background:#f1f5f9; }
+  .chip.on { background:#0f172a; border-color:#0f172a; color:#fff; }
+  .btn { padding:.4rem .9rem; border-radius:.6rem; font-size:.875rem; font-weight:600; border:1px solid #e2e8f0; background:#fff; color:#334155; }
+  .btn:hover { background:#f1f5f9; }
+  input[type=range] { height:.4rem; cursor:pointer; }
+  select, input[type=number] { border:1px solid #cbd5e1; border-radius:.5rem; padding:.3rem .5rem; background:#fff; font-size:.875rem; }
+  ::-webkit-scrollbar { width:6px; height:6px; } ::-webkit-scrollbar-track { background:#f1f5f9; }
+  ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; } ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+<header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="book-open" class="w-6 h-6"></i></div>
+      <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Dimensions, Units, and Notation</h1>
+    </div>
+    <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium"><button onclick="scrollToSection('notations')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="type" class="w-4 h-4"></i><span>Notation</span></button><button onclick="scrollToSection('si-units')" class="px-3 py-1.5 rounded-lg text-indigo-700 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition flex items-center gap-1.5"><i data-lucide="layers" class="w-4 h-4"></i><span>SI Units</span></button><button onclick="scrollToSection('prefixes')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5"><i data-lucide="cpu" class="w-4 h-4"></i><span>Prefixes</span></button><button onclick="scrollToSection('dimlab')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="flask-conical" class="w-4 h-4"></i><span>Dimensional Analysis</span></button><button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4"></i><span>Quiz</span></button></nav>
+  </div>
+</header>
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+<section id="notations" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="max-w-3xl space-y-3">
+    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Typographical conventions</span>
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Mathematical and Symbol Notation</h2>
+    <p class="text-slate-700 text-sm sm:text-base leading-relaxed">Electromagnetics mixes scalars, vectors, unit vectors and phasors in the same equation. A fixed set of typographical rules tells them apart at a glance — the same rules used throughout this course (Ulaby, <i>Fundamentals of Applied Electromagnetics</i>).</p>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+    <div class="glass-card rounded-2xl p-5 space-y-3 ">
+  <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-400/10 px-2.5 py-1 rounded-md">Scalars</span>
+  <h3 class="text-base font-bold text-slate-900">Medium-weight italic</h3>
+  <p class="text-sm text-slate-700 leading-relaxed">Scalar quantities carry magnitude only, e.g. $C$ for capacitance, $V$ for voltage, $\rho_{\mathrm{v}}$ for volume charge density.</p>
+  <div class="eq bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$C, \quad R, \quad V, \quad \rho_{\mathrm{v}}$$</div>
+</div>
+    <div class="glass-card rounded-2xl p-5 space-y-3 ">
+  <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-400/10 px-2.5 py-1 rounded-md">Units</span>
+  <h3 class="text-base font-bold text-slate-900">Medium-weight roman</h3>
+  <p class="text-sm text-slate-700 leading-relaxed">Units are upright (roman), never italic: $\mathrm{V/m}$ for volts per meter, $\mathrm{C/m^2}$ for coulombs per square meter.</p>
+  <div class="eq bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\mathrm{V/m}, \quad \mathrm{C/m^2}, \quad \mathrm{A/m}$$</div>
+</div>
+    <div class="glass-card rounded-2xl p-5 space-y-3 ">
+  <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-400/10 px-2.5 py-1 rounded-md">Vectors</span>
+  <h3 class="text-base font-bold text-slate-900">Boldface roman</h3>
+  <p class="text-sm text-slate-700 leading-relaxed">Vector quantities are boldface roman: $\mathbf{E}$ is the electric field vector, $E = |\mathbf{E}|$ its magnitude.</p>
+  <div class="eq bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\mathbf{E}, \quad \mathbf{H}, \quad \mathbf{D}, \quad \mathbf{B}, \quad \mathbf{J}$$</div>
+</div>
+    <div class="glass-card rounded-2xl p-5 space-y-3 ">
+  <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-400/10 px-2.5 py-1 rounded-md">Unit vectors</span>
+  <h3 class="text-base font-bold text-slate-900">Boldface with circumflex</h3>
+  <p class="text-sm text-slate-700 leading-relaxed">A unit vector has magnitude 1 and marks a direction; it carries a circumflex (hat): $\mathbf{A} = \boldsymbol{\hat{a}}\,A$.</p>
+  <div class="eq bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\hat{\mathbf{x}}, \quad \hat{\mathbf{y}}, \quad \hat{\mathbf{z}}, \quad \hat{\mathbf{r}}, \quad \boldsymbol{\hat{\phi}}, \quad \hat{\mathbf{R}}, \quad \boldsymbol{\hat{\theta}}$$</div>
+</div>
+    <div class="glass-card rounded-2xl p-5 space-y-3 md:col-span-2 lg:col-span-1">
+  <span class="text-sm font-bold text-indigo-700 uppercase tracking-wider bg-indigo-400/10 px-2.5 py-1 rounded-md">Phasors</span>
+  <h3 class="text-base font-bold text-slate-900">Tilde over the letter</h3>
+  <p class="text-sm text-slate-700 leading-relaxed">$\widetilde{E}$ is the phasor of the sinusoidal scalar $E(t)$ and $\widetilde{\mathbf{E}}$ the phasor of the vector $\mathbf{E}(t)$: $\mathbf{E}(t) = \mathfrak{Re}[\widetilde{\mathbf{E}}\,e^{j\omega t}]$.</p>
+  <div class="eq bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-indigo-700 text-sm">$$\widetilde{\mathbf{E}}(x,y,z), \quad \widetilde{\mathbf{H}}(x,y,z), \quad \widetilde{\mathbf{J}}(x,y,z)$$</div>
+</div>
+    <div class="glass-card rounded-2xl p-5 space-y-3 md:col-span-2 lg:col-span-3">
+      <span class="text-sm font-bold text-purple-700 uppercase tracking-wider bg-purple-400/10 px-2.5 py-1 rounded-md">Put together</span>
+      <p class="text-sm text-slate-700 leading-relaxed">One equation shows every convention. The field of a point charge is a vector (bold) built from a scalar magnitude (italic) and a unit vector (hat), and its unit is written upright:</p>
+      <div class="eq bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-purple-700">$$\mathbf{E} = \hat{\mathbf{R}}\,\frac{q}{4\pi\varepsilon_0 R^2} \quad (\mathrm{V/m}), \qquad \widetilde{\mathbf{E}}(z) = \hat{\mathbf{x}}\,E_0\,e^{-jkz}$$</div>
+    </div>
+  </div>
+</section>
+
+<section id="si-units" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+  <div>
+    <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">International System</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Fundamental SI Units and Derived EM Quantities</h2>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">Every electromagnetic quantity can be written as a product of powers of a few fundamental units. Following Ulaby, electric charge (coulomb) is taken as the fundamental electrical dimension.</p>
+  </div>
+</div>
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <div class="lg:col-span-2 overflow-x-auto rounded-2xl border border-slate-200">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-100 text-slate-700"><tr><th class="px-4 py-3 font-bold text-sky-800">Dimension</th><th class="px-4 py-3 font-bold">Unit</th><th class="px-4 py-3 font-bold text-amber-800">Symbol</th></tr></thead>
+        <tbody class="divide-y divide-slate-200 text-slate-700"><tr class="hover:bg-slate-200/50"><td class="px-4 py-2.5 font-medium text-slate-900">Length</td><td class="px-4 py-2.5">meter</td><td class="px-4 py-2.5 text-amber-800">$\mathrm{m}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2.5 font-medium text-slate-900">Mass</td><td class="px-4 py-2.5">kilogram</td><td class="px-4 py-2.5 text-amber-800">$\mathrm{kg}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2.5 font-medium text-slate-900">Time</td><td class="px-4 py-2.5">second</td><td class="px-4 py-2.5 text-amber-800">$\mathrm{s}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2.5 font-medium text-slate-900">Electric charge</td><td class="px-4 py-2.5">coulomb</td><td class="px-4 py-2.5 text-amber-800">$\mathrm{C}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2.5 font-medium text-slate-900">Temperature</td><td class="px-4 py-2.5">kelvin</td><td class="px-4 py-2.5 text-amber-800">$\mathrm{K}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2.5 font-medium text-slate-900">Amount of substance</td><td class="px-4 py-2.5">mole</td><td class="px-4 py-2.5 text-amber-800">$\mathrm{mol}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2.5 font-medium text-slate-900">Luminous intensity</td><td class="px-4 py-2.5">candela</td><td class="px-4 py-2.5 text-amber-800">$\mathrm{cd}$</td></tr></tbody>
+      </table>
+      <p class="text-sm text-slate-600 p-3 border-t border-slate-200 bg-slate-50">Note: in the 2019 SI definition the <b>ampere</b> is the base electrical unit and the coulomb is derived, $1\,\mathrm{C} = 1\,\mathrm{A\cdot s}$. Both views give identical dimensions.</p>
+    </div>
+    <div class="lg:col-span-3 overflow-x-auto rounded-2xl border border-slate-200">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-100 text-slate-700"><tr><th class="px-4 py-3 font-bold text-sky-800">Quantity</th><th class="px-4 py-3 font-bold">Symbol</th><th class="px-4 py-3 font-bold text-amber-800">Unit</th><th class="px-4 py-3 font-bold text-rose-700">In fundamental units</th></tr></thead>
+        <tbody class="divide-y divide-slate-200 text-slate-700"><tr class="hover:bg-slate-200/50"><td class="px-4 py-2 font-medium text-slate-900">Electric field intensity</td><td class="px-4 py-2">$\mathbf{E}$</td><td class="px-4 py-2 text-amber-800">$\mathrm{V/m}$</td><td class="px-4 py-2 text-rose-700">$\mathrm{kg\,m\,s^{-2}\,C^{-1}}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2 font-medium text-slate-900">Electric flux density</td><td class="px-4 py-2">$\mathbf{D}$</td><td class="px-4 py-2 text-amber-800">$\mathrm{C/m^2}$</td><td class="px-4 py-2 text-rose-700">$\mathrm{C\,m^{-2}}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2 font-medium text-slate-900">Magnetic field intensity</td><td class="px-4 py-2">$\mathbf{H}$</td><td class="px-4 py-2 text-amber-800">$\mathrm{A/m}$</td><td class="px-4 py-2 text-rose-700">$\mathrm{C\,s^{-1}\,m^{-1}}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2 font-medium text-slate-900">Magnetic flux density</td><td class="px-4 py-2">$\mathbf{B}$</td><td class="px-4 py-2 text-amber-800">$\mathrm{T = Wb/m^2}$</td><td class="px-4 py-2 text-rose-700">$\mathrm{kg\,s^{-1}\,C^{-1}}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2 font-medium text-slate-900">Current density</td><td class="px-4 py-2">$\mathbf{J}$</td><td class="px-4 py-2 text-amber-800">$\mathrm{A/m^2}$</td><td class="px-4 py-2 text-rose-700">$\mathrm{C\,s^{-1}\,m^{-2}}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2 font-medium text-slate-900">Volume charge density</td><td class="px-4 py-2">$\rho_{\mathrm{v}}$</td><td class="px-4 py-2 text-amber-800">$\mathrm{C/m^3}$</td><td class="px-4 py-2 text-rose-700">$\mathrm{C\,m^{-3}}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2 font-medium text-slate-900">Permittivity</td><td class="px-4 py-2">$\varepsilon$</td><td class="px-4 py-2 text-amber-800">$\mathrm{F/m}$</td><td class="px-4 py-2 text-rose-700">$\mathrm{C^2\,s^2\,kg^{-1}\,m^{-3}}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2 font-medium text-slate-900">Permeability</td><td class="px-4 py-2">$\mu$</td><td class="px-4 py-2 text-amber-800">$\mathrm{H/m}$</td><td class="px-4 py-2 text-rose-700">$\mathrm{kg\,m\,C^{-2}}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2 font-medium text-slate-900">Conductivity</td><td class="px-4 py-2">$\sigma$</td><td class="px-4 py-2 text-amber-800">$\mathrm{S/m}$</td><td class="px-4 py-2 text-rose-700">$\mathrm{C^2\,s\,kg^{-1}\,m^{-3}}$</td></tr><tr class="hover:bg-slate-200/50"><td class="px-4 py-2 font-medium text-slate-900">Voltage</td><td class="px-4 py-2">$V$</td><td class="px-4 py-2 text-amber-800">$\mathrm{V}$</td><td class="px-4 py-2 text-rose-700">$\mathrm{kg\,m^2\,s^{-2}\,C^{-1}}$</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="prefixes" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+  <div>
+    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Scaling factors</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Multiple and Submultiple Prefixes</h2>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">Electromagnetic quantities span more than 30 orders of magnitude — from the 1.6×10⁻¹⁹ C charge of an electron to the 5000 km wavelength of 60 Hz power. Prefixes keep the numbers readable.</p>
+  </div>
+</div>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-4 grid grid-cols-2 lg:grid-cols-1 gap-4">
+      <div class="glass-card rounded-2xl p-4"><h3 class="text-sm font-bold text-sky-800 mb-2 flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4"></i> Multiples</h3>
+        <table class="w-full text-sm"><tbody class="divide-y divide-slate-200 text-slate-700"><tr id="pre18" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">exa</td><td class="py-2 px-2 text-sky-800 font-semibold">E</td><td class="py-2 px-2 text-right">$10^{18}$</td></tr><tr id="pre15" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">peta</td><td class="py-2 px-2 text-sky-800 font-semibold">P</td><td class="py-2 px-2 text-right">$10^{15}$</td></tr><tr id="pre12" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">tera</td><td class="py-2 px-2 text-sky-800 font-semibold">T</td><td class="py-2 px-2 text-right">$10^{12}$</td></tr><tr id="pre9" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">giga</td><td class="py-2 px-2 text-sky-800 font-semibold">G</td><td class="py-2 px-2 text-right">$10^{9}$</td></tr><tr id="pre6" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">mega</td><td class="py-2 px-2 text-sky-800 font-semibold">M</td><td class="py-2 px-2 text-right">$10^{6}$</td></tr><tr id="pre3" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">kilo</td><td class="py-2 px-2 text-sky-800 font-semibold">k</td><td class="py-2 px-2 text-right">$10^{3}$</td></tr></tbody></table></div>
+      <div class="glass-card rounded-2xl p-4"><h3 class="text-sm font-bold text-rose-700 mb-2 flex items-center gap-2"><i data-lucide="trending-down" class="w-4 h-4"></i> Submultiples</h3>
+        <table class="w-full text-sm"><tbody class="divide-y divide-slate-200 text-slate-700"><tr id="pre-3" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">milli</td><td class="py-2 px-2 text-rose-700 font-semibold">m</td><td class="py-2 px-2 text-right">$10^{-3}$</td></tr><tr id="pre-6" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">micro</td><td class="py-2 px-2 text-rose-700 font-semibold">$\mu$</td><td class="py-2 px-2 text-right">$10^{-6}$</td></tr><tr id="pre-9" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">nano</td><td class="py-2 px-2 text-rose-700 font-semibold">n</td><td class="py-2 px-2 text-right">$10^{-9}$</td></tr><tr id="pre-12" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">pico</td><td class="py-2 px-2 text-rose-700 font-semibold">p</td><td class="py-2 px-2 text-right">$10^{-12}$</td></tr><tr id="pre-15" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">femto</td><td class="py-2 px-2 text-rose-700 font-semibold">f</td><td class="py-2 px-2 text-right">$10^{-15}$</td></tr><tr id="pre-18" class="transition"><td class="py-2 px-2 text-slate-900 font-medium">atto</td><td class="py-2 px-2 text-rose-700 font-semibold">a</td><td class="py-2 px-2 text-right">$10^{-18}$</td></tr></tbody></table></div>
+    </div>
+    <div class="lg:col-span-8 space-y-4">
+      <div class="glass-card rounded-2xl p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2"><i data-lucide="ruler" class="w-5 h-5 text-amber-800"></i> Interactive Simulation 1 · Scale Explorer</h3>
+          <div id="unit-chips" class="flex flex-wrap gap-2"><button class="chip on" data-v="m">Length (m)</button><button class="chip" data-v="Hz">Frequency (Hz)</button><button class="chip" data-v="s">Time (s)</button><button class="chip" data-v="F">Capacitance (F)</button></div>
+        </div>
+        <div class="relative h-[220px] rounded-xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-scale" class="w-full h-full"></canvas></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-36 shrink-0 text-slate-700">Value $10^{n}$, $n$ =</span><input type="range" id="s-exp" min="-18" max="18" step="0.05" value="0" class="flex-1 min-w-0 accent-amber-600"><span id="v-exp" class="w-24 shrink-0 text-right font-mono font-semibold text-amber-800"></span></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">Scientific</span><span id="ro-sci" class="font-mono font-bold text-slate-700 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">With prefix</span><span id="ro-pre" class="font-mono font-bold text-amber-800 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">Closest example</span><span id="ro-near" class="font-mono font-bold text-sky-800 text-right"></span></div>
+        </div>
+        <p class="text-sm text-slate-600">Drag the slider or click on the ruler. The matching prefix is highlighted in the tables; engineering practice picks the prefix that leaves a number between 1 and 1000.</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2"><i data-lucide="repeat" class="w-5 h-5 text-indigo-700"></i> Prefix Converter</h3>
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+          <input id="cv-in" type="number" value="2.4" step="any" class="w-28 font-mono">
+          <select id="cv-from"></select><span class="text-slate-600">→</span><select id="cv-to"></select>
+          <select id="cv-unit"><option>Hz</option><option>m</option><option>F</option><option>H</option><option>V</option><option>A</option><option>C</option><option>s</option></select>
+        </div>
+        <div class="eq bg-slate-100/90 p-3 rounded-xl border border-slate-200 text-indigo-700 text-center" id="cv-out"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dimlab" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+  <div>
+    <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Unit algebra</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Interactive Simulation 2 · Dimensional Analysis Lab</h2>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">Every valid equation must have the same dimensions on both sides. Build a product of quantities with exponents and the lab reduces it to fundamental units (kg, m, s, C) and names the result.</p>
+  </div>
+</div>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-7 glass-card rounded-2xl p-5 space-y-4">
+      <div class="flex flex-wrap gap-2" id="dim-presets"></div>
+      <div id="dim-rows" class="space-y-2"></div>
+      <div class="eq bg-white p-3 rounded-xl border border-slate-200 text-center text-slate-900" id="dim-expr"></div>
+    </div>
+    <div class="lg:col-span-5 space-y-3">
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <h3 class="text-sm font-bold text-slate-900">Result in fundamental units</h3>
+        <div id="dim-badges" class="grid grid-cols-4 gap-2 text-center"></div>
+        <div class="eq bg-slate-100/90 p-3 rounded-xl border border-slate-200 text-center text-rose-700" id="dim-base"></div>
+        <div class="p-3 rounded-xl border text-sm" id="dim-name"></div>
+      </div>
+      <div class="text-sm text-slate-700 bg-slate-100/90 p-3 rounded-xl border border-slate-200 flex gap-2"><i data-lucide="lightbulb" class="w-4 h-4 text-amber-800 shrink-0 mt-0.5"></i>
+        <span>Try the preset $1/\sqrt{\mu_0\varepsilon_0}$: the result is a velocity — Maxwell's first hint that light is an electromagnetic wave. $\sqrt{\mu_0/\varepsilon_0}$ comes out in ohms: the intrinsic impedance of free space, $\eta_0 \approx 377\ \Omega$.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+    <div class="flex items-center gap-2"><span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2></div>
+    <div class="flex items-center gap-2"><button id="quiz-reset" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button>
+    <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 5</span></div>
+  </div>
+  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+</section>
+
+</main>
+<footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Dimensions, Units, and Notation</footer>
+<script>
+/* ===== Shared page toolkit (canvas, UI, quiz, animation) ===== */
+const $ = id => document.getElementById(id);
+const TAU = 2 * Math.PI, DEG = Math.PI / 180;
+const COL = { sky:'#0284c7', rose:'#e11d48', amber:'#d97706', indigo:'#4f46e5', emerald:'#059669', purple:'#9333ea',
+  slate:'#334155', grid:'#e2e8f0', axis:'#64748b', text:'#0f172a', muted:'#64748b', teal:'#0d9488' };
+
+// Canvas CSS size is cached and refreshed by a ResizeObserver, so drawing a frame never forces a layout.
+const _cvSize = new WeakMap();
+const _cvRO = ('ResizeObserver' in window) ? new ResizeObserver(es => es.forEach(e => {
+  const b = e.target.getBoundingClientRect(); _cvSize.set(e.target, { width: b.width, height: b.height });
+})) : null;
+function setupCanvas(cv) {
+  let r = _cvSize.get(cv);
+  if (!r) { const b = cv.getBoundingClientRect(); r = { width: b.width, height: b.height }; if (_cvRO) { _cvSize.set(cv, r); _cvRO.observe(cv); } }
+  const d = window.devicePixelRatio || 1;
+  const w = Math.max(1, r.width), h = Math.max(1, r.height);
+  const W = Math.round(w * d), H = Math.round(h * d);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const c = cv.getContext('2d');
+  c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, w, h);
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  return { c, w, h };
+}
+function line(c, x1, y1, x2, y2, col, lw = 1, dash) {
+  c.save(); c.strokeStyle = col; c.lineWidth = lw; if (dash) c.setLineDash(dash);
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.restore();
+}
+function arrow(c, x1, y1, x2, y2, col, lw = 2, hs = 9) {
+  const L = Math.hypot(x2 - x1, y2 - y1); if (L < 0.5) return;
+  const a = Math.atan2(y2 - y1, x2 - x1), h = Math.min(hs, L * 0.6);
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw;
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - h * 0.7 * Math.cos(a), y2 - h * 0.7 * Math.sin(a)); c.stroke();
+  c.beginPath(); c.moveTo(x2, y2);
+  c.lineTo(x2 - h * Math.cos(a - 0.42), y2 - h * Math.sin(a - 0.42));
+  c.lineTo(x2 - h * Math.cos(a + 0.42), y2 - h * Math.sin(a + 0.42)); c.closePath(); c.fill(); c.restore();
+}
+function label(c, t, x, y, col = COL.text, font = '600 13px Inter, system-ui, sans-serif', align = 'left', base = 'middle', halo = true) {
+  c.save(); c.font = font; c.textAlign = align; c.textBaseline = base;
+  if (halo) { c.lineWidth = 3.5; c.strokeStyle = 'rgba(255,255,255,0.9)'; c.strokeText(t, x, y); }
+  c.fillStyle = col; c.fillText(t, x, y); c.restore();
+}
+function dot(c, x, y, r, col, stroke = '#fff') {
+  c.save(); c.fillStyle = col; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+  if (stroke) { c.strokeStyle = stroke; c.lineWidth = 2; c.stroke(); } c.restore();
+}
+function curve(c, pts, col, lw = 2, dash) {
+  if (!pts.length) return;
+  c.save(); c.strokeStyle = col; c.lineWidth = lw; if (dash) c.setLineDash(dash);
+  c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke(); c.restore();
+}
+/* plot frame: returns mapping helpers for a box */
+function plotFrame(c, box, xr, yr, opt = {}) {
+  const { x, y, w, h } = box;
+  const X = v => x + (v - xr[0]) / (xr[1] - xr[0]) * w;
+  const Y = v => y + h - (v - yr[0]) / (yr[1] - yr[0]) * h;
+  c.save(); c.fillStyle = opt.bg || '#ffffff'; c.fillRect(x, y, w, h);
+  c.strokeStyle = COL.grid; c.lineWidth = 1;
+  (opt.xt || []).forEach(v => { c.beginPath(); c.moveTo(X(v), y); c.lineTo(X(v), y + h); c.stroke(); });
+  (opt.yt || []).forEach(v => { c.beginPath(); c.moveTo(x, Y(v)); c.lineTo(x + w, Y(v)); c.stroke(); });
+  c.strokeStyle = '#cbd5e1'; c.strokeRect(x, y, w, h);
+  if (yr[0] < 0 && yr[1] > 0) line(c, x, Y(0), x + w, Y(0), COL.axis, 1.2);
+  c.restore();
+  const f = '500 12px Inter, system-ui, sans-serif';
+  (opt.xt || []).forEach(v => label(c, (opt.xf || String)(v), X(v), y + h + 12, COL.muted, f, 'center', 'middle', false));
+  (opt.yt || []).forEach(v => label(c, (opt.yf || String)(v), x - 6, Y(v), COL.muted, f, 'right', 'middle', false));
+  if (opt.xl) label(c, opt.xl, x + w, y + h + 28, COL.slate, '600 12px Inter, system-ui, sans-serif', 'right', 'middle', false);
+  if (opt.yl) label(c, opt.yl, x + 4, y - 10, COL.slate, '600 12px Inter, system-ui, sans-serif', 'left', 'middle', false);
+  return { X, Y };
+}
+function fmtSI(v, unit = '', digits = 3) {
+  if (!isFinite(v)) return '∞ ' + unit;
+  if (v === 0) return '0 ' + unit;
+  const P = [[1e24,'Y'],[1e21,'Z'],[1e18,'E'],[1e15,'P'],[1e12,'T'],[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n'],[1e-12,'p'],[1e-15,'f'],[1e-18,'a'],[1e-21,'z'],[1e-24,'y']];
+  const a = Math.abs(v);
+  for (const [s, p] of P) if (a >= s * 0.9995) return String(parseFloat((v / s).toPrecision(digits))) + ' ' + p + unit;
+  return v.toExponential(digits - 1) + ' ' + unit;
+}
+function fmtE(v, d = 3) { // 1.23×10⁻⁴
+  if (v === 0) return '0'; if (!isFinite(v)) return '∞';
+  const e = Math.floor(Math.log10(Math.abs(v))); const m = v / Math.pow(10, e);
+  if (e >= -2 && e <= 3) return v.toPrecision(d);
+  const sup = String(e).replace(/-/g, '⁻').replace(/\d/g, k => '⁰¹²³⁴⁵⁶⁷⁸⁹'[k]);
+  return m.toFixed(d - 1) + '×10' + sup;
+}
+function texE(v, d = 3) { // TeX scientific
+  if (v === 0) return '0'; const e = Math.floor(Math.log10(Math.abs(v)));
+  if (e >= -2 && e <= 3) return v.toPrecision(d);
+  return (v / Math.pow(10, e)).toFixed(d - 1) + '\\times 10^{' + e + '}';
+}
+const val = id => parseFloat($(id).value);
+/* bind sliders: map { id: fmt(v) } — slider #s-id, readout #v-id */
+function bindSliders(map, onChange) {
+  const upd = () => { for (const k in map) { const o = $('v-' + k); if (o) o.textContent = map[k](val('s-' + k)); } onChange && onChange(); };
+  for (const k in map) $('s-' + k).addEventListener('input', upd);
+  upd(); return upd;
+}
+function setSlider(k, v) { const s = $('s-' + k); s.value = v; s.dispatchEvent(new Event('input')); }
+/* chip group: buttons with data-v inside container; returns getter */
+function chipGroup(id, onChange) {
+  const box = $(id); let cur = (box.querySelector('.chip.on') || box.querySelector('.chip')).dataset.v;
+  box.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    box.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); cur = b.dataset.v; onChange && onChange(cur);
+  }));
+  return { get: () => cur, set: v => { const b = box.querySelector(`.chip[data-v="${v}"]`); if (b) b.click(); } };
+}
+function chipToggle(id, onChange) { const b = $(id); b.addEventListener('click', () => { b.classList.toggle('on'); onChange && onChange(b.classList.contains('on')); }); return () => b.classList.contains('on'); }
+/* pointer dragging on a canvas: hit(x,y)->key|null, move(key,x,y), end(key) */
+function draggable(cv, hit, move, end) {
+  let key = null;
+  const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  cv.addEventListener('pointerdown', e => { const [x, y] = pos(e); key = hit(x, y); if (key != null) { cv.setPointerCapture(e.pointerId); e.preventDefault(); move(key, x, y); } });
+  cv.addEventListener('pointermove', e => { const [x, y] = pos(e); if (key != null) move(key, x, y); else cv.style.cursor = hit(x, y) != null ? 'grab' : ''; });
+  const up = () => { if (key != null) { end && end(key); key = null; } };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+}
+/* animation loop — pauses canvases that are off-screen, and stops completely (0 frames/s)
+   when no animated canvas is visible or the tab is hidden; it restarts when one scrolls back in. */
+const _anim = { items: [], on: false, last: 0 };
+function _animKick() {
+  if (_anim.on) return;
+  _anim.on = true; _anim.last = performance.now();
+  requestAnimationFrame(_animTick);
+}
+function _animTick(now) {
+  const dt = Math.max(0, Math.min(0.05, (now - _anim.last) / 1000)); _anim.last = Math.max(_anim.last, now);
+  let any = false;
+  if (!document.hidden) _anim.items.forEach(i => { if (i.vis) { any = true; try { i.fn(dt); } catch (err) { console.error(err); } } });
+  if (any) requestAnimationFrame(_animTick); else _anim.on = false;
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) _animKick(); });
+function animate(el, fn) {
+  const it = { el, fn, vis: true }; _anim.items.push(it);
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(e => { it.vis = e.isIntersecting; if (it.vis) _animKick(); })).observe(el);
+  _animKick();
+}
+const _resize = [];
+function onResize(fn) { _resize.push(fn); }
+window.addEventListener('resize', () => _resize.forEach(f => f()));
+function playButton(id, state, key = 'run') {
+  const b = $(id);
+  const paint = () => { b.innerHTML = state[key] ? '❚❚ Pause' : '▶ Play'; };
+  b.addEventListener('click', () => { state[key] = !state[key]; paint(); }); paint();
+}
+function typeset(el) { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(el ? [el] : undefined).catch(() => {}); }
+function scrollToSection(id) { const el = $(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
+/* data-driven quiz — same visual format as the reference page (dimensions_units_notation) */
+function renderQuiz(id, QS) {
+  const box = $(id);
+  const card = (q, i) => `
+    <div class="glass-card rounded-2xl p-5 space-y-3 ${QS.length % 2 && i === QS.length - 1 ? 'md:col-span-2' : ''}" id="q${i}-card">
+      <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+      <p class="text-sm text-slate-800 font-medium leading-relaxed">${q.q}</p>
+      <div class="grid grid-cols-1 ${QS.length % 2 && i === QS.length - 1 ? 'md:grid-cols-2' : ''} gap-2 text-sm">${q.o.map((o, j) =>
+        `<button class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition text-slate-800 flex items-start gap-2" data-j="${j}"><span class="font-semibold text-slate-600 shrink-0">${String.fromCharCode(65 + j)}.</span><span>${o}</span></button>`).join('')}</div>
+      <div id="q${i}-fb" class="text-sm hidden p-2.5 rounded-xl"></div>
+    </div>`;
+  const draw = () => {
+    box.innerHTML = QS.map(card).join('');
+    let score = 0, done = 0;
+    const setScore = () => { const s = $('quiz-score'); if (s) s.textContent = `Score: ${score} / ${QS.length}`; };
+    QS.forEach((q, i) => box.querySelectorAll(`.q${i}-btn`).forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j; if ($(`q${i}-card`).dataset.done) return; $(`q${i}-card`).dataset.done = 1; done++;
+      const ok = j === q.a; if (ok) score++;
+      box.querySelectorAll(`.q${i}-btn`).forEach(x => { const k = +x.dataset.j; x.disabled = true; x.classList.remove('hover:border-slate-300', 'bg-slate-100');
+        if (k === q.a) x.classList.add('bg-emerald-500/10', 'border-emerald-500/40', 'text-emerald-800');
+        else if (k === j) x.classList.add('bg-rose-500/10', 'border-rose-500/40', 'text-rose-800');
+        else x.classList.add('bg-slate-100', 'opacity-60'); });
+      const fb = $(`q${i}-fb`);
+      fb.className = 'text-sm p-2.5 rounded-xl font-medium leading-relaxed border ' + (ok ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800' : 'bg-rose-500/10 border-rose-500/30 text-rose-700');
+      fb.innerHTML = `${ok ? '✓ Correct.' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + q.a) + '.'} <span class="font-normal text-slate-700">${q.e}</span>`;
+      setScore();
+      if (done === QS.length) { const r = $('quiz-reset'); if (r) r.classList.remove('hidden'); }
+      typeset(fb);
+    })));
+    setScore(); const r = $('quiz-reset'); if (r) r.classList.add('hidden');
+    typeset(box);
+  };
+  draw();
+  const r = $('quiz-reset'); if (r) r.addEventListener('click', draw);
+}
+
+/* ===== Dimensions, Units, and Notation ===== */
+const PREF = [['E', 18], ['P', 15], ['T', 12], ['G', 9], ['M', 6], ['k', 3], ['', 0], ['m', -3], ['µ', -6], ['n', -9], ['p', -12], ['f', -15], ['a', -18]];
+const PNAME = { E: 'exa', P: 'peta', T: 'tera', G: 'giga', M: 'mega', k: 'kilo', '': '(none)', m: 'milli', 'µ': 'micro', n: 'nano', p: 'pico', f: 'femto', a: 'atto' };
+const EXAMPLES = {
+  m: [[0.84e-15, 'proton radius'], [5.3e-11, 'hydrogen atom'], [1e-9, 'DNA width ~ nm'], [5e-7, 'green light λ'], [7e-5, 'human hair'], [1e-3, 'mm-wave λ (300 GHz)'], [0.125, 'Wi-Fi λ (2.4 GHz)'], [1.7, 'person'], [3, 'FM radio λ'], [5e6, '60 Hz λ'], [6.37e6, 'Earth radius'], [1.5e11, 'Earth–Sun']],
+  Hz: [[50, 'power grid'], [1e3, 'audio tone'], [1e6, 'AM radio'], [1e8, 'FM radio'], [2.4e9, 'Wi-Fi'], [3e10, 'radar / satellite'], [3e13, 'thermal IR'], [5.5e14, 'green light'], [1e16, 'ultraviolet'], [3e18, 'X-rays'], [1e20, 'gamma rays']],
+  s: [[3.3e-18, 'light crosses an atom'], [1e-15, 'optical cycle ~ fs'], [3.3e-9, 'light travels 1 m'], [3e-10, '3 GHz clock period'], [1e-6, 'µs pulse'], [1.67e-2, '60 Hz period'], [1, 'heartbeat'], [8.64e4, 'one day'], [3.15e7, 'one year']],
+  F: [[1e-16, 'transistor gate'], [1e-12, 'pF ceramic chip'], [1e-10, '1 m of coax (≈100 pF)'], [1e-7, '0.1 µF decoupling'], [1e-3, 'electrolytic'], [1, 'supercapacitor'], [3000, 'large supercap']]
+};
+let unit = 'm';
+const cvS = $('cv-scale');
+function prefixOf(v) {
+  const e = Math.log10(Math.abs(v)); let best = PREF[PREF.length - 1];
+  for (const p of PREF) if (e >= p[1] - 1e-9) { best = p; break; }
+  if (e >= 21) best = PREF[0];
+  return best;
+}
+function drawScale() {
+  const { c, w, h } = setupCanvas(cvS);
+  const n = val('s-exp'), L = 30, R = w - 30, y0 = h / 2 + 10;
+  const X = e => L + (e + 18) / 36 * (R - L);
+  // band backgrounds per prefix
+  for (let e = -18; e < 18; e += 3) { c.fillStyle = ((e / 3) % 2 === 0) ? '#f8fafc' : '#f1f5f9'; c.fillRect(X(e), 10, X(e + 3) - X(e), h - 20); }
+  line(c, L, y0, R, y0, COL.slate, 2);
+  for (let e = -18; e <= 18; e++) {
+    const big = e % 3 === 0; line(c, X(e), y0 - (big ? 8 : 4), X(e), y0 + (big ? 8 : 4), COL.axis, big ? 1.5 : 1);
+    if (big) { const p = PREF.find(q => q[1] === e); label(c, (p[0] || '—'), X(e), y0 + 20, e === 0 ? COL.slate : (e > 0 ? COL.sky : COL.rose), '700 13px Inter, sans-serif', 'center');
+      label(c, '10' + String(e).replace(/-/g, '⁻').replace(/\d/g, k => '⁰¹²³⁴⁵⁶⁷⁸⁹'[k]), X(e), y0 + 36, COL.muted, '500 11px Inter, sans-serif', 'center', 'middle', false); }
+  }
+  // examples
+  const ex = EXAMPLES[unit];
+  ex.forEach(([v, t], i) => {
+    const e = Math.log10(v); if (e < -18 || e > 18) return;
+    const up = i % 2 === 0, yy = up ? y0 - 30 - (i % 4 === 0 ? 0 : 24) : y0 - 78 - (i % 4 === 1 ? 0 : 24);
+    line(c, X(e), y0 - 4, X(e), yy + 6, 'rgba(2,132,199,0.35)', 1, [2, 3]);
+    dot(c, X(e), y0, 3.5, COL.sky, null);
+    label(c, t, X(e), yy, COL.slate, '500 12px Inter, sans-serif', 'center');
+  });
+  // current marker
+  line(c, X(n), 12, X(n), h - 12, COL.amber, 2.5);
+  dot(c, X(n), y0, 6, COL.amber);
+  // update readouts
+  const v = Math.pow(10, n), p = prefixOf(v);
+  $('ro-sci').textContent = fmtE(v, 3) + ' ' + unit;
+  $('ro-pre').textContent = String(parseFloat((v / Math.pow(10, p[1])).toPrecision(3))) + ' ' + p[0] + unit;
+  let near = ex[0]; ex.forEach(q => { if (Math.abs(Math.log10(q[0]) - n) < Math.abs(Math.log10(near[0]) - n)) near = q; });
+  $('ro-near').textContent = near[1];
+  document.querySelectorAll('[id^=pre]').forEach(r => r.classList.remove('bg-amber-100'));
+  const row = $('pre' + p[1]); if (row) row.classList.add('bg-amber-100');
+}
+cvS.addEventListener('pointerdown', e => { const r = cvS.getBoundingClientRect(); const x = e.clientX - r.left;
+  setSlider('exp', Math.max(-18, Math.min(18, (x - 30) / (r.width - 60) * 36 - 18)).toFixed(2)); });
+bindSliders({ exp: v => 'n = ' + (+v).toFixed(2) }, drawScale);
+chipGroup('unit-chips', u => { unit = u; drawScale(); });
+onResize(drawScale);
+
+/* prefix converter */
+['cv-from', 'cv-to'].forEach((id, k) => { $(id).innerHTML = PREF.map(p => `<option value="${p[1]}">${p[0] || '—'} ${PNAME[p[0]]} (10^${p[1]})</option>`).join(''); });
+$('cv-from').value = 9; $('cv-to').value = 6;
+function niceNum(x) { if (x === 0) return '0'; const a = Math.abs(x); if (a >= 1e-3 && a < 1e7) return String(parseFloat(x.toPrecision(6))); return texE(x, 4); }
+function convert() {
+  const x = parseFloat($('cv-in').value) || 0, a = +$('cv-from').value, b = +$('cv-to').value, u = $('cv-unit').value;
+  const pa = PREF.find(p => p[1] === a)[0], pb = PREF.find(p => p[1] === b)[0];
+  const U = s => '\\,\\mathrm{' + (s === 'µ' ? '\\mu ' : s) + (u === 'Ω' ? '\\Omega' : u) + '}';
+  const y = x * Math.pow(10, a - b);
+  $('cv-out').innerHTML = `$$${niceNum(x)}${U(pa)} = ${niceNum(x)}\\times 10^{${a}}${U('')} = ${niceNum(y)}${U(pb)}$$`;
+  typeset($('cv-out'));
+}
+['cv-in', 'cv-from', 'cv-to', 'cv-unit'].forEach(id => $(id).addEventListener('input', convert));
+
+/* dimensional analysis lab — dims [kg, m, s, C] */
+const Q = {
+  q: ['q', 'charge', [0, 0, 0, 1], 'C'], E: ['E', 'electric field', [1, 1, -2, -1], 'V/m'], D: ['D', 'flux density D', [0, -2, 0, 1], 'C/m^2'],
+  H: ['H', 'magnetic field H', [0, -1, -1, 1], 'A/m'], B: ['B', 'flux density B', [1, 0, -1, -1], 'T'], J: ['J', 'current density', [0, -2, -1, 1], 'A/m^2'],
+  eps: ['\\varepsilon_0', 'permittivity', [-1, -3, 2, 2], 'F/m'], mu: ['\\mu_0', 'permeability', [1, 1, 0, -2], 'H/m'], sig: ['\\sigma', 'conductivity', [-1, -3, 1, 2], 'S/m'],
+  u: ['u', 'velocity', [0, 1, -1, 0], 'm/s'], R: ['R', 'distance', [0, 1, 0, 0], 'm'], t: ['t', 'time', [0, 0, 1, 0], 's'], w: ['\\omega', 'angular freq.', [0, 0, -1, 0], 'rad/s'],
+  V: ['V', 'voltage', [1, 2, -2, -1], 'V'], I: ['I', 'current', [0, 0, -1, 1], 'A'], L: ['L', 'inductance', [1, 2, 0, -2], 'H'], C: ['C', 'capacitance', [-1, -2, 2, 2], 'F'],
+  Rz: ['R_\\Omega', 'resistance', [1, 2, -1, -2], '\\Omega'], m: ['m', 'mass', [1, 0, 0, 0], 'kg']
+};
+const NAMED = [[[0, 0, 0, 0], 'dimensionless', ''], [[0, 1, -1, 0], 'm/s', 'a velocity'], [[1, 2, -1, -2], 'Ω', 'an impedance / resistance'], [[1, 1, -2, 0], 'N', 'a force'],
+  [[1, 2, -2, 0], 'J', 'an energy'], [[1, 2, -3, 0], 'W', 'a power'], [[1, 2, -2, -1], 'V', 'a voltage'], [[0, 0, -1, 1], 'A', 'a current'], [[-1, -2, 1, 2], 'S', 'a conductance'],
+  [[-1, -2, 2, 2], 'F', 'a capacitance'], [[1, 2, 0, -2], 'H', 'an inductance'], [[1, 2, -1, -1], 'Wb', 'a magnetic flux'], [[1, 0, -1, -1], 'T', 'a magnetic flux density'],
+  [[1, 1, -2, -1], 'V/m', 'an electric field'], [[0, -1, -1, 1], 'A/m', 'a magnetic field intensity'], [[0, -2, 0, 1], 'C/m²', 'a flux / surface charge density'],
+  [[0, -2, -1, 1], 'A/m²', 'a current density'], [[0, -3, 0, 1], 'C/m³', 'a volume charge density'], [[-1, -3, 2, 2], 'F/m', 'a permittivity'], [[1, 1, 0, -2], 'H/m', 'a permeability'],
+  [[-1, -3, 1, 2], 'S/m', 'a conductivity'], [[1, -1, -2, 0], 'J/m³', 'an energy density'], [[1, 0, -3, 0], 'W/m²', 'a power density (Poynting vector)'],
+  [[0, 0, 1, 0], 's', 'a time'], [[0, 0, -1, 0], '1/s = Hz', 'a frequency'], [[0, 1, 0, 0], 'm', 'a length'], [[0, 0, 0, 1], 'C', 'a charge'], [[0, 0, 2, 0], 's²', 'a time squared'],
+  [[0, -2, 2, 0], 's²/m²', 'an inverse velocity squared']];
+const EXPS = [[-2, '-2'], [-1, '-1'], [-0.5, '-1/2'], [0, '0'], [0.5, '1/2'], [1, '1'], [2, '2']];
+const PRESETS = [
+  ['$1/\\sqrt{\\mu_0\\varepsilon_0}$', [['mu', -0.5], ['eps', -0.5], ['q', 0]]],
+  ['$\\sqrt{\\mu_0/\\varepsilon_0}$', [['mu', 0.5], ['eps', -0.5], ['q', 0]]],
+  ['$qE$', [['q', 1], ['E', 1], ['R', 0]]],
+  ['$q\\,uB$', [['q', 1], ['u', 1], ['B', 1]]],
+  ['$\\varepsilon_0E^2$', [['eps', 1], ['E', 2], ['R', 0]]],
+  ['$EH$', [['E', 1], ['H', 1], ['R', 0]]],
+  ['$E/H$', [['E', 1], ['H', -1], ['R', 0]]],
+  ['$\\varepsilon/\\sigma$', [['eps', 1], ['sig', -1], ['R', 0]]],
+  ['$\\sqrt{LC}$', [['L', 0.5], ['C', 0.5], ['R', 0]]],
+  ['$\\sigma E$', [['sig', 1], ['E', 1], ['R', 0]]]
+];
+const rowsBox = $('dim-rows');
+rowsBox.innerHTML = [0, 1, 2].map(i => `<div class="flex flex-wrap items-center gap-2 text-sm"><span class="w-16 text-slate-600">Factor ${i + 1}</span>
+  <select id="dq${i}" class="flex-1 min-w-[10rem]">${Object.entries(Q).map(([k, q]) => `<option value="${k}">${q[1]} (${q[3].replace('^2', '²').replace('\\Omega', 'Ω')})</option>`).join('')}</select>
+  <span class="text-slate-600">power</span><select id="de${i}">${EXPS.map(e => `<option value="${e[0]}">${e[1]}</option>`).join('')}</select></div>`).join('');
+$('dim-presets').innerHTML = PRESETS.map((p, i) => `<button class="chip" data-p="${i}">${p[0]}</button>`).join('');
+$('dim-presets').querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+  $('dim-presets').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b));
+  PRESETS[+b.dataset.p][1].forEach(([k, e], i) => { $('dq' + i).value = k; $('de' + i).value = e; }); dimCalc();
+}));
+const fracTeX = e => { if (Number.isInteger(e)) return String(e); const n = Math.round(e * 2); return (n < 0 ? '-' : '') + '\\frac{' + Math.abs(n) + '}{2}'; };
+function dimCalc() {
+  const d = [0, 0, 0, 0]; let expr = [], units = [];
+  for (let i = 0; i < 3; i++) {
+    const k = $('dq' + i).value, e = +$('de' + i).value; if (!e) continue;
+    const q = Q[k]; q[2].forEach((x, j) => d[j] += x * e);
+    const pw = e === 1 ? '' : `^{${fracTeX(e)}}`;
+    expr.push(`${q[0]}${pw}`); units.push(`[\\mathrm{${q[3]}}]${pw}`);
+  }
+  const clean = d.map(x => Math.abs(x) < 1e-9 ? 0 : Math.round(x * 2) / 2);
+  $('dim-expr').innerHTML = `$$${expr.join('\\,') || '1'} \\;\\rightarrow\\; ${units.join('\\,') || '1'}$$`;
+  const nm = ['kg', 'm', 's', 'C'];
+  const base = clean.map((x, j) => x ? `\\mathrm{${nm[j]}}${x === 1 ? '' : '^{' + fracTeX(x) + '}'}` : '').filter(Boolean).join('\\,');
+  $('dim-base').innerHTML = `$$${base || '1\\ (\\text{dimensionless})'}$$`;
+  $('dim-badges').innerHTML = ['M (kg)', 'L (m)', 'T (s)', 'Q (C)'].map((t, j) => `<div class="rounded-xl border border-slate-200 bg-white p-2"><div class="text-sm text-slate-600">${t}</div><div class="text-lg font-bold font-mono ${clean[j] ? 'text-rose-700' : 'text-slate-600'}">${fracTeX(clean[j]).replace('\\frac{1}{2}', '½').replace('\\frac{3}{2}', '3/2')}</div></div>`).join('');
+  const hit = NAMED.find(n => n[0].every((x, j) => x === clean[j]));
+  const nb = $('dim-name');
+  if (hit) { nb.className = 'p-3 rounded-xl border text-sm bg-emerald-50 border-emerald-300 text-emerald-800'; nb.innerHTML = `<b>Unit: ${hit[1]}</b>${hit[2] ? ' — the result is ' + hit[2] + '.' : ''}`; }
+  else { nb.className = 'p-3 rounded-xl border text-sm bg-slate-50 border-slate-200 text-slate-700'; nb.innerHTML = 'No common named unit — the combination is still valid, just not a standard quantity.'; }
+  ['dim-expr','dim-base'].forEach(i => typeset($(i)));
+}
+for (let i = 0; i < 3; i++) { $('dq' + i).addEventListener('change', dimCalc); $('de' + i).addEventListener('change', dimCalc); }
+
+renderQuiz('quiz-box', [
+  { q: 'How is a vector quantity such as the electric field written in this course?', o: ['Medium-weight italic ($E$)', 'Boldface roman ($\\mathbf{E}$)', 'Boldface with a circumflex ($\\hat{\\mathbf{E}}$)', 'With a tilde ($\\widetilde{E}$)'], a: 1,
+    e: 'Vectors are boldface roman. Italic $E$ is only the magnitude, a hat marks a unit vector (magnitude 1), and a tilde marks a phasor.' },
+  { q: 'What is the SI unit of the electric flux density $\\mathbf{D}$?', o: ['$\\mathrm{V/m}$', '$\\mathrm{C/m^2}$', '$\\mathrm{A/m}$', '$\\mathrm{F/m}$'], a: 1,
+    e: '$\\mathbf{D} = \\varepsilon\\mathbf{E}$ has units $(\\mathrm{F/m})(\\mathrm{V/m}) = \\mathrm{C/m^2}$, because $\\mathrm{F\\cdot V} = \\mathrm{C}$. It equals a surface charge density.' },
+  { q: 'A capacitor is labelled 47 nF. What is its capacitance in farads?', o: ['$4.7\\times10^{-6}$ F', '$4.7\\times10^{-8}$ F', '$4.7\\times10^{-11}$ F', '$47\\times10^{-6}$ F'], a: 1,
+    e: 'nano = $10^{-9}$, so $47\\,\\mathrm{nF} = 47\\times10^{-9} = 4.7\\times10^{-8}$ F.' },
+  { q: 'Reduced to fundamental units, $1/\\sqrt{\\mu_0\\varepsilon_0}$ has the dimensions of…', o: ['an impedance (Ω)', 'a velocity (m/s)', 'a frequency (Hz)', 'it is dimensionless'], a: 1,
+    e: '$[\\mu_0][\\varepsilon_0] = (\\mathrm{kg\\,m\\,C^{-2}})(\\mathrm{C^2 s^2 kg^{-1} m^{-3}}) = \\mathrm{s^2/m^2}$, so the inverse square root is m/s. Its value, $3\\times10^8$ m/s, is the speed of light.' },
+  { q: 'Wi-Fi operates at 2.4 GHz. The same frequency in MHz is…', o: ['240 MHz', '2400 MHz', '24 000 MHz', '0.0024 MHz'], a: 1,
+    e: 'giga ($10^9$) to mega ($10^6$) is a factor of $10^3$: $2.4\\times10^{9} = 2400\\times10^{6}$ Hz.' }
+]);
+window.addEventListener('load', () => { drawScale(); convert(); $('dim-presets').querySelector('.chip').click(); });
+
+lucide.createIcons();
+</script>
+</body>
+</html>

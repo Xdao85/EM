@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en" data-root="../">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maxwell's equations · Electromagnetics Course Portal</title>
+    <link rel="stylesheet" href="../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/em.css">
+    <script src="../assets/vendor/katex/katex.min.js"></script>
+    <script src="../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../assets/js/em.js"></script>
+<script src="../assets/vendor/lucide/lucide.min.js"></script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .glass-panel { background: rgba(255,255,255,.85); border: 1px solid rgba(15,23,42,.08); backdrop-filter: blur(8px); }
+  .card { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,.03); transition: border-color .2s, transform .2s, box-shadow .2s; }
+  a.card:hover, button.card:hover { border-color: rgba(2,132,199,.45); transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(15,23,42,.25); }
+  a.card:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; }
+  .chip { padding: .35rem .8rem; border-radius: 9999px; font-size: .875rem; font-weight: 600; border: 1px solid #e2e8f0; color: #475569; background: #fff; transition: all .15s; }
+  .chip:hover { background: #f8fafc; }
+  .chip.on { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .seg button { padding: .4rem .9rem; font-size: .875rem; font-weight: 600; color: #475569; border-radius: .5rem; }
+  .seg button.on { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  ::-webkit-scrollbar { width: 8px; height: 6px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fade { animation: fade-in .35s ease-out both; }
+  .ring-track { stroke: #e2e8f0; } .ring-val { stroke: #059669; transition: stroke-dashoffset .6s ease; }
+  .balance { text-wrap: balance; }
+  nav a { white-space: nowrap; }
+  .skip { position: absolute; left: -999px; top: 8px; z-index: 60; background: #0f172a; color: #fff; padding: .5rem .9rem; border-radius: .5rem; font-weight: 600; }
+  .skip:focus { left: 8px; }
+  .stat b { display: block; font-size: 1.5rem; line-height: 1.1; font-weight: 800; color: #0f172a; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: .875rem; color: #475569; }
+  .pg-wrap { position: relative; }
+  .pg-handle { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 9999px; touch-action: none; cursor: grab; outline: none; }
+  .pg-handle:active { cursor: grabbing; }
+  .pg-handle:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #0369a1; }
+  .chip[aria-pressed="true"], .chip.on { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .hl { background: #fef08a; color: inherit; border-radius: 2px; }
+  #q::-webkit-search-cancel-button { display: none; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+<a href="#main" class="skip">Skip to content</a>
+<header id="portal-header" class="border-b border-slate-200 px-4 lg:px-8 py-3"></header>
+<main id="main" class="flex-grow">
+<section class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8">
+  <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">Maxwell's equations</h1>
+  <p class="text-base text-slate-700 mt-2 max-w-3xl">The four laws the whole course builds towards. Each card links to the modules where the law is studied.</p>
+</section>
+<!-- Maxwell -->
+<section class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+  <div class="rounded-2xl bg-slate-50 border border-slate-200 p-5 sm:p-6">
+    <div class="flex flex-wrap items-end justify-between gap-3 mb-4">
+      <div>
+        <p class="text-sm text-slate-700">Switch the form to see the same physics three ways.</p>
+      </div>
+      <div class="seg inline-flex p-1 rounded-xl bg-slate-200/70" id="mx-seg" role="group" aria-label="Form of Maxwell's equations">
+        <button data-f="d" class="on" aria-pressed="true">Differential</button><button data-f="i" aria-pressed="false">Integral</button><button data-f="p" aria-pressed="false">Phasor</button>
+      </div>
+    </div>
+    <div id="mx" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+  </div>
+</section>
+
+
+</main>
+<footer class="border-t border-slate-200 py-5 px-4 text-center text-sm text-slate-600 mt-8">
+  <a href="../welcome.html" data-file="welcome.html" class="nav font-medium text-sky-800 hover:underline">← Back to the overview</a>
+  <span class="mx-2">·</span> Notation follows Ulaby, <i>Fundamentals of Applied Electromagnetics</i>
+</footer>
+<script src="../assets/js/portal.js"></script>
+<script>
+portalHeader('portal/maxwell.html');
+/* Maxwell */
+const MX = [
+ {c:'sky', name:"Gauss's law", sub:'Electric charge is the source of D', d:'\\nabla\\cdot\\mathbf{D} = \\rho_v', i:'\\oint_S \\mathbf{D}\\cdot d\\mathbf{s} = Q', p:'\\nabla\\cdot\\tilde{\\mathbf{D}} = \\tilde{\\rho}_v', t:'3', links:[['3.4','Gauss\'s Law','topic3/gauss_s_law.html'],['3.1','Electrostatic equations','topic3/maxwell_s_equations_electromagnetics.html']]},
+ {c:'rose', name:"Faraday's law", sub:'Changing B induces a circulating E', d:'\\nabla\\times\\mathbf{E} = -\\dfrac{\\partial\\mathbf{B}}{\\partial t}', i:'\\oint_C \\mathbf{E}\\cdot d\\boldsymbol{\\ell} = -\\dfrac{d}{dt}\\int_S \\mathbf{B}\\cdot d\\mathbf{s}', p:'\\nabla\\times\\tilde{\\mathbf{E}} = -j\\omega\\tilde{\\mathbf{B}}', t:'5', links:[['5.1','Faraday\'s Law','topic5/faraday_law.html']]},
+ {c:'amber', name:'No magnetic monopoles', sub:'Magnetic flux lines always close', d:'\\nabla\\cdot\\mathbf{B} = 0', i:'\\oint_S \\mathbf{B}\\cdot d\\mathbf{s} = 0', p:'\\nabla\\cdot\\tilde{\\mathbf{B}} = 0', t:'4', links:[['4.3','Magnetostatic equations','topic4/maxwell_magnetostatic_equations.html']]},
+ {c:'indigo', name:'Ampère–Maxwell law', sub:'Currents and changing D produce H', d:'\\nabla\\times\\mathbf{H} = \\mathbf{J} + \\dfrac{\\partial\\mathbf{D}}{\\partial t}', i:'\\oint_C \\mathbf{H}\\cdot d\\boldsymbol{\\ell} = I + \\int_S \\dfrac{\\partial\\mathbf{D}}{\\partial t}\\cdot d\\mathbf{s}', p:'\\nabla\\times\\tilde{\\mathbf{H}} = \\tilde{\\mathbf{J}} + j\\omega\\tilde{\\mathbf{D}}', t:'4, 5', links:[['4.3','Ampère\'s law','topic4/maxwell_magnetostatic_equations.html'],['5.7','Displacement current','topic5/displacement_current_electromagnetics.html']]}
+];
+let mxForm = 'd';
+function renderMX(){
+  const el = document.getElementById('mx');
+  el.innerHTML = MX.map(m => { const c = COLORS[m.c]; return `
+    <div class="card rounded-xl p-4 border-t-4" style="border-top-color:${c.hex}">
+      <div class="text-sm font-bold ${c.text}">${m.name}</div>
+      <div class="text-sm text-slate-600 mb-2">${m.sub}</div>
+      <div class="eq text-slate-900 min-h-[3.5rem] flex items-center">$$${m[mxForm]}$$</div>
+      <div class="text-sm text-slate-600 mt-2">Studied in Topic ${m.t}</div>
+      <div class="mt-1 flex flex-col gap-0.5">${m.links.map(l => `<a href="${href(l[2])}" data-file="${l[2]}" class="nav text-sm font-semibold ${c.text} hover:underline"><span class="font-mono">${l[0]}</span> ${l[1]} →</a>`).join('')}</div>
+    </div>`; }).join('');
+  bindNav(el); typeset(el);
+}
+document.querySelectorAll('#mx-seg button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#mx-seg button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+  mxForm = b.dataset.f; renderMX();
+});
+
+renderMX();
+portalReady();
+</script>
+</body>
+</html>

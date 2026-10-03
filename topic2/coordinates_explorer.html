@@ -1,0 +1,2448 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Coordinate Explorer</title>
+
+    <link rel="stylesheet" href="../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/vendor/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="../assets/vendor/fontawesome/css/solid.min.css">
+    <link rel="stylesheet" href="../assets/css/em.css">
+    <script src="../assets/vendor/katex/katex.min.js"></script>
+    <script src="../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../assets/js/em.js"></script>
+<!-- Three.js for 3D visualization -->
+    <script src="../assets/vendor/three/three.min.js"></script>
+    <!-- OrbitControls for camera interaction -->
+    <script src="../assets/vendor/three/OrbitControls.js"></script>
+    <!-- Post-processing (bloom glow for the emissive vector/basis arrows) -->
+    <!-- FontAwesome for icons -->
+<!-- Inter Font -->
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            margin: 0;
+        }
+
+        /* Custom Glassmorphism UI panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+        }
+
+        /* Custom scrollbar for control panels */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.06);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(15, 23, 42, 0.25);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        /* Canvas container */
+        #canvas-container { position: absolute; inset: 0; touch-action: none; }
+        #stage { position: relative; height: 620px; overflow: hidden; border-radius: 16px; border: 1px solid #e2e8f0; background: #fff; }
+        /* below 1024 px the panel stacks under the 3D view; 'flex-1' there would shrink the view to 0 px height */
+        @media (max-width: 1023px) { #stage { height: 460px; flex: none; width: 100%; } }
+        #labels-container { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        #stage canvas { display: block; }
+        /* explorer panel below the scene: controls + formulas flow in columns */
+        #left-panel .mode-group:not(.hidden) { display: block; columns: 3 300px; column-gap: 28px; }
+        #left-panel .mode-group > * { break-inside: avoid; margin-bottom: 8px; }
+        #left-panel .mode-group .formula-group:first-of-type { border-top: 1px solid rgba(15,23,42,.08); padding-top: 7px; }
+        .slider-block > div + div { margin-top: 4px; }
+
+        /* 3D Floating Label overlay element */
+        .mathjax-label {
+            position: absolute;
+            z-index: 10;
+            pointer-events: none;
+            color: #0f172a;               /* default; coloured labels keep their own colour class */
+            font-weight: 600;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            transition: opacity 0.15s ease;
+            /* light pill behind every label: readable over grid lines, dashed guides and the dark vector */
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1px 6px;
+            border-radius: 6px;
+            box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 35%, transparent), 0 1px 3px rgba(15, 23, 42, 0.10);
+        }
+
+        .live-box { background:#f1f5f9; border:1px solid #e2e8f0; border-radius:12px; padding:8px 10px; font-size:14px; overflow-x:auto; overflow-y:hidden; }
+        .live-box svg { max-width:none; }
+        .preset-btn { font-size:13px; padding:3px 8px; border-radius:8px; border:1px solid #e2e8f0; background:#fff; color:#334155; }
+        .preset-btn:hover { background:#f1f5f9; border-color:#94a3b8; }
+        .panel-toggle { font-size:13px; padding:4px 10px; border-radius:10px; border:1px solid rgba(15,23,42,.15); background:rgba(255,255,255,.92); color:#0f172a; box-shadow:0 2px 8px rgba(15,23,42,.12); }
+        .panel-collapsed > :not(.panel-head) { display:none !important; }
+        .axis-badge {
+            background: rgba(255, 255, 255, 0.92);
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(15,23,42,0.15);
+            font-size: 12px;
+        }
+
+        .mag-badge {
+            background: #ffffff;
+            color: #0f172a;
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(15,23,42,0.12);
+            border: 1px solid #cbd5e1;
+        }
+
+        /* colour of each label = colour of the thing it describes (x red, y violet, z blue …) */
+        .mathjax-label.text-red-700 { color: #b91c1c; }
+        .mathjax-label.text-violet-700 { color: #6d28d9; }
+        .mathjax-label.text-blue-700 { color: #1d4ed8; }
+        #leader-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 9; }
+        #leader-svg line { stroke-width: 1.6; }
+        #leader-svg line.halo { stroke: #ffffff; stroke-width: 4.5; opacity: .9; }
+
+        /* ---------- control panel ---------- */
+        #right-panel { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+        #right-panel .rp-h { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #475569; margin: 0 2px 6px; }
+        #right-panel .rp-cam { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        #right-panel .rp-cam button { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 600;
+            color: #1e293b; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 5px 2px; transition: background .15s, border-color .15s;
+            flex-direction: column; gap: 2px; line-height: 1.1; }
+        #right-panel .rp-cam button i { color: #475569; font-size: 12px; }
+        #right-panel .rp-cam button:hover { background: #f0f9ff; border-color: #0369a1; }
+        #right-panel .rp-cam button.on { background: #0f172a; border-color: #0f172a; color: #fff; }
+        #right-panel .rp-cam button.on i { color: #fff; }
+        #right-panel .rp-group { border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; padding: 4px; }
+        #right-panel label { border-radius: 8px; padding: 2px 6px; gap: 10px; font-size: 13px; transition: background .12s; }
+        #right-panel label:hover { background: #f1f5f9; }
+        #right-panel .rp-group > label:first-child { font-size: 13.5px; }
+        #right-panel label > span { display: block; flex: 1; min-width: 0; line-height: 1.35; white-space: normal; }
+        #right-panel label > span > i:first-child { width: 20px; height: 20px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;
+            vertical-align: -5px; margin-right: 7px; background: #fff; border: 1px solid #e2e8f0; font-size: 10px; }
+        /* switches instead of checkboxes (same inputs, same ids) */
+        #right-panel input[type="checkbox"] { -webkit-appearance: none; appearance: none; width: 34px; height: 20px; border-radius: 999px; background: #cbd5e1;
+            position: relative; flex-shrink: 0; cursor: pointer; transition: background .15s; margin: 0; border: 0; background: #7b8aa0; }
+        #right-panel input[type="checkbox"]::before { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff;
+            box-shadow: 0 1px 2px rgba(15,23,42,.3); transition: transform .15s; }
+        #right-panel input[type="checkbox"]:checked { background: var(--sw, #0369a1); }
+        #right-panel input[type="checkbox"]:checked::before { transform: translateX(14px); }
+        #right-panel input[type="checkbox"]:focus-visible { outline: 3px solid #0369a1; outline-offset: 2px; }
+        #right-panel input.accent-red-600 { --sw: #dc2626; }
+        #right-panel input.accent-violet-600 { --sw: #7c3aed; }
+        #right-panel input.accent-slate-700 { --sw: #334155; }
+        #right-panel input.accent-slate-400 { --sw: #64748b; }
+        #right-panel #cyl-overlay-options, #right-panel #sph-overlay-options { margin-top: 2px; }
+        /* an overlay's sub-options are shown only while that overlay is switched on (keeps the panel short) */
+        #right-panel .rp-group.closed > div { display: none; }
+
+
+        .mathjax-label svg {
+            display: inline-block !important;
+            vertical-align: middle;
+        }
+
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: #cbd5e1;
+            border-radius: 6px;
+            height: 4px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #2563eb;
+            border: 2px solid #ffffff;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(15,23,42,0.4);
+            transition: transform 0.1s ease, background 0.1s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #1d4ed8;
+        }
+        input[type=range]::-moz-range-track {
+            background: #cbd5e1;
+            border-radius: 6px;
+            height: 4px;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #2563eb;
+            border: 2px solid #ffffff;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(15,23,42,0.4);
+        }
+
+        /* Compact coordinate-slider rows (Ax/Ay/Az, r/phi/z, R/theta/phi) */
+        .flex.justify-between.text-xs.mb-1 {
+            margin-bottom: 1px;
+            font-size: 10.5px;
+        }
+        .w-2\.5.h-2\.5.rounded-full.inline-block {
+            width: 7px;
+            height: 7px;
+        }
+
+        .tab-btn-active {
+            background: rgba(56, 189, 248, 0.25);
+            border-color: #38bdf8;
+            color: #38bdf8;
+        }
+
+        /* Formula reference blocks (Coordinate Variables, Vector Representation, etc.)
+           Sized down and made scrollable so long equations (e.g. the 3x3 cross-product
+           determinant) fit inside the narrow side panel instead of overflowing it. */
+        .formula-group {
+            padding-top: 7px;
+            margin-top: 3px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+        }
+        .formula-group:first-of-type {
+            border-top: none;
+            padding-top: 0;
+            margin-top: 0;
+        }
+        .formula-group h3 {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            line-height: 1.3;
+            color: #000000;
+            margin: 0 0 3px 0;
+        }
+        .formula-group .formula,
+        .formula-group .formula-list > div {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #000000;
+        }
+        .formula-group .formula,
+        .formula-group .formula-list {
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 2px;
+        }
+        .formula-group .formula-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .formula-group small {
+            display: block;
+            font-size: 12px;
+            color: #334155;
+            margin-top: 2px;
+        }
+        .formula-group .formula svg,
+        .formula-group .formula-list svg {
+            max-width: 100%;
+            vertical-align: middle;
+        }
+
+        /* ==== White-theme overrides ====
+           Tailwind's play-CDN generates these utility classes at runtime with
+           dark-theme colors baked in (light text/pastel accents meant for a
+           navy background). !important forces the light-theme equivalents
+           regardless of when Tailwind (re)injects its stylesheet, without
+           having to touch every class="..." occurrence in the markup. */
+        .bg-slate-900\/60, .bg-slate-900\/70, .bg-slate-900\/80,
+        .bg-slate-800, .bg-slate-800\/80 {
+            background-color: rgba(226, 232, 240, 0.85) !important;
+        }
+        .bg-slate-700, .hover\:bg-slate-700:hover {
+            background-color: #cbd5e1 !important;
+        }
+        .border-slate-700, .border-slate-700\/50, .border-slate-700\/60,
+        .border-slate-600\/60 {
+            border-color: rgba(15, 23, 42, 0.16) !important;
+        }
+        .text-slate-100, .text-slate-200, .text-slate-300 {
+            color: #000000 !important;
+        }
+        .text-slate-400 {
+            color: #111827 !important;
+        }
+        .hover\:text-white:hover {
+            color: #000000 !important;
+        }
+        .text-red-300, .text-red-400     { color: #dc2626 !important; }
+        .text-emerald-300, .text-emerald-400 { color: #059669 !important; }
+        .text-blue-300, .text-blue-400   { color: #1e40af !important; }
+        .text-fuchsia-300, .text-fuchsia-400 { color: #c026d3 !important; }
+        .text-amber-300, .text-amber-400 { color: #b45309 !important; }
+        .text-cyan-300, .text-cyan-400   { color: #0891b2 !important; }
+        .text-violet-300, .text-violet-400 { color: #7c3aed !important; }
+        .text-purple-400 { color: #9333ea !important; }
+        .tab-btn-active {
+            background: rgba(37, 99, 235, 0.14) !important;
+            border-color: #1e40af !important;
+            color: #1e40af !important;
+        }
+    </style>
+</head>
+<body class="bg-white">
+<div id="cs-root" class="p-1 space-y-4">
+    <div class="flex flex-col lg:flex-row gap-4 items-stretch">
+        <div id="stage" class="flex-1 min-w-0">
+            <div id="canvas-container"></div>
+            <div id="labels-container"></div>
+            <div class="absolute bottom-2 left-3 text-sm text-slate-600 pointer-events-none">Drag to orbit · scroll to zoom · right-drag to pan</div>
+        </div>
+        <aside id="right-panel" class="glass-panel p-3.5 rounded-2xl border border-slate-700/50 space-y-3 w-full lg:w-[350px] shrink-0 lg:max-h-[620px] overflow-y-auto">
+
+            <!-- Camera Orientation Presets -->
+            <div>
+                <div class="rp-h">View</div>
+                <div class="rp-cam">
+                    <button id="cam-default-btn" type="button" class="on" title="Default 3D view"><i class="fa-solid fa-cube"></i>Default</button>
+                    <button id="cam-low-btn" type="button" title="Low-angle view"><i class="fa-solid fa-eye"></i>Low</button>
+                    <button id="cam-xy-btn" type="button" title="Top view (XY plane)"><i class="fa-solid fa-arrow-down"></i>Top</button>
+                    <button id="cam-xz-btn" type="button" title="Front view (XZ plane)"><i class="fa-solid fa-arrow-right"></i>Front</button>
+                </div>
+            </div>
+
+            <!-- Visual Features Toggles -->
+            <div class="space-y-2">
+                <div class="rp-h pt-2">Coordinate overlays</div>
+                <!-- Cylindrical Elements Toggle Group -->
+                <div class="rp-group cyl space-y-0.5">
+                    <label class="flex items-center justify-between text-sm text-red-700 font-semibold cursor-pointer">
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-circle-notch"></i> Cylindrical Overlay</span>
+                        <input id="toggle-cyl-overlay" type="checkbox" checked class="rounded accent-red-600 w-4 h-4">
+                    </label>
+
+                    <div id="cyl-overlay-options" class="space-y-2 transition-opacity">
+                        <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-database text-red-700"></i> Cylinder Grid Surface</span>
+                            <input id="toggle-cylinder-mesh" type="checkbox" checked class="rounded accent-red-600 w-4 h-4">
+                        </label>
+
+                        <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-chart-pie text-violet-700"></i> Angle Arc ($\phi$) & Radius ($r$)</span>
+                            <input id="toggle-phi-arc" type="checkbox" checked class="rounded accent-violet-600 w-4 h-4">
+                        </label>
+
+                        <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-compass text-slate-700"></i> Cylindrical Basis ($\hat{\mathbf{r}}, \boldsymbol{\hat{\phi}}, \hat{\mathbf{z}}$)</span>
+                            <input id="toggle-cyl-basis" type="checkbox" checked class="rounded accent-slate-700 w-4 h-4">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Spherical Elements Toggle Group -->
+                <div class="rp-group sph space-y-0.5">
+                    <label class="flex items-center justify-between text-sm text-violet-700 font-semibold cursor-pointer">
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-globe"></i> Spherical Overlay</span>
+                        <input id="toggle-sph-overlay" type="checkbox" class="rounded accent-violet-600 w-4 h-4">
+                    </label>
+
+                    <div id="sph-overlay-options" class="space-y-2 transition-opacity">
+                        <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-circle text-red-700"></i> Spherical Shell Wireframe</span>
+                            <input id="toggle-sphere-mesh" type="checkbox" checked class="rounded accent-red-600 w-4 h-4">
+                        </label>
+
+                        <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-chart-pie text-violet-700"></i> Polar ($\theta$) & Azimuth ($\phi$) Arcs</span>
+                            <input id="toggle-sph-arcs" type="checkbox" checked class="rounded accent-violet-600 w-4 h-4">
+                        </label>
+
+                        <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-compass text-slate-700"></i> Spherical Basis ($\hat{\mathbf{R}}, \boldsymbol{\hat{\theta}}, \boldsymbol{\hat{\phi}}$)</span>
+                            <input id="toggle-sph-basis" type="checkbox" checked class="rounded accent-slate-700 w-4 h-4">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="rp-h pt-3">Vector &amp; guides</div>
+                <!-- Cartesian & Vector Toggle Group -->
+                <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                    <span class="flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-bars-staggered text-red-700"></i> Cartesian Components ($A_x, A_y, A_z$)</span>
+                    <input id="toggle-comp-a" type="checkbox" checked class="rounded accent-red-600 w-4 h-4">
+                </label>
+
+                <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-location-arrow text-violet-700"></i> Unit Vector ($\hat{\mathbf{a}}$)</span>
+                    <input id="toggle-unit" type="checkbox" checked class="rounded accent-violet-600 w-4 h-4">
+                </label>
+
+                <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-ruler-combined text-slate-700"></i> Magnitude Bar ($A$)</span>
+                    <input id="toggle-mag-bar" type="checkbox" checked class="rounded accent-slate-700 w-4 h-4">
+                </label>
+
+                <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-vector-square text-slate-700"></i> Projection Box</span>
+                    <input id="toggle-proj" type="checkbox" checked class="rounded accent-slate-700 w-4 h-4">
+                </label>
+
+                <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-border-all text-slate-600"></i> Cartesian Axes</span>
+                    <input id="toggle-grid" type="checkbox" checked class="rounded accent-slate-400 w-4 h-4">
+                </label>
+
+                <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-cube text-violet-700"></i> Differential Element ($dl,\, d\mathbf{s}_i,\, dv$)</span>
+                    <input id="toggle-diff-element" type="checkbox" class="rounded accent-violet-600 w-4 h-4">
+                </label>
+
+                <label class="flex items-center justify-between text-sm text-slate-600 cursor-pointer hover:text-white">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-tags text-slate-700"></i> Floating 3D Labels</span>
+                    <input id="toggle-labels" type="checkbox" checked class="rounded accent-slate-700 w-4 h-4">
+                </label>
+            </div>
+        
+        </aside>
+    </div>
+    <section id="left-panel" class="glass-panel p-4 rounded-2xl border border-slate-700/50 space-y-3">
+            <!-- Coordinate Mode Switcher Tabs -->
+            <div class="flex rounded-xl bg-slate-900/80 p-1 border border-slate-700/60 text-sm font-medium">
+                <button id="tab-cartesian" class="flex-1 py-1.5 rounded-lg border border-transparent transition tab-btn-active">
+                    <i class="fa-solid fa-square-minus mr-1"></i> Cartesian
+                </button>
+                <button id="tab-cylindrical" class="flex-1 py-1.5 rounded-lg border border-transparent text-slate-600 hover:text-white transition">
+                    <i class="fa-solid fa-circle-notch mr-1"></i> Cylindrical
+                </button>
+                <button id="tab-spherical" class="flex-1 py-1.5 rounded-lg border border-transparent text-slate-600 hover:text-white transition">
+                    <i class="fa-solid fa-globe mr-1"></i> Spherical
+                </button>
+            </div>
+
+            <!-- Cartesian Input Controls Section -->
+            <div id="cartesian-controls-group" class="mode-group space-y-1"><div class="slider-block">
+                <div class="flex items-center gap-2">
+                    <label for="slider-x" class="font-semibold text-red-700 flex items-center gap-1 shrink-0 w-[64px] text-sm whitespace-nowrap overflow-hidden">
+                        <span class="w-2 h-2 rounded-full bg-red-500 inline-block shrink-0"></span> $A_x$
+                    </label>
+                    <input id="slider-x" type="range" min="-15" max="15" step="0.5" value="3" class="flex-1 min-w-0">
+                    <span id="val-x" class="font-mono text-red-700 text-sm w-12 text-right shrink-0">3.0</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <label for="slider-y" class="font-semibold text-violet-700 flex items-center gap-1 shrink-0 w-[64px] text-sm whitespace-nowrap overflow-hidden">
+                        <span class="w-2 h-2 rounded-full bg-violet-500 inline-block shrink-0"></span> $A_y$
+                    </label>
+                    <input id="slider-y" type="range" min="-15" max="15" step="0.5" value="4" class="flex-1 min-w-0">
+                    <span id="val-y" class="font-mono text-violet-700 text-sm w-12 text-right shrink-0">4.0</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <label for="slider-z" class="font-semibold text-blue-700 flex items-center gap-1 shrink-0 w-[64px] text-sm whitespace-nowrap overflow-hidden">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 inline-block shrink-0"></span> $A_z$
+                    </label>
+                    <input id="slider-z" type="range" min="-15" max="15" step="0.5" value="5" class="flex-1 min-w-0">
+                    <span id="val-z" class="font-mono text-blue-700 text-sm w-12 text-right shrink-0">5.0</span>
+                </div>
+
+
+                </div><div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span class="text-sm text-slate-600">Presets:</span>
+                    <button class="preset-btn" data-p="3,4,5">(3, 4, 5)</button>
+                    <button class="preset-btn" data-p="-4,3,2">(−4, 3, 2)</button>
+                    <button class="preset-btn" data-p="-3,-3,-4">(−3, −3, −4)</button>
+                    <button class="preset-btn" data-p="0,0,6">on z-axis</button>
+                    <button class="preset-btn" data-p="5,-2,0">in xy-plane</button>
+                </div>
+                <div id="math-cart-display" class="live-box"></div>
+                <div class="formula-group">
+                    <h3>Coordinate Variables</h3>
+                    <div class="formula">
+                        $x,\;y,\;z \in (-\infty, \infty)$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Vector Representation</h3>
+                    <div class="formula">
+                        $\mathbf{A}
+                        =\hat{\mathbf{x}}A_x
+                        +\hat{\mathbf{y}}A_y
+                        +\hat{\mathbf{z}}A_z$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Magnitude</h3>
+                    <div class="formula">
+                        $|\mathbf{A}|
+                        =\sqrt{A_x^2+A_y^2+A_z^2}$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Position Vector</h3>
+                    <div class="formula">
+                        $\overrightarrow{OP_1}
+                        =\hat{\mathbf{x}}x_1
+                        +\hat{\mathbf{y}}y_1
+                        +\hat{\mathbf{z}}z_1$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Properties of Unit Vectors</h3>
+                    <div class="formula-list">
+                        <div>
+                            $\hat{\mathbf{x}}\cdot\hat{\mathbf{x}}
+                            =\hat{\mathbf{y}}\cdot\hat{\mathbf{y}}
+                            =\hat{\mathbf{z}}\cdot\hat{\mathbf{z}}=1$
+                        </div>
+
+                        <div>
+                            $\hat{\mathbf{x}}\cdot\hat{\mathbf{y}}
+                            =\hat{\mathbf{y}}\cdot\hat{\mathbf{z}}
+                            =\hat{\mathbf{z}}\cdot\hat{\mathbf{x}}=0$
+                        </div>
+
+                        <div>
+                            $\hat{\mathbf{x}}\times\hat{\mathbf{y}}=\hat{\mathbf{z}},
+                            \quad
+                            \hat{\mathbf{y}}\times\hat{\mathbf{z}}=\hat{\mathbf{x}},
+                            \quad
+                            \hat{\mathbf{z}}\times\hat{\mathbf{x}}=\hat{\mathbf{y}}$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Dot Product </h3>
+                    <div class="formula">
+                        $\mathbf{A}\cdot\mathbf{B}
+                        =A_xB_x+A_yB_y+A_zB_z$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Cross Product</h3>
+                    <div class="formula">
+                        $$\mathbf{A}\times\mathbf{B}
+                        =
+                        \begin{vmatrix}
+                        \hat{\mathbf{x}} & \hat{\mathbf{y}} & \hat{\mathbf{z}}\\
+                        A_x & A_y & A_z\\
+                        B_x & B_y & B_z
+                        \end{vmatrix}$$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Differential Length</h3>
+                    <div class="formula">
+                        $d\mathbf{l}
+                        =\hat{\mathbf{x}}\,dx
+                        +\hat{\mathbf{y}}\,dy
+                        +\hat{\mathbf{z}}\,dz$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Differential Surface Area</h3>
+                    <div class="formula-list">
+                        <div>
+                            $d\mathbf{s}_x
+                            =\hat{\mathbf{x}}\,dy\,dz$
+                        </div>
+
+                        <div>
+                            $d\mathbf{s}_y
+                            =\hat{\mathbf{y}}\,dx\,dz$
+                        </div>
+
+                        <div>
+                            $d\mathbf{s}_z
+                            =\hat{\mathbf{z}}\,dx\,dy$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Differential Volume</h3>
+                    <div class="formula">
+                        $dv=dx\,dy\,dz$
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cylindrical Input Controls Section -->
+            <div id="cylindrical-controls-group" class="mode-group space-y-1 hidden"><div class="slider-block">
+                <div class="flex items-center gap-2">
+                    <label for="slider-r" class="font-semibold text-red-700 flex items-center gap-1 shrink-0 w-[64px] text-sm whitespace-nowrap overflow-hidden">
+                        <span class="w-2 h-2 rounded-full bg-red-500 inline-block shrink-0"></span> $r$
+                    </label>
+                    <input id="slider-r" type="range" min="0" max="22" step="0.2" value="5" class="flex-1 min-w-0">
+                    <span id="val-r" class="font-mono text-red-700 text-sm w-12 text-right shrink-0">5.0</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <label for="slider-cyl-phi" class="font-semibold text-violet-700 flex items-center gap-1 shrink-0 w-[64px] text-sm whitespace-nowrap overflow-hidden">
+                        <span class="w-2 h-2 rounded-full bg-violet-500 inline-block shrink-0"></span> $\phi$
+                    </label>
+                    <input id="slider-cyl-phi" type="range" min="0" max="360" step="1" value="53" class="flex-1 min-w-0">
+                    <span id="val-cyl-phi" class="font-mono text-violet-700 text-sm w-12 text-right shrink-0">53°</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <label for="slider-cyl-z" class="font-semibold text-blue-700 flex items-center gap-1 shrink-0 w-[64px] text-sm whitespace-nowrap overflow-hidden">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 inline-block shrink-0"></span> $z$
+                    </label>
+                    <input id="slider-cyl-z" type="range" min="-15" max="15" step="0.5" value="5" class="flex-1 min-w-0">
+                    <span id="val-cyl-z" class="font-mono text-blue-700 text-sm w-12 text-right shrink-0">5.0</span>
+                </div>
+
+
+                </div><div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span class="text-sm text-slate-600">Presets:</span>
+                    <button class="preset-btn" data-p="3,4,5">(3, 4, 5)</button>
+                    <button class="preset-btn" data-p="-4,3,2">(−4, 3, 2)</button>
+                    <button class="preset-btn" data-p="-3,-3,-4">(−3, −3, −4)</button>
+                    <button class="preset-btn" data-p="0,0,6">on z-axis</button>
+                    <button class="preset-btn" data-p="5,-2,0">in xy-plane</button>
+                </div>
+                <div id="math-cyl-display" class="live-box"></div>
+                <div class="formula-group">
+                    <h3>Coordinate Variables</h3>
+                    <div class="formula">
+                        $r \ge 0,\quad 0 \le \phi < 2\pi,\quad -\infty < z < \infty$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Vector Representation</h3>
+                    <div class="formula">
+                        $\mathbf{A}
+                        =\hat{\mathbf{r}}A_r
+                        +\boldsymbol{\hat{\phi}}A_\phi
+                        +\hat{\mathbf{z}}A_z$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Magnitude</h3>
+                    <div class="formula">
+                        $|\mathbf{A}|
+                        =\sqrt{A_r^2+A_\phi^2+A_z^2}$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Position Vector</h3>
+                    <div class="formula">
+                        $\overrightarrow{OP_1}
+                        =\hat{\mathbf{r}}r_1
+                        +\hat{\mathbf{z}}z_1$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Properties of Unit Vectors</h3>
+                    <div class="formula-list">
+                        <div>
+                            $\hat{\mathbf{r}}\cdot\hat{\mathbf{r}}
+                            =\boldsymbol{\hat{\phi}}\cdot\boldsymbol{\hat{\phi}}
+                            =\hat{\mathbf{z}}\cdot\hat{\mathbf{z}}=1$
+                        </div>
+
+                        <div>
+                            $\hat{\mathbf{r}}\cdot\boldsymbol{\hat{\phi}}
+                            =\boldsymbol{\hat{\phi}}\cdot\hat{\mathbf{z}}
+                            =\hat{\mathbf{z}}\cdot\hat{\mathbf{r}}=0$
+                        </div>
+
+                        <div>
+                            $\hat{\mathbf{r}}\times\boldsymbol{\hat{\phi}}
+                            =\hat{\mathbf{z}},
+                            \quad
+                            \boldsymbol{\hat{\phi}}\times\hat{\mathbf{z}}
+                            =\hat{\mathbf{r}},
+                            \quad
+                            \hat{\mathbf{z}}\times\hat{\mathbf{r}}
+                            =\boldsymbol{\hat{\phi}}$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Dot Product</h3>
+                    <div class="formula">
+                        $\mathbf{A}\cdot\mathbf{B}
+                        =A_rB_r+A_\phi B_\phi+A_zB_z$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Cross Product</h3>
+                    <div class="formula">
+                        $$\mathbf{A}\times\mathbf{B}
+                        =
+                        \begin{vmatrix}
+                        \hat{\mathbf{r}} &
+                        \boldsymbol{\hat{\phi}} &
+                        \hat{\mathbf{z}}\\
+                        A_r & A_\phi & A_z\\
+                        B_r & B_\phi & B_z
+                        \end{vmatrix}$$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Differential Length</h3>
+                    <div class="formula">
+                        $d\mathbf{l}
+                        =\hat{\mathbf{r}}\,dr
+                        +\boldsymbol{\hat{\phi}}\,r\,d\phi
+                        +\hat{\mathbf{z}}\,dz$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Differential Surface Area</h3>
+                    <div class="formula-list">
+                        <div>
+                            $d\mathbf{s}_r
+                            =\hat{\mathbf{r}}\,r\,d\phi\,dz$
+                        </div>
+
+                        <div>
+                            $d\mathbf{s}_\phi
+                            =\boldsymbol{\hat{\phi}}\,dr\,dz$
+                        </div>
+
+                        <div>
+                            $d\mathbf{s}_z
+                            =\hat{\mathbf{z}}\,r\,dr\,d\phi$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Differential Volume</h3>
+                    <div class="formula">
+                        $dv=r\,dr\,d\phi\,dz$
+                    </div>
+                </div>
+
+
+            </div>
+            <!-- Spherical Input Controls Section -->
+            <div id="spherical-controls-group" class="mode-group space-y-1 hidden"><div class="slider-block">
+                <div class="flex items-center gap-2">
+                    <label for="slider-sph-r" class="font-semibold text-red-700 flex items-center gap-1 shrink-0 w-[64px] text-sm whitespace-nowrap overflow-hidden">
+                        <span class="w-2 h-2 rounded-full bg-red-500 inline-block shrink-0"></span> $R$
+                    </label>
+                    <input id="slider-sph-r" type="range" min="0" max="26" step="0.2" value="7.07" class="flex-1 min-w-0">
+                    <span id="val-sph-r" class="font-mono text-red-700 text-sm w-12 text-right shrink-0">7.1</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <label for="slider-theta" class="font-semibold text-violet-700 flex items-center gap-1 shrink-0 w-[64px] text-sm whitespace-nowrap overflow-hidden">
+                        <span class="w-2 h-2 rounded-full bg-violet-500 inline-block shrink-0"></span> $\theta$
+                    </label>
+                    <input id="slider-theta" type="range" min="0" max="180" step="1" value="45" class="flex-1 min-w-0">
+                    <span id="val-theta" class="font-mono text-violet-700 text-sm w-12 text-right shrink-0">45°</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <label for="slider-sph-phi" class="font-semibold text-blue-700 flex items-center gap-1 shrink-0 w-[64px] text-sm whitespace-nowrap overflow-hidden">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 inline-block shrink-0"></span> $\phi$
+                    </label>
+                    <input id="slider-sph-phi" type="range" min="0" max="360" step="1" value="53" class="flex-1 min-w-0">
+                    <span id="val-sph-phi" class="font-mono text-blue-700 text-sm w-12 text-right shrink-0">53°</span>
+                </div>
+
+
+                </div><div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span class="text-sm text-slate-600">Presets:</span>
+                    <button class="preset-btn" data-p="3,4,5">(3, 4, 5)</button>
+                    <button class="preset-btn" data-p="-4,3,2">(−4, 3, 2)</button>
+                    <button class="preset-btn" data-p="-3,-3,-4">(−3, −3, −4)</button>
+                    <button class="preset-btn" data-p="0,0,6">on z-axis</button>
+                    <button class="preset-btn" data-p="5,-2,0">in xy-plane</button>
+                </div>
+                <div id="math-sph-display" class="live-box"></div>
+                <div class="formula-group">
+                    <h3>Coordinate Variables</h3>
+                    <div class="formula">
+                        $R \ge 0,\quad 0 \le \theta \le \pi,\quad 0 \le \phi < 2\pi$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Vector Representation</h3>
+                    <div class="formula">
+                        $\mathbf{A}
+                        =\hat{\mathbf{R}}A_R
+                        +\boldsymbol{\hat{\theta}}A_\theta
+                        +\boldsymbol{\hat{\phi}}A_\phi$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Magnitude</h3>
+                    <div class="formula">
+                        $|\mathbf{A}|
+                        =\sqrt{A_R^2+A_\theta^2+A_\phi^2}$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Position Vector</h3>
+                    <div class="formula">
+                        $\overrightarrow{OP_1}
+                        =\hat{\mathbf{R}}R_1$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Properties of Unit Vectors</h3>
+                    <div class="formula-list">
+                        <div>
+                            $\hat{\mathbf{R}}\cdot\hat{\mathbf{R}}
+                            =\boldsymbol{\hat{\theta}}\cdot\boldsymbol{\hat{\theta}}
+                            =\boldsymbol{\hat{\phi}}\cdot\boldsymbol{\hat{\phi}}=1$
+                        </div>
+
+                        <div>
+                            $\hat{\mathbf{R}}\cdot\boldsymbol{\hat{\theta}}
+                            =\boldsymbol{\hat{\theta}}\cdot\boldsymbol{\hat{\phi}}
+                            =\boldsymbol{\hat{\phi}}\cdot\hat{\mathbf{R}}=0$
+                        </div>
+
+                        <div>
+                            $\hat{\mathbf{R}}\times\boldsymbol{\hat{\theta}}
+                            =\boldsymbol{\hat{\phi}},
+                            \quad
+                            \boldsymbol{\hat{\theta}}\times\boldsymbol{\hat{\phi}}
+                            =\hat{\mathbf{R}},
+                            \quad
+                            \boldsymbol{\hat{\phi}}\times\hat{\mathbf{R}}
+                            =\boldsymbol{\hat{\theta}}$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Dot Product</h3>
+                    <div class="formula">
+                        $\mathbf{A}\cdot\mathbf{B}
+                        =A_RB_R+A_\theta B_\theta+A_\phi B_\phi$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Cross Product</h3>
+                    <div class="formula">
+                        $$\mathbf{A}\times\mathbf{B}
+                        =
+                        \begin{vmatrix}
+                        \hat{\mathbf{R}} &
+                        \boldsymbol{\hat{\theta}} &
+                        \boldsymbol{\hat{\phi}}\\
+                        A_R & A_\theta & A_\phi\\
+                        B_R & B_\theta & B_\phi
+                        \end{vmatrix}$$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Differential Length</h3>
+                    <div class="formula">
+                        $d\mathbf{l}
+                        =\hat{\mathbf{R}}\,dR
+                        +\boldsymbol{\hat{\theta}}\,R\,d\theta
+                        +\boldsymbol{\hat{\phi}}\,R\sin\theta\,d\phi$
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Differential Surface Area</h3>
+                    <div class="formula-list">
+                        <div>
+                            $d\mathbf{s}_R
+                            =\hat{\mathbf{R}}\,
+                            R^2\sin\theta\,d\theta\,d\phi$
+                        </div>
+
+                        <div>
+                            $d\mathbf{s}_\theta
+                            =\boldsymbol{\hat{\theta}}\,
+                            R\sin\theta\,dR\,d\phi$
+                        </div>
+
+                        <div>
+                            $d\mathbf{s}_\phi
+                            =\boldsymbol{\hat{\phi}}\,
+                            R\,dR\,d\theta$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-group">
+                    <h3>Differential Volume</h3>
+                    <div class="formula">
+                        $dv=R^2\sin\theta\,dR\,d\theta\,d\phi$
+                    </div>
+                </div>
+
+            </div>
+            
+    </section>
+</div>
+
+    <script>
+        const container = document.getElementById('canvas-container');
+        const labelsContainer = document.getElementById('labels-container');
+
+        // Tab & Controls DOM
+        const tabCartesian = document.getElementById('tab-cartesian');
+        const tabCylindrical = document.getElementById('tab-cylindrical');
+        const tabSpherical = document.getElementById('tab-spherical');
+        const cartesianControlsGroup = document.getElementById('cartesian-controls-group');
+        const cylindricalControlsGroup = document.getElementById('cylindrical-controls-group');
+        const sphericalControlsGroup = document.getElementById('spherical-controls-group');
+
+        // Math Displays
+        const mathCartDisplay = document.getElementById('math-cart-display');
+        const mathCylDisplay = document.getElementById('math-cyl-display');
+        const mathSphDisplay = document.getElementById('math-sph-display');
+
+        // Sliders DOM
+        const sliderX = document.getElementById('slider-x');
+        const sliderY = document.getElementById('slider-y');
+        const sliderZ = document.getElementById('slider-z');
+        const valX = document.getElementById('val-x');
+        const valY = document.getElementById('val-y');
+        const valZ = document.getElementById('val-z');
+
+        const sliderR = document.getElementById('slider-r');
+        const sliderCylPhi = document.getElementById('slider-cyl-phi');
+        const sliderCylZ = document.getElementById('slider-cyl-z');
+        const valR = document.getElementById('val-r');
+        const valCylPhi = document.getElementById('val-cyl-phi');
+        const valCylZ = document.getElementById('val-cyl-z');
+
+        const sliderSphR = document.getElementById('slider-sph-r');
+        const sliderTheta = document.getElementById('slider-theta');
+        const sliderSphPhi = document.getElementById('slider-sph-phi');
+        const valSphR = document.getElementById('val-sph-r');
+        const valTheta = document.getElementById('val-theta');
+        const valSphPhi = document.getElementById('val-sph-phi');
+
+        
+        // Toggles
+        const toggleCylinderMesh = document.getElementById('toggle-cylinder-mesh');
+        const togglePhiArc = document.getElementById('toggle-phi-arc');
+        const toggleCylBasis = document.getElementById('toggle-cyl-basis');
+        const toggleCylOverlay = document.getElementById('toggle-cyl-overlay');
+        const cylOverlayOptions = document.getElementById('cyl-overlay-options');
+        const toggleSphOverlay = document.getElementById('toggle-sph-overlay');
+        const sphOverlayOptions = document.getElementById('sph-overlay-options');
+        const toggleSphereMesh = document.getElementById('toggle-sphere-mesh');
+        const toggleSphArcs = document.getElementById('toggle-sph-arcs');
+        const toggleSphBasis = document.getElementById('toggle-sph-basis');
+
+        const toggleUnit = document.getElementById('toggle-unit');
+        const toggleCompA = document.getElementById('toggle-comp-a');
+        const toggleProj = document.getElementById('toggle-proj');
+        const toggleMagBar = document.getElementById('toggle-mag-bar');
+        const toggleGrid = document.getElementById('toggle-grid');
+        const toggleLabels = document.getElementById('toggle-labels');
+        const toggleDiffElement = document.getElementById('toggle-diff-element');
+
+        // Application State
+        const state = {
+            vectorA: new THREE.Vector3(3, 4, 5),
+            originA: new THREE.Vector3(0, 0, 0),
+            inputMode: 'cartesian',
+            showCylOverlay: true,
+            showCylinderMesh: true,
+            showPhiArc: true,
+            showCylBasis: true,
+            showSphOverlay: false,
+            showSphereMesh: true,
+            showSphArcs: true,
+            showSphBasis: true,
+            showUnitVector: true,
+            showCompA: true,
+            showProjections: true,
+            showMagBar: true,
+            showGrid: true,
+            showLabels: true,
+            showDiffElement: false,   // off at start: its seven labels crowd the tip of A; tick the box to show it
+            unitVectorAtTip: false,
+            currentAxisLength: 10
+        };
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+        scene.fog = new THREE.FogExp2(0xffffff, 0.012);
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / Math.max(1, container.clientHeight), 0.1, 1000);
+        camera.up.set(0, 0, 1); // Set +Z as vertical UP
+        camera.position.set(20, -12, 11);   // side-on to the default point (3, 4, 5): vector and labels do not overlap
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxDistance = 60;
+        controls.minDistance = 2;
+
+        // EffectComposer / bloom removed: the scene is rendered directly (less GPU work, 7 fewer scripts).
+
+        // Lighting - hemisphere light gives a natural sky/ground colour gradient,
+        // replacing a flat ambient light for more three-dimensional shading.
+        const hemiLight = new THREE.HemisphereLight(0x8fb3ff, 0x0f172a, 0.55);
+        scene.add(hemiLight);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        dirLight.position.set(15, 20, 25);
+        scene.add(dirLight);
+
+        const dirLight2 = new THREE.DirectionalLight(0x38bdf8, 0.35);
+        dirLight2.position.set(-10, -10, -10);
+        scene.add(dirLight2);
+
+        const originGeo = new THREE.SphereGeometry(0.18, 32, 32);
+        const originMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.25, metalness: 0.55, emissive: 0x1d4ed8, emissiveIntensity: 0.25 });
+        const vectorOriginSphere = new THREE.Mesh(originGeo, originMat);
+
+        const axesGroup = new THREE.Group();
+        scene.add(axesGroup);
+
+        function updateAxes() {
+            while (axesGroup.children.length > 0) {
+                const obj = axesGroup.children[0];
+                if (obj.geometry) obj.geometry.dispose();
+                axesGroup.remove(obj);
+            }
+
+            const magA = state.vectorA.length();
+            const axisLength = Math.max(10, magA * 1.5);
+            state.currentAxisLength = axisLength;
+
+            const createScaledAxis = (length, colorHex, axisType) => {
+                const group = new THREE.Group();
+                let dir;
+                if (axisType === 'x') dir = new THREE.Vector3(1, 0, 0);
+                else if (axisType === 'y') dir = new THREE.Vector3(0, 1, 0);
+                else dir = new THREE.Vector3(0, 0, 1);
+
+                const arrowPos = new THREE.ArrowHelper(dir, new THREE.Vector3(0, 0, 0), length, colorHex, 0.5, 0.25);
+                group.add(arrowPos);
+
+                const negPoints = [new THREE.Vector3(0, 0, 0), dir.clone().negate().multiplyScalar(length)];
+                const negGeo = new THREE.BufferGeometry().setFromPoints(negPoints);
+                const negMat = new THREE.LineDashedMaterial({
+                    color: colorHex,
+                    dashSize: 0.3,
+                    gapSize: 0.2,
+                    opacity: 0.4,
+                    transparent: true
+                });
+                const negLine = new THREE.Line(negGeo, negMat);
+                negLine.computeLineDistances();
+                group.add(negLine);
+
+                const tickMat = new THREE.LineBasicMaterial({ color: colorHex, opacity: 0.6, transparent: true });
+                for (let i = -Math.floor(length); i <= Math.floor(length); i++) {
+                    if (i === 0) continue;
+                    const tickPoints = [];
+                    if (axisType === 'x') {
+                        tickPoints.push(new THREE.Vector3(i, -0.12, 0), new THREE.Vector3(i, 0.12, 0));
+                    } else if (axisType === 'y') {
+                        tickPoints.push(new THREE.Vector3(-0.12, i, 0), new THREE.Vector3(0.12, i, 0));
+                    } else {
+                        tickPoints.push(new THREE.Vector3(-0.12, 0, i), new THREE.Vector3(0.12, 0, i));
+                    }
+                    const tickGeo = new THREE.BufferGeometry().setFromPoints(tickPoints);
+                    group.add(new THREE.Line(tickGeo, tickMat));
+                }
+                return group;
+            };
+
+            axesGroup.add(createScaledAxis(axisLength, 0xef4444, 'x'));
+            axesGroup.add(createScaledAxis(axisLength, 0x8b5cf6, 'y'));
+            axesGroup.add(createScaledAxis(axisLength, 0x3b82f6, 'z'));
+        }
+
+        const vectorGroup = new THREE.Group();
+        vectorGroup.add(vectorOriginSphere);
+        scene.add(vectorGroup);
+
+        const tipGeo = new THREE.SphereGeometry(0.22, 32, 32);
+        const tipMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.15, metalness: 0.55, emissive: 0x1d4ed8, emissiveIntensity: 0.45 });
+        const tipSphere = new THREE.Mesh(tipGeo, tipMat);
+        vectorGroup.add(tipSphere);
+
+        let vectorAMeshGroup = new THREE.Group();
+        let unitVectorMeshGroup = new THREE.Group();
+        const projectionGroup = new THREE.Group();
+        const magDimensionGroup = new THREE.Group();
+        const cylindricalMeshGroup = new THREE.Group();
+        const sphericalMeshGroup = new THREE.Group();
+        const diffElementGroup = new THREE.Group();
+
+        vectorGroup.add(vectorAMeshGroup);
+        vectorGroup.add(unitVectorMeshGroup);
+        vectorGroup.add(diffElementGroup);
+        scene.add(projectionGroup);
+        scene.add(magDimensionGroup);
+        scene.add(cylindricalMeshGroup);
+        scene.add(sphericalMeshGroup);
+
+        function create3DArrow(length, colorHex, shaftRadius = 0.08, headRadius = 0.22, headLength = 0.6) {
+            const group = new THREE.Group();
+            if (length <= 0.0001) return group;
+
+            const actualHeadLength = Math.min(headLength, length * 0.8);
+            const shaftLength = length - actualHeadLength;
+
+            if (shaftLength > 0) {
+                const shaftGeo = new THREE.CylinderGeometry(shaftRadius, shaftRadius, shaftLength, 16);
+                shaftGeo.translate(0, shaftLength / 2, 0);
+                const shaftMat = new THREE.MeshStandardMaterial({
+                    color: colorHex,
+                    roughness: 0.3,
+                    metalness: 0.6,
+                    emissive: colorHex,
+                    emissiveIntensity: 0.2
+                });
+                const shaftMesh = new THREE.Mesh(shaftGeo, shaftMat);
+                group.add(shaftMesh);
+            }
+
+            const headGeo = new THREE.ConeGeometry(headRadius, actualHeadLength, 24);
+            headGeo.translate(0, shaftLength + actualHeadLength / 2, 0);
+            const headMat = new THREE.MeshStandardMaterial({
+                color: colorHex,
+                roughness: 0.2,
+                metalness: 0.8,
+                emissive: colorHex,
+                emissiveIntensity: 0.3
+            });
+            const headMesh = new THREE.Mesh(headGeo, headMat);
+            group.add(headMesh);
+
+            return group;
+        }
+
+        function orientObjectToVector(object, directionVec) {
+            const defaultDir = new THREE.Vector3(0, 1, 0);
+            const targetDir = directionVec.clone().normalize();
+            if (targetDir.lengthSq() < 0.0001) return;
+
+            const quaternion = new THREE.Quaternion();
+            quaternion.setFromUnitVectors(defaultDir, targetDir);
+            object.quaternion.copy(quaternion);
+        }
+
+        let isTypesetting = false;
+        let pendingNodesToTypeset = new Set();
+
+        function renderMathJaxElement(targetElement, mathTexString) {
+            if (!targetElement) return;
+            if (targetElement.getAttribute('data-tex') === mathTexString) return;
+            targetElement.setAttribute('data-tex', mathTexString);
+            targetElement.innerHTML = mathTexString;
+            pendingNodesToTypeset.add(targetElement);
+            triggerMathJaxUpdate();
+        }
+
+        function triggerMathJaxUpdate() {
+            if (window.MathJax && window.MathJax.typesetPromise && pendingNodesToTypeset.size > 0) {
+                if (!isTypesetting) {
+                    isTypesetting = true;
+                    const nodes = Array.from(pendingNodesToTypeset);
+                    pendingNodesToTypeset.clear();
+                    window.MathJax.typesetPromise(nodes).then(() => {
+                        isTypesetting = false;
+                        if (pendingNodesToTypeset.size > 0) {
+                            triggerMathJaxUpdate();
+                        }
+                    }).catch(err => {
+                        isTypesetting = false;
+                        console.error("MathJax typesetting error:", err);
+                    });
+                }
+            }
+        }
+
+        function createDOMOverlayLabel(id, mathTexString, extraClass = '') {
+            let el = document.getElementById(id);
+            if (!el) {
+                el = document.createElement('div');
+                el.id = id;
+                el.className = `mathjax-label ${extraClass}`;
+                labelsContainer.appendChild(el);
+            }
+            renderMathJaxElement(el, mathTexString);
+            return el;
+        }
+
+        const labelOrigin = createDOMOverlayLabel('label-origin', '$O$', 'axis-badge text-slate-600');
+        const labelOriginA = createDOMOverlayLabel('label-origin-a', '$O_A$', 'axis-badge text-slate-700 border-slate-500/50');
+        const labelOx = createDOMOverlayLabel('label-ox', '$O_x$', 'axis-badge text-red-700 border-red-500/50');
+        const labelOy = createDOMOverlayLabel('label-oy', '$O_y$', 'axis-badge text-violet-700 border-violet-500/50');
+        const labelOz = createDOMOverlayLabel('label-oz', '$O_z$', 'axis-badge text-blue-700 border-blue-500/50');
+
+        const labelA = createDOMOverlayLabel('label-vec-a', '$\\mathbf{A}$');
+        const labelMagBar = createDOMOverlayLabel('label-mag-bar', '$A = |\\mathbf{A}|$', 'mag-badge');
+
+        const labelAx = createDOMOverlayLabel('label-ax', '$A_x$', 'text-red-700 text-xs font-mono');
+        const labelAy = createDOMOverlayLabel('label-ay', '$A_y$', 'text-violet-700 text-xs font-mono');
+        const labelAz = createDOMOverlayLabel('label-az', '$A_z$', 'text-blue-700 text-xs font-mono');
+
+        // Cylindrical labels
+        const labelR = createDOMOverlayLabel('label-cyl-r', '$A_r$', 'text-red-700 text-xs font-semibold');
+        const labelPhi = createDOMOverlayLabel('label-cyl-phi', '$\\phi$', 'text-violet-700 text-xs font-semibold');
+        const labelHatR = createDOMOverlayLabel('label-hat-r', '$\\hat{\\mathbf{r}}$', 'text-red-700 text-xs font-bold');
+        const labelHatPhi = createDOMOverlayLabel('label-hat-phi', '$\\boldsymbol{\\hat{\\phi}}$', 'text-violet-700 text-xs font-bold');
+
+        // Spherical labels
+        const labelSphR = createDOMOverlayLabel('label-sph-r', '$A_R$', 'text-red-700 text-xs font-semibold');
+        const labelTheta = createDOMOverlayLabel('label-sph-theta', '$\\theta$', 'text-violet-700 text-xs font-semibold');
+        const labelSphPhi = createDOMOverlayLabel('label-sph-phi', '$\\phi$', 'text-blue-700 text-xs font-semibold');
+        const labelSphHatR = createDOMOverlayLabel('label-sph-hat-r', '$\\hat{\\mathbf{R}}$', 'text-red-700 text-xs font-bold');
+        const labelHatTheta = createDOMOverlayLabel('label-sph-hat-theta', '$\\boldsymbol{\\hat{\\theta}}$', 'text-violet-700 text-xs font-bold');
+        const labelSphHatPhi = createDOMOverlayLabel('label-sph-hat-phi', '$\\boldsymbol{\\hat{\\phi}}$', 'text-blue-700 text-xs font-bold');
+
+        // Differential element labels (dl components, ds_i faces, dv) - text switches
+        // per coordinate mode inside updateDiffElementGroup()/updateScene().
+        const labelDiffU = createDOMOverlayLabel('label-diff-u', '$dx$', 'text-red-700 text-sm font-semibold');
+        const labelDiffV = createDOMOverlayLabel('label-diff-v', '$dy$', 'text-violet-700 text-sm font-semibold');
+        const labelDiffW = createDOMOverlayLabel('label-diff-w', '$dz$', 'text-blue-700 text-sm font-semibold');
+        const labelDsU = createDOMOverlayLabel('label-ds-u', '$d\\mathbf{s}_x$', 'text-red-700 text-sm');
+        const labelDsV = createDOMOverlayLabel('label-ds-v', '$d\\mathbf{s}_y$', 'text-violet-700 text-sm');
+        const labelDsW = createDOMOverlayLabel('label-ds-w', '$d\\mathbf{s}_z$', 'text-blue-700 text-sm');
+        const labelDv = createDOMOverlayLabel('label-dv', '$dv$', 'axis-badge text-violet-700 border-violet-500/50');
+        const labelP1 = createDOMOverlayLabel('label-p1', '$P_1$', 'axis-badge text-slate-700');
+        const labelP2 = createDOMOverlayLabel('label-p2', '$P_2$', 'axis-badge text-slate-700');
+
+        function updateCylindricalMeshGroup() {
+            while (cylindricalMeshGroup.children.length > 0) {
+                const obj = cylindricalMeshGroup.children[0];
+                obj.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+                cylindricalMeshGroup.remove(obj);
+            }
+
+            const orig = state.originA;
+            const vec = state.vectorA;
+            const r = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+            let phi = Math.atan2(vec.y, vec.x); if (phi < 0) phi += 2 * Math.PI;
+            const z = vec.z;
+
+            if (r < 0.01 || !state.showCylOverlay) return;
+
+            // 1. Transparent Reference Cylinder Surface
+            if (state.showCylinderMesh) {
+                const cylHeight = Math.abs(z) > 0.1 ? Math.abs(z) : 0.05;
+                const cylGeo = new THREE.CylinderGeometry(r, r, cylHeight, 32, 1, true);
+                const cylMat = new THREE.MeshStandardMaterial({
+                    color: 0xef4444,
+                    transparent: true,
+                    opacity: 0.12,
+                    side: THREE.DoubleSide,
+                    wireframe: false
+                });
+                const cylMesh = new THREE.Mesh(cylGeo, cylMat);
+                cylMesh.rotation.x = Math.PI / 2;
+                cylMesh.position.set(orig.x, orig.y, orig.z + z / 2);
+                cylindricalMeshGroup.add(cylMesh);
+
+                const circleGeo = new THREE.BufferGeometry();
+                const points = [];
+                for (let i = 0; i <= 64; i++) {
+                    const angle = (i / 64) * Math.PI * 2;
+                    points.push(new THREE.Vector3(r * Math.cos(angle), r * Math.sin(angle), 0));
+                }
+                circleGeo.setFromPoints(points);
+                const circleMat = new THREE.LineDashedMaterial({ color: 0xdc2626, dashSize: 0.35, gapSize: 0.15, opacity: 0.9, transparent: true });
+
+                const bottomCircle = new THREE.Line(circleGeo, circleMat);
+                bottomCircle.computeLineDistances();
+                bottomCircle.position.set(orig.x, orig.y, orig.z);
+                cylindricalMeshGroup.add(bottomCircle);
+
+                const topCircle = new THREE.Line(circleGeo, circleMat);
+                topCircle.computeLineDistances();
+                topCircle.position.set(orig.x, orig.y, orig.z + z);
+                cylindricalMeshGroup.add(topCircle);
+            }
+
+            // 2. Azimuth Angle Phi Arc and Radial Line
+            if (state.showPhiArc) {
+                const radialLineGeo = new THREE.BufferGeometry().setFromPoints([
+                    orig,
+                    new THREE.Vector3(orig.x + vec.x, orig.y + vec.y, orig.z)
+                ]);
+                const radialLineMat = new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2 });
+                cylindricalMeshGroup.add(new THREE.Line(radialLineGeo, radialLineMat));
+
+                if (Math.abs(phi) > 0.02) {
+                    const arcRadius = Math.min(r * 0.45, 2.5);
+                    const arcPoints = [];
+                    const steps = 32;
+
+                    for (let i = 0; i <= steps; i++) {
+                        const a = phi * (i / steps);
+                        arcPoints.push(new THREE.Vector3(orig.x + arcRadius * Math.cos(a), orig.y + arcRadius * Math.sin(a), orig.z));
+                    }
+
+                    const arcGeo = new THREE.BufferGeometry().setFromPoints(arcPoints);
+                    const arcMat = new THREE.LineBasicMaterial({ color: 0x8b5cf6, linewidth: 2 });
+                    cylindricalMeshGroup.add(new THREE.Line(arcGeo, arcMat));
+                }
+            }
+
+            // 3. Cylindrical Basis Unit Vectors (r_hat, phi_hat)
+            if (state.showCylBasis) {
+                const baseP = new THREE.Vector3(orig.x + vec.x, orig.y + vec.y, orig.z);
+
+                const rHatDir = new THREE.Vector3(Math.cos(phi), Math.sin(phi), 0);
+                const rHatArrow = create3DArrow(1.2, 0xef4444, 0.06, 0.18, 0.35);
+                orientObjectToVector(rHatArrow, rHatDir);
+                rHatArrow.position.copy(baseP);
+
+                const phiHatDir = new THREE.Vector3(-Math.sin(phi), Math.cos(phi), 0);
+                const phiHatArrow = create3DArrow(1.2, 0x8b5cf6, 0.06, 0.18, 0.35);
+                orientObjectToVector(phiHatArrow, phiHatDir);
+                phiHatArrow.position.copy(baseP);
+
+                cylindricalMeshGroup.add(rHatArrow);
+                cylindricalMeshGroup.add(phiHatArrow);
+            }
+        }
+
+        function updateSphericalMeshGroup() {
+            while (sphericalMeshGroup.children.length > 0) {
+                const obj = sphericalMeshGroup.children[0];
+                obj.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+                sphericalMeshGroup.remove(obj);
+            }
+
+            const orig = state.originA;
+            const vec = state.vectorA;
+            const R = vec.length();
+            if (R < 0.01 || !state.showSphOverlay) return;
+
+            const theta = Math.acos(Math.max(-1, Math.min(1, vec.z / R)));
+            let phi = Math.atan2(vec.y, vec.x); if (phi < 0) phi += 2 * Math.PI;
+
+            // 1. Transparent Reference Sphere Wireframe
+            if (state.showSphereMesh) {
+                const sphereGeo = new THREE.SphereGeometry(R, 24, 16);
+                const sphereMat = new THREE.MeshStandardMaterial({
+                    color: 0xef4444,
+                    transparent: true,
+                    opacity: 0.1,
+                    wireframe: true
+                });
+                const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+                sphereMesh.position.copy(orig);
+                sphericalMeshGroup.add(sphereMesh);
+            }
+
+            // 2. Polar Angle Theta Arc & Azimuth Phi Arc
+            if (state.showSphArcs) {
+                // Radial vector line
+                const radialLineGeo = new THREE.BufferGeometry().setFromPoints([orig, orig.clone().add(vec)]);
+                const radialLineMat = new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2 });
+                sphericalMeshGroup.add(new THREE.Line(radialLineGeo, radialLineMat));
+
+                // Theta arc (from +Z axis down to vec)
+                if (theta > 0.02 && theta < Math.PI - 0.02) {
+                    const arcRadius = Math.min(R * 0.4, 2.0);
+                    const arcPoints = [];
+                    const steps = 24;
+                    for (let i = 0; i <= steps; i++) {
+                        const t = theta * (i / steps);
+                        // In XZ plane rotated by phi
+                        const pt = new THREE.Vector3(
+                            arcRadius * Math.sin(t) * Math.cos(phi),
+                            arcRadius * Math.sin(t) * Math.sin(phi),
+                            arcRadius * Math.cos(t)
+                        );
+                        arcPoints.push(orig.clone().add(pt));
+                    }
+                    const arcGeo = new THREE.BufferGeometry().setFromPoints(arcPoints);
+                    const arcMat = new THREE.LineBasicMaterial({ color: 0x8b5cf6, linewidth: 2 });
+                    sphericalMeshGroup.add(new THREE.Line(arcGeo, arcMat));
+                }
+
+                // Phi arc (in XY plane)
+                const rXY = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+                if (rXY > 0.1 && Math.abs(phi) > 0.02) {
+                    const phiArcRadius = Math.min(rXY * 0.4, 1.8);
+                    const phiPoints = [];
+                    const steps = 24;
+                    for (let i = 0; i <= steps; i++) {
+                        const a = phi * (i / steps);
+                        phiPoints.push(orig.clone().add(new THREE.Vector3(phiArcRadius * Math.cos(a), phiArcRadius * Math.sin(a), 0)));
+                    }
+                    const phiGeo = new THREE.BufferGeometry().setFromPoints(phiPoints);
+                    const phiMat = new THREE.LineBasicMaterial({ color: 0x3b82f6, linewidth: 2 });
+                    sphericalMeshGroup.add(new THREE.Line(phiGeo, phiMat));
+                }
+            }
+
+            // 3. Spherical Basis Unit Vectors (R_hat, theta_hat, phi_hat)
+            if (state.showSphBasis) {
+                const baseP = orig.clone().add(vec);
+
+                // R_hat points along vector direction
+                const rHatDir = vec.clone().normalize();
+                const rHatArrow = create3DArrow(1.2, 0xef4444, 0.06, 0.18, 0.35);
+                orientObjectToVector(rHatArrow, rHatDir);
+                rHatArrow.position.copy(baseP);
+
+                // Theta_hat points in direction of increasing theta (towards -Z / away from +Z)
+                const thetaHatDir = new THREE.Vector3(
+                    Math.cos(theta) * Math.cos(phi),
+                    Math.cos(theta) * Math.sin(phi),
+                    -Math.sin(theta)
+                ).normalize();
+                const thetaHatArrow = create3DArrow(1.2, 0x8b5cf6, 0.06, 0.18, 0.35);
+                orientObjectToVector(thetaHatArrow, thetaHatDir);
+                thetaHatArrow.position.copy(baseP);
+
+                // Phi_hat points in direction of increasing phi
+                const phiHatDir = new THREE.Vector3(-Math.sin(phi), Math.cos(phi), 0).normalize();
+                const phiHatArrow = create3DArrow(1.2, 0x3b82f6, 0.06, 0.18, 0.35);
+                orientObjectToVector(phiHatArrow, phiHatDir);
+                phiHatArrow.position.copy(baseP);
+
+                sphericalMeshGroup.add(rHatArrow);
+                sphericalMeshGroup.add(thetaHatArrow);
+                sphericalMeshGroup.add(phiHatArrow);
+            }
+        }
+
+        // ---- Differential element (dl, ds_i, dv) helpers ----
+        // Maps (u,v,w) generalized coordinates to a Cartesian point (relative to O)
+        // for the currently selected system: cartesian(x,y,z) / cylindrical(r,phi,z) / spherical(R,theta,phi)
+        function diffCoordMap(mode, u, v, w) {
+            if (mode === 'cylindrical') {
+                return new THREE.Vector3(u * Math.cos(v), u * Math.sin(v), w);
+            } else if (mode === 'spherical') {
+                return new THREE.Vector3(
+                    u * Math.sin(v) * Math.cos(w),
+                    u * Math.sin(v) * Math.sin(w),
+                    u * Math.cos(v)
+                );
+            }
+            return new THREE.Vector3(u, v, w); // cartesian
+        }
+
+        function makeQuad(p1, p2, p3, p4, colorHex, opacity) {
+            const geo = new THREE.BufferGeometry();
+            const verts = new Float32Array([
+                p1.x, p1.y, p1.z,  p2.x, p2.y, p2.z,  p3.x, p3.y, p3.z,
+                p1.x, p1.y, p1.z,  p3.x, p3.y, p3.z,  p4.x, p4.y, p4.z
+            ]);
+            geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+            geo.computeVertexNormals();
+            const mat = new THREE.MeshStandardMaterial({
+                color: colorHex, transparent: true, opacity: opacity,
+                side: THREE.DoubleSide, roughness: 0.4, metalness: 0.1, depthWrite: false
+            });
+            return new THREE.Mesh(geo, mat);
+        }
+
+        function updateDiffElementGroup() {
+            while (diffElementGroup.children.length > 0) {
+                const obj = diffElementGroup.children[0];
+                obj.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+                diffElementGroup.remove(obj);
+            }
+            state._diffLabelPos = null;
+            if (!state.showDiffElement) return;
+
+            const vec = state.vectorA;
+            const mag = vec.length();
+            if (mag < 0.4) return;
+
+            const mode = state.inputMode;
+            // u1,v1,w1 = coordinates of corner P1 (near corner); u2,v2,w2 = corner P2 (far corner)
+            let u1, v1, w1, u2, v2, w2, colorU, colorV, colorW, nameU, nameV, nameW, dsNameU, dsNameV, dsNameW;
+            let uHat, vHat, wHat, p1Label, p2Label;
+
+            if (mode === 'cylindrical') {
+                const r = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+                const phi = Math.atan2(vec.y, vec.x);
+                const dr = 1.6;
+                const dphi = Math.max(0.09, Math.min(0.55, 1.6 / Math.max(r, 1)));
+                const dz = 1.6;
+                u1 = r; v1 = phi; w1 = vec.z;
+                u2 = r + dr; v2 = phi + dphi; w2 = vec.z + dz;
+                colorU = 0xef4444; colorV = 0x8b5cf6; colorW = 0x3b82f6;
+                nameU = '$dr$'; nameV = '$r\\,d\\phi$'; nameW = '$dz$';
+                dsNameU = '$d\\mathbf{s}_r$'; dsNameV = '$d\\mathbf{s}_\\phi$'; dsNameW = '$d\\mathbf{s}_z$';
+                uHat = new THREE.Vector3(Math.cos(phi), Math.sin(phi), 0);
+                vHat = new THREE.Vector3(-Math.sin(phi), Math.cos(phi), 0);
+                wHat = new THREE.Vector3(0, 0, 1);
+                p1Label = `$(r_1,\\phi_1,z_1){=}(${u1.toFixed(1)},${(v1*180/Math.PI).toFixed(0)}^\\circ,${w1.toFixed(1)})$`;
+                p2Label = `$(r_2,\\phi_2,z_2){=}(${u2.toFixed(1)},${(v2*180/Math.PI).toFixed(0)}^\\circ,${w2.toFixed(1)})$`;
+            } else if (mode === 'spherical') {
+                const R = mag;
+                const theta = Math.acos(Math.max(-1, Math.min(1, vec.z / R)));
+                const phi = Math.atan2(vec.y, vec.x);
+                const dR = 1.6;
+                const dtheta = Math.max(0.09, Math.min(0.55, 1.6 / Math.max(R, 1)));
+                const sinTheta = Math.max(Math.sin(theta), 0.15);
+                const dphi = Math.max(0.09, Math.min(0.55, 1.6 / Math.max(R * sinTheta, 1)));
+                u1 = R; v1 = theta; w1 = phi;
+                u2 = R + dR; v2 = theta + dtheta; w2 = phi + dphi;
+                colorU = 0xef4444; colorV = 0x8b5cf6; colorW = 0x3b82f6;
+                nameU = '$dR$'; nameV = '$R\\,d\\theta$'; nameW = '$R\\sin\\theta\\,d\\phi$';
+                dsNameU = '$d\\mathbf{s}_R$'; dsNameV = '$d\\mathbf{s}_\\theta$'; dsNameW = '$d\\mathbf{s}_\\phi$';
+                uHat = new THREE.Vector3(Math.sin(theta) * Math.cos(phi), Math.sin(theta) * Math.sin(phi), Math.cos(theta));
+                vHat = new THREE.Vector3(Math.cos(theta) * Math.cos(phi), Math.cos(theta) * Math.sin(phi), -Math.sin(theta));
+                wHat = new THREE.Vector3(-Math.sin(phi), Math.cos(phi), 0);
+                p1Label = `$(R_1,\\theta_1,\\phi_1){=}(${u1.toFixed(1)},${(v1*180/Math.PI).toFixed(0)}^\\circ,${(w1*180/Math.PI).toFixed(0)}^\\circ)$`;
+                p2Label = `$(R_2,\\theta_2,\\phi_2){=}(${u2.toFixed(1)},${(v2*180/Math.PI).toFixed(0)}^\\circ,${(w2*180/Math.PI).toFixed(0)}^\\circ)$`;
+            } else { // cartesian
+                const d = 1.6;
+                u1 = vec.x; v1 = vec.y; w1 = vec.z;
+                u2 = vec.x + d; v2 = vec.y + d; w2 = vec.z + d;
+                colorU = 0xef4444; colorV = 0x8b5cf6; colorW = 0x3b82f6;
+                nameU = '$dx$'; nameV = '$dy$'; nameW = '$dz$';
+                dsNameU = '$d\\mathbf{s}_x$'; dsNameV = '$d\\mathbf{s}_y$'; dsNameW = '$d\\mathbf{s}_z$';
+                uHat = new THREE.Vector3(1, 0, 0);
+                vHat = new THREE.Vector3(0, 1, 0);
+                wHat = new THREE.Vector3(0, 0, 1);
+                p1Label = `$(x_1,y_1,z_1){=}(${u1.toFixed(1)},${v1.toFixed(1)},${w1.toFixed(1)})$`;
+                p2Label = `$(x_2,y_2,z_2){=}(${u2.toFixed(1)},${v2.toFixed(1)},${w2.toFixed(1)})$`;
+            }
+
+            const map = (u, v, w) => diffCoordMap(mode, u, v, w);
+            const c000 = map(u1, v1, w1);
+            const c100 = map(u2, v1, w1);
+            const c010 = map(u1, v2, w1);
+            const c001 = map(u1, v1, w2);
+            const c110 = map(u2, v2, w1);
+            const c101 = map(u2, v1, w2);
+            const c011 = map(u1, v2, w2);
+            const c111 = map(u2, v2, w2);
+
+            // Wireframe outline of the box bounded by P1(u1,v1,w1) and P2(u2,v2,w2) - 12 edges
+            const wireMat = new THREE.LineBasicMaterial({ color: 0x334155, transparent: true, opacity: 0.45 });
+            [[c000, c100], [c010, c110], [c001, c101], [c011, c111],
+             [c000, c010], [c100, c110], [c001, c011], [c101, c111],
+             [c000, c001], [c100, c101], [c010, c011], [c110, c111]].forEach(([a, b]) => {
+                const geo = new THREE.BufferGeometry().setFromPoints([a, b]);
+                diffElementGroup.add(new THREE.Line(geo, wireMat));
+            });
+
+            // dl: the 3 edges from P1 toward P2 (dx/dy/dz, dr/r.dphi/dz, dR/R.dtheta/R.sinth.dphi)
+            const addDlArrow = (target, colorHex) => {
+                const dirVec = target.clone().sub(c000);
+                const len = dirVec.length();
+                if (len < 0.02) return c000.clone();
+                const arrow = create3DArrow(len, colorHex, 0.035, 0.09, Math.min(0.22, len * 0.35));
+                orientObjectToVector(arrow, dirVec);
+                arrow.position.copy(c000);
+                diffElementGroup.add(arrow);
+                return c000.clone().addScaledVector(dirVec, 0.55);
+            };
+            const midU = addDlArrow(c100, colorU);
+            const midV = addDlArrow(c010, colorV);
+            const midW = addDlArrow(c001, colorW);
+
+            // Translucent panels on the 3 faces meeting at P1, just to read as a solid volume dv
+            diffElementGroup.add(makeQuad(c000, c010, c011, c001, colorU, 0.22));
+            diffElementGroup.add(makeQuad(c000, c100, c101, c001, colorV, 0.22));
+            diffElementGroup.add(makeQuad(c000, c100, c110, c010, colorW, 0.22));
+
+            // ds_i: TRUE outward normal vectors (along u-hat/v-hat/w-hat) anchored at the
+            // center of the far face (the one at u2, v2 or w2) they belong to.
+            const nLen = 0.75;
+            const addNormalArrow = (faceCorners, hatDir, colorHex) => {
+                const center = faceCorners[0].clone().add(faceCorners[1]).add(faceCorners[2]).add(faceCorners[3]).multiplyScalar(0.25);
+                const arrow = create3DArrow(nLen, colorHex, 0.04, 0.12, 0.3);
+                orientObjectToVector(arrow, hatDir);
+                arrow.position.copy(center);
+                diffElementGroup.add(arrow);
+                return center.clone().addScaledVector(hatDir, nLen * 1.15);
+            };
+            const dsUPos = addNormalArrow([c100, c110, c111, c101], uHat, colorU);
+            const dsVPos = addNormalArrow([c010, c110, c111, c011], vHat, colorV);
+            const dsWPos = addNormalArrow([c001, c101, c111, c011], wHat, colorW);
+
+            state._diffLabelPos = {
+                dU: midU, dV: midV, dW: midW,
+                dsU: dsUPos, dsV: dsVPos, dsW: dsWPos,
+                dv: c000.clone().add(c111).multiplyScalar(0.5),
+                p1: c000.clone(), p2: c111.clone(),
+                nameU, nameV, nameW, dsNameU, dsNameV, dsNameW, p1Label, p2Label
+            };
+        }
+
+        function updateProjectionsAndTriangles(vec, orig) {
+            [projectionGroup, magDimensionGroup].forEach(grp => {
+                while (grp.children.length > 0) {
+                    const obj = grp.children[0];
+                    if (obj.geometry) obj.geometry.dispose();
+                    if (obj.material) obj.material.dispose();
+                    grp.remove(obj);
+                }
+            });
+
+            if (vec.length() < 0.001) return;
+
+            const startP = orig.clone();
+            const tipP = orig.clone().add(vec);
+
+            if (state.showProjections) {
+                const lineMat = new THREE.LineDashedMaterial({
+                    color: 0x1f2937,
+                    dashSize: 0.3,
+                    gapSize: 0.2,
+                    linewidth: 2,
+                    opacity: 0.7,
+                    transparent: true
+                });
+
+                const pointsList = [
+                    [tipP, new THREE.Vector3(tipP.x, tipP.y, startP.z)],
+                    [new THREE.Vector3(tipP.x, tipP.y, startP.z), new THREE.Vector3(tipP.x, startP.y, startP.z)],
+                    [new THREE.Vector3(tipP.x, tipP.y, startP.z), new THREE.Vector3(startP.x, tipP.y, startP.z)],
+                    [tipP, new THREE.Vector3(startP.x, tipP.y, tipP.z)],
+                    [new THREE.Vector3(startP.x, tipP.y, tipP.z), new THREE.Vector3(startP.x, tipP.y, startP.z)],
+                    [new THREE.Vector3(startP.x, tipP.y, tipP.z), new THREE.Vector3(startP.x, startP.y, tipP.z)],
+                    [tipP, new THREE.Vector3(tipP.x, startP.y, tipP.z)],
+                    [new THREE.Vector3(tipP.x, startP.y, tipP.z), new THREE.Vector3(tipP.x, startP.y, startP.z)],
+                    [new THREE.Vector3(tipP.x, startP.y, tipP.z), new THREE.Vector3(startP.x, startP.y, tipP.z)]
+                ];
+
+                pointsList.forEach(pts => {
+                    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                    const line = new THREE.Line(geo, lineMat);
+                    line.computeLineDistances();
+                    projectionGroup.add(line);
+                });
+            }
+
+            if (state.showCompA) {
+                const compMatX = new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 3 });
+                const compMatY = new THREE.LineBasicMaterial({ color: 0x8b5cf6, linewidth: 3 });
+                const compMatZ = new THREE.LineBasicMaterial({ color: 0x3b82f6, linewidth: 3 });
+
+                const p1 = startP.clone();
+                const p2 = startP.clone().add(new THREE.Vector3(vec.x, 0, 0));
+                const p3 = startP.clone().add(new THREE.Vector3(vec.x, vec.y, 0));
+                const p4 = tipP.clone();
+
+                projectionGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([p1, p2]), compMatX));
+                projectionGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([p2, p3]), compMatY));
+                projectionGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([p3, p4]), compMatZ));
+            }
+
+            if (state.showMagBar && vec.length() > 0.1) {
+                let normalOffset = new THREE.Vector3().crossVectors(vec, new THREE.Vector3(0, 0, 1));
+                if (normalOffset.lengthSq() < 0.0001) {
+                    normalOffset.set(1, 0, 0);
+                } else {
+                    normalOffset.normalize();
+                }
+                const offsetDistance = Math.max(1.6, Math.min(3.2, vec.length() * 0.25 + 1.2));
+                normalOffset.multiplyScalar(offsetDistance);
+
+                const startOffset = startP.clone().add(normalOffset);
+                const endOffset = tipP.clone().add(normalOffset);
+
+                const dimLineMat = new THREE.LineBasicMaterial({ color: 0x1f2937 });
+                const dimGeo = new THREE.BufferGeometry().setFromPoints([startOffset, endOffset]);
+                const dimLine = new THREE.Line(dimGeo, dimLineMat);
+                magDimensionGroup.add(dimLine);
+            }
+        }
+
+        function updateScene() {
+            const vec = state.vectorA;
+            const orig = state.originA;
+            const mag = vec.length();
+
+            vectorGroup.position.copy(orig);
+
+            const disposeTree = o => o.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+            while (vectorAMeshGroup.children.length > 0) {
+                const obj = vectorAMeshGroup.children[0];
+                disposeTree(obj); vectorAMeshGroup.remove(obj);
+            }
+            if (mag > 0.001) {
+                const arrowA = create3DArrow(mag, 0x0f172a, 0.09, 0.25, 0.7);
+                orientObjectToVector(arrowA, vec);
+                vectorAMeshGroup.add(arrowA);
+            }
+            tipSphere.position.copy(vec);
+
+            while (unitVectorMeshGroup.children.length > 0) {
+                const obj = unitVectorMeshGroup.children[0];
+                disposeTree(obj); unitVectorMeshGroup.remove(obj);
+            }
+
+            if (state.showUnitVector && mag > 0.001) {
+                const unitArrow = create3DArrow(1.0, 0x8b5cf6, 0.12, 0.28, 0.5);
+                orientObjectToVector(unitArrow, vec);
+
+                if (state.unitVectorAtTip) {
+                    unitVectorMeshGroup.position.copy(vec);
+                } else {
+                    unitVectorMeshGroup.position.set(0, 0, 0);
+                }
+
+                unitVectorMeshGroup.add(unitArrow);
+                unitVectorMeshGroup.visible = true;
+            } else {
+                unitVectorMeshGroup.visible = false;
+            }
+
+            updateCylindricalMeshGroup();
+            updateSphericalMeshGroup();
+            updateDiffElementGroup();
+            updateProjectionsAndTriangles(vec, orig);
+            updateAxes();
+
+            // Real-Time Math Equation Formatting
+            const clamp1 = v => Math.max(-1, Math.min(1, v));
+            const r = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+            const phi = Math.atan2(vec.y, vec.x);
+            const R = mag;
+            const theta = R > 0.001 ? Math.acos(clamp1(vec.z / R)) : 0;
+
+            const cosPhi = Math.cos(phi);
+            const sinPhi = Math.sin(phi);
+            const cosTheta = Math.cos(theta);
+            const sinTheta = Math.sin(theta);
+
+            // Cylindrical components
+            const Ar = vec.x * cosPhi + vec.y * sinPhi;
+            const Aphi = -vec.x * sinPhi + vec.y * cosPhi;
+
+            // Spherical components
+            const AR = vec.x * sinTheta * cosPhi + vec.y * sinTheta * sinPhi + vec.z * cosTheta;
+            const Atheta = vec.x * cosTheta * cosPhi + vec.y * cosTheta * sinPhi - vec.z * sinTheta;
+
+            const fix0 = v => (Math.abs(v) < 0.005 ? "0" : v.toFixed(3));
+
+            // Live numeric readouts for the three systems (position vector of the tip point P)
+            let phiDeg0 = phi * 180 / Math.PI; if (phiDeg0 < 0) phiDeg0 += 360;
+            const thDeg0 = theta * 180 / Math.PI;
+            const sg = v => (v < 0 ? ' - ' : ' + ') + Math.abs(v).toFixed(2);
+            let cartTex = `\\begin{aligned}&P = (${vec.x.toFixed(2)},\\ ${vec.y.toFixed(2)},\\ ${vec.z.toFixed(2)})\\\\ &\\mathbf{A} = ${vec.x.toFixed(2)}\\,\\hat{\\mathbf{x}}${sg(vec.y)}\\,\\hat{\\mathbf{y}}${sg(vec.z)}\\,\\hat{\\mathbf{z}}\\\\ &|\\mathbf{A}| = ${mag.toFixed(3)}\\end{aligned}`;
+            const phiNote = vec.x < 0 ? `\\ (\\text{quadrant-corrected})` : '';
+            let cylTex = `\\begin{aligned}&r = \\sqrt{x^2+y^2} = ${r.toFixed(3)}\\\\ &\\phi = \\tan^{-1}(y/x) = ${phiDeg0.toFixed(1)}^\\circ${phiNote}\\\\ &z = ${vec.z.toFixed(2)}\\\\ &A_r = ${Ar.toFixed(3)},\\ A_\\phi = ${fix0(Aphi)},\\ A_z = ${vec.z.toFixed(2)}\\\\ &\\mathbf{A} = ${Ar.toFixed(2)}\\,\\hat{\\mathbf{r}}${sg(vec.z)}\\,\\hat{\\mathbf{z}}\\end{aligned}`;
+            let sphTex = `\\begin{aligned}&R = \\sqrt{x^2+y^2+z^2} = ${R.toFixed(3)}\\\\ &\\theta = \\cos^{-1}(z/R) = ${thDeg0.toFixed(1)}^\\circ\\\\ &\\phi = ${phiDeg0.toFixed(1)}^\\circ\\\\ &A_R = ${AR.toFixed(3)},\\ A_\\theta = ${fix0(Atheta)},\\ A_\\phi = ${fix0(Aphi)}\\\\ &\\mathbf{A} = ${AR.toFixed(2)}\\,\\hat{\\mathbf{R}}\\end{aligned}`;
+
+            if (mathCartDisplay) renderMathJaxElement(mathCartDisplay, `$$${cartTex}$$`);
+            if (mathCylDisplay) renderMathJaxElement(mathCylDisplay, `$$${cylTex}$$`);
+            if (mathSphDisplay) renderMathJaxElement(mathSphDisplay, `$$${sphTex}$$`);
+
+            // Update Label LaTeX strings only when state changes
+            if (state.showCompA) {
+                renderMathJaxElement(labelAx, `$A_x = ${vec.x.toFixed(1)}$`);
+                renderMathJaxElement(labelAy, `$A_y = ${vec.y.toFixed(1)}$`);
+                renderMathJaxElement(labelAz, `$A_z = ${vec.z.toFixed(1)}$`);
+            }
+
+            let phiDeg = phi * (180 / Math.PI);
+            if (phiDeg < 0) phiDeg += 360;
+
+            if (state.showCylOverlay && state.showPhiArc && r > 0.1) {
+                renderMathJaxElement(labelR, `$r = ${r.toFixed(1)}$`);
+                renderMathJaxElement(labelPhi, `$\\phi = ${phiDeg.toFixed(0)}^\\circ$`);
+            }
+
+            if (state.showSphOverlay && state.showSphArcs && R > 0.1) {
+                renderMathJaxElement(labelSphR, `$R = ${R.toFixed(1)}$`);
+                renderMathJaxElement(labelTheta, `$\\theta = ${(theta * (180 / Math.PI)).toFixed(0)}^\\circ$`);
+                renderMathJaxElement(labelSphPhi, `$\\phi = ${phiDeg.toFixed(0)}^\\circ$`);
+            }
+
+            if (state.showMagBar && mag > 0.1) {
+                renderMathJaxElement(labelMagBar, `$|\\mathbf{A}| = ${mag.toFixed(2)}$`);
+            }
+
+            if (state.showDiffElement && state._diffLabelPos) {
+                const dp = state._diffLabelPos;
+                renderMathJaxElement(labelDiffU, dp.nameU);
+                renderMathJaxElement(labelDiffV, dp.nameV);
+                renderMathJaxElement(labelDiffW, dp.nameW);
+                renderMathJaxElement(labelDsU, dp.dsNameU);
+                renderMathJaxElement(labelDsV, dp.dsNameV);
+                renderMathJaxElement(labelDsW, dp.dsNameW);
+                renderMathJaxElement(labelP1, dp.p1Label);
+                renderMathJaxElement(labelP2, dp.p2Label);
+            }
+
+            axesGroup.visible = state.showGrid;
+        }
+
+        // Move a label sideways (in screen space) off the line p0→p1, towards the upper side, by `px` pixels
+        function nudgeOffLine(el, p0, p1, px) {
+            const a = p0.clone().project(camera), b = p1.clone().project(camera);
+            const W = container.clientWidth, H = container.clientHeight;
+            let dx = (b.x - a.x) * W / 2, dy = -(b.y - a.y) * H / 2;
+            const L = Math.hypot(dx, dy); if (L < 1) return;
+            let nx = -dy / L, ny = dx / L;
+            if (ny > 0) { nx = -nx; ny = -ny; }                       // always to the upper side of the line
+            el.style.left = (parseFloat(el.style.left) + nx * px) + 'px';
+            el.style.top = (parseFloat(el.style.top) + ny * px) + 'px';
+        }
+
+        // ---- Label layout that does not jump around ----
+        // Each label keeps a small offset from its anchor point. Offsets are recomputed only when the view has been
+        // still for a moment (no orbiting, no slider dragging); while the user moves things, labels travel rigidly
+        // with their anchors. New offsets are eased in over a few frames, and a thin dashed leader line in the
+        // label's colour joins a label to its anchor whenever it has been moved away from it.
+        const labelOffsets = new Map();          // element -> {x, y} current offset (px)
+        const labelTargets = new Map();          // element -> {x, y} offset we are easing towards
+        const labelSizes = new Map();            // element -> [w, h] at the last arrangement
+        // When to re-arrange: 250 ms after the user's last input (drag release, slider, wheel), and once more when the
+        // camera's easing has visibly stopped. Never while a mouse button is held down.
+        let lastInput = performance.now(), pointerDown = false, needSolve = true, settleTimer = null, camWasMoving = false;
+        const prevCam = camera.position.clone(), camAtSolve = camera.position.clone();
+        function userInput() {
+            lastInput = performance.now(); needSolve = true;
+            clearTimeout(settleTimer);
+            settleTimer = setTimeout(() => EM.invalidate(700), 260);
+        }
+        container.addEventListener('pointerdown', () => { pointerDown = true; userInput(); });
+        window.addEventListener('pointerup', () => { if (pointerDown) { pointerDown = false; userInput(); } });
+        container.addEventListener('wheel', userInput, { passive: true });
+        document.addEventListener('input', userInput, true);
+        document.addEventListener('click', e => { if (e.target.closest && e.target.closest('button')) userInput(); }, true);
+        const leaderSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        leaderSvg.id = 'leader-svg';
+        document.getElementById('labels-container').appendChild(leaderSvg);
+
+        function visibleLabels() {
+            return [...document.querySelectorAll('.mathjax-label')].filter(e => e.style.display !== 'none' && e.style.opacity !== '0' && e.offsetWidth && !e.classList.contains('mag-badge'));
+        }
+        // Callout placement. Each label is tried at its anchor and at 16 directions × 5 distances around it; the
+        // position with the lowest cost wins. Cost: overlapping another label (with an 8 px gap, so the result is
+        // spacious; 14 px), covering another label's anchor point, leaving the view, crossing another leader line, and
+        // distance. In a crowd, labels are pushed outwards (away from the crowd's centre) and joined to their point
+        // by a leader line. Labels in crowded spots are placed first.
+        function segX(a, b, c, d) {               // do segments ab and cd cross?
+            const o = (p, q, r) => Math.sign((q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x));
+            return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
+        }
+        function segBox(a, b, r) {                // does segment ab pass through box r (x0,y0,x1,y1)?
+            const inside = p => p.x > r.x0 && p.x < r.x1 && p.y > r.y0 && p.y < r.y1;
+            if (inside(a) || inside(b)) return true;
+            const C = [{x: r.x0, y: r.y0}, {x: r.x1, y: r.y0}, {x: r.x1, y: r.y1}, {x: r.x0, y: r.y1}];
+            for (let k = 0; k < 4; k++) if (segX(a, b, C[k], C[(k + 1) % 4])) return true;
+            return false;
+        }
+        function solveOffsets(B) {                 // B: [{e, x, y, w, h, fixed}] at anchor positions; returns offsets
+            const W = container.clientWidth, H = container.clientHeight, GAP = 14;   // minimum free space between labels
+            const placed = [], leaders = [];
+            const out = B.map(o => ({ ...o, ox: 0, oy: 0 }));
+            const box = (x, y, w, h, g) => ({ x0: x - w / 2 - g, y0: y - h / 2 - g, x1: x + w / 2 + g, y1: y + h / 2 + g });
+            const area = (a, b) => Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+            out.filter(o => o.fixed).forEach(o => placed.push(box(o.x, o.y, o.w, o.h, 0)));
+            const movable = out.filter(o => !o.fixed);
+            movable.forEach(o => {
+                const nb = out.filter(q => q !== o && Math.hypot(q.x - o.x, q.y - o.y) < 110);
+                o.crowd = nb.length;
+                const cx = nb.length ? nb.reduce((t, q) => t + q.x, o.x) / (nb.length + 1) : o.x;
+                const cy = nb.length ? nb.reduce((t, q) => t + q.y, o.y) / (nb.length + 1) : o.y;
+                let dx = o.x - cx, dy = o.y - cy; const L = Math.hypot(dx, dy);
+                o.outx = L > 1 ? dx / L : 0; o.outy = L > 1 ? dy / L : -1;   // default: upwards
+            });
+            movable.sort((a, b) => b.crowd - a.crowd);
+            const cands = [[0, 0]];
+            [48, 78, 110, 145, 182, 220].forEach(r => { for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8; cands.push([r * Math.cos(a), r * Math.sin(a)]); } });
+            movable.forEach(o => {
+                let best = null, bestCost = Infinity;
+                for (const [dx, dy] of cands) {
+                    const x = o.x + dx, y = o.y + dy, r = Math.hypot(dx, dy);
+                    const b0 = box(x, y, o.w, o.h, 0), bg = box(x, y, o.w, o.h, GAP);
+                    let c = r * 1.0;
+                    // in a crowd (3 or more points within 110 px), move the label clearly out of it
+                    if (o.crowd >= 2) c += Math.max(0, 80 - r) * (o.crowd - 1) * 1.6;
+                    if (b0.x0 < 4 || b0.y0 < 4 || b0.x1 > W - 4 || b0.y1 > H - 4) c += 1e6;
+                    for (const p of placed) c += area(bg, p) * 60;
+                    for (const q of out) if (q !== o && q.x > b0.x0 - 4 && q.x < b0.x1 + 4 && q.y > b0.y0 - 4 && q.y < b0.y1 + 4) c += 4000;
+                    if (r > 0) {
+                        c += (1 - (dx * o.outx + dy * o.outy) / r) * 30;
+                        const A = { x: o.x, y: o.y }, Bp = { x, y };
+                        for (const l of leaders) if (segX(A, Bp, l[0], l[1])) c += 3000;
+                        for (const p of placed) if (segBox(A, Bp, p)) c += 1500;
+                    }
+                    if (c < bestCost) { bestCost = c; best = [dx, dy]; }
+                }
+                o.ox = best[0]; o.oy = best[1];
+                placed.push(box(o.x + o.ox, o.y + o.oy, o.w, o.h, 0));
+                if (Math.hypot(o.ox, o.oy) > 0) leaders.push([{ x: o.x, y: o.y }, { x: o.x + o.ox, y: o.y + o.oy }]);
+            });
+            return out;
+        }
+
+        function layoutLabels() {
+            const els = visibleLabels();
+            const B = els.map(e => ({ e, x: parseFloat(e.style.left), y: parseFloat(e.style.top), w: e.offsetWidth + 4, h: e.offsetHeight + 2, fixed: e.classList.contains('axis-badge') }));
+            const camDelta = camera.position.distanceTo(prevCam); prevCam.copy(camera.position);
+            if (camWasMoving && camDelta < 0.003) needSolve = true;          // camera easing just finished
+            camWasMoving = camDelta >= 0.003;
+            if (camera.position.distanceTo(camAtSolve) > 0.25) needSolve = true; // view drifted since the last arrangement
+            // a label that changed size (its math finished rendering, or its value text changed) needs a new arrangement
+            for (const o of B) { const sz = labelSizes.get(o.e); if (!sz || Math.abs(sz[0] - o.w) > 2 || Math.abs(sz[1] - o.h) > 2) { needSolve = true; break; } }
+            const settled = !pointerDown && performance.now() - lastInput > 250;
+            if (settled && needSolve) { solveOffsets(B).forEach(o => { labelTargets.set(o.e, { x: o.ox, y: o.oy }); labelSizes.set(o.e, [o.w, o.h]); }); needSolve = false; camAtSolve.copy(camera.position); }
+            let easing = false, lines = '';
+            const svgRect = leaderSvg.getBoundingClientRect();
+            B.forEach(o => {
+                const t = labelTargets.get(o.e) || { x: 0, y: 0 };
+                const c = labelOffsets.get(o.e) || { x: t.x, y: t.y };
+                const nx = c.x + (t.x - c.x) * 0.35, ny = c.y + (t.y - c.y) * 0.35;
+                const done = Math.abs(t.x - nx) < 0.3 && Math.abs(t.y - ny) < 0.3;
+                const cur = done ? { x: t.x, y: t.y } : { x: nx, y: ny };
+                if (!done) easing = true;
+                labelOffsets.set(o.e, cur);
+                // keep every label fully inside the 3D view (axis-end badges used to be cut off on narrow screens)
+                const CW = container.clientWidth, CH = container.clientHeight;
+                const lx = Math.min(CW - o.w / 2 - 2, Math.max(o.w / 2 + 2, o.x + cur.x));
+                const ly = Math.min(CH - o.h / 2 - 2, Math.max(o.h / 2 + 2, o.y + cur.y));
+                o.e.style.left = lx + 'px'; o.e.style.top = ly + 'px';
+                const d = Math.hypot(cur.x, cur.y);
+                if (d > 9) {                                         // leader line from the anchor point to the label's edge
+                    const ex = lx - o.x, ey = ly - o.y;
+                    const k = Math.max(0, 1 - Math.min(o.w / 2 / Math.max(Math.abs(ex), 1e-6), o.h / 2 / Math.max(Math.abs(ey), 1e-6)));
+                    const col = getComputedStyle(o.e).color, x2 = o.x + ex * k, y2 = o.y + ey * k;
+                    lines += `<line class="halo" x1="${o.x}" y1="${o.y}" x2="${x2}" y2="${y2}"/>` +
+                             `<line x1="${o.x}" y1="${o.y}" x2="${x2}" y2="${y2}" stroke="${col}"/>` +
+                             `<circle cx="${o.x}" cy="${o.y}" r="3.2" fill="${col}" stroke="#fff" stroke-width="1.5"/>`;
+                }
+            });
+            for (const e of [...labelOffsets.keys()]) if (!els.includes(e)) { labelOffsets.delete(e); labelTargets.delete(e); }
+            leaderSvg.innerHTML = lines;
+            if (easing || (needSolve && !pointerDown)) EM.invalidate(200);   // keep drawing until the labels have settled
+        }
+
+        function updateLabelsPosition() {
+            updateLabelsPositionRaw();
+            layoutLabels();
+        }
+        function updateLabelsPositionRaw() {
+            if (!state.showLabels) {
+                labelsContainer.style.display = 'none';
+                return;
+            }
+            labelsContainer.style.display = 'block';
+
+            const tempV = new THREE.Vector3();
+
+            if (state.showGrid) {
+                const len = state.currentAxisLength;
+                projectToScreen(new THREE.Vector3(0, 0, 0), labelOrigin);
+                projectToScreen(new THREE.Vector3(len + 0.5, 0, 0), labelOx);
+                projectToScreen(new THREE.Vector3(0, len + 0.5, 0), labelOy);
+                projectToScreen(new THREE.Vector3(0, 0, len + 0.5), labelOz);
+                [labelOrigin, labelOx, labelOy, labelOz].forEach(l => l.style.display = 'block');
+            } else {
+                [labelOrigin, labelOx, labelOy, labelOz].forEach(l => l.style.display = 'none');
+            }
+
+            if (state.originA.length() > 0.001) {
+                projectToScreen(state.originA, labelOriginA);
+                labelOriginA.style.display = 'block';
+            } else {
+                labelOriginA.style.display = 'none';
+            }
+
+            if (state.showCompA && state.vectorA.length() > 0.1) {
+                const orig = state.originA;
+                projectToScreen(orig.clone().add(new THREE.Vector3(state.vectorA.x / 2, -0.4, 0)), labelAx);
+                projectToScreen(orig.clone().add(new THREE.Vector3(state.vectorA.x + 0.4, state.vectorA.y / 2, 0)), labelAy);
+                projectToScreen(orig.clone().add(new THREE.Vector3(state.vectorA.x, state.vectorA.y, state.vectorA.z / 2)), labelAz);
+                [labelAx, labelAy, labelAz].forEach(l => l.style.display = 'block');
+            } else {
+                [labelAx, labelAy, labelAz].forEach(l => l.style.display = 'none');
+            }
+
+            const R = state.vectorA.length();
+            const r = Math.sqrt(state.vectorA.x * state.vectorA.x + state.vectorA.y * state.vectorA.y);
+            let phi = Math.atan2(state.vectorA.y, state.vectorA.x); if (phi < 0) phi += 2 * Math.PI;
+            const theta = R > 0.001 ? Math.acos(Math.max(-1, Math.min(1, state.vectorA.z / R))) : 0;
+            const orig = state.originA;
+
+            // ---- Cylindrical overlay labels ----
+            if (state.showCylOverlay && state.showPhiArc && r > 0.1) {
+                projectToScreen(orig.clone().add(new THREE.Vector3(state.vectorA.x * 0.72, state.vectorA.y * 0.72, 0.3)), labelR);   // clear of the φ arc and A_x/A_y labels
+                labelR.style.display = 'block';
+
+                const arcRadius = Math.min(r * 0.45, 2.5);
+                const halfPhi = phi / 2;
+                projectToScreen(orig.clone().add(new THREE.Vector3((arcRadius + 0.4) * Math.cos(halfPhi), (arcRadius + 0.4) * Math.sin(halfPhi), 0)), labelPhi);
+                labelPhi.style.display = 'block';
+            } else {
+                labelR.style.display = 'none';
+                labelPhi.style.display = 'none';
+            }
+
+            if (state.showCylOverlay && state.showCylBasis && r > 0.1) {
+                const baseP = orig.clone().add(new THREE.Vector3(state.vectorA.x, state.vectorA.y, 0));
+                const rHatDir = new THREE.Vector3(Math.cos(phi), Math.sin(phi), 0).multiplyScalar(1.5);
+                const phiHatDir = new THREE.Vector3(-Math.sin(phi), Math.cos(phi), 0).multiplyScalar(1.5);
+
+                projectToScreen(baseP.clone().add(rHatDir), labelHatR);
+                projectToScreen(baseP.clone().add(phiHatDir), labelHatPhi);
+                labelHatR.style.display = 'block';
+                labelHatPhi.style.display = 'block';
+            } else {
+                labelHatR.style.display = 'none';
+                labelHatPhi.style.display = 'none';
+            }
+
+            // ---- Spherical overlay labels ----
+            if (state.showSphOverlay && state.showSphArcs && R > 0.1) {
+                projectToScreen(orig.clone().add(state.vectorA.clone().multiplyScalar(0.75)), labelSphR);
+                labelSphR.style.display = 'block';
+
+                if (theta > 0.02 && theta < Math.PI - 0.02) {
+                    const halfTheta = theta / 2;
+                    const arcR = Math.min(R * 0.4, 2.0) + 0.4;
+                    projectToScreen(orig.clone().add(new THREE.Vector3(
+                        arcR * Math.sin(halfTheta) * Math.cos(phi),
+                        arcR * Math.sin(halfTheta) * Math.sin(phi),
+                        arcR * Math.cos(halfTheta)
+                    )), labelTheta);
+                    labelTheta.style.display = 'block';
+                } else {
+                    labelTheta.style.display = 'none';
+                }
+
+                if (r > 0.1 && Math.abs(phi) > 0.02) {
+                    const halfPhiS = phi / 2;
+                    const phiArcR = Math.min(r * 0.4, 1.8) + 0.3;
+                    projectToScreen(orig.clone().add(new THREE.Vector3(phiArcR * Math.cos(halfPhiS), phiArcR * Math.sin(halfPhiS), 0.2)), labelSphPhi);
+                    labelSphPhi.style.display = 'block';
+                } else {
+                    labelSphPhi.style.display = 'none';
+                }
+            } else {
+                labelSphR.style.display = 'none';
+                labelTheta.style.display = 'none';
+                labelSphPhi.style.display = 'none';
+            }
+
+            if (state.showSphOverlay && state.showSphBasis && R > 0.1) {
+                const baseP = orig.clone().add(state.vectorA);
+                const RHatDir = state.vectorA.clone().normalize().multiplyScalar(1.5);
+                const thetaHatDir = new THREE.Vector3(
+                    Math.cos(theta) * Math.cos(phi),
+                    Math.cos(theta) * Math.sin(phi),
+                    -Math.sin(theta)
+                ).normalize().multiplyScalar(1.5);
+                const phiHatDirS = new THREE.Vector3(-Math.sin(phi), Math.cos(phi), 0).normalize().multiplyScalar(1.5);
+
+                projectToScreen(baseP.clone().add(RHatDir), labelSphHatR);
+                projectToScreen(baseP.clone().add(thetaHatDir), labelHatTheta);
+                projectToScreen(baseP.clone().add(phiHatDirS), labelSphHatPhi);
+                labelSphHatR.style.display = 'block';
+                labelHatTheta.style.display = 'block';
+                labelSphHatPhi.style.display = 'block';
+            } else {
+                labelSphHatR.style.display = 'none';
+                labelHatTheta.style.display = 'none';
+                labelSphHatPhi.style.display = 'none';
+            }
+
+            if (state.vectorA.length() > 0.1) {
+                tempV.copy(state.originA).addScaledVector(state.vectorA, 0.5);
+                tempV.z += 0.3;
+                projectToScreen(tempV, labelA);
+                nudgeOffLine(labelA, state.originA, state.originA.clone().add(state.vectorA), 20);
+                labelA.style.display = 'block';
+            } else {
+                labelA.style.display = 'none';
+            }
+
+            if (state.showMagBar && state.vectorA.length() > 0.1) {
+                let normalOffset = new THREE.Vector3().crossVectors(state.vectorA, new THREE.Vector3(0, 0, 1));
+                if (normalOffset.lengthSq() < 0.0001) {
+                    normalOffset.set(1, 0, 0);
+                } else {
+                    normalOffset.normalize();
+                }
+                const offsetDistance = Math.max(1.6, Math.min(3.2, state.vectorA.length() * 0.25 + 1.2));
+                normalOffset.multiplyScalar(offsetDistance);
+
+                // |A| badge sits in a fixed spot at the top-left of the view, so it never covers the vector or its labels
+                labelMagBar.style.opacity = '1';
+                labelMagBar.style.left = (labelMagBar.offsetWidth / 2 + 16) + 'px';
+                labelMagBar.style.top = (labelMagBar.offsetHeight / 2 + 16) + 'px';
+                labelMagBar.style.display = 'block';
+            } else {
+                labelMagBar.style.display = 'none';
+            }
+
+            // ---- Differential element labels (dl, ds_i, dv, P1, P2) ----
+            if (state.showDiffElement && state._diffLabelPos) {
+                const dp = state._diffLabelPos;
+                const O = state.originA;
+                projectToScreen(O.clone().add(dp.dU), labelDiffU);
+                projectToScreen(O.clone().add(dp.dV), labelDiffV);
+                projectToScreen(O.clone().add(dp.dW), labelDiffW);
+                projectToScreen(O.clone().add(dp.dsU), labelDsU);
+                projectToScreen(O.clone().add(dp.dsV), labelDsV);
+                projectToScreen(O.clone().add(dp.dsW), labelDsW);
+                projectToScreen(O.clone().add(dp.dv), labelDv);
+                [labelDiffU, labelDiffV, labelDiffW, labelDsU, labelDsV, labelDsW, labelDv].forEach(l => l.style.display = 'block');
+                // P1/P2 coordinate badges intentionally disabled
+                [labelP1, labelP2].forEach(l => l.style.display = 'none');
+            } else {
+                [labelDiffU, labelDiffV, labelDiffW, labelDsU, labelDsV, labelDsW, labelDv, labelP1, labelP2].forEach(l => l.style.display = 'none');
+            }
+        }
+
+        function projectToScreen(worldPos, element) {
+            const screenPos = worldPos.clone().project(camera);
+            const x = (screenPos.x * .5 + .5) * container.clientWidth;
+            const y = (-(screenPos.y * .5) + .5) * container.clientHeight;
+
+            if (screenPos.z > 1) {
+                element.style.opacity = '0';
+            } else {
+                element.style.opacity = '1';
+                element.style.left = `${x}px`;
+                element.style.top = `${y}px`;
+            }
+        }
+
+        function syncControlsFromVector(source) {
+            const x = state.vectorA.x;
+            const y = state.vectorA.y;
+            const z = state.vectorA.z;
+
+            const r = Math.sqrt(x * x + y * y);
+            const R = Math.sqrt(x * x + y * y + z * z);
+            let phiDeg = Math.atan2(y, x) * (180 / Math.PI);
+            if (phiDeg < 0) phiDeg += 360;
+            const thetaDeg = R > 0.001 ? Math.acos(Math.max(-1, Math.min(1, z / R))) * (180 / Math.PI) : 0;
+
+            // Cartesian sliders
+            if (source !== 'cartesian') {
+                sliderX.value = x;
+                sliderY.value = y;
+                sliderZ.value = z;
+            }
+            valX.textContent = x.toFixed(1);
+            valY.textContent = y.toFixed(1);
+            valZ.textContent = z.toFixed(1);
+
+            // Cylindrical sliders (the group being dragged keeps its own values)
+            let cyl = { r, phiDeg, z };
+            if (source === 'cylindrical') {
+                cyl = {
+                    r: parseFloat(sliderR.value),
+                    phiDeg: parseFloat(sliderCylPhi.value),
+                    z: parseFloat(sliderCylZ.value)
+                };
+            } else {
+                sliderR.value = r.toFixed(1);
+                sliderCylPhi.value = Math.round(phiDeg);
+                sliderCylZ.value = z;
+            }
+            valR.textContent = cyl.r.toFixed(1);
+            valCylPhi.textContent = `${Math.round(cyl.phiDeg)}°`;
+            valCylZ.textContent = cyl.z.toFixed(1);
+
+            // Spherical sliders
+            let sph = { R, thetaDeg, phiDeg };
+            if (source === 'spherical') {
+                sph = {
+                    R: parseFloat(sliderSphR.value),
+                    thetaDeg: parseFloat(sliderTheta.value),
+                    phiDeg: parseFloat(sliderSphPhi.value)
+                };
+            } else {
+                sliderSphR.value = R.toFixed(1);
+                sliderTheta.value = Math.round(thetaDeg);
+                sliderSphPhi.value = Math.round(phiDeg);
+            }
+            valSphR.textContent = sph.R.toFixed(1);
+            valTheta.textContent = `${Math.round(sph.thetaDeg)}°`;
+            valSphPhi.textContent = `${Math.round(sph.phiDeg)}°`;
+        }
+
+        function onCartesianInput() {
+            state.vectorA.x = parseFloat(sliderX.value);
+            state.vectorA.y = parseFloat(sliderY.value);
+            state.vectorA.z = parseFloat(sliderZ.value);
+
+            syncControlsFromVector('cartesian');
+            updateScene();
+        }
+
+        function onCylindricalInput() {
+            const r = parseFloat(sliderR.value);
+            const phiRad = parseFloat(sliderCylPhi.value) * (Math.PI / 180);
+            const z = parseFloat(sliderCylZ.value);
+
+            state.vectorA.x = r * Math.cos(phiRad);
+            state.vectorA.y = r * Math.sin(phiRad);
+            state.vectorA.z = z;
+
+            syncControlsFromVector('cylindrical');
+            updateScene();
+        }
+
+        function onSphericalInput() {
+            const R = parseFloat(sliderSphR.value);
+            const thetaRad = parseFloat(sliderTheta.value) * (Math.PI / 180);
+            const phiRad = parseFloat(sliderSphPhi.value) * (Math.PI / 180);
+
+            state.vectorA.x = R * Math.sin(thetaRad) * Math.cos(phiRad);
+            state.vectorA.y = R * Math.sin(thetaRad) * Math.sin(phiRad);
+            state.vectorA.z = R * Math.cos(thetaRad);
+
+            syncControlsFromVector('spherical');
+            updateScene();
+        }
+
+        // Event Listeners for Sliders
+        sliderX.addEventListener('input', onCartesianInput);
+        sliderY.addEventListener('input', onCartesianInput);
+        sliderZ.addEventListener('input', onCartesianInput);
+
+        sliderR.addEventListener('input', onCylindricalInput);
+        sliderCylPhi.addEventListener('input', onCylindricalInput);
+        sliderCylZ.addEventListener('input', onCylindricalInput);
+
+        sliderSphR.addEventListener('input', onSphericalInput);
+        sliderTheta.addEventListener('input', onSphericalInput);
+        sliderSphPhi.addEventListener('input', onSphericalInput);
+
+        // Overlay master switches (dim the sub-options while a overlay is off)
+        function updateOverlayOptionStates() {
+            cylOverlayOptions.classList.toggle('opacity-40', !state.showCylOverlay);
+            cylOverlayOptions.classList.toggle('pointer-events-none', !state.showCylOverlay);
+            sphOverlayOptions.classList.toggle('opacity-40', !state.showSphOverlay);
+            sphOverlayOptions.classList.toggle('pointer-events-none', !state.showSphOverlay);
+        }
+
+        function setOverlays(showCyl, showSph) {
+            state.showCylOverlay = showCyl;
+            state.showSphOverlay = showSph;
+            toggleCylOverlay.checked = showCyl;
+            toggleSphOverlay.checked = showSph;
+            updateOverlayOptionStates();
+            updateScene();
+        }
+
+        toggleCylOverlay.addEventListener('change', (e) => {
+            state.showCylOverlay = e.target.checked;
+            updateOverlayOptionStates();
+            updateScene();
+        });
+
+        toggleSphOverlay.addEventListener('change', (e) => {
+            state.showSphOverlay = e.target.checked;
+            updateOverlayOptionStates();
+            updateScene();
+        });
+
+        updateOverlayOptionStates();
+
+        // Tab Switching (Cartesian / Cylindrical / Spherical)
+        const TAB_ACTIVE = "flex-1 py-1.5 rounded-lg border border-transparent transition tab-btn-active";
+        const TAB_INACTIVE = "flex-1 py-1.5 rounded-lg border border-transparent text-slate-600 hover:text-white transition";
+
+        function setInputMode(mode) {
+            state.inputMode = mode;
+            tabCartesian.className = mode === 'cartesian' ? TAB_ACTIVE : TAB_INACTIVE;
+            tabCylindrical.className = mode === 'cylindrical' ? TAB_ACTIVE : TAB_INACTIVE;
+            tabSpherical.className = mode === 'spherical' ? TAB_ACTIVE : TAB_INACTIVE;
+
+            cartesianControlsGroup.classList.toggle('hidden', mode !== 'cartesian');
+            cylindricalControlsGroup.classList.toggle('hidden', mode !== 'cylindrical');
+            sphericalControlsGroup.classList.toggle('hidden', mode !== 'spherical');
+
+            // Show the overlay that matches the coordinate system being edited
+            if (mode === 'cylindrical') setOverlays(true, false);
+            else if (mode === 'spherical') setOverlays(false, true);
+        }
+
+        tabCartesian.addEventListener('click', () => setInputMode('cartesian'));
+        tabCylindrical.addEventListener('click', () => setInputMode('cylindrical'));
+        tabSpherical.addEventListener('click', () => setInputMode('spherical'));
+
+        // Feature Toggles
+        function bindToggle(el, key) {
+            el.addEventListener('change', (e) => {
+                state[key] = e.target.checked;
+                updateScene();
+            });
+        }
+
+        bindToggle(toggleCylinderMesh, 'showCylinderMesh');
+        bindToggle(togglePhiArc, 'showPhiArc');
+        bindToggle(toggleCylBasis, 'showCylBasis');
+
+        bindToggle(toggleSphereMesh, 'showSphereMesh');
+        bindToggle(toggleSphArcs, 'showSphArcs');
+        bindToggle(toggleSphBasis, 'showSphBasis');
+
+        bindToggle(toggleUnit, 'showUnitVector');
+        bindToggle(toggleCompA, 'showCompA');
+        bindToggle(toggleProj, 'showProjections');
+        bindToggle(toggleMagBar, 'showMagBar');
+        bindToggle(toggleGrid, 'showGrid');
+        bindToggle(toggleLabels, 'showLabels');
+        bindToggle(toggleDiffElement, 'showDiffElement');
+
+        function setDefault3DView() {
+            camera.position.set(20, -12, 11);   // was (16, 16, 12): looked straight along the default vector (3, 4, 5)
+            camera.up.set(0, 0, 1);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
+
+        function setLowAngleView() {
+            camera.position.set(18, -18, 2.5);
+            camera.up.set(0, 0, 1);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
+
+        function setXYView() {
+            camera.position.set(0, 0, 25);
+            camera.up.set(0, 1, 0);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
+
+        function setXZView() {
+            camera.position.set(0, -25, 0);
+            camera.up.set(0, 0, 1);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
+
+        document.getElementById('cam-default-btn').addEventListener('click', setDefault3DView);
+        document.getElementById('cam-low-btn').addEventListener('click', setLowAngleView);
+        document.getElementById('cam-xy-btn').addEventListener('click', setXYView);
+        document.getElementById('cam-xz-btn').addEventListener('click', setXZView);
+        // collapse an overlay group's options while that overlay is off
+        [['toggle-cyl-overlay', '.rp-group.cyl'], ['toggle-sph-overlay', '.rp-group.sph']].forEach(([id, sel]) => {
+            const cb = document.getElementById(id), g = document.querySelector(sel);
+            const sync = () => g.classList.toggle('closed', !cb.checked);
+            cb.addEventListener('change', sync); sync();
+        });
+
+        // highlight the chosen view; any manual orbit clears the highlight
+        (function () {
+            const ids = ['cam-default-btn', 'cam-low-btn', 'cam-xy-btn', 'cam-xz-btn'];
+            let byButton = false;
+            ids.forEach(id => document.getElementById(id).addEventListener('click', () => {
+                ids.forEach(x => document.getElementById(x).classList.toggle('on', x === id)); byButton = true; setTimeout(() => byButton = false, 400);
+            }));
+            container.addEventListener('pointerdown', () => { if (!byButton) ids.forEach(x => document.getElementById(x).classList.remove('on')); });
+            container.addEventListener('wheel', () => ids.forEach(x => document.getElementById(x).classList.remove('on')), { passive: true });
+        })();
+
+
+        // Presets (set the Cartesian point, all three slider groups follow)
+        document.querySelectorAll('.preset-btn').forEach(b => b.addEventListener('click', () => {
+            const [x, y, z] = b.dataset.p.split(',').map(Number);
+            state.vectorA.set(x, y, z);
+            sliderX.value = x; sliderY.value = y; sliderZ.value = z;
+            syncControlsFromVector();
+            updateScene();
+            viewSideOn(x, y);
+        }));
+
+        // After a preset: if the vector points almost straight at (or away from) the camera, it looks like a dot and
+        // the labels pile up. Turn the camera by the smallest amount that keeps at least 65° between the line of
+        // sight and the vector's azimuth; otherwise leave the view alone (axes keep their usual orientation).
+        function viewSideOn(x, y) {
+            if (Math.hypot(x, y) < 0.01) return;
+            const deg = Math.PI / 180, MIN = 65 * deg;
+            const cur = Math.atan2(camera.position.y, camera.position.x), phi = Math.atan2(y, x);
+            const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
+            const d = wrap(phi - cur), dist = Math.min(Math.abs(d), Math.PI - Math.abs(d));
+            if (dist >= MIN) return;
+            const base = Math.abs(d) <= Math.PI / 2 ? phi : phi + Math.PI;           // nearest of the two "aligned" azimuths
+            const cands = [wrap(base - MIN), wrap(base + MIN)];
+            // prefer views from the +x side (|azimuth| ≤ 90°: the x-axis keeps pointing towards the viewer), then the smaller turn
+            const ok = cands.filter(a => Math.abs(a) <= Math.PI / 2 + 1e-6), pool = ok.length ? ok : cands;
+            const az = pool.reduce((best, a) => Math.abs(wrap(a - cur)) < Math.abs(wrap(best - cur)) ? a : best, pool[0]);
+            const horiz = Math.hypot(camera.position.x, camera.position.y), h = camera.position.z;
+            camera.position.set(horiz * Math.cos(az), horiz * Math.sin(az), h);
+            camera.up.set(0, 0, 1); controls.target.set(0, 0, 0); controls.update();
+            EM.invalidate(600);
+        }
+
+        // Collapsible panels (useful on small screens)
+
+
+        function resizeStage() {
+            const w = container.clientWidth, h = container.clientHeight;
+            if (!w || !h) return;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+            EM.invalidate(300);
+        }
+        window.addEventListener('resize', resizeStage);
+        if ('ResizeObserver' in window) new ResizeObserver(resizeStage).observe(container);
+
+        // Tell the host page how tall this explorer is, so the frame has no inner scrollbar
+        function postHeight() { try { parent.postMessage({ csExplorerHeight: document.getElementById('cs-root').scrollHeight + 8 }, '*'); } catch (e) {} }
+        if ('ResizeObserver' in window) new ResizeObserver(postHeight).observe(document.getElementById('cs-root'));
+        window.addEventListener('load', () => setTimeout(postHeight, 300));
+
+        window.onload = function() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+
+            setDefault3DView();
+            syncControlsFromVector();
+            updateScene();
+
+            // Render on demand: draw only while the user interacts or the camera is still easing;
+            // otherwise the loop sleeps (0 frames per second).
+            EM.loop(container, function () {
+                const moved = controls.update();
+                updateLabelsPosition();
+                renderer.render(scene, camera);
+                return moved;
+            }, { demand: true });
+            EM.invalidate(1500);
+        };
+    </script>
+</body>
+</html>

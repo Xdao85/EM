@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Review of Phasors - Electromagnetics Module</title>
+    <link rel="stylesheet" href="../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/em.css">
+    <script src="../assets/vendor/katex/katex.min.js"></script>
+    <script src="../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../assets/js/em.js"></script>
+<script src="../assets/vendor/lucide/lucide.min.js"></script>
+<style>
+  body { background:#ffffff; color:#0f172a; font-family:'Inter',sans-serif; overflow-x:hidden; }
+  .glass-panel { background:rgba(255,255,255,.85); backdrop-filter:blur(12px); border:1px solid rgba(15,23,42,.08); box-shadow:0 1px 3px rgba(15,23,42,.06); }
+  .glass-card { background:rgba(241,245,249,.7); backdrop-filter:blur(8px); border:1px solid rgba(15,23,42,.08); transition:all .25s ease-in-out; }
+  .glass-card:hover { border-color:rgba(2,132,199,.45); }
+  canvas { touch-action:none; display:block; }
+  .eq { overflow-x:auto; overflow-y:hidden; }
+  .chip { padding:.35rem .75rem; border-radius:.6rem; font-size:.875rem; font-weight:600; border:1px solid #e2e8f0; background:#fff; color:#334155; transition:all .15s; }
+  .chip:hover { background:#f1f5f9; }
+  .chip.on { background:#0f172a; border-color:#0f172a; color:#fff; }
+  .btn { padding:.4rem .9rem; border-radius:.6rem; font-size:.875rem; font-weight:600; border:1px solid #e2e8f0; background:#fff; color:#334155; }
+  .btn:hover { background:#f1f5f9; }
+  input[type=range] { height:.4rem; cursor:pointer; }
+  select, input[type=number] { border:1px solid #cbd5e1; border-radius:.5rem; padding:.3rem .5rem; background:#fff; font-size:.875rem; }
+  ::-webkit-scrollbar { width:6px; height:6px; } ::-webkit-scrollbar-track { background:#f1f5f9; }
+  ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; } ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+<header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="activity" class="w-6 h-6"></i></div>
+      <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Review of Phasors</h1>
+    </div>
+    <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium"><button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="book-open" class="w-4 h-4"></i><span>Phasor Basics</span></button><button onclick="scrollToSection('rc-circuit')" class="px-3 py-1.5 rounded-lg text-indigo-700 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition flex items-center gap-1.5"><i data-lucide="cpu" class="w-4 h-4"></i><span>RC Circuit</span></button><button onclick="scrollToSection('phasor-steps')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5"><i data-lucide="list-ordered" class="w-4 h-4"></i><span>5-Step Method</span></button><button onclick="scrollToSection('wave-propagation')" class="px-3 py-1.5 rounded-lg text-emerald-800 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition flex items-center gap-1.5"><i data-lucide="waves" class="w-4 h-4"></i><span>Wave Phasors</span></button><button onclick="scrollToSection('lookup-table')" class="px-3 py-1.5 rounded-lg text-purple-700 bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 transition flex items-center gap-1.5"><i data-lucide="table" class="w-4 h-4"></i><span>Transform Table</span></button><button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4"></i><span>Quiz</span></button></nav>
+  </div>
+</header>
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+<section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="max-w-3xl space-y-3">
+    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Phasor domain</span>
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Review of Phasors</h2>
+    <p class="text-slate-700 text-sm sm:text-base leading-relaxed">In a linear system driven by a sinusoid, every voltage, current and field oscillates at the same angular frequency $\omega$. Only amplitudes and phases differ — and a single complex number, the <b>phasor</b>, stores both. Differential equations in $t$ become algebraic equations.</p>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+    <div class="glass-card rounded-2xl p-5 space-y-2"><div class="text-sky-800 font-bold text-sm">Definition</div>
+      <div class="eq text-sky-800 text-center">$$z(t) = \mathfrak{Re}\big[\widetilde{Z}\,e^{j\omega t}\big]$$</div>
+      <p class="text-sm text-slate-700">$z(t) = A\cos(\omega t + \phi) \ \leftrightarrow\ \widetilde{Z} = Ae^{j\phi}$. The phasor is time-independent.</p></div>
+    <div class="glass-card rounded-2xl p-5 space-y-2"><div class="text-amber-800 font-bold text-sm">Calculus becomes algebra</div>
+      <div class="eq text-amber-800 text-center">$$\frac{dz}{dt} \leftrightarrow j\omega\widetilde{Z}, \quad \int z\,dt \leftrightarrow \frac{\widetilde{Z}}{j\omega}$$</div>
+      <p class="text-sm text-slate-700">Multiplying by $j$ is a $+90^\circ$ phase shift; dividing by $j$ is $-90^\circ$.</p></div>
+    <div class="glass-card rounded-2xl p-5 space-y-2"><div class="text-emerald-800 font-bold text-sm">Waves too</div>
+      <div class="eq text-emerald-800 text-center">$$A\cos(\omega t \mp \beta x) \leftrightarrow Ae^{\mp j\beta x}$$</div>
+      <p class="text-sm text-slate-700">A position-dependent phase $e^{-j\beta x}$ describes a wave travelling in $+x$.</p></div>
+  </div>
+</section>
+
+<section id="rc-circuit" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+  <div>
+    <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">RC Circuit: Phasor Diagram and Waveforms</h2>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">Series RC circuit driven by $v_s(t) = V_0\sin(\omega t + \phi_0)$. The phasor diagram shows Kirchhoff's voltage law as a vector sum $\widetilde{V}_s = \widetilde{V}_R + \widetilde{V}_C$; the oscilloscope shows the same four signals in time.</p>
+  </div>
+</div>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-8 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div class="md:col-span-2 relative h-[340px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-pd" class="w-full h-full"></canvas></div>
+        <div class="md:col-span-3 relative h-[340px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-scope" class="w-full h-full"></canvas></div>
+      </div>
+      <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <span class="flex items-center gap-1.5"><span class="w-4 h-1 rounded bg-sky-600 inline-block"></span>$v_s(t)$ source</span>
+        <span class="flex items-center gap-1.5"><span class="w-4 h-1 rounded bg-amber-600 inline-block"></span>$v_R(t)$ resistor</span>
+        <span class="flex items-center gap-1.5"><span class="w-4 h-1 rounded bg-purple-600 inline-block"></span>$v_C(t)$ capacitor</span>
+        <span class="flex items-center gap-1.5"><span class="w-4 h-1 rounded bg-emerald-600 inline-block"></span>$i(t)$ current (right axis)</span>
+      </div>
+      <div class="glass-card rounded-2xl p-4 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3">
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Amplitude $V_0$</span><input type="range" id="s-v0" min="1" max="10" step="0.5" value="5" class="flex-1 min-w-0 accent-sky-600"><span id="v-v0" class="w-24 shrink-0 text-right font-mono font-semibold text-sky-800"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Frequency $f$</span><input type="range" id="s-f" min="10" max="500" step="5" value="50" class="flex-1 min-w-0 accent-indigo-600"><span id="v-f" class="w-24 shrink-0 text-right font-mono font-semibold text-indigo-700"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Resistance $R$</span><input type="range" id="s-r" min="10" max="1000" step="10" value="100" class="flex-1 min-w-0 accent-amber-600"><span id="v-r" class="w-24 shrink-0 text-right font-mono font-semibold text-amber-800"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Capacitance $C$</span><input type="range" id="s-c" min="1" max="100" step="1" value="20" class="flex-1 min-w-0 accent-purple-600"><span id="v-c" class="w-24 shrink-0 text-right font-mono font-semibold text-purple-700"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Phase $\phi_0$</span><input type="range" id="s-p0" min="-180" max="180" step="5" value="0" class="flex-1 min-w-0 accent-slate-600"><span id="v-p0" class="w-24 shrink-0 text-right font-mono font-semibold text-slate-700"></span></div>
+        <div class="flex items-center gap-2"><button id="rc-play" class="btn"></button><button id="rc-rot" class="chip">Rotate with $e^{j\omega t}$</button></div>
+      </div>
+    </div>
+    <div class="lg:col-span-4 space-y-3">
+      <div class="glass-card rounded-2xl p-5 space-y-2">
+        <h3 class="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4 text-emerald-800"></i> Live phasor solution</h3>
+        <div id="rc-math" class="eq text-sm space-y-1"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$\omega$</span><span id="ro-w" class="font-mono font-bold text-indigo-700 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$1/\omega C$</span><span id="ro-xc" class="font-mono font-bold text-purple-700 text-right"></span></div>
+        <div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$|Z|$</span><span id="ro-z" class="font-mono font-bold text-slate-700 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$\phi_1$</span><span id="ro-phi1" class="font-mono font-bold text-amber-800 text-right"></span></div>
+        <div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$|\widetilde{I}|$</span><span id="ro-i" class="font-mono font-bold text-emerald-800 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$f_c = \frac{1}{2\pi RC}$</span><span id="ro-fc" class="font-mono font-bold text-sky-800 text-right"></span></div>
+      </div>
+      <div id="rc-note" class="text-sm text-slate-700 bg-slate-100/90 p-3 rounded-xl border border-slate-200"></div>
+    </div>
+  </div>
+</section>
+
+<section id="phasor-steps" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+  <div>
+    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Analytical method</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Five-Step Solution of the RC Equation</h2>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">Kirchhoff's voltage law around the loop gives an integro-differential equation. The phasor method turns it into one line of algebra.</p>
+  </div>
+</div>
+  <div class="eq bg-slate-100/90 p-4 rounded-2xl border border-slate-200 text-center text-sky-800">$$R\,i(t) + \frac{1}{C}\int i(t)\,dt = v_s(t) = V_0\sin(\omega t + \phi_0)$$</div>
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4"><div class="glass-card rounded-2xl p-4 space-y-2">
+  <div class="text-sm font-bold text-sky-800 uppercase tracking-wider flex items-center justify-between"><span>Step 1</span><span class="w-6 h-6 rounded-full bg-sky-100 text-sky-800 flex items-center justify-center text-sm font-bold">1</span></div>
+  <h4 class="text-sm font-bold text-slate-900">Adopt a cosine reference</h4>
+  <p class="text-sm text-slate-700 leading-snug">Write every source as a cosine using $\sin x = \cos(x - \pi/2)$:</p>
+  <div class="eq text-sm text-sky-800 bg-white p-2 rounded-lg border border-slate-200">$$v_s(t) = V_0\cos\!\left(\omega t + \phi_0 - \tfrac{\pi}{2}\right)$$</div>
+</div><div class="glass-card rounded-2xl p-4 space-y-2">
+  <div class="text-sm font-bold text-indigo-700 uppercase tracking-wider flex items-center justify-between"><span>Step 2</span><span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold">2</span></div>
+  <h4 class="text-sm font-bold text-slate-900">Express as phasors</h4>
+  <p class="text-sm text-slate-700 leading-snug">Each quantity becomes $z(t) = \mathfrak{Re}[\widetilde{Z}e^{j\omega t}]$:</p>
+  <div class="eq text-sm text-indigo-700 bg-white p-2 rounded-lg border border-slate-200">$$\widetilde{V}_s = V_0\,e^{j(\phi_0 - \pi/2)}$$</div>
+</div><div class="glass-card rounded-2xl p-4 space-y-2">
+  <div class="text-sm font-bold text-amber-800 uppercase tracking-wider flex items-center justify-between"><span>Step 3</span><span class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-sm font-bold">3</span></div>
+  <h4 class="text-sm font-bold text-slate-900">Recast the equation</h4>
+  <p class="text-sm text-slate-700 leading-snug">Replace $d/dt \rightarrow j\omega$ and $\int dt \rightarrow 1/j\omega$:</p>
+  <div class="eq text-sm text-amber-800 bg-white p-2 rounded-lg border border-slate-200">$$\widetilde{I}\left(R + \frac{1}{j\omega C}\right) = \widetilde{V}_s$$</div>
+</div><div class="glass-card rounded-2xl p-4 space-y-2">
+  <div class="text-sm font-bold text-emerald-800 uppercase tracking-wider flex items-center justify-between"><span>Step 4</span><span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-sm font-bold">4</span></div>
+  <h4 class="text-sm font-bold text-slate-900">Solve the algebra</h4>
+  <p class="text-sm text-slate-700 leading-snug">With $\phi_1 = \tan^{-1}(\omega RC)$:</p>
+  <div class="eq text-sm text-emerald-800 bg-white p-2 rounded-lg border border-slate-200">$$\widetilde{I} = \frac{V_0\,\omega C}{\sqrt{1+\omega^2R^2C^2}}\,e^{j(\phi_0 - \phi_1)}$$</div>
+</div><div class="glass-card rounded-2xl p-4 space-y-2">
+  <div class="text-sm font-bold text-rose-700 uppercase tracking-wider flex items-center justify-between"><span>Step 5</span><span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-sm font-bold">5</span></div>
+  <h4 class="text-sm font-bold text-slate-900">Return to time domain</h4>
+  <p class="text-sm text-slate-700 leading-snug">Multiply by $e^{j\omega t}$ and take the real part:</p>
+  <div class="eq text-sm text-rose-700 bg-white p-2 rounded-lg border border-slate-200">$$\begin{aligned} i(t) &= \frac{V_0\,\omega C}{\sqrt{1+\omega^2R^2C^2}} \\ &\quad\times\cos(\omega t + \phi_0 - \phi_1) \end{aligned}$$</div>
+</div></div>
+  <p class="text-sm text-slate-700 bg-slate-100/90 p-3 rounded-xl border border-slate-200">Checks: for $\omega RC \gg 1$ the capacitor is almost a short, $\phi_1 \to 90^\circ$, and $i(t)$ is in phase with $v_s(t)$ — a pure resistor. For $\omega RC \ll 1$, $\phi_1 \to 0$ and the current leads the source by $90^\circ$ — a pure capacitor. Test both limits with the simulation.</p>
+</section>
+
+<section id="wave-propagation" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+  <div>
+    <span class="text-sm font-bold uppercase tracking-wider text-emerald-800 bg-emerald-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Phasors of Travelling Waves</h2>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">The phasor $Ae^{-j\beta x}$ has a phase that falls steadily with distance. Multiplied by $e^{j\omega t}$ it becomes a wave moving in $+x$; with $e^{+j\beta x}$ it moves in $-x$. The small dials show the phasor (frozen at $t = 0$) at several positions.</p>
+  </div>
+</div>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-8 space-y-3">
+      <div class="relative h-[380px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-wave" class="w-full h-full"></canvas></div>
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <div class="flex flex-wrap items-center gap-2"><div id="dir-chips" class="flex gap-2"><button class="chip on" data-v="-1">$Ae^{-j\beta x}$ (+x)</button><button class="chip" data-v="1">$Ae^{+j\beta x}$ (−x)</button></div>
+          <button id="w-play" class="btn"></button><button id="w-ghost" class="chip on">Show earlier snapshot</button></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-24 shrink-0 text-slate-700">$\beta$</span><input type="range" id="s-beta" min="0.5" max="4" step="0.1" value="1.5" class="flex-1 min-w-0 accent-emerald-600"><span id="v-beta" class="w-24 shrink-0 text-right font-mono font-semibold text-emerald-800"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-24 shrink-0 text-slate-700">$\omega$</span><input type="range" id="s-om" min="0.5" max="4" step="0.1" value="2" class="flex-1 min-w-0 accent-indigo-600"><span id="v-om" class="w-24 shrink-0 text-right font-mono font-semibold text-indigo-700"></span></div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-24 shrink-0 text-slate-700">$\phi$ (deg)</span><input type="range" id="s-phw" min="-180" max="180" step="5" value="0" class="flex-1 min-w-0 accent-amber-600"><span id="v-phw" class="w-24 shrink-0 text-right font-mono font-semibold text-amber-800"></span></div>
+      </div>
+    </div>
+    <div class="lg:col-span-4 space-y-3">
+      <div class="glass-card rounded-2xl p-5 space-y-3 text-sm">
+        <div id="w-eq" class="eq bg-white p-2.5 rounded-xl border border-slate-200 text-emerald-800"></div>
+        <div class="grid grid-cols-1 gap-2"><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$u_p = \omega/\beta$</span><span id="ro-up" class="font-mono font-bold text-emerald-800 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$\lambda = 2\pi/\beta$</span><span id="ro-lam" class="font-mono font-bold text-amber-800 text-right"></span></div><div class="flex justify-between items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm"><span class="text-slate-700">$T = 2\pi/\omega$</span><span id="ro-T" class="font-mono font-bold text-indigo-700 text-right"></span></div></div>
+        <div class="p-3 rounded-xl bg-white border border-emerald-300"><b class="text-emerald-800">+x wave:</b> the spatial exponent is negative. Constant phase $\omega t - \beta x$ requires $x$ to grow with $t$.</div>
+        <div class="p-3 rounded-xl bg-white border border-rose-300"><b class="text-rose-700">−x wave:</b> the spatial exponent is positive. Constant phase $\omega t + \beta x$ requires $x$ to shrink.</div>
+        <div class="flex gap-2 items-start text-slate-700"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-800 shrink-0 mt-0.5"></i><span>Rule: the sign in front of $j\beta x$ is <b>opposite</b> to the direction of travel.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="lookup-table" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+  <div>
+    <span class="text-sm font-bold uppercase tracking-wider text-purple-700 bg-purple-400/10 px-2.5 py-1 rounded-md">Reference</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Time-Domain ↔ Phasor-Domain Pairs</h2>
+    <p class="text-sm text-slate-700 mt-1 leading-relaxed">Cosine reference, $z(t) = \mathfrak{Re}[\widetilde{Z}e^{j\omega t}]$ (Ulaby Table 1-5).</p>
+  </div>
+</div>
+  <div class="overflow-x-auto rounded-2xl border border-slate-200">
+    <table class="w-full text-left text-sm">
+      <thead><tr class="bg-slate-100 border-b border-slate-200 text-slate-700"><th class="p-3.5">$z(t)$</th><th class="p-3.5">Phasor $\widetilde{Z}$</th><th class="p-3.5">Comment</th></tr></thead>
+      <tbody class="divide-y divide-slate-200 bg-white">
+        <tr class="hover:bg-slate-200/50"><td class="p-3.5 text-sky-800">$A\cos\omega t$</td><td class="p-3.5 text-emerald-800">$A$</td><td class="p-3.5 text-slate-700">reference</td></tr>
+        <tr class="hover:bg-slate-200/50"><td class="p-3.5 text-sky-800">$A\cos(\omega t + \phi)$</td><td class="p-3.5 text-emerald-800">$Ae^{j\phi}$</td><td class="p-3.5 text-slate-700">phase shift</td></tr>
+        <tr class="hover:bg-slate-200/50"><td class="p-3.5 text-sky-800">$A\sin(\omega t + \phi)$</td><td class="p-3.5 text-emerald-800">$Ae^{j(\phi - \pi/2)}$</td><td class="p-3.5 text-slate-700">$\sin x = \cos(x - 90^\circ)$</td></tr>
+        <tr class="hover:bg-slate-200/50"><td class="p-3.5 text-sky-800">$A\cos(\omega t - \beta x + \phi)$</td><td class="p-3.5 text-emerald-800">$Ae^{j(\phi - \beta x)}$</td><td class="p-3.5 text-slate-700">wave travelling in $+x$</td></tr>
+        <tr class="hover:bg-slate-200/50"><td class="p-3.5 text-sky-800">$Ae^{-\alpha x}\cos(\omega t - \beta x)$</td><td class="p-3.5 text-emerald-800">$Ae^{-(\alpha + j\beta)x}$</td><td class="p-3.5 text-slate-700">attenuated wave, $\gamma = \alpha + j\beta$</td></tr>
+        <tr class="hover:bg-slate-200/50"><td class="p-3.5 text-sky-800">$\dfrac{d}{dt}z(t)$</td><td class="p-3.5 text-emerald-800">$j\omega\widetilde{Z}$</td><td class="p-3.5 text-slate-700">$+90^\circ$, scaled by $\omega$</td></tr>
+        <tr class="hover:bg-slate-200/50"><td class="p-3.5 text-sky-800">$\dfrac{d^2}{dt^2}z(t)$</td><td class="p-3.5 text-emerald-800">$-\omega^2\widetilde{Z}$</td><td class="p-3.5 text-slate-700">$(j\omega)^2 = -\omega^2$</td></tr>
+        <tr class="hover:bg-slate-200/50"><td class="p-3.5 text-sky-800">$\int z(t)\,dt$</td><td class="p-3.5 text-emerald-800">$\dfrac{\widetilde{Z}}{j\omega}$</td><td class="p-3.5 text-slate-700">$-90^\circ$, divided by $\omega$</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+  <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+    <div class="flex items-center gap-2"><span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2></div>
+    <div class="flex items-center gap-2"><button id="quiz-reset" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button>
+    <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 5</span></div>
+  </div>
+  <div id="quiz-box" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+</section>
+
+</main>
+<footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Review of Phasors</footer>
+<script>
+/* ===== Shared page toolkit (canvas, UI, quiz, animation) ===== */
+const $ = id => document.getElementById(id);
+const TAU = 2 * Math.PI, DEG = Math.PI / 180;
+const COL = { sky:'#0284c7', rose:'#e11d48', amber:'#d97706', indigo:'#4f46e5', emerald:'#059669', purple:'#9333ea',
+  slate:'#334155', grid:'#e2e8f0', axis:'#64748b', text:'#0f172a', muted:'#64748b', teal:'#0d9488' };
+
+// Canvas CSS size is cached and refreshed by a ResizeObserver, so drawing a frame never forces a layout.
+const _cvSize = new WeakMap();
+const _cvRO = ('ResizeObserver' in window) ? new ResizeObserver(es => es.forEach(e => {
+  const b = e.target.getBoundingClientRect(); _cvSize.set(e.target, { width: b.width, height: b.height });
+})) : null;
+function setupCanvas(cv) {
+  let r = _cvSize.get(cv);
+  if (!r) { const b = cv.getBoundingClientRect(); r = { width: b.width, height: b.height }; if (_cvRO) { _cvSize.set(cv, r); _cvRO.observe(cv); } }
+  const d = window.devicePixelRatio || 1;
+  const w = Math.max(1, r.width), h = Math.max(1, r.height);
+  const W = Math.round(w * d), H = Math.round(h * d);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const c = cv.getContext('2d');
+  c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, w, h);
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  return { c, w, h };
+}
+function line(c, x1, y1, x2, y2, col, lw = 1, dash) {
+  c.save(); c.strokeStyle = col; c.lineWidth = lw; if (dash) c.setLineDash(dash);
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.restore();
+}
+function arrow(c, x1, y1, x2, y2, col, lw = 2, hs = 9) {
+  const L = Math.hypot(x2 - x1, y2 - y1); if (L < 0.5) return;
+  const a = Math.atan2(y2 - y1, x2 - x1), h = Math.min(hs, L * 0.6);
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw;
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - h * 0.7 * Math.cos(a), y2 - h * 0.7 * Math.sin(a)); c.stroke();
+  c.beginPath(); c.moveTo(x2, y2);
+  c.lineTo(x2 - h * Math.cos(a - 0.42), y2 - h * Math.sin(a - 0.42));
+  c.lineTo(x2 - h * Math.cos(a + 0.42), y2 - h * Math.sin(a + 0.42)); c.closePath(); c.fill(); c.restore();
+}
+function label(c, t, x, y, col = COL.text, font = '600 13px Inter, system-ui, sans-serif', align = 'left', base = 'middle', halo = true) {
+  c.save(); c.font = font; c.textAlign = align; c.textBaseline = base;
+  if (halo) { c.lineWidth = 3.5; c.strokeStyle = 'rgba(255,255,255,0.9)'; c.strokeText(t, x, y); }
+  c.fillStyle = col; c.fillText(t, x, y); c.restore();
+}
+function dot(c, x, y, r, col, stroke = '#fff') {
+  c.save(); c.fillStyle = col; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+  if (stroke) { c.strokeStyle = stroke; c.lineWidth = 2; c.stroke(); } c.restore();
+}
+function curve(c, pts, col, lw = 2, dash) {
+  if (!pts.length) return;
+  c.save(); c.strokeStyle = col; c.lineWidth = lw; if (dash) c.setLineDash(dash);
+  c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke(); c.restore();
+}
+/* plot frame: returns mapping helpers for a box */
+function plotFrame(c, box, xr, yr, opt = {}) {
+  const { x, y, w, h } = box;
+  const X = v => x + (v - xr[0]) / (xr[1] - xr[0]) * w;
+  const Y = v => y + h - (v - yr[0]) / (yr[1] - yr[0]) * h;
+  c.save(); c.fillStyle = opt.bg || '#ffffff'; c.fillRect(x, y, w, h);
+  c.strokeStyle = COL.grid; c.lineWidth = 1;
+  (opt.xt || []).forEach(v => { c.beginPath(); c.moveTo(X(v), y); c.lineTo(X(v), y + h); c.stroke(); });
+  (opt.yt || []).forEach(v => { c.beginPath(); c.moveTo(x, Y(v)); c.lineTo(x + w, Y(v)); c.stroke(); });
+  c.strokeStyle = '#cbd5e1'; c.strokeRect(x, y, w, h);
+  if (yr[0] < 0 && yr[1] > 0) line(c, x, Y(0), x + w, Y(0), COL.axis, 1.2);
+  c.restore();
+  const f = '500 12px Inter, system-ui, sans-serif';
+  (opt.xt || []).forEach(v => label(c, (opt.xf || String)(v), X(v), y + h + 12, COL.muted, f, 'center', 'middle', false));
+  (opt.yt || []).forEach(v => label(c, (opt.yf || String)(v), x - 6, Y(v), COL.muted, f, 'right', 'middle', false));
+  if (opt.xl) label(c, opt.xl, x + w, y + h + 28, COL.slate, '600 12px Inter, system-ui, sans-serif', 'right', 'middle', false);
+  if (opt.yl) label(c, opt.yl, x + 4, y - 10, COL.slate, '600 12px Inter, system-ui, sans-serif', 'left', 'middle', false);
+  return { X, Y };
+}
+function fmtSI(v, unit = '', digits = 3) {
+  if (!isFinite(v)) return '∞ ' + unit;
+  if (v === 0) return '0 ' + unit;
+  const P = [[1e24,'Y'],[1e21,'Z'],[1e18,'E'],[1e15,'P'],[1e12,'T'],[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n'],[1e-12,'p'],[1e-15,'f'],[1e-18,'a'],[1e-21,'z'],[1e-24,'y']];
+  const a = Math.abs(v);
+  for (const [s, p] of P) if (a >= s * 0.9995) return String(parseFloat((v / s).toPrecision(digits))) + ' ' + p + unit;
+  return v.toExponential(digits - 1) + ' ' + unit;
+}
+function fmtE(v, d = 3) { // 1.23×10⁻⁴
+  if (v === 0) return '0'; if (!isFinite(v)) return '∞';
+  const e = Math.floor(Math.log10(Math.abs(v))); const m = v / Math.pow(10, e);
+  if (e >= -2 && e <= 3) return v.toPrecision(d);
+  const sup = String(e).replace(/-/g, '⁻').replace(/\d/g, k => '⁰¹²³⁴⁵⁶⁷⁸⁹'[k]);
+  return m.toFixed(d - 1) + '×10' + sup;
+}
+function texE(v, d = 3) { // TeX scientific
+  if (v === 0) return '0'; const e = Math.floor(Math.log10(Math.abs(v)));
+  if (e >= -2 && e <= 3) return v.toPrecision(d);
+  return (v / Math.pow(10, e)).toFixed(d - 1) + '\\times 10^{' + e + '}';
+}
+const val = id => parseFloat($(id).value);
+/* bind sliders: map { id: fmt(v) } — slider #s-id, readout #v-id */
+function bindSliders(map, onChange) {
+  const upd = () => { for (const k in map) { const o = $('v-' + k); if (o) o.textContent = map[k](val('s-' + k)); } onChange && onChange(); };
+  for (const k in map) $('s-' + k).addEventListener('input', upd);
+  upd(); return upd;
+}
+function setSlider(k, v) { const s = $('s-' + k); s.value = v; s.dispatchEvent(new Event('input')); }
+/* chip group: buttons with data-v inside container; returns getter */
+function chipGroup(id, onChange) {
+  const box = $(id); let cur = (box.querySelector('.chip.on') || box.querySelector('.chip')).dataset.v;
+  box.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    box.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); cur = b.dataset.v; onChange && onChange(cur);
+  }));
+  return { get: () => cur, set: v => { const b = box.querySelector(`.chip[data-v="${v}"]`); if (b) b.click(); } };
+}
+function chipToggle(id, onChange) { const b = $(id); b.addEventListener('click', () => { b.classList.toggle('on'); onChange && onChange(b.classList.contains('on')); }); return () => b.classList.contains('on'); }
+/* pointer dragging on a canvas: hit(x,y)->key|null, move(key,x,y), end(key) */
+function draggable(cv, hit, move, end) {
+  let key = null;
+  const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  cv.addEventListener('pointerdown', e => { const [x, y] = pos(e); key = hit(x, y); if (key != null) { cv.setPointerCapture(e.pointerId); e.preventDefault(); move(key, x, y); } });
+  cv.addEventListener('pointermove', e => { const [x, y] = pos(e); if (key != null) move(key, x, y); else cv.style.cursor = hit(x, y) != null ? 'grab' : ''; });
+  const up = () => { if (key != null) { end && end(key); key = null; } };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+}
+/* animation loop — pauses canvases that are off-screen, and stops completely (0 frames/s)
+   when no animated canvas is visible or the tab is hidden; it restarts when one scrolls back in. */
+const _anim = { items: [], on: false, last: 0 };
+function _animKick() {
+  if (_anim.on) return;
+  _anim.on = true; _anim.last = performance.now();
+  requestAnimationFrame(_animTick);
+}
+function _animTick(now) {
+  const dt = Math.max(0, Math.min(0.05, (now - _anim.last) / 1000)); _anim.last = Math.max(_anim.last, now);
+  let any = false;
+  if (!document.hidden) _anim.items.forEach(i => { if (i.vis) { any = true; try { i.fn(dt); } catch (err) { console.error(err); } } });
+  if (any) requestAnimationFrame(_animTick); else _anim.on = false;
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) _animKick(); });
+function animate(el, fn) {
+  const it = { el, fn, vis: true }; _anim.items.push(it);
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(e => { it.vis = e.isIntersecting; if (it.vis) _animKick(); })).observe(el);
+  _animKick();
+}
+const _resize = [];
+function onResize(fn) { _resize.push(fn); }
+window.addEventListener('resize', () => _resize.forEach(f => f()));
+function playButton(id, state, key = 'run') {
+  const b = $(id);
+  const paint = () => { b.innerHTML = state[key] ? '❚❚ Pause' : '▶ Play'; };
+  b.addEventListener('click', () => { state[key] = !state[key]; paint(); }); paint();
+}
+function typeset(el) { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(el ? [el] : undefined).catch(() => {}); }
+function scrollToSection(id) { const el = $(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
+/* data-driven quiz — same visual format as the reference page (dimensions_units_notation) */
+function renderQuiz(id, QS) {
+  const box = $(id);
+  const card = (q, i) => `
+    <div class="glass-card rounded-2xl p-5 space-y-3 ${QS.length % 2 && i === QS.length - 1 ? 'md:col-span-2' : ''}" id="q${i}-card">
+      <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+      <p class="text-sm text-slate-800 font-medium leading-relaxed">${q.q}</p>
+      <div class="grid grid-cols-1 ${QS.length % 2 && i === QS.length - 1 ? 'md:grid-cols-2' : ''} gap-2 text-sm">${q.o.map((o, j) =>
+        `<button class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition text-slate-800 flex items-start gap-2" data-j="${j}"><span class="font-semibold text-slate-600 shrink-0">${String.fromCharCode(65 + j)}.</span><span>${o}</span></button>`).join('')}</div>
+      <div id="q${i}-fb" class="text-sm hidden p-2.5 rounded-xl"></div>
+    </div>`;
+  const draw = () => {
+    box.innerHTML = QS.map(card).join('');
+    let score = 0, done = 0;
+    const setScore = () => { const s = $('quiz-score'); if (s) s.textContent = `Score: ${score} / ${QS.length}`; };
+    QS.forEach((q, i) => box.querySelectorAll(`.q${i}-btn`).forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j; if ($(`q${i}-card`).dataset.done) return; $(`q${i}-card`).dataset.done = 1; done++;
+      const ok = j === q.a; if (ok) score++;
+      box.querySelectorAll(`.q${i}-btn`).forEach(x => { const k = +x.dataset.j; x.disabled = true; x.classList.remove('hover:border-slate-300', 'bg-slate-100');
+        if (k === q.a) x.classList.add('bg-emerald-500/10', 'border-emerald-500/40', 'text-emerald-800');
+        else if (k === j) x.classList.add('bg-rose-500/10', 'border-rose-500/40', 'text-rose-800');
+        else x.classList.add('bg-slate-100', 'opacity-60'); });
+      const fb = $(`q${i}-fb`);
+      fb.className = 'text-sm p-2.5 rounded-xl font-medium leading-relaxed border ' + (ok ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800' : 'bg-rose-500/10 border-rose-500/30 text-rose-700');
+      fb.innerHTML = `${ok ? '✓ Correct.' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + q.a) + '.'} <span class="font-normal text-slate-700">${q.e}</span>`;
+      setScore();
+      if (done === QS.length) { const r = $('quiz-reset'); if (r) r.classList.remove('hidden'); }
+      typeset(fb);
+    })));
+    setScore(); const r = $('quiz-reset'); if (r) r.classList.add('hidden');
+    typeset(box);
+  };
+  draw();
+  const r = $('quiz-reset'); if (r) r.addEventListener('click', draw);
+}
+
+/* ===== Review of Phasors ===== */
+function debounce(f, ms = 120) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => f(...a), ms); }; }
+const wrapDeg = a => ((a % 360) + 540) % 360 - 180;
+
+/* ---------- Sim 1: RC circuit ---------- */
+const RC = { run: true, tau: 0 };
+playButton('rc-play', RC);
+const rot = chipToggle('rc-rot');
+let S = {};
+function solve() {
+  const V0 = val('s-v0'), f = val('s-f'), R = val('s-r'), C = val('s-c') * 1e-6, p0 = val('s-p0') * DEG;
+  const w = TAU * f, wRC = w * R * C, phi1 = Math.atan(wRC);
+  const Im = V0 * w * C / Math.sqrt(1 + wRC * wRC);          // |I|
+  const aS = p0 - Math.PI / 2, aI = p0 - phi1, aC = aI - Math.PI / 2;
+  S = { V0, f, R, C, p0, w, wRC, phi1, Im, VR: Im * R, VC: Im / (w * C), aS, aI, aR: aI, aC, Z: Math.hypot(R, 1 / (w * C)) };
+  $('ro-w').textContent = fmtSI(w, 'rad/s', 3); $('ro-xc').textContent = fmtSI(1 / (w * C), 'Ω', 3);
+  $('ro-z').textContent = fmtSI(S.Z, 'Ω', 3); $('ro-phi1').textContent = (phi1 / DEG).toFixed(1) + '°';
+  $('ro-i').textContent = fmtSI(Im, 'A', 3); $('ro-fc').textContent = fmtSI(1 / (TAU * R * C), 'Hz', 3);
+  $('rc-note').innerHTML = wRC > 3 ? '<b>$\\omega RC \\gg 1$:</b> the capacitor behaves almost like a short; $v_R \\approx v_s$ and $i(t)$ is nearly in phase with the source.'
+    : wRC < 0.33 ? '<b>$\\omega RC \\ll 1$:</b> the capacitor takes almost all the voltage; the current leads the source by nearly $90^\\circ$.'
+    : 'Intermediate regime: $\\widetilde{V}_R \\perp \\widetilde{V}_C$ always, and the two add (as vectors) to $\\widetilde{V}_s$. Current leads $v_C$ by exactly $90^\\circ$.';
+  rcMath();
+}
+const rcMath = debounce(() => {
+  const d = a => (wrapDeg(a / DEG)).toFixed(1) + '^\\circ';
+  $('rc-math').innerHTML = `
+  <div class="text-sky-800">$$\\widetilde{V}_s = ${S.V0.toFixed(1)}\\angle ${d(S.aS)}\\ \\mathrm{V}$$</div>
+  <div class="text-amber-800">$$\\phi_1 = \\tan^{-1}(\\omega RC) = \\tan^{-1}(${S.wRC.toFixed(3)}) = ${(S.phi1 / DEG).toFixed(1)}^\\circ$$</div>
+  <div class="text-emerald-800 font-bold">$$\\widetilde{I} = \\frac{V_0\\omega C}{\\sqrt{1+\\omega^2R^2C^2}}\\angle(\\phi_0 - \\phi_1) = ${(S.Im * 1e3).toFixed(2)}\\angle ${d(S.aI)}\\ \\mathrm{mA}$$</div>
+  <div class="text-amber-800">$$\\widetilde{V}_R = R\\widetilde{I} = ${S.VR.toFixed(2)}\\angle ${d(S.aR)}\\ \\mathrm{V}$$</div>
+  <div class="text-purple-700">$$\\widetilde{V}_C = \\frac{\\widetilde{I}}{j\\omega C} = ${S.VC.toFixed(2)}\\angle ${d(S.aC)}\\ \\mathrm{V}$$</div>
+  <div class="text-rose-700 border-t border-slate-200 pt-1">$$i(t) = ${(S.Im * 1e3).toFixed(2)}\\cos(\\omega t ${S.aI < 0 ? '-' : '+'} ${Math.abs(wrapDeg(S.aI / DEG)).toFixed(1)}^\\circ)\\ \\mathrm{mA}$$</div>`;
+  typeset($('rc-math')); typeset($('rc-note'));
+});
+bindSliders({ v0: v => v.toFixed(1) + ' V', f: v => v + ' Hz', r: v => v + ' Ω', c: v => v + ' µF', p0: v => v + '°' }, solve);
+
+const cvPD = $('cv-pd'), cvSc = $('cv-scope');
+function drawPD() {
+  const { c, w, h } = setupCanvas(cvPD);
+  const cx = w / 2, cy = h / 2 + 6, L = Math.min(w, h) * 0.38, s = L / S.V0;
+  const rotA = rot() ? S.w * RC.tau : 0;
+  c.strokeStyle = COL.grid; c.lineWidth = 1; c.beginPath(); c.arc(cx, cy, L, 0, TAU); c.stroke();
+  line(c, cx - L - 14, cy, cx + L + 14, cy, COL.axis, 1.2); line(c, cx, cy - L - 14, cx, cy + L + 14, COL.axis, 1.2);
+  label(c, 'Re', cx + L + 12, cy + 12, COL.muted, '600 11px Inter, sans-serif', 'right'); label(c, 'Im', cx + 6, cy - L - 8, COL.muted, '600 11px Inter, sans-serif');
+  const P = (m, a) => [cx + m * s * Math.cos(a + rotA), cy - m * s * Math.sin(a + rotA)];
+  const [rx, ry] = P(S.VR, S.aR), [sx, sy] = P(S.V0, S.aS);
+  arrow(c, cx, cy, rx, ry, COL.amber, 3, 10); label(c, 'V_R', (cx + rx) / 2 - 10, (cy + ry) / 2 - 10, COL.amber, '700 12px Inter, sans-serif', 'right');
+  arrow(c, rx, ry, sx, sy, COL.purple, 3, 10); label(c, 'V_C', (rx + sx) / 2 + 8, (ry + sy) / 2, COL.purple, '700 12px Inter, sans-serif');
+  arrow(c, cx, cy, sx, sy, COL.sky, 3.4, 12); label(c, 'V_s', sx + 8, sy - 8, COL.sky, '700 13px Inter, sans-serif');
+  // current, own scale: draw at 0.6 L
+  const ia = S.aI + rotA; arrow(c, cx, cy, cx + 0.6 * L * Math.cos(ia), cy - 0.6 * L * Math.sin(ia), COL.emerald, 2.4, 9);
+  label(c, 'I', cx + 0.66 * L * Math.cos(ia), cy - 0.66 * L * Math.sin(ia), COL.emerald, '700 13px Inter, sans-serif', 'center');
+  // right-angle mark between VR and VC
+  const u = [Math.cos(S.aR + rotA), -Math.sin(S.aR + rotA)], v = [Math.cos(S.aC + rotA), -Math.sin(S.aC + rotA)], q = 9;
+  if (S.VR * s > 14 && S.VC * s > 14) curve(c, [[rx - u[0] * q, ry - u[1] * q], [rx - u[0] * q + v[0] * q, ry - u[1] * q + v[1] * q], [rx + v[0] * q, ry + v[1] * q]], COL.slate, 1.2);
+  label(c, rot() ? 'rotating: Re part = instantaneous value' : 'static phasors (t = 0)', 10, 14, COL.muted, '500 12px Inter, sans-serif');
+  label(c, 'I drawn on its own scale', 10, h - 12, COL.emerald, '500 12px Inter, sans-serif');
+}
+function drawScope() {
+  const { c, w, h } = setupCanvas(cvSc);
+  const T = 1 / S.f, tmax = 2 * T, box = { x: 44, y: 18, w: w - 96, h: h - 56 };
+  const Vm = S.V0 * 1.15, Imx = S.Im * 1.15 || 1;
+  const xt = [0, 0.5, 1, 1.5, 2].map(k => k * T);
+  const F = plotFrame(c, box, [0, tmax], [-Vm, Vm], { xt, yt: [-S.V0, 0, S.V0], xf: v => (v * 1e3).toPrecision(3), yf: v => v.toFixed(1), xl: 't (ms)', yl: 'V' });
+  const Yi = v => F.Y(v / Imx * Vm);
+  [-S.Im, S.Im].forEach(v => label(c, (v * 1e3).toPrecision(3), box.x + box.w + 6, Yi(v), COL.emerald, '500 12px Inter, sans-serif', 'left', 'middle', false));
+  label(c, 'mA', box.x + box.w + 6, box.y - 8, COL.emerald, '600 12px Inter, sans-serif', 'left', 'middle', false);
+  const sig = (m, a, sc) => { const p = []; for (let i = 0; i <= 300; i++) { const t = tmax * i / 300; p.push([F.X(t), sc(m * Math.cos(S.w * t + a))]); } return p; };
+  curve(c, sig(S.V0, S.aS, F.Y), COL.sky, 2.6);
+  curve(c, sig(S.VR, S.aR, F.Y), COL.amber, 2);
+  curve(c, sig(S.VC, S.aC, F.Y), COL.purple, 2);
+  curve(c, sig(S.Im, S.aI, Yi), COL.emerald, 2, [6, 4]);
+  const tc = RC.tau % tmax; line(c, F.X(tc), box.y, F.X(tc), box.y + box.h, 'rgba(15,23,42,0.35)', 1.2, [3, 3]);
+  const vsNow = S.V0 * Math.cos(S.w * tc + S.aS); dot(c, F.X(tc), F.Y(vsNow), 4.5, COL.sky);
+}
+animate(cvPD, dt => {
+  if (RC.run) RC.tau += dt * (2 / S.f) / 4; // one 2-period sweep every 4 s
+  drawPD(); drawScope();
+});
+
+/* ---------- Sim 2: travelling-wave phasors ---------- */
+const W = { t: 0, run: true };
+playButton('w-play', W);
+const ghost = chipToggle('w-ghost');
+const dirG = chipGroup('dir-chips', () => wEq());
+const wEq = debounce(() => {
+  const s = +dirG.get(), b = val('s-beta'), ph = val('s-phw');
+  const sg = s < 0 ? '-' : '+', phs = ph ? (ph > 0 ? ' + ' : ' - ') + Math.abs(ph) + '^\\circ' : '';
+  $('w-eq').innerHTML = `$$\\widetilde{E}(x) = A\\,e^{j(${sg}${b.toFixed(1)}x${phs.replace('^\\circ', '^\\circ')})}$$ $$E(x,t) = A\\cos(\\omega t ${sg} ${b.toFixed(1)}x${phs})$$
+    <p class="text-sm font-semibold ${s < 0 ? 'text-emerald-800' : 'text-rose-700'} text-center">travels in the ${s < 0 ? '+x' : '−x'} direction</p>`;
+  typeset($('w-eq'));
+});
+bindSliders({ beta: v => v.toFixed(1) + ' rad/m', om: v => v.toFixed(1) + ' rad/s', phw: v => v + '°' }, () => {
+  const b = val('s-beta'), o = val('s-om');
+  $('ro-up').textContent = (o / b).toFixed(2) + ' m/s'; $('ro-lam').textContent = (TAU / b).toFixed(2) + ' m'; $('ro-T').textContent = (TAU / o).toFixed(2) + ' s';
+  wEq();
+});
+const cvW = $('cv-wave');
+animate(cvW, dt => {
+  if (W.run) W.t += dt;
+  const { c, w, h } = setupCanvas(cvW);
+  const s = +dirG.get(), b = val('s-beta'), o = val('s-om'), ph = val('s-phw') * DEG, A = 1;
+  const x0 = 40, x1 = w - 20, L = 12, X = x => x0 + x / L * (x1 - x0), cy = h * 0.4, u = h * 0.22;
+  const col = s < 0 ? COL.emerald : COL.rose;
+  line(c, x0, cy, x1, cy, COL.axis, 1.2);
+  for (let k = 0; k <= L; k += 2) { line(c, X(k), cy - 4, X(k), cy + 4, COL.axis); label(c, k + ' m', X(k), cy + u + 16, COL.muted, '500 11px Inter, sans-serif', 'center', 'middle', false); }
+  label(c, 'x →', x1, cy - u - 12, COL.slate, '600 12px Inter, sans-serif', 'right');
+  const wave = t => { const p = []; for (let i = 0; i <= 400; i++) { const x = L * i / 400; p.push([X(x), cy - u * A * Math.cos(o * t + s * b * x + ph)]); } return p; };
+  if (ghost()) curve(c, wave(W.t - 0.35), 'rgba(100,116,139,0.35)', 2, [6, 5]);
+  curve(c, wave(W.t), col, 3);
+  // track a crest: o t + s b x + ph = 2πn  →  x = (2πn − ph − o t)/(s b)
+  const lam = TAU / b;
+  let xc = (-ph - o * W.t) / (s * b); xc = ((xc % lam) + lam) % lam;
+  for (let x = xc; x <= L; x += lam) dot(c, X(x), cy - u, 5, col);
+  arrow(c, X(xc) , cy - u - 18, X(xc) - s * 36, cy - u - 18, col, 2.4, 9);
+  label(c, 'crest moves at u_p = ω/β', X(xc) - s * 40, cy - u - 32, col, '600 12px Inter, sans-serif', 'center');
+  // phasor dials (t = 0) at integer x
+  const dy = h * 0.83, r = Math.min(18, (x1 - x0) / L * 0.38);
+  label(c, 'phasor at t = 0:', x0 - 30, dy - r - 14, COL.slate, '600 12px Inter, sans-serif');
+  for (let k = 0; k <= L; k += 1) {
+    const a = s * b * k + ph, px = X(k);
+    c.strokeStyle = COL.grid; c.lineWidth = 1; c.beginPath(); c.arc(px, dy, r, 0, TAU); c.stroke();
+    arrow(c, px, dy, px + r * Math.cos(a), dy - r * Math.sin(a), col, 2, 6);
+  }
+});
+
+renderQuiz('quiz-box', [
+  { q: 'What is the (cosine-referenced) phasor of $v(t) = 12\\sin(\\omega t + 30^\\circ)$ V?', o: ['$12\\angle 30^\\circ$ V', '$12\\angle -60^\\circ$ V', '$12\\angle 120^\\circ$ V', '$-12\\angle 30^\\circ$ V'], a: 1,
+    e: 'Convert first: $\\sin(x) = \\cos(x - 90^\\circ)$, so $v(t) = 12\\cos(\\omega t - 60^\\circ)$ and $\\widetilde{V} = 12e^{-j60^\\circ}$.' },
+  { q: 'For a capacitor, how are $i(t)$ and $v_C(t)$ related in phase?', o: ['Voltage leads current by $90^\\circ$', 'Current leads voltage by $90^\\circ$', 'They are in phase', 'Current lags by $45^\\circ$'], a: 1,
+    e: '$\\widetilde{I} = j\\omega C\\,\\widetilde{V}_C$ and $j = 1\\angle 90^\\circ$, so the current leads the capacitor voltage by a quarter period. In the simulation, the green phasor is always $90^\\circ$ ahead of the purple one.' },
+  { q: 'The phasor $\\widetilde{\\mathbf{E}}(z) = \\hat{\\mathbf{y}}E_0e^{+j\\beta z}$ describes a wave travelling along…', o: ['$+z$', '$-z$', '$+y$', 'it is a standing wave'], a: 1,
+    e: 'In the time domain $E = E_0\\cos(\\omega t + \\beta z)$. Constant phase needs $z$ to decrease as $t$ grows: travel in $-z$. The sign of the exponent is opposite to the direction of travel.' },
+  { q: 'Time integration $\\int v(t)\\,dt$ becomes, in the phasor domain…', o: ['multiplication by $j\\omega$', 'division by $j\\omega$', 'multiplication by $-\\omega^2$', 'no change'], a: 1,
+    e: 'Since $\\frac{d}{dt}e^{j\\omega t} = j\\omega e^{j\\omega t}$, the inverse operation divides by $j\\omega$ — a $-90^\\circ$ shift and a factor $1/\\omega$.' },
+  { q: 'In the series RC circuit with $\\omega RC = 1$, the angle $\\phi_1$ and the phase of $\\widetilde{I}$ relative to the source phasor are…', o: ['$\\phi_1 = 45^\\circ$; current leads $v_s$ by $45^\\circ$', '$\\phi_1 = 90^\\circ$; in phase', '$\\phi_1 = 45^\\circ$; current lags by $45^\\circ$', '$\\phi_1 = 0$; current leads by $90^\\circ$'], a: 0,
+    e: '$\\phi_1 = \\tan^{-1}(1) = 45^\\circ$. The source phasor is at $\\phi_0 - 90^\\circ$ and the current at $\\phi_0 - 45^\\circ$, so the current leads by $45^\\circ$. Set $f = f_c$ in the simulation to check.' }
+]);
+window.addEventListener('load', () => { solve(); wEq(); });
+
+lucide.createIcons();
+</script>
+</body>
+</html>

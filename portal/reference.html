@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en" data-root="../">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick reference · Electromagnetics Course Portal</title>
+    <link rel="stylesheet" href="../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/em.css">
+    <script src="../assets/vendor/katex/katex.min.js"></script>
+    <script src="../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../assets/js/em.js"></script>
+<script src="../assets/vendor/lucide/lucide.min.js"></script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .glass-panel { background: rgba(255,255,255,.85); border: 1px solid rgba(15,23,42,.08); backdrop-filter: blur(8px); }
+  .card { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,.03); transition: border-color .2s, transform .2s, box-shadow .2s; }
+  a.card:hover, button.card:hover { border-color: rgba(2,132,199,.45); transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(15,23,42,.25); }
+  a.card:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; }
+  .chip { padding: .35rem .8rem; border-radius: 9999px; font-size: .875rem; font-weight: 600; border: 1px solid #e2e8f0; color: #475569; background: #fff; transition: all .15s; }
+  .chip:hover { background: #f8fafc; }
+  .chip.on { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .seg button { padding: .4rem .9rem; font-size: .875rem; font-weight: 600; color: #475569; border-radius: .5rem; }
+  .seg button.on { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  ::-webkit-scrollbar { width: 8px; height: 6px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fade { animation: fade-in .35s ease-out both; }
+  .ring-track { stroke: #e2e8f0; } .ring-val { stroke: #059669; transition: stroke-dashoffset .6s ease; }
+  .balance { text-wrap: balance; }
+  nav a { white-space: nowrap; }
+  .skip { position: absolute; left: -999px; top: 8px; z-index: 60; background: #0f172a; color: #fff; padding: .5rem .9rem; border-radius: .5rem; font-weight: 600; }
+  .skip:focus { left: 8px; }
+  .stat b { display: block; font-size: 1.5rem; line-height: 1.1; font-weight: 800; color: #0f172a; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: .875rem; color: #475569; }
+  .pg-wrap { position: relative; }
+  .pg-handle { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 9999px; touch-action: none; cursor: grab; outline: none; }
+  .pg-handle:active { cursor: grabbing; }
+  .pg-handle:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #0369a1; }
+  .chip[aria-pressed="true"], .chip.on { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .hl { background: #fef08a; color: inherit; border-radius: 2px; }
+  #q::-webkit-search-cancel-button { display: none; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+<a href="#main" class="skip">Skip to content</a>
+<header id="portal-header" class="border-b border-slate-200 px-4 lg:px-8 py-3"></header>
+<main id="main" class="flex-grow">
+<section class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8">
+  <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">Quick reference</h1>
+  <p class="text-base text-slate-700 mt-2 max-w-3xl">Physical constants, key relations and vector-calculus identities used throughout the course.</p>
+</section>
+<!-- Reference -->
+<section id="reference" class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 scroll-mt-20">
+  <h2 class="text-2xl font-bold text-slate-900 mb-4">Constants and key relations</h2>
+  <div class="grid lg:grid-cols-2 gap-4">
+    <div class="card rounded-xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-100 text-slate-700"><tr><th class="text-left px-4 py-2 font-semibold">Quantity</th><th class="text-left px-4 py-2 font-semibold">Symbol</th><th class="text-left px-4 py-2 font-semibold">Value</th></tr></thead>
+        <tbody class="divide-y divide-slate-200 text-slate-800">
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Speed of light in vacuum</td><td class="px-4 py-2">$c$</td><td class="px-4 py-2">$2.998\times10^{8}$ m/s</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Permittivity of free space</td><td class="px-4 py-2">$\varepsilon_0$</td><td class="px-4 py-2">$8.854\times10^{-12}\approx\dfrac{10^{-9}}{36\pi}$ F/m</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Permeability of free space</td><td class="px-4 py-2">$\mu_0$</td><td class="px-4 py-2">$4\pi\times10^{-7}$ H/m</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Intrinsic impedance of free space</td><td class="px-4 py-2">$\eta_0$</td><td class="px-4 py-2">$\approx 120\pi \approx 377\ \Omega$</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Elementary charge</td><td class="px-4 py-2">$e$</td><td class="px-4 py-2">$1.602\times10^{-19}$ C</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Electron mass</td><td class="px-4 py-2">$m_e$</td><td class="px-4 py-2">$9.109\times10^{-31}$ kg</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card rounded-xl p-5 grid sm:grid-cols-2 gap-x-6 gap-y-4 text-sm text-slate-800 eq">
+      <div><div class="text-sm font-semibold text-sky-800 mb-1">Waves</div>$u_p = \dfrac{\omega}{\beta} = f\lambda$, $\ \beta = \dfrac{2\pi}{\lambda}$</div>
+      <div><div class="text-sm font-semibold text-sky-800 mb-1">Phasors</div>$\dfrac{\partial}{\partial t} \rightarrow j\omega$, $\ \int dt \rightarrow \dfrac{1}{j\omega}$</div>
+      <div><div class="text-sm font-semibold text-indigo-700 mb-1">Free space</div>$c = \dfrac{1}{\sqrt{\mu_0\varepsilon_0}}$, $\ \eta_0 = \sqrt{\dfrac{\mu_0}{\varepsilon_0}}$</div>
+      <div><div class="text-sm font-semibold text-purple-700 mb-1">Constitutive</div>$\mathbf{D} = \varepsilon\mathbf{E}$, $\ \mathbf{B} = \mu\mathbf{H}$, $\ \mathbf{J} = \sigma\mathbf{E}$</div>
+      <div><div class="text-sm font-semibold text-amber-800 mb-1">Lorentz force</div>$\mathbf{F} = q(\mathbf{E} + \mathbf{u}\times\mathbf{B})$</div>
+      <div><div class="text-sm font-semibold text-rose-700 mb-1">Continuity</div>$\nabla\cdot\mathbf{J} = -\dfrac{\partial\rho_v}{\partial t}$</div>
+    </div>
+  </div>
+  <div class="card rounded-xl p-5 mt-4 text-sm text-slate-800 eq">
+    <div class="text-sm font-semibold text-slate-900 mb-3">Vector-calculus identities <a href="../topic2/curl_operator.html" data-file="topic2/curl_operator.html" class="nav font-medium text-indigo-700 hover:underline ml-2">Topic 2 →</a></div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
+      <div>$\nabla\times(\nabla V) = 0$</div>
+      <div>$\nabla\cdot(\nabla\times\mathbf{A}) = 0$</div>
+      <div>$\nabla\cdot(\nabla V) = \nabla^2 V$</div>
+      <div>$\nabla\times(\nabla\times\mathbf{A}) = \nabla(\nabla\cdot\mathbf{A}) - \nabla^2\mathbf{A}$</div>
+      <div>$\nabla\cdot(V\mathbf{A}) = V\,\nabla\cdot\mathbf{A} + \mathbf{A}\cdot\nabla V$</div>
+      <div>$\nabla\times(V\mathbf{A}) = V\,\nabla\times\mathbf{A} + \nabla V\times\mathbf{A}$</div>
+      <div class="sm:col-span-2 lg:col-span-3">Divergence theorem $\displaystyle\int_V\nabla\cdot\mathbf{A}\,dv = \oint_S\mathbf{A}\cdot d\mathbf{s}$ &nbsp;·&nbsp; Stokes's theorem $\displaystyle\int_S(\nabla\times\mathbf{A})\cdot d\mathbf{s} = \oint_C\mathbf{A}\cdot d\boldsymbol{\ell}$</div>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="border-t border-slate-200 py-5 px-4 text-center text-sm text-slate-600 mt-8">
+  <a href="../welcome.html" data-file="welcome.html" class="nav font-medium text-sky-800 hover:underline">← Back to the overview</a>
+  <span class="mx-2">·</span> Notation follows Ulaby, <i>Fundamentals of Applied Electromagnetics</i>
+</footer>
+<script src="../assets/js/portal.js"></script>
+<script>
+portalHeader('portal/reference.html');
+
+portalReady();
+</script>
+</body>
+</html>

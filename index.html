@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electromagnetics Course</title>
+    <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+    <link rel="stylesheet" href="assets/css/em.css">
+    <script src="assets/vendor/katex/katex.min.js"></script>
+    <script src="assets/vendor/katex/auto-render.min.js"></script>
+    <script src="assets/js/em.js"></script>
+<script src="assets/vendor/lucide/lucide.min.js"></script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  .chevron { transition: transform .2s ease; }
+  .chevron.open { transform: rotate(90deg); }
+  .section-list { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s ease; }
+  .section-list.open { grid-template-rows: 1fr; }
+  .section-list > ul { overflow: hidden; min-height: 0; }
+  .nav-link.active { background: #e0f2fe; color: #0369a1 !important; font-weight: 600; }
+  .nav-link.active .sid { color: #0369a1 !important; }
+  .tbtn { display:inline-flex; align-items:center; gap:.375rem; padding:.4rem .6rem; border-radius:.5rem; font-size:.875rem; font-weight:500; color:#334155; border:1px solid transparent; transition: background .15s, border-color .15s; white-space:nowrap; }
+  .tbtn:hover { background:#f1f5f9; border-color:#e2e8f0; }
+  .tbtn:disabled { opacity:.35; pointer-events:none; }
+  .tbtn.on { background:#ecfdf5; border-color:#a7f3d0; color:#047857; }
+  kbd { font-family: ui-monospace, monospace; font-size: .8rem; padding: .1rem .4rem; border: 1px solid #cbd5e1; border-bottom-width: 2px; border-radius: .3rem; background: #f8fafc; color:#334155; }
+  #sidebar { transition: margin-left .25s ease, transform .25s ease; }
+  body.sb-collapsed #sidebar { margin-left: -20rem; }
+  body.focus #sidebar, body.focus #topbar { display: none !important; }
+  body.focus #focusbar { display: flex; }
+  #notes { transition: margin-right .25s ease; }
+  body:not(.notes-open) #notes { margin-right: -22rem; }
+  #toast { transition: opacity .2s, transform .2s; }
+  @media (max-width: 900px) {
+    #sidebar { position: fixed; inset: 0 auto 0 0; z-index: 40; transform: translateX(-100%); margin-left:0 !important; }
+    body.mobile-open #sidebar { transform: translateX(0); }
+    body.mobile-open #sidebar-backdrop { display:block; }
+    #notes { position: fixed; inset: 0 0 0 auto; z-index: 40; }
+    .hide-sm { display:none !important; }
+  }
+</style>
+</head>
+<body class="bg-white flex h-screen overflow-hidden text-slate-800">
+
+<div id="sidebar-backdrop" class="hidden fixed inset-0 bg-slate-900/30 z-30" onclick="closeMobile()"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="w-80 shrink-0 border-r border-slate-200 h-full flex flex-col bg-white">
+  <div class="p-4 border-b border-slate-200 space-y-3">
+    <div class="flex items-center justify-between">
+      <a href="#/welcome.html" onclick="closeMobile()" class="flex items-center gap-2.5 group">
+        <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-lg text-white shadow-lg shadow-sky-500/20"><i data-lucide="radio" class="w-5 h-5"></i></div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600 bg-clip-text text-transparent">Electromagnetics</h1>
+          <p class="text-sm text-slate-600">Interactive course modules</p>
+        </div>
+      </a>
+      <button onclick="closeMobile()" class="min-[901px]:hidden p-1.5 text-slate-600 hover:text-slate-900" aria-label="Close menu"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <!-- overall progress -->
+    <div>
+      <div class="flex justify-between text-sm text-slate-600 mb-1"><span>Your progress</span><span id="prog-text" class="font-semibold text-emerald-800">0 / 45</span></div>
+      <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div id="prog-bar" class="h-full bg-emerald-500 rounded-full transition-all" style="width:0%"></div></div>
+    </div>
+    <!-- search -->
+    <div class="relative">
+      <i data-lucide="search" class="w-4 h-4 text-slate-600 absolute left-2.5 top-1/2 -translate-y-1/2"></i>
+      <input id="search" type="search" placeholder="Search modules…  ( / )" autocomplete="off"
+        class="w-full pl-8 pr-3 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+    </div>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto p-3" id="menu"></nav>
+
+  <div class="p-3 border-t border-slate-200 grid grid-cols-2 gap-2">
+    <a href="#/welcome.html" onclick="closeMobile()" class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-sm font-medium text-slate-700"><i data-lucide="home" class="w-4 h-4"></i> Overview</a>
+    <button onclick="toggleHelp(true)" class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-sm font-medium text-slate-700"><i data-lucide="keyboard" class="w-4 h-4"></i> Shortcuts</button>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="flex-1 h-full relative flex flex-col min-w-0">
+  <div id="topbar" class="flex items-center gap-1 px-2 sm:px-3 py-1.5 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <button class="tbtn" onclick="toggleSidebar()" title="Toggle menu"><i data-lucide="panel-left" class="w-4 h-4"></i></button>
+    <div class="min-w-0 flex-1 px-1">
+      <div id="crumb-topic" class="text-sm text-slate-600 truncate leading-tight">Overview</div>
+      <div id="crumb-title" class="text-sm font-semibold text-slate-900 truncate leading-tight">Welcome</div>
+    </div>
+    <button id="b-prev" class="tbtn" onclick="go(-1)" title="Previous module  [ "><i data-lucide="chevron-left" class="w-4 h-4"></i><span class="hide-sm">Prev</span></button>
+    <button id="b-next" class="tbtn" onclick="go(1)" title="Next module  ]"><span class="hide-sm">Next</span><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+    <span class="w-px h-6 bg-slate-200 mx-1 hide-sm"></span>
+    <button id="b-done" class="tbtn" onclick="toggleDone()" title="Mark module as completed  (M)"><i data-lucide="circle-check" class="w-4 h-4"></i><span class="hide-sm" id="b-done-t">Mark done</span></button>
+    <button id="b-notes" class="tbtn" onclick="toggleNotes()" title="My notes for this module  (N)"><i data-lucide="notebook-pen" class="w-4 h-4"></i><span class="hide-sm">Notes</span></button>
+    <button class="tbtn hide-sm" onclick="copyLink()" title="Copy a direct link to this module"><i data-lucide="link" class="w-4 h-4"></i></button>
+    <a id="b-newtab" class="tbtn hide-sm" href="welcome.html" target="_blank" rel="noopener" title="Open this page in a new tab" aria-label="Open this page in a new tab"><i data-lucide="external-link" class="w-4 h-4"></i></a>
+    <button class="tbtn" onclick="setFocus(true)" title="Presentation mode  (F)"><i data-lucide="presentation" class="w-4 h-4"></i><span class="hide-sm">Present</span></button>
+    <button class="tbtn hide-sm" onclick="toggleFullscreen()" title="Full screen"><i data-lucide="maximize" class="w-4 h-4"></i></button>
+  </div>
+  <div id="loadbar" class="h-0.5 bg-sky-500 w-0 transition-all duration-300"></div>
+
+  <div class="flex-1 flex min-h-0">
+    <iframe name="contentFrame" id="frame" class="flex-1 w-full h-full border-none bg-white" title="Course content"></iframe>
+    <!-- Notes drawer -->
+    <aside id="notes" class="w-[22rem] shrink-0 border-l border-slate-200 bg-slate-50 flex flex-col h-full">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white">
+        <div class="min-w-0">
+          <div class="text-sm font-bold text-slate-900 flex items-center gap-1.5"><i data-lucide="notebook-pen" class="w-4 h-4 text-sky-800"></i> My notes</div>
+          <div id="notes-for" class="text-sm text-slate-600 truncate">Overview</div>
+        </div>
+        <button class="tbtn" onclick="toggleNotes(false)" aria-label="Close notes"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <textarea id="notes-text" class="flex-1 m-3 p-3 text-sm leading-relaxed rounded-lg border border-slate-200 bg-white resize-none focus:outline-none focus:ring-2 focus:ring-sky-600"
+        placeholder="Key formulas, questions for class, things to review…&#10;&#10;Notes are saved automatically in this browser, one page per module."></textarea>
+      <div class="px-4 pb-3 flex items-center justify-between text-sm text-slate-600">
+        <span id="notes-saved">Saved in this browser</span>
+        <button class="text-sky-800 font-medium hover:underline" onclick="exportNotes()">Export all notes</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Presentation mode floating bar -->
+  <div id="focusbar" class="hidden absolute bottom-4 right-4 z-20 items-center gap-1 px-2 py-1.5 rounded-xl bg-white/95 border border-slate-200 shadow-lg opacity-60 hover:opacity-100 transition">
+    <button class="tbtn" onclick="go(-1)" title="Previous  ["><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+    <span id="focus-id" class="text-sm font-semibold text-slate-700 px-1">1.1</span>
+    <button class="tbtn" onclick="go(1)" title="Next  ]"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+    <button class="tbtn" onclick="toggleFullscreen()" title="Full screen"><i data-lucide="maximize" class="w-4 h-4"></i></button>
+    <button class="tbtn" onclick="setFocus(false)" title="Exit presentation mode  (Esc)"><i data-lucide="minimize-2" class="w-4 h-4"></i> Exit</button>
+  </div>
+</main>
+
+<!-- Shortcut help -->
+<div id="help" class="hidden fixed inset-0 z-50 bg-slate-900/40 items-center justify-center p-4" onclick="if(event.target===this)toggleHelp(false)">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-bold text-slate-900">Keyboard shortcuts</h2>
+      <button class="tbtn" onclick="toggleHelp(false)" aria-label="Close"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    <table class="w-full text-sm text-slate-700">
+      <tbody class="divide-y divide-slate-200">
+        <tr><td class="py-2"><kbd>[</kbd> <kbd>]</kbd></td><td>Previous / next module</td></tr>
+        <tr><td class="py-2"><kbd>F</kbd></td><td>Presentation mode (hide menu and toolbar)</td></tr>
+        <tr><td class="py-2"><kbd>Esc</kbd></td><td>Leave presentation mode or close panels</td></tr>
+        <tr><td class="py-2"><kbd>M</kbd></td><td>Mark current module done / not done</td></tr>
+        <tr><td class="py-2"><kbd>N</kbd></td><td>Open or close my notes</td></tr>
+        <tr><td class="py-2"><kbd>B</kbd></td><td>Show or hide the menu</td></tr>
+        <tr><td class="py-2"><kbd>/</kbd></td><td>Search modules</td></tr>
+        <tr><td class="py-2"><kbd>Ctrl</kbd> <kbd>+</kbd> / <kbd>−</kbd></td><td>Enlarge the page for a projector</td></tr>
+        <tr><td class="py-2"><kbd>?</kbd></td><td>Show this help</td></tr>
+      </tbody>
+    </table>
+    <p class="text-sm text-slate-600">Shortcuts work when the course page is focused; they are ignored while you type in a field or drag a slider.</p>
+  </div>
+</div>
+
+<div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 translate-y-2 opacity-0 pointer-events-none z-50 px-4 py-2 rounded-lg bg-slate-900 text-white text-sm shadow-lg"></div>
+
+<script>
+const COURSE = [
+ {id:"1", num:"01", title:"Introduction: Waves and Phasors", color:"sky",
+  blurb:"Harmonic wave propagation, complex notation and phasor-domain analysis.",
+  goals:["Read SI units and vector notation","Describe travelling and lossy waves","Work fluently with complex numbers and phasors"],
+  sections:[
+   {id:"1.1", title:"Dimensions, Units, and Notation", file:"topic1/dimensions_units_notation.html", desc:"SI base units, derived electromagnetic quantities ($V, A, \\Omega, F, H, T, Wb$) and vector notation conventions."},
+   {id:"1.2", title:"The Nature of Electromagnetism", file:"topic1/nature_of_electromagnetism.html", desc:"The four fundamental forces, electric charge, the fields $\\mathbf{E}$ and $\\mathbf{B}$, and field–particle interaction."},
+   {id:"1.3", title:"Travelling Waves", file:"topic1/traveling_waves.html", desc:"Sinusoidal waves $y(z,t) = A\\cos(\\omega t - \\beta z)$, phase velocity $u_p = \\omega/\\beta$ and wavelength $\\lambda$."},
+   {id:"1.4", title:"The Electromagnetic Spectrum", file:"topic1/electromagnetic_spectrum.html", desc:"Bands from ELF/RF through microwave, infrared, visible light, X-rays and gamma rays ($c = f\\lambda$)."},
+   {id:"1.5", title:"Review of Complex Numbers", file:"topic1/complex_numbers.html", desc:"Rectangular and polar forms, Euler's identity $e^{j\\theta} = \\cos\\theta + j\\sin\\theta$ and complex arithmetic."},
+   {id:"1.6", title:"Review of Phasors", file:"topic1/phasors.html", desc:"Time domain to phasor domain $v(t) = \\mathfrak{Re}\\{\\tilde{V} e^{j\\omega t}\\}$ and $\\partial/\\partial t \\rightarrow j\\omega$."}]},
+ {id:"2", num:"02", title:"Vector Analysis", color:"indigo",
+  blurb:"Coordinate systems, vector-calculus operators and the integral theorems.",
+  goals:["Use Cartesian, cylindrical and spherical coordinates","Compute gradient, divergence, curl and Laplacian","Apply the divergence and Stokes theorems"],
+  sections:[
+   {id:"2.1", title:"Basic Laws of Vector Algebra", file:"topic2/3d_vector.html", desc:"Vector addition, dot product $\\mathbf{A}\\cdot\\mathbf{B}$, cross product $\\mathbf{A}\\times\\mathbf{B}$ and triple products."},
+   {id:"2.2", title:"Orthogonal Coordinate Systems", file:"topic2/coordinates_systems.html", desc:"Cartesian $(x,y,z)$, cylindrical $(r,\\phi,z)$ and spherical $(R,\\theta,\\phi)$ coordinates and metric factors."},
+   {id:"2.3", title:"Transformations between Systems", file:"topic2/3d_vector_CCS.html", desc:"Transformation matrices for positions and vector components across the three coordinate systems."},
+   {id:"2.4", title:"Gradient of a Scalar Field", file:"topic2/gradient_operator.html", desc:"Direction of maximum rate of change $\\nabla V$ and the directional derivative."},
+   {id:"2.5", title:"Divergence of a Vector Field", file:"topic2/divergence_operator.html", desc:"Net outward flux per unit volume $\\nabla\\cdot\\mathbf{A}$ and the divergence theorem."},
+   {id:"2.6", title:"Curl of a Vector Field", file:"topic2/curl_operator.html", desc:"Circulation density $\\nabla\\times\\mathbf{A}$ and Stokes' theorem."},
+   {id:"2.7", title:"Laplacian Operator", file:"topic2/laplacian_operator.html", desc:"Second-order operator $\\nabla^2 V = \\nabla\\cdot(\\nabla V)$ for scalar and vector fields."},
+   {id:"2.8", title:"Stokes' & Divergence Theorem", file:"topic2/stokes_and_divergence_theorem.html", desc:"Integral theorems linking the differential operators to boundary and surface integrals."}]},
+ {id:"3", num:"03", title:"Electrostatics", color:"purple",
+  blurb:"Static electric fields, charge distributions, dielectrics and capacitance.",
+  goals:["Find E from charges with Coulomb's and Gauss's laws","Use the potential V and boundary conditions","Compute capacitance, energy and image solutions"],
+  sections:[
+   {id:"3.1", title:"Maxwell's Electrostatic Equations", file:"topic3/maxwell_s_equations_electromagnetics.html", desc:"The decoupled electrostatic pair $\\nabla\\cdot\\mathbf{D} = \\rho_v$ and $\\nabla\\times\\mathbf{E} = 0$."},
+   {id:"3.2", title:"Charge & Current Distributions", file:"topic3/charge_and_current_distributions.html", desc:"Volume, surface and line charge densities $\\rho_v, \\rho_s, \\rho_\\ell$ and current density $\\mathbf{J}$."},
+   {id:"3.3", title:"Coulomb's Law", file:"topic3/coulomb_law.html", desc:"Force between point charges $\\mathbf{F} = \\dfrac{q_1 q_2}{4\\pi\\varepsilon_0 R^2}\\boldsymbol{\\hat{R}}$ and the field $\\mathbf{E}$."},
+   {id:"3.4", title:"Gauss's Law", file:"topic3/gauss_s_law.html", desc:"$\\oint_S \\mathbf{D}\\cdot d\\mathbf{s} = Q$ applied to symmetric charge geometries."},
+   {id:"3.5", title:"Electric Scalar Potential", file:"topic3/electric_scalar_potential.html", desc:"$V = -\\int \\mathbf{E}\\cdot d\\boldsymbol{\\ell}$, $\\mathbf{E} = -\\nabla V$ and the Poisson and Laplace equations."},
+   {id:"3.6", title:"Conductors", file:"topic3/conductors.html", desc:"Ohm's law $\\mathbf{J} = \\sigma\\mathbf{E}$, zero interior field and equipotential surfaces."},
+   {id:"3.7", title:"Dielectrics", file:"topic3/dielectrics.html", desc:"Polarization $\\mathbf{P}$, $\\mathbf{D} = \\varepsilon_0\\mathbf{E} + \\mathbf{P}$, relative permittivity $\\varepsilon_r$ and breakdown."},
+   {id:"3.8", title:"Electric Boundary Conditions", file:"topic3/electric_boundary_conditions.html", desc:"$E_{1t} = E_{2t}$ and $D_{1n} - D_{2n} = \\rho_s$ at an interface."},
+   {id:"3.9", title:"Capacitance", file:"topic3/capacitance.html", desc:"$C = Q/V$ for parallel-plate, coaxial and spherical geometries."},
+   {id:"3.10", title:"Electrostatic Potential Energy", file:"topic3/electrostatic_potential_energy.html", desc:"Stored energy $W_e = \\tfrac{1}{2}\\int_V \\varepsilon E^2\\,dV = \\tfrac{1}{2}CV^2$."},
+   {id:"3.11", title:"Image Method", file:"topic3/image_method.html", desc:"Charge–ground-plane problems solved with mirror image charges."}]},
+ {id:"4", num:"04", title:"Magnetostatics", color:"amber",
+  blurb:"Steady magnetic fields, magnetic forces, vector potential and inductance.",
+  goals:["Compute forces and torques on charges and currents","Find H with Biot–Savart and Ampère","Use A, material properties, inductance and energy"],
+  sections:[
+   {id:"4.1", title:"Magnetic Forces & Torques", file:"topic4/magnetic_forces_torques.html", desc:"Lorentz force $\\mathbf{F} = q(\\mathbf{E} + \\mathbf{u}\\times\\mathbf{B})$ and torque $\\mathbf{T} = \\mathbf{m}\\times\\mathbf{B}$."},
+   {id:"4.2", title:"The Biot–Savart Law", file:"topic4/biot_savart_law.html", desc:"$d\\mathbf{H} = \\dfrac{I\\,d\\boldsymbol{\\ell}\\times\\boldsymbol{\\hat{R}}}{4\\pi R^2}$ for wires, loops and solenoids."},
+   {id:"4.3", title:"Maxwell's Magnetostatic Equations", file:"topic4/maxwell_magnetostatic_equations.html", desc:"Ampère's law $\\nabla\\times\\mathbf{H} = \\mathbf{J}$ and $\\nabla\\cdot\\mathbf{B} = 0$ (no monopoles)."},
+   {id:"4.4", title:"Vector Magnetic Potential", file:"topic4/vector_magnetic_potential.html", desc:"$\\mathbf{B} = \\nabla\\times\\mathbf{A}$ and magnetic flux $\\Phi = \\oint \\mathbf{A}\\cdot d\\boldsymbol{\\ell}$."},
+   {id:"4.5", title:"Magnetic Material Properties", file:"topic4/magnetic_properties_of_materials.html", desc:"Magnetization $\\mathbf{M}$, $\\mu_r$, dia-, para- and ferromagnetism and hysteresis."},
+   {id:"4.6", title:"Magnetic Boundary Conditions", file:"topic4/magnetic_boundary_conditions.html", desc:"$B_{1n} = B_{2n}$ and $\\boldsymbol{\\hat{n}}_2\\times(\\mathbf{H}_1 - \\mathbf{H}_2) = \\mathbf{J}_s$."},
+   {id:"4.7", title:"Inductance", file:"topic4/inductance.html", desc:"Self and mutual inductance $L = \\Lambda/I$ for solenoids, toroids and parallel lines."},
+   {id:"4.8", title:"Magnetic Energy", file:"topic4/magnetic_energy.html", desc:"Stored energy $W_m = \\tfrac{1}{2}\\int_V \\mu H^2\\,dV = \\tfrac{1}{2}LI^2$."}]},
+ {id:"5", num:"05", title:"Maxwell's Equations for Time-Varying Fields", color:"rose",
+  blurb:"Induction, displacement current, boundary conditions and electromagnetic potentials.",
+  goals:["Apply Faraday's law to transformers, generators and moving conductors","Explain displacement current and charge continuity","Use retarded potentials and phasor Maxwell equations"],
+  sections:[
+   {id:"5.0", title:"Dynamic Fields Overview", file:"topic5/dynamic_fields_maxwell_equations.html", desc:"The coupled time-varying Maxwell system and how it predicts electromagnetic waves."},
+   {id:"5.1", title:"Faraday's Law", file:"topic5/faraday_law.html", desc:"$V_{\\text{emf}} = -\\dfrac{d\\Phi}{dt}$ and Lenz's law for the direction of the induced current."},
+   {id:"5.2", title:"Stationary Loop in Time-Varying Field", file:"topic5/stationary_loop.html", desc:"Transformer emf $V_{\\text{emf}}^{\\text{tr}} = -\\int_S \\dfrac{\\partial\\mathbf{B}}{\\partial t}\\cdot d\\mathbf{s}$."},
+   {id:"5.3", title:"The Ideal Transformer", file:"topic5/the_ideal_transformer.html", desc:"$V_1/V_2 = N_1/N_2 = I_2/I_1$ and impedance transformation."},
+   {id:"5.4", title:"Moving Conductor in Static Field", file:"topic5/moving_conductor_in_a_static_magnetic_field.html", desc:"Motional emf $V_{\\text{emf}}^{\\text{m}} = \\oint(\\mathbf{u}\\times\\mathbf{B})\\cdot d\\boldsymbol{\\ell}$ on sliding bars and rails."},
+   {id:"5.5", title:"The Electromagnetic Generator", file:"topic5/electromagnetic_generator.html", desc:"A loop rotating in a uniform field gives $V_{\\text{emf}} = A\\omega B_0\\sin\\omega t$."},
+   {id:"5.6", title:"Moving Conductor in Time-Varying Field", file:"topic5/moving_conductor_time-varying_magnetic_field.html", desc:"Total emf $V_{\\text{emf}} = V_{\\text{emf}}^{\\text{tr}} + V_{\\text{emf}}^{\\text{m}}$."},
+   {id:"5.7", title:"Displacement Current", file:"topic5/displacement_current_electromagnetics.html", desc:"Maxwell's term $\\mathbf{J}_d = \\partial\\mathbf{D}/\\partial t$ through capacitor gaps and free space."},
+   {id:"5.8", title:"Time-Varying Boundary Conditions", file:"topic5/boundary_conditions_for_electromagnetics.html", desc:"The complete set of field boundary conditions at dynamic interfaces."},
+   {id:"5.9", title:"Charge-Current Continuity Relation", file:"topic5/charge_current_continuity_relation.html", desc:"Charge conservation $\\nabla\\cdot\\mathbf{J} = -\\partial\\rho_v/\\partial t$."},
+   {id:"5.10", title:"Free-Charge Dissipation", file:"topic5/free_charge_dissipation_in_a_conductor.html", desc:"Relaxation $\\rho_v(t) = \\rho_{vo}e^{-t/\\tau_r}$ with $\\tau_r = \\varepsilon/\\sigma$."},
+   {id:"5.11", title:"Electromagnetic Potentials", file:"topic5/electromagnetic_potentials.html", desc:"Retarded potentials $V$ and $\\mathbf{A}$, the Lorenz gauge and time-harmonic phasor solutions."}]}
+];
+const COLORS = {
+  sky:{hex:"#0284c7", text:"text-sky-800", bg:"bg-sky-50", border:"border-sky-200", bar:"bg-sky-600", ring:"ring-sky-600", soft:"bg-sky-500/10"},
+  indigo:{hex:"#4f46e5", text:"text-indigo-700", bg:"bg-indigo-50", border:"border-indigo-200", bar:"bg-indigo-600", ring:"ring-indigo-600", soft:"bg-indigo-500/10"},
+  purple:{hex:"#9333ea", text:"text-purple-700", bg:"bg-purple-50", border:"border-purple-200", bar:"bg-purple-600", ring:"ring-purple-600", soft:"bg-purple-500/10"},
+  amber:{hex:"#d97706", text:"text-amber-800", bg:"bg-amber-50", border:"border-amber-200", bar:"bg-amber-600", ring:"ring-amber-600", soft:"bg-amber-500/10"},
+  rose:{hex:"#e11d48", text:"text-rose-700", bg:"bg-rose-50", border:"border-rose-200", bar:"bg-rose-600", ring:"ring-rose-600", soft:"bg-rose-500/10"}
+};
+const STORE_KEY = "em-course-state-v2";
+function loadState(){
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch(e) {}
+  if (!s) { s = {visited:{}, done:{}, notes:{}, last:null};
+    try { const old = localStorage.getItem("em-course-last-page"); if (old) { s.last = old; s.page = old; } } catch(e) {} }
+  s.visited = s.visited || {}; s.done = s.done || {}; s.notes = s.notes || {};
+  return s;
+}
+function saveState(s){ try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch(e) {} }
+const ALL = COURSE.flatMap(t => t.sections.map(s => ({...s, topic:t})));
+function findSection(file){ return ALL.find(s => s.file === file) || null; }
+function stripTeX(s){ return s.replace(/\$[^$]*\$/g, "").replace(/\s+/g, " "); }
+
+const WELCOME = "welcome.html";
+const frame = document.getElementById('frame');
+let state = loadState();
+let current = null;
+
+/* ---------- menu ---------- */
+function buildMenu(){
+  const menu = document.getElementById('menu'); menu.innerHTML = '';
+  COURSE.forEach(t => {
+    const c = COLORS[t.color];
+    const wrap = document.createElement('div'); wrap.className = 'mb-1'; wrap.dataset.topic = t.id;
+    wrap.innerHTML = `
+      <button type="button" class="topic-h w-full text-left px-2.5 py-2 hover:bg-slate-50 rounded-lg flex items-center gap-2.5">
+        <span class="shrink-0 w-7 h-7 rounded-md ${c.bg} border ${c.border} ${c.text} text-sm font-bold font-mono flex items-center justify-center">${t.num}</span>
+        <span class="min-w-0 flex-1">
+          <span class="block text-sm font-semibold text-slate-800 truncate">${t.title}</span>
+          <span class="flex items-center gap-2 mt-1"><span class="flex-1 h-1 rounded-full bg-slate-100 overflow-hidden"><span class="tbar block h-full ${c.bar} rounded-full" style="width:0%"></span></span><span class="tcount text-sm text-slate-600 tabular-nums">0/${t.sections.length}</span></span>
+        </span>
+        <i data-lucide="chevron-right" class="chevron w-4 h-4 text-slate-600 shrink-0"></i>
+      </button>
+      <div class="section-list"><ul class="mt-0.5 mb-1 ml-6 pl-3 border-l border-slate-200 space-y-0.5"></ul></div>`;
+    const ul = wrap.querySelector('ul');
+    t.sections.forEach(s => {
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="#/${s.file}" data-file="${s.file}" data-search="${(s.id+' '+s.title+' '+stripTeX(s.desc)).toLowerCase()}"
+        class="nav-link flex items-center gap-2 px-2.5 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-md">
+        <span class="st shrink-0 w-4 h-4 flex items-center justify-center"></span>
+        <span class="sid font-semibold text-slate-600 shrink-0 tabular-nums">${s.id}</span>
+        <span class="truncate">${s.title}</span></a>`;
+      li.querySelector('a').addEventListener('click', closeMobile);
+      ul.appendChild(li);
+    });
+    wrap.querySelector('.topic-h').onclick = () => {
+      wrap.querySelector('.section-list').classList.toggle('open');
+      wrap.querySelector('.chevron').classList.toggle('open');
+    };
+    menu.appendChild(wrap);
+  });
+}
+function statusIcon(file){
+  if (state.done[file]) return '<svg viewBox="0 0 16 16" class="w-4 h-4"><circle cx="8" cy="8" r="7" fill="#059669"/><path d="M4.8 8.2l2.2 2.2 4.2-4.6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  if (state.visited[file]) return '<svg viewBox="0 0 16 16" class="w-4 h-4"><circle cx="8" cy="8" r="6" fill="none" stroke="#0284c7" stroke-width="1.6"/><path d="M8 2a6 6 0 0 1 0 12z" fill="#0284c7"/></svg>';
+  return '<svg viewBox="0 0 16 16" class="w-4 h-4"><circle cx="8" cy="8" r="6" fill="none" stroke="#cbd5e1" stroke-width="1.6"/></svg>';
+}
+function refreshProgress(){
+  document.querySelectorAll('.nav-link').forEach(a => a.querySelector('.st').innerHTML = statusIcon(a.dataset.file));
+  let tot = 0;
+  COURSE.forEach(t => {
+    const n = t.sections.filter(s => state.done[s.file]).length; tot += n;
+    const w = document.querySelector(`[data-topic="${t.id}"]`);
+    w.querySelector('.tbar').style.width = (100*n/t.sections.length) + '%';
+    w.querySelector('.tcount').textContent = `${n}/${t.sections.length}`;
+  });
+  document.getElementById('prog-text').textContent = `${tot} / ${ALL.length} done`;
+  document.getElementById('prog-bar').style.width = (100*tot/ALL.length) + '%';
+  const d = current && state.done[current.file];
+  const b = document.getElementById('b-done');
+  b.classList.toggle('on', !!d); b.disabled = !current;
+  document.getElementById('b-done-t').textContent = d ? 'Done' : 'Mark done';
+  postState();
+}
+
+/* ---------- navigation ---------- */
+function fileFromHash(){
+  const h = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
+  return h && /\.html$/.test(h) ? h : null;
+}
+function route(){
+  const f = fileFromHash() || state.page || WELCOME;
+  open(f, false);
+}
+function open(file, push = true){
+  if (push) { if (fileFromHash() !== file) { location.hash = '/' + file; return; } }
+  try { if (notesTimer) saveNotesNow(); } catch (_) {}   // keep notes typed just before switching page on the page they belong to (notes code may not be set up yet on first load)
+  current = findSection(file);
+  const abs = new URL(file, location.href).href;
+  if (frame.dataset.src !== file) {
+    frame.dataset.src = file; loading(true);
+    try { frame.contentWindow.location.replace(abs); } catch(e) { frame.src = file; }
+  }
+  if (current) { state.visited[file] = Date.now(); state.last = file; }
+  state.page = file;
+  saveState(state);
+  setActive(file); updateCrumb(); refreshProgress(); loadNotes();
+}
+function go(d){
+  const i = current ? ALL.indexOf(current) : -1;
+  const j = i + d;
+  if (j < 0) { open(WELCOME); return; }
+  if (j >= ALL.length) return;
+  open(ALL[j].file);
+}
+function setActive(file){
+  document.querySelectorAll('.nav-link').forEach(a => {
+    const on = a.dataset.file === file; a.classList.toggle('active', on);
+    if (on) {
+      const w = a.closest('[data-topic]');
+      w.querySelector('.section-list').classList.add('open'); w.querySelector('.chevron').classList.add('open');
+      a.scrollIntoView({block:'nearest'});
+    }
+  });
+}
+/* overview sub-pages (portal/*.html): friendly titles in the top bar */
+const PORTAL_PAGES = {'portal/modules.html':'All modules', 'portal/maxwell.html':"Maxwell's equations", 'portal/guide.html':'Study & teaching', 'portal/reference.html':'Quick reference'};
+function updateCrumb(){
+  syncNewTabLink();
+  const t = document.getElementById('crumb-topic'), h = document.getElementById('crumb-title');
+  const i = current ? ALL.indexOf(current) : -1;
+  document.getElementById('b-prev').disabled = i < 0;
+  document.getElementById('b-next').disabled = i >= ALL.length - 1;
+  if (current) {
+    t.innerHTML = `<span class="${COLORS[current.topic.color].text} font-semibold">Topic ${current.topic.id}</span> · ${current.topic.title} · ${i+1} of ${ALL.length}`;
+    h.textContent = current.id + '  ' + current.title;
+    document.title = current.id + ' ' + current.title + ' · Electromagnetics';
+    document.getElementById('focus-id').textContent = current.id;
+  } else if (PORTAL_PAGES[frame.dataset.src]) {
+    t.textContent = 'Overview'; h.textContent = PORTAL_PAGES[frame.dataset.src];
+    document.title = PORTAL_PAGES[frame.dataset.src] + ' · Electromagnetics';
+    document.getElementById('focus-id').textContent = 'Home';
+  } else if (frame.dataset.src && frame.dataset.src !== WELCOME) {
+    t.textContent = 'Page'; h.textContent = frame.dataset.src;
+    document.title = 'Electromagnetics Course';
+    document.getElementById('focus-id').textContent = '—';
+  } else {
+    t.textContent = 'Overview'; h.textContent = 'Welcome to the course';
+    document.title = 'Electromagnetics Course';
+    document.getElementById('focus-id').textContent = 'Home';
+  }
+}
+function loading(on){
+  const b = document.getElementById('loadbar');
+  if (on) { b.style.opacity = 1; b.style.width = '70%'; }
+  else { b.style.width = '100%'; setTimeout(() => { b.style.opacity = 0; b.style.width = '0'; }, 300); }
+}
+frame.addEventListener('load', () => {
+  loading(false);
+  // keep the menu in sync if the user followed a link inside the page (same-origin only)
+  try {
+    const p = frame.contentWindow.location.href;
+    const base = new URL('.', location.href).href;
+    if (p.startsWith(base)) {
+      const rel = decodeURIComponent(p.slice(base.length).split('#')[0]);
+      if (rel && rel !== frame.dataset.src && /\.html$/.test(rel)) { frame.dataset.src = rel; open(rel); }
+    }
+    frame.contentDocument.addEventListener('keydown', onKey);
+  } catch(e) {}
+  postState();
+});
+window.addEventListener('hashchange', route);
+
+/* ---------- welcome page <-> shell messages ---------- */
+function postState(){
+  try { frame.contentWindow.postMessage({em:'state', state, current: current ? current.file : null}, '*'); } catch(e) {}
+}
+window.addEventListener('message', e => {
+  const m = e.data || {};
+  if (m.em === 'hello') postState();
+  if (m.em === 'open' && m.file) open(m.file);
+  if (m.em === 'toggle-done' && m.file) { state.done[m.file] ? delete state.done[m.file] : state.done[m.file] = Date.now(); saveState(state); refreshProgress(); }
+  if (m.em === 'reset') { state = {visited:{}, done:{}, notes:state.notes, last:null, page:state.page}; saveState(state); refreshProgress(); toast('Progress reset'); }
+  if (m.em === 'focus') setFocus(true);
+});
+
+/* ---------- actions ---------- */
+function toggleDone(){
+  if (!current) return;
+  const f = current.file;
+  if (state.done[f]) { delete state.done[f]; toast('Marked as not done'); }
+  else { state.done[f] = Date.now(); toast('✓ ' + current.id + ' marked as done'); }
+  saveState(state); refreshProgress();
+}
+function toggleSidebar(){
+  if (matchMedia('(max-width: 900px)').matches) document.body.classList.toggle('mobile-open');
+  else document.body.classList.toggle('sb-collapsed');
+}
+function closeMobile(){ document.body.classList.remove('mobile-open'); }
+function setFocus(on){ document.body.classList.toggle('focus', on); if (on) toast('Presentation mode — press Esc to exit'); }
+function toggleFullscreen(){
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(()=>{});
+  else document.exitFullscreen?.();
+}
+function toggleHelp(on){ const h = document.getElementById('help'); h.classList.toggle('hidden', !on); h.classList.toggle('flex', on); }
+function copyLink(){
+  const url = location.href.split('#')[0] + '#/' + (current ? current.file : WELCOME);
+  (navigator.clipboard?.writeText(url) || Promise.reject()).then(() => toast('Link copied — share it with your class'))
+    .catch(() => { prompt('Copy this link:', url); });
+}
+/* "Open in new tab" is a real link (id b-newtab) whose address follows the page on screen. A link the user clicks
+   is allowed everywhere (popup blockers, pages opened from disk, Ctrl/middle-click, right-click "open in new tab");
+   a scripted window.open() was blocked in some of those cases, so the button looked dead. */
+function syncNewTabLink(){
+  const el = document.getElementById('b-newtab'); if (!el) return;
+  el.href = new URL(current ? current.file : (frame.dataset.src || WELCOME), location.href).href;
+}
+function openTab(){ syncNewTabLink(); document.getElementById('b-newtab').click(); }
+function toast(msg){
+  const t = document.getElementById('toast'); t.textContent = msg;
+  t.style.opacity = 1; t.style.transform = 'translate(-50%,0)';
+  clearTimeout(toast._t); toast._t = setTimeout(() => { t.style.opacity = 0; t.style.transform = 'translate(-50%,8px)'; }, 1800);
+}
+
+/* ---------- notes ---------- */
+const notesText = document.getElementById('notes-text');
+function notesKey(){ return current ? current.file : WELCOME; }
+function loadNotes(){
+  notesText.value = state.notes[notesKey()] || '';
+  document.getElementById('notes-for').textContent = current ? current.id + ' ' + current.title : 'Course overview';
+  document.getElementById('b-notes').classList.toggle('on', !!state.notes[notesKey()]);
+}
+let notesTimer;
+function saveNotesNow(){                       // write the textarea to storage immediately
+  clearTimeout(notesTimer); notesTimer = null;
+  const v = notesText.value.trim();
+  if (v) state.notes[notesKey()] = notesText.value; else delete state.notes[notesKey()];
+  saveState(state); document.getElementById('notes-saved').textContent = 'Saved in this browser';
+  document.getElementById('b-notes').classList.toggle('on', !!v);
+}
+notesText.addEventListener('input', () => {
+  document.getElementById('notes-saved').textContent = 'Saving…';
+  clearTimeout(notesTimer);
+  notesTimer = setTimeout(saveNotesNow, 400);
+});
+function toggleNotes(on){
+  const open = on === undefined ? !document.body.classList.contains('notes-open') : on;
+  document.body.classList.toggle('notes-open', open);
+  if (open) setTimeout(() => notesText.focus(), 260);
+}
+function exportNotes(){
+  // Save what is in the box first: before, notes typed less than 0.4 s before pressing the button were not
+  // saved yet, so Export said "No notes yet" (or left out the latest text).
+  if (notesTimer) saveNotesNow();
+  const lines = ['# My Electromagnetics notes', ''];
+  const keys = Object.keys(state.notes);
+  if (!keys.length) { toast('No notes yet'); return; }
+  [WELCOME, ...ALL.map(s => s.file)].forEach(f => {
+    if (!state.notes[f]) return;
+    const s = findSection(f);
+    lines.push('## ' + (s ? s.id + ' ' + s.title : 'Course overview'), '', state.notes[f].trim(), '');
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/markdown'});
+  // the link must be in the page for some browsers (older Safari/Firefox) to start the download
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'electromagnetics_notes.md';
+  a.style.display = 'none'; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  toast('Notes exported: electromagnetics_notes.md');
+}
+
+/* ---------- search ---------- */
+const search = document.getElementById('search');
+search.addEventListener('input', () => {
+  const q = search.value.trim().toLowerCase();
+  document.querySelectorAll('#menu [data-topic]').forEach(w => {
+    let hits = 0;
+    w.querySelectorAll('.nav-link').forEach(a => {
+      const ok = !q || a.dataset.search.includes(q); a.parentElement.style.display = ok ? '' : 'none'; if (ok) hits++;
+    });
+    w.style.display = hits ? '' : 'none';
+    if (q) { w.querySelector('.section-list').classList.add('open'); w.querySelector('.chevron').classList.add('open'); }
+  });
+});
+search.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { const a = [...document.querySelectorAll('.nav-link')].find(a => a.parentElement.style.display !== 'none'); if (a) { open(a.dataset.file); search.blur(); closeMobile(); } }
+  if (e.key === 'Escape') { search.value = ''; search.dispatchEvent(new Event('input')); search.blur(); }
+});
+
+/* ---------- keyboard ---------- */
+function onKey(e){
+  const t = e.target, tag = (t.tagName || '').toLowerCase();
+  if (e.key === 'Escape') { if (document.body.classList.contains('focus')) setFocus(false); toggleHelp(false); toggleNotes(false); closeMobile(); return; }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (['input','textarea','select'].includes(tag) || t.isContentEditable) return;
+  const k = e.key;
+  const act = { '[':()=>go(-1), ']':()=>go(1), 'f':()=>setFocus(!document.body.classList.contains('focus')), 'm':toggleDone,
+    'n':()=>toggleNotes(), 'b':toggleSidebar, '?':()=>toggleHelp(true), '/':()=>{ if (document.body.classList.contains('focus')) setFocus(false); document.body.classList.remove('sb-collapsed'); document.body.classList.add('mobile-open'); search.focus(); } }[k.length === 1 ? k.toLowerCase() : k];
+  if (act) { e.preventDefault(); act(); }
+}
+document.addEventListener('keydown', onKey);
+
+/* ---------- start ---------- */
+buildMenu();
+lucide.createIcons();
+route();
+</script>
+</body>
+</html>
