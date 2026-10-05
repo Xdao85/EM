@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Định luật Gauss - Học phần Trường điện từ</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20">
+                    <i data-lucide="globe" class="w-6 h-6"></i>
+                </div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Định luật Gauss</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Hai dạng</button>
+                <button onclick="scrollToSection('flux-explorer')" class="px-3 py-1.5 rounded-lg text-emerald-800 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition flex items-center gap-1.5"><i data-lucide="scan" class="w-3.5 h-3.5"></i><span>Khám phá thông lượng</span></button>
+                <button onclick="scrollToSection('point-charge')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="circle" class="w-3.5 h-3.5"></i><span>Điện tích điểm</span></button>
+                <button onclick="scrollToSection('line-charge')" class="px-3 py-1.5 rounded-lg text-indigo-700 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition flex items-center gap-1.5"><i data-lucide="minus" class="w-3.5 h-3.5"></i><span>Điện tích dài</span></button>
+                <button onclick="scrollToSection('charged-sphere')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5"><i data-lucide="disc" class="w-3.5 h-3.5"></i><span>Quả cầu tích điện</span></button>
+                <button onclick="scrollToSection('decay')" class="px-3 py-1.5 rounded-lg text-rose-700 hover:bg-rose-500/10 transition">Đối xứng &amp; suy giảm</button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Kiểm tra</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Section 1: two forms -->
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Tĩnh điện</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Định luật Gauss: dạng vi phân và dạng tích phân</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                    Định luật Gauss phát biểu rằng tổng thông lượng (flux) hướng ra ngoài của mật độ điện thông (electric flux density) $\mathbf{D}$ qua một mặt kín $S$ bất kỳ bằng tổng điện tích $Q$ được bao bởi $S$. Các điện tích nằm ngoài $S$ tạo ra thông lượng đi vào rồi đi ra, không đóng góp gì. Thông lượng là đại lượng có dấu đo trường đi qua mặt, không phải độ lớn trường tại một điểm. Định luật Gauss luôn đúng, nhưng muốn tìm ngay trường cần đủ đối xứng để đơn giản hóa tích phân mặt.</p>
+            </div>
+
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-400/10 px-2.5 py-1 rounded-md">Dạng vi phân</span>
+                    <h3 class="text-base font-bold text-slate-900">Tại từng điểm</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\nabla \cdot \mathbf{D} = \rho_{\mathrm{v}}$$</div>
+                    <p class="text-sm text-slate-700">Độ phân kỳ (divergence) của $\mathbf{D}$ tại một điểm bằng mật độ điện tích khối tại điểm đó: các đường thông lượng xuất phát từ điện tích dương và kết thúc ở điện tích âm.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-indigo-700 uppercase tracking-wider bg-indigo-400/10 px-2.5 py-1 rounded-md">Định lý divergence</span>
+                    <h3 class="text-base font-bold text-slate-900">Cầu nối</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-indigo-700 text-sm">$$\int_v \nabla \cdot \mathbf{D}\, dv = \oint_S \mathbf{D} \cdot d\mathbf{s}$$</div>
+                    <p class="text-sm text-slate-700">Lấy tích phân dạng vi phân trên thể tích $v$ được bao bởi $S$ sẽ biến nó thành một tích phân mặt.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">Dạng tích phân</span>
+                    <h3 class="text-base font-bold text-slate-900">Trên một mặt kín</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\oint_S \mathbf{D} \cdot d\mathbf{s} = Q$$</div>
+                    <p class="text-sm text-slate-700">$d\mathbf{s} = \hat{\mathbf{n}}\, ds$ hướng ra ngoài. Chỉ có điện tích được bao $Q$ xuất hiện ở vế phải.</p>
+                </div>
+            </div>
+
+            <div class="relative mt-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-sm text-slate-700">
+                <span class="font-bold text-amber-800">Vì sao nó mạnh:</span> khi phân bố điện tích có đối xứng cầu, trụ hoặc phẳng, hãy chọn một mặt Gauss trên đó $\mathbf{D}$ hoặc song song với $d\mathbf{s}$ với độ lớn không đổi, hoặc vuông góc với nó. Khi đó $\oint_S \mathbf{D}\cdot d\mathbf{s}$ rút gọn thành $D \times (\text{diện tích})$ và suy ra ngay $\mathbf{E} = \mathbf{D}/\varepsilon$ chỉ trong một dòng.
+            </div>
+        </section>
+
+        <!-- Section 2: flux explorer -->
+        <section id="flux-explorer" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-emerald-800 bg-emerald-500/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 1</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Thông lượng qua một mặt kín bất kỳ</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        Ba điện tích dài vô hạn vuông góc với màn hình; mặt Gauss là một hình trụ mà bạn nhìn thấy mặt cắt ngang của nó. Hãy kéo các điện tích hoặc mặt Gauss, thay đổi hình dạng của nó, và so sánh thông lượng tính bằng tích phân số với điện tích được bao. Điện tích ngoài có thể làm đổi trường trên mọi phần mặt mà không đổi thông lượng tổng. Quan sát cả đóng góp vào và ra; thông lượng tổng bằng không không có nghĩa trường bằng không.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-8 flex flex-col space-y-3">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-sm text-slate-700 mr-1">Hình dạng mặt</span>
+                        <div id="shape-group" class="flex gap-1.5">
+                            <button data-v="circle" class="chip on">Tròn</button>
+                            <button data-v="square" class="chip">Vuông</button>
+                            <button data-v="blob" class="chip">Bất kỳ</button>
+                        </div>
+                        <span class="mx-2 text-slate-600">|</span>
+                        <button onclick="chipToggle(fx, 'map', this)" class="chip on">Bản đồ trường</button>
+                        <button onclick="chipToggle(fx, 'normals', this, 'on-emerald')" class="chip on-emerald">Mũi tên thông lượng</button>
+                    </div>
+                    <div class="relative h-[420px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                        <canvas id="canvas-flux" class="w-full h-full cursor-grab"></canvas>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-4 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-sky-800 font-semibold">$\rho_{\ell 1}$</span><span id="val-l1" class="font-mono text-sky-800"></span></div><input type="range" id="slider-l1" min="-50" max="50" step="5" value="40" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-rose-700 font-semibold">$\rho_{\ell 2}$</span><span id="val-l2" class="font-mono text-rose-700"></span></div><input type="range" id="slider-l2" min="-50" max="50" step="5" value="-20" class="w-full accent-rose-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-violet-700 font-semibold">$\rho_{\ell 3}$</span><span id="val-l3" class="font-mono text-violet-700"></span></div><input type="range" id="slider-l3" min="-50" max="50" step="5" value="30" class="w-full accent-violet-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-emerald-800 font-semibold">Kích thước mặt</span><span id="val-gsize" class="font-mono text-emerald-800"></span></div><input type="range" id="slider-gsize" min="0.5" max="2.6" step="0.05" value="1.5" class="w-full accent-emerald-600"></div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4 text-sm">
+                    <div class="space-y-3">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2"><i data-lucide="sigma" class="w-4 h-4 text-emerald-800"></i> Thông lượng trên một đơn vị chiều dài</h3>
+                        <p class="text-slate-700">Với điện tích dài, $\mathbf{D} = \hat{\mathbf{r}}\,\rho_{\ell}/(2\pi r)$, và định luật Gauss cho mỗi mét chiều dài hình trụ có dạng</p>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-emerald-800 text-center">$$\oint_C \mathbf{D}\cdot\hat{\mathbf{n}}\, dl = \sum_{\text{bên trong}} \rho_{\ell i}$$</div>
+                        <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                            <div class="flex justify-between"><span class="text-slate-600">Thông lượng ra</span><span id="ro-fx-out" class="text-emerald-800 font-bold"></span></div>
+                            <div class="flex justify-between"><span class="text-slate-600">Thông lượng vào</span><span id="ro-fx-in" class="text-amber-800 font-bold"></span></div>
+                            <div class="flex justify-between border-t border-slate-200 pt-2"><span class="text-slate-800 font-sans font-semibold">Thông lượng tổng (tính số)</span><span id="ro-fx-net" class="text-slate-900 font-bold"></span></div>
+                            <div class="flex justify-between"><span class="text-slate-800 font-sans font-semibold">Được bao $\sum \rho_{\ell}$</span><span id="ro-fx-enc" class="text-sky-800 font-bold"></span></div>
+                        </div>
+                    </div>
+                    <p class="text-slate-600">Hãy thử: thay đổi hình dạng hoặc kích thước nhưng giữ nguyên các điện tích bên trong, thông lượng tổng không đổi. Di chuyển một điện tích qua biên và thông lượng nhảy đúng bằng điện tích đó.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: point charge -->
+        <section id="point-charge" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 2</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Điện tích điểm và mặt Gauss hình cầu</h2>
+                    <p class="text-sm text-slate-600 mt-1">Do đối xứng, $\mathbf{D} = \hat{\mathbf{R}} D_R$ hướng theo bán kính và có cùng độ lớn tại mọi điểm trên mặt cầu bán kính $R$ có tâm tại điện tích. Kéo quả cầu để xoay nó.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-80 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-point-sphere" class="w-full h-full cursor-grab"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Điện tích $q$</span><span id="val-point-q" class="font-mono text-sky-800"></span></div><input type="range" id="slider-point-q" min="-20" max="20" step="1" value="10" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Bán kính $R$</span><span id="val-point-r" class="font-mono text-amber-800"></span></div><input type="range" id="slider-point-r" min="0.2" max="2" step="0.05" value="1" class="w-full accent-amber-600"></div>
+                        <div class="space-y-1"><span class="text-slate-700 block">Môi trường</span>
+                            <select id="select-point-er" class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-2 py-1.5">
+                                <option value="1">Chân không (εr = 1)</option><option value="2.1">Teflon (εr = 2.1)</option><option value="4">Thạch anh (εr = 4)</option>
+                            </select></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4 text-sm text-slate-700">
+                    <div class="space-y-3">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2"><i data-lucide="list-ordered" class="w-4 h-4 text-sky-800"></i> Dẫn giải</h3>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sky-800">$$\oint_S \hat{\mathbf{R}} D_R \cdot \hat{\mathbf{R}}\, ds = D_R (4\pi R^2) = q$$</div>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-emerald-800">$$\mathbf{E} = \frac{\mathbf{D}}{\varepsilon} = \hat{\mathbf{R}}\, \frac{q}{4\pi\varepsilon R^2}$$</div>
+                        <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 font-mono">
+                            <div><span class="text-slate-600 block">Thông lượng $\Psi = q$</span><span id="ro-pt-flux" class="text-slate-900 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">Diện tích $4\pi R^2$</span><span id="ro-pt-area" class="text-amber-800 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">$D_R$</span><span id="ro-pt-D" class="text-indigo-700 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">$|\mathbf{E}|$</span><span id="ro-pt-E" class="text-emerald-800 font-bold"></span></div>
+                        </div>
+                    </div>
+                    <div class="h-32 bg-white border border-slate-200 rounded-xl overflow-hidden relative"><canvas id="canvas-pt-graph" class="w-full h-full"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: line charge -->
+        <section id="line-charge" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 3</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Điện tích dài vô hạn và mặt Gauss hình trụ</h2>
+                    <p class="text-sm text-slate-600 mt-1">Một mật độ điện tích dài đều $\rho_{\ell}$ nằm dọc trục $z$. Hình trụ Gauss có bán kính $r$ và chiều cao $h$; thông lượng của nó chia thành phần qua mặt bên cong và qua hai nắp phẳng.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-80 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-line-cylinder" class="w-full h-full"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\rho_{\ell}$</span><span id="val-line-rhol" class="font-mono text-indigo-700"></span></div><input type="range" id="slider-line-rhol" min="-100" max="100" step="5" value="50" class="w-full accent-indigo-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Bán kính $r$</span><span id="val-line-r" class="font-mono text-amber-800"></span></div><input type="range" id="slider-line-r" min="0.1" max="1" step="0.05" value="0.5" class="w-full accent-amber-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Chiều cao $h$</span><span id="val-line-h" class="font-mono text-sky-800"></span></div><input type="range" id="slider-line-h" min="0.2" max="1.5" step="0.05" value="0.8" class="w-full accent-sky-600"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-3 text-sm text-slate-700">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2"><i data-lucide="layers" class="w-4 h-4 text-indigo-700"></i> Từng mặt một</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-indigo-700">$$\oint_S \mathbf{D}\cdot d\mathbf{s} = \underbrace{\int_{\text{trên}}}_{0} + \underbrace{\int_{\text{dưới}}}_{0} + \int_{\text{bên}} \hat{\mathbf{r}}D_r\cdot\hat{\mathbf{r}}\, r\,d\phi\,dz$$</div>
+                    <p>Trên các nắp, $d\mathbf{s} = \pm\hat{\mathbf{z}}\,ds$ vuông góc với $\mathbf{D}$. Mặt bên cho $2\pi r h D_r = \rho_{\ell} h$, nên</p>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-emerald-800">$$\mathbf{E} = \hat{\mathbf{r}}\,\frac{\rho_{\ell}}{2\pi\varepsilon_0 r}$$</div>
+                    <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 font-mono">
+                        <div><span class="text-slate-600 block">$Q = \rho_{\ell} h$</span><span id="ro-ln-Q" class="text-slate-900 font-bold"></span></div>
+                        <div><span class="text-slate-600 block">Diện tích mặt bên $2\pi r h$</span><span id="ro-ln-A" class="text-amber-800 font-bold"></span></div>
+                        <div><span class="text-slate-600 block">$D_r$</span><span id="ro-ln-D" class="text-indigo-700 font-bold"></span></div>
+                        <div><span class="text-slate-600 block">$|\mathbf{E}|$</span><span id="ro-ln-E" class="text-emerald-800 font-bold"></span></div>
+                    </div>
+                    <p class="text-slate-600">Thay đổi $h$ làm điện tích được bao và diện tích mặt bên thay đổi cùng một hệ số, nên $\mathbf{E}$ không phụ thuộc vào $h$.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: uniformly charged sphere -->
+        <section id="charged-sphere" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Ví dụ minh họa</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Trường của quả cầu tích điện đều</h2>
+                    <p class="text-sm text-slate-600 mt-1">Một quả cầu bán kính $a$ mang mật độ điện tích khối đều $\rho_{\mathrm{v}}$. Di chuyển mặt cầu Gauss bán kính $R$ vào trong và ra ngoài vùng điện tích, quan sát điện tích được bao quyết định trường như thế nào. Bên trong khối cầu tích điện, tăng bán kính sẽ bao thêm điện tích; bên ngoài, toàn bộ điện tích đã được bao và chỉ diện tích tăng. Điều đó giải thích hai quy luật theo bán kính mà không cần học thuộc riêng công thức.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-72 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-sphere" class="w-full h-full"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Bán kính quả cầu $a$</span><span id="val-sph-a" class="font-mono text-amber-800"></span></div><input type="range" id="slider-sph-a" min="1" max="5" step="0.5" value="3" class="w-full accent-amber-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\rho_{\mathrm{v}}$</span><span id="val-sph-rho" class="font-mono text-sky-800"></span></div><input type="range" id="slider-sph-rho" min="-10" max="10" step="1" value="5" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Mặt Gauss $R$</span><span id="val-sph-R" class="font-mono text-emerald-800"></span></div><input type="range" id="slider-sph-R" min="0.2" max="8" step="0.1" value="2" class="w-full accent-emerald-600"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-3 text-sm text-slate-700">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2"><i data-lucide="sigma" class="w-4 h-4 text-amber-800"></i> Bên trong và bên ngoài</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-amber-800">$$R \le a:\ \ D_R 4\pi R^2 = \rho_{\mathrm{v}}\tfrac{4}{3}\pi R^3 \Rightarrow \mathbf{E} = \hat{\mathbf{R}}\,\frac{\rho_{\mathrm{v}} R}{3\varepsilon_0}$$</div>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sky-800">$$R \ge a:\ \ \mathbf{E} = \hat{\mathbf{R}}\,\frac{\rho_{\mathrm{v}} a^3}{3\varepsilon_0 R^2} = \hat{\mathbf{R}}\,\frac{Q}{4\pi\varepsilon_0 R^2}$$</div>
+                    <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 font-mono">
+                        <div><span class="text-slate-600 block">$Q_{\mathrm{enc}}$</span><span id="ro-sph-q" class="text-slate-900 font-bold"></span></div>
+                        <div><span class="text-slate-600 block">$|\mathbf{E}|$ tại $R$</span><span id="ro-sph-E" class="text-emerald-800 font-bold"></span></div>
+                    </div>
+                    <div class="h-32 bg-white border border-slate-200 rounded-xl overflow-hidden relative"><canvas id="canvas-sphere-graph" class="w-full h-full"></canvas></div>
+                    <p class="text-slate-600">Bên ngoài, quả cầu tác động đúng như một điện tích điểm $Q$ đặt tại tâm; bên trong, $E$ tăng tuyến tính và đạt cực đại tại bề mặt.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: decay comparison -->
+        <section id="decay" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 4</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Đối xứng quyết định tốc độ suy giảm</h2>
+                    <p class="text-sm text-slate-600 mt-1">Trường giảm nhanh đúng bằng tốc độ diện tích mặt Gauss tăng theo khoảng cách.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 space-y-3">
+                    <div class="relative h-72 rounded-2xl bg-white border border-slate-200 overflow-hidden"><canvas id="canvas-decay" class="w-full h-full"></canvas></div>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="chipToggle(dec, 'pt', this); drawDecay()" class="chip on">Điểm: $1/r^2$</button>
+                        <button onclick="chipToggle(dec, 'ln', this, 'on-indigo'); drawDecay()" class="chip on-indigo">Dài: $1/r$</button>
+                        <button onclick="chipToggle(dec, 'sh', this, 'on-rose'); drawDecay()" class="chip on-rose">Mặt phẳng: $r^0$</button>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 space-y-3 text-sm">
+                    <div class="glass-card rounded-2xl p-4 border-l-4 border-l-sky-500"><span class="font-bold text-sky-800">Điện tích điểm:</span> <span class="text-slate-700">mặt cầu, diện tích $4\pi R^2$ ⇒ $E \propto 1/R^2$.</span></div>
+                    <div class="glass-card rounded-2xl p-4 border-l-4 border-l-indigo-500"><span class="font-bold text-indigo-700">Điện tích dài:</span> <span class="text-slate-700">mặt bên hình trụ, diện tích $2\pi r h$ ⇒ $E \propto 1/r$.</span></div>
+                    <div class="glass-card rounded-2xl p-4 border-l-4 border-l-rose-500"><span class="font-bold text-rose-700">Mặt phẳng điện tích:</span> <span class="text-slate-700">hộp dẹt (pillbox), diện tích nắp cố định ⇒ $E = \rho_{\mathrm{s}}/2\varepsilon_0$, không phụ thuộc khoảng cách.</span></div>
+                    <p class="text-slate-600">Cả ba đường cong được chuẩn hóa về 1 tại $r = 1$ để có thể so sánh trực tiếp hình dạng.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: quiz -->
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Câu hỏi tự kiểm tra</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Làm lại</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Điểm: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Học phần Trường điện từ — Định luật Gauss</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Câu ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Điểm: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Đúng. ' : '✗ Sai — đáp án đúng là ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Điểm: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // Section 2 — flux explorer (line charges ⟂ screen, arbitrary closed curve)
+        // =========================================================
+        const fx = { map: true, normals: true, shape: 'circle',
+            charges: [{ x: -0.9, y: 0.25, col: COL.sky, s: 'slider-l1' }, { x: 1.35, y: 0.55, col: COL.rose, s: 'slider-l2' }, { x: 0.15, y: -1.05, col: COL.violet, s: 'slider-l3' }],
+            G: { x: -0.25, y: 0.1 } };
+        function fxGeom(w, h) { const S = Math.min(w / 7.2, h / 5.2); return { S, X: x => w / 2 + x * S, Y: y => h / 2 - y * S, wx: px => (px - w / 2) / S, wy: py => (h / 2 - py) / S }; }
+        function boundary(R, N) {
+            const pts = [];
+            for (let k = 0; k < N; k++) {
+                const t = 2 * Math.PI * k / N;
+                let x, y;
+                if (fx.shape === 'circle') { x = R * Math.cos(t); y = R * Math.sin(t); }
+                else if (fx.shape === 'square') {
+                    const u = (k / N) * 4, side = Math.floor(u), f = u - side, s = R;
+                    [x, y] = side === 0 ? [s, -s + 2 * s * f] : side === 1 ? [s - 2 * s * f, s] : side === 2 ? [-s, s - 2 * s * f] : [-s + 2 * s * f, -s];
+                } else { const r = R * (1 + 0.22 * Math.sin(3 * t) + 0.12 * Math.cos(5 * t)); x = r * Math.cos(t); y = r * Math.sin(t); }
+                pts.push([fx.G.x + x, fx.G.y + y]);
+            }
+            return pts;
+        }
+        function inside(pts, x, y) {
+            let c = false;
+            for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+                const [xi, yi] = pts[i], [xj, yj] = pts[j];
+                if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+            }
+            return c;
+        }
+        function fxCharges() { return fx.charges.map(c => ({ ...c, q: num(c.s) })); }
+        function Dline(x, y, list) {       // D in nC/m² for ρℓ in nC/m
+            let dx = 0, dy = 0;
+            list.forEach(c => { const rx = x - c.x, ry = y - c.y, r2 = rx * rx + ry * ry + 1e-9, k = c.q / (2 * Math.PI * r2); dx += k * rx; dy += k * ry; });
+            return [dx, dy];
+        }
+        function drawFlux() {
+            const list = fxCharges(), R = num('slider-gsize');
+            list.forEach((c, i) => setText('val-l' + (i + 1), sgn(c.q) + Math.abs(c.q) + ' nC/m'));
+            setText('val-gsize', R.toFixed(2) + ' m');
+            const c = setupCanvas('canvas-flux'); if (!c) return;
+            const { ctx, w, h } = c, G = fxGeom(w, h);
+            // grid
+            for (let x = -4; x <= 4; x++) line(ctx, G.X(x), 0, G.X(x), h, COL.grid, 1);
+            for (let y = -3; y <= 3; y++) line(ctx, 0, G.Y(y), w, G.Y(y), COL.grid, 1);
+            if (fx.map) {
+                for (let x = -3.5; x <= 3.5; x += 0.33) for (let y = -2.5; y <= 2.5; y += 0.33) {
+                    if (list.some(q => Math.hypot(x - q.x, y - q.y) < 0.22)) continue;
+                    const [dx, dy] = Dline(x, y, list);
+                    dirArrow(ctx, G.X(x), G.Y(y), dx, -dy, 0.33 * G.S * 0.62, COL.slate, -0.3, 1.8);
+                }
+            }
+            const N = 1440, pts = boundary(R, N);
+            // numerical flux
+            let out = 0, inn = 0, minD = Infinity;
+            for (let k = 0; k < N; k++) {
+                const [x1, y1] = pts[k], [x2, y2] = pts[(k + 1) % N];
+                const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, tx = x2 - x1, ty = y2 - y1;
+                const [dx, dy] = Dline(mx, my, list), d = dx * ty - dy * tx;      // D · (ty, −tx)
+                if (d > 0) out += d; else inn += d;
+                list.forEach(q => { minD = Math.min(minD, Math.hypot(mx - q.x, my - q.y)); });
+            }
+            const enc = list.reduce((s, q) => s + (inside(pts, q.x, q.y) ? q.q : 0), 0);
+            // surface
+            ctx.save();
+            ctx.beginPath(); pts.forEach(([x, y], k) => k ? ctx.lineTo(G.X(x), G.Y(y)) : ctx.moveTo(G.X(x), G.Y(y))); ctx.closePath();
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.07)'; ctx.fill();
+            ctx.strokeStyle = COL.emerald; ctx.lineWidth = 2; ctx.setLineDash([7, 5]); ctx.stroke(); ctx.restore();
+            if (fx.normals) {
+                const M = 36;
+                for (let k = 0; k < M; k++) {
+                    const i = Math.floor(k * N / M), [x1, y1] = pts[i], [x2, y2] = pts[(i + 1) % N];
+                    let tx = x2 - x1, ty = y2 - y1; const tl = Math.hypot(tx, ty); tx /= tl; ty /= tl;
+                    const nx = ty, ny = -tx, [dx, dy] = Dline(x1, y1, list), dn = dx * nx + dy * ny;
+                    const L = clamp(Math.sign(dn) * Math.sqrt(Math.abs(dn)) * 9, -26, 26);
+                    if (Math.abs(L) > 2) arrow(ctx, G.X(x1), G.Y(y1), nx * L, -ny * L, L > 0 ? COL.emerald : COL.amber, 0.9, 1.8, 6);
+                }
+            }
+            list.forEach((q, i) => {
+                chargeDisc(ctx, G.X(q.x), G.Y(q.y), q.q, 12);
+                ctx.save(); ctx.strokeStyle = q.col; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(G.X(q.x), G.Y(q.y), 16, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+                label(ctx, 'ρℓ' + ['₁', '₂', '₃'][i], G.X(q.x), G.Y(q.y) + 27, q.col, '600 12px Inter, sans-serif', 'center');
+            });
+            label(ctx, 'kéo điện tích hoặc mặt Gauss  ·  1 ô = 1 m', 10, h - 12, COL.muted, '12px Inter, sans-serif');
+            const onS = minD < 0.05;
+            setText('ro-fx-out', onS ? '—' : '+' + out.toFixed(2) + ' nC/m');
+            setText('ro-fx-in', onS ? '—' : '−' + Math.abs(inn).toFixed(2) + ' nC/m');
+            setText('ro-fx-net', onS ? 'điện tích nằm trên mặt' : sgn(out + inn) + Math.abs(out + inn).toFixed(2) + ' nC/m');
+            setText('ro-fx-enc', sgn(enc) + Math.abs(enc).toFixed(2) + ' nC/m');
+        }
+        draggable('canvas-flux', (x, y, w, h) => {
+            const G = fxGeom(w, h);
+            const i = fx.charges.findIndex(q => Math.hypot(G.X(q.x) - x, G.Y(q.y) - y) < 20);
+            if (i >= 0) return i;
+            return inside(boundary(num('slider-gsize'), 240), G.wx(x), G.wy(y)) ? { surf: true, dx: G.wx(x) - fx.G.x, dy: G.wy(y) - fx.G.y } : null;
+        }, (hd, x, y, w, h) => {
+            const G = fxGeom(w, h), X = clamp(G.wx(x), -3.3, 3.3), Y = clamp(G.wy(y), -2.4, 2.4);
+            if (typeof hd === 'number') { fx.charges[hd].x = X; fx.charges[hd].y = Y; }
+            else { fx.G.x = X - hd.dx; fx.G.y = Y - hd.dy; }
+            drawFlux();
+        });
+        chipGroup('shape-group', v => { fx.shape = v; drawFlux(); });
+        document.querySelectorAll('#flux-explorer .chip').forEach(b => b.addEventListener('click', () => setTimeout(drawFlux, 0)));
+        onInputs(['slider-l1', 'slider-l2', 'slider-l3', 'slider-gsize'], drawFlux);
+
+        // =========================================================
+        // Section 3 — point charge + spherical Gaussian surface (rotating)
+        // =========================================================
+        const sph = { rx: 0.35, ry: 0.4, drag: false };
+        const FIB = (() => { const p = [], n = 70, g = Math.PI * (3 - Math.sqrt(5)); for (let i = 0; i < n; i++) { const y = 1 - 2 * (i + 0.5) / n, r = Math.sqrt(1 - y * y); p.push([r * Math.cos(g * i), y, r * Math.sin(g * i)]); } return p; })();
+        function rot([x, y, z]) {
+            const cy = Math.cos(sph.ry), sy = Math.sin(sph.ry), cx = Math.cos(sph.rx), sx = Math.sin(sph.rx);
+            const x1 = cy * x + sy * z, z1 = -sy * x + cy * z;
+            return [x1, cx * y - sx * z1, sx * y + cx * z1];
+        }
+        function updatePoint() {
+            const q = num('slider-point-q') * 1e-9, R = num('slider-point-r'), er = num('select-point-er');
+            setText('val-point-q', sgn(q) + Math.abs(q * 1e9) + ' nC'); setText('val-point-r', R.toFixed(2) + ' m');
+            const A = 4 * Math.PI * R * R, D = Math.abs(q) / A, E = D / (er * EPS0);
+            setText('ro-pt-flux', fmtSI(q, 'C')); setText('ro-pt-area', A.toFixed(2) + ' m²');
+            setText('ro-pt-D', fmtSI(D, 'C/m²')); setText('ro-pt-E', fmtSI(E, 'V/m'));
+            const g = setupCanvas('canvas-pt-graph'); if (!g) return;
+            const Emax = Math.abs(q) / (4 * Math.PI * er * EPS0 * 0.04) || 1;
+            const F = plotFrame(g.ctx, g.w, g.h, 0.2, 2, 0, 1.05, { xlabel: 'R (m)', ylabel: '|E| / |E(0.2 m)|' });
+            curve(g.ctx, r => (0.04 / (r * r)), 0.2, 2, F.X, F.Y, COL.emerald);
+            dot(g.ctx, F.X(R), F.Y(0.04 / (R * R)));
+        }
+        function drawPoint(dt) {
+            if (!sph.drag) sph.ry += dt * 0.35;
+            const q = num('slider-point-q'), R = num('slider-point-r');
+            const c = setupCanvas('canvas-point-sphere'); if (!c) return;
+            const { ctx, w, h } = c, cx = w / 2, cy = h / 2, rp = 22 + 62 * R;
+            const L = clamp(10 + 26 * Math.pow(0.6 / R, 2), 10, 55) * (q === 0 ? 0 : 1);
+            const pts = FIB.map(p => ({ p: rot(p), n: p })).sort((a, b) => a.p[2] - b.p[2]);
+            const dir = q >= 0 ? 1 : -1;
+            const drawOne = (P, front) => {
+                const [x, y, z] = P.p, sx = cx + x * rp, sy = cy - y * rp;
+                const ex = x * L * dir, ey = -y * L * dir;
+                ctx.save(); ctx.globalAlpha = front ? 1 : 0.25;
+                if (L > 0) arrow(ctx, dir > 0 ? sx : sx - ex, dir > 0 ? sy : sy - ey, ex, ey, COL.sky, 1, 1.6, 6);
+                ctx.fillStyle = COL.amber; ctx.beginPath(); ctx.arc(sx, sy, 2.2, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            };
+            pts.filter(P => P.p[2] < 0).forEach(P => drawOne(P, false));
+            // sphere shading + wireframe
+            const grd = ctx.createRadialGradient(cx - rp * 0.3, cy - rp * 0.3, rp * 0.1, cx, cy, rp);
+            grd.addColorStop(0, 'rgba(14, 165, 233, 0.10)'); grd.addColorStop(1, 'rgba(14, 165, 233, 0.22)');
+            ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(cx, cy, rp, 0, Math.PI * 2); ctx.fill();
+            ctx.save(); ctx.strokeStyle = 'rgba(2, 132, 199, 0.35)'; ctx.lineWidth = 1;
+            for (let lat = -60; lat <= 60; lat += 30) {
+                ctx.beginPath();
+                for (let k = 0; k <= 60; k++) { const a = 2 * Math.PI * k / 60, t = lat * Math.PI / 180, [x, y, z] = rot([Math.cos(t) * Math.cos(a), Math.sin(t), Math.cos(t) * Math.sin(a)]); k ? ctx.lineTo(cx + x * rp, cy - y * rp) : ctx.moveTo(cx + x * rp, cy - y * rp); }
+                ctx.stroke();
+            }
+            for (let lon = 0; lon < 180; lon += 30) {
+                ctx.beginPath();
+                for (let k = 0; k <= 60; k++) { const t = Math.PI * (k / 60 - 0.5), a = lon * Math.PI / 180, [x, y] = rot([Math.cos(t) * Math.cos(a), Math.sin(t), Math.cos(t) * Math.sin(a)]); k ? ctx.lineTo(cx + x * rp, cy - y * rp) : ctx.moveTo(cx + x * rp, cy - y * rp); }
+                ctx.stroke();
+            }
+            ctx.restore();
+            ctx.save(); ctx.strokeStyle = COL.sky; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, rp, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+            chargeDisc(ctx, cx, cy, q, 11);
+            pts.filter(P => P.p[2] >= 0).forEach(P => drawOne(P, true));
+            label(ctx, 'D (xanh) ∥ ds (chấm vàng đánh dấu mặt Gauss)', 10, 14, COL.slate, '12px Inter, sans-serif');
+            label(ctx, `S: R = ${R.toFixed(2)} m`, cx, cy + rp + 16 > h - 8 ? h - 10 : cy + rp + 16, COL.sky, '600 12px Inter, sans-serif', 'center');
+        }
+        draggable('canvas-point-sphere', () => { sph.drag = true; return { lx: null }; }, (hd, x, y) => {
+            if (hd.lx !== null) { sph.ry += (x - hd.lx) * 0.01; sph.rx = clamp(sph.rx + (y - hd.ly) * 0.01, -1.4, 1.4); }
+            hd.lx = x; hd.ly = y;
+        }, () => { sph.drag = false; });
+        onInputs(['slider-point-q', 'slider-point-r', 'select-point-er'], updatePoint);
+
+        // =========================================================
+        // Section 4 — infinite line charge + cylinder
+        // =========================================================
+        function updateLine() {
+            const rl = num('slider-line-rhol') * 1e-9, r = num('slider-line-r'), hh = num('slider-line-h');
+            setText('val-line-rhol', sgn(rl) + Math.abs(rl * 1e9) + ' nC/m'); setText('val-line-r', r.toFixed(2) + ' m'); setText('val-line-h', hh.toFixed(2) + ' m');
+            const A = 2 * Math.PI * r * hh, D = Math.abs(rl) / (2 * Math.PI * r);
+            setText('ro-ln-Q', fmtSI(rl * hh, 'C')); setText('ro-ln-A', A.toFixed(3) + ' m²');
+            setText('ro-ln-D', fmtSI(D, 'C/m²')); setText('ro-ln-E', fmtSI(D / EPS0, 'V/m'));
+            drawLine();
+        }
+        function drawLine() {
+            const rl = num('slider-line-rhol'), r = num('slider-line-r'), hh = num('slider-line-h');
+            const c = setupCanvas('canvas-line-cylinder'); if (!c) return;
+            const { ctx, w, h } = c, cx = w * 0.45, cy = h / 2;
+            const rp = 30 + r * 120, hp = 50 + hh * 130, ry = 0.3;
+            const top = cy - hp / 2, bot = cy + hp / 2;
+            const col = rl >= 0 ? COL.sky : COL.rose, dir = rl >= 0 ? 1 : -1;
+            const L = rl === 0 ? 0 : clamp(12 + 14 * Math.abs(rl) / 50 * (0.5 / r), 10, 46);
+            const radial = (front) => {
+                for (let lv = 0; lv < 3; lv++) {
+                    const y0 = top + hp * (lv + 0.5) / 3;
+                    for (let k = 0; k < 10; k++) {
+                        const a = 2 * Math.PI * k / 10 + 0.3, s = Math.sin(a);
+                        if ((s >= 0) !== front) continue;
+                        const x = cx + rp * Math.cos(a), y = y0 + ry * rp * s, ux = Math.cos(a), uy = ry * s, n = Math.hypot(ux, uy);
+                        const ex = ux / n * L * dir, ey = uy / n * L * dir;
+                        if (L > 0) arrow(ctx, dir > 0 ? x : x - ex, dir > 0 ? y : y - ey, ex, ey, COL.sky, front ? 1 : 0.3, 1.8, 6);
+                    }
+                }
+            };
+            // back half
+            ctx.save(); ctx.strokeStyle = COL.amber; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.45;
+            ctx.beginPath(); ctx.ellipse(cx, bot, rp, rp * ry, 0, Math.PI, 2 * Math.PI); ctx.stroke(); ctx.restore();
+            radial(false);
+            // line charge
+            ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cx, 6); ctx.lineTo(cx, h - 6); ctx.stroke(); ctx.restore();
+            for (let y = 16; y < h - 6; y += 22) label(ctx, rl >= 0 ? '+' : '−', cx - 10, y, col, 'bold 12px Inter, sans-serif', 'center');
+            // cylinder side + caps
+            ctx.save(); ctx.fillStyle = 'rgba(217, 119, 6, 0.07)'; ctx.fillRect(cx - rp, top, 2 * rp, hp);
+            ctx.strokeStyle = COL.amber; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(cx - rp, top); ctx.lineTo(cx - rp, bot); ctx.moveTo(cx + rp, top); ctx.lineTo(cx + rp, bot); ctx.stroke();
+            ctx.fillStyle = 'rgba(217, 119, 6, 0.12)';
+            ctx.beginPath(); ctx.ellipse(cx, top, rp, rp * ry, 0, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(cx, bot, rp, rp * ry, 0, 0, Math.PI); ctx.stroke();
+            ctx.restore();
+            radial(true);
+            // cap normals and in-plane D on the top cap
+            arrow(ctx, cx + rp * 0.55, top, 0, -38, COL.emerald, 1, 2.2, 8);
+            label(ctx, 'ds', cx + rp * 0.55 + 6, top - 34, COL.emerald);
+            arrow(ctx, cx + rp * 0.55, bot, 0, 38, COL.emerald, 1, 2.2, 8);
+            if (L > 0) arrow(ctx, cx + rp * 0.2, top, dir * 26, dir * 26 * ry * 0.3, COL.sky, 0.9, 1.6, 6);
+            // annotations
+            const ax = cx + rp + 48;
+            label(ctx, 'nắp trên: D ⟂ ds → 0', ax, top - 6, COL.emerald);
+            label(ctx, 'mặt bên: D ∥ ds', ax, cy, COL.sky);
+            label(ctx, 'nắp dưới: 0', ax, bot + 14, COL.emerald);
+            line(ctx, cx, bot + rp * ry + 14, cx + rp, bot + rp * ry + 14, COL.slate, 1, [3, 3]);
+            label(ctx, 'r', cx + rp / 2, bot + rp * ry + 24, COL.slate, 'italic 600 13px Inter, sans-serif', 'center');
+            line(ctx, cx - rp - 14, top, cx - rp - 14, bot, COL.slate, 1, [3, 3]);
+            label(ctx, 'h', cx - rp - 24, cy, COL.slate, 'italic 600 13px Inter, sans-serif', 'center');
+            label(ctx, 'z', cx + 8, 12, COL.slate, 'italic 600 13px Inter, sans-serif');
+        }
+        onInputs(['slider-line-rhol', 'slider-line-r', 'slider-line-h'], updateLine);
+
+        // =========================================================
+        // Section 5 — uniformly charged sphere
+        // =========================================================
+        function Esph(Rcm, acm, rho) {  // rho in µC/m³, radii in cm → V/m (signed)
+            const R = Rcm / 100, a = acm / 100, r = rho * 1e-6;
+            return R <= a ? r * R / (3 * EPS0) : r * a * a * a / (3 * EPS0 * R * R);
+        }
+        function drawSphere() {
+            const a = num('slider-sph-a'), rho = num('slider-sph-rho'), R = num('slider-sph-R');
+            setText('val-sph-a', a.toFixed(1) + ' cm'); setText('val-sph-rho', sgn(rho) + Math.abs(rho) + ' µC/m³'); setText('val-sph-R', R.toFixed(1) + ' cm');
+            const Qenc = rho * 1e-6 * 4 / 3 * Math.PI * Math.pow(Math.min(R, a) / 100, 3);
+            const E = Esph(R, a, rho);
+            setText('ro-sph-q', fmtSI(Qenc, 'C')); setText('ro-sph-E', fmtSI(Math.abs(E), 'V/m'));
+            const c = setupCanvas('canvas-sphere'); if (!c) return;
+            const { ctx, w, h } = c, cx = w / 2, cy = h / 2, S = (h / 2 - 14) / 8;
+            const col = rho >= 0 ? '14, 165, 233' : '225, 29, 72';
+            ctx.fillStyle = `rgba(${col}, 0.22)`; ctx.beginPath(); ctx.arc(cx, cy, a * S, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = `rgba(${col}, 0.8)`; ctx.lineWidth = 1.5; ctx.stroke();
+            // enclosed part
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.18)'; ctx.beginPath(); ctx.arc(cx, cy, Math.min(R, a) * S, 0, Math.PI * 2); ctx.fill();
+            ctx.save(); ctx.strokeStyle = COL.emerald; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.beginPath(); ctx.arc(cx, cy, R * S, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+            const Emax = Math.abs(Esph(a, a, rho)) || 1, L = 10 + 34 * Math.abs(E) / Emax, dir = rho >= 0 ? 1 : -1;
+            if (rho !== 0) for (let k = 0; k < 12; k++) {
+                const t = 2 * Math.PI * k / 12, x = cx + R * S * Math.cos(t), y = cy + R * S * Math.sin(t);
+                arrow(ctx, dir > 0 ? x : x - dir * L * Math.cos(t), dir > 0 ? y : y - dir * L * Math.sin(t), dir * L * Math.cos(t), dir * L * Math.sin(t), COL.indigo, 0.9, 2, 7);
+            }
+            label(ctx, 'a', cx + a * S * 0.707 + 6, cy - a * S * 0.707 - 6, rho >= 0 ? COL.sky : COL.rose, 'italic 600 13px Inter, sans-serif');
+            label(ctx, R <= a ? 'Mặt cầu Gauss bên trong: chỉ bao một phần điện tích' : 'Mặt cầu Gauss bên ngoài: bao toàn bộ điện tích Q', 10, h - 12, COL.emerald, '600 12px Inter, sans-serif');
+            const g = setupCanvas('canvas-sphere-graph'); if (!g) return;
+            const F = plotFrame(g.ctx, g.w, g.h, 0, 8, 0, 1.1, { xlabel: 'R (cm)', ylabel: '|E| / |E(a)|' });
+            curve(g.ctx, x => Math.abs(Esph(x, a, rho)) / Emax, 0, 8, F.X, F.Y, COL.indigo);
+            line(g.ctx, F.X(a), F.T - 6, F.X(a), g.h - F.B, COL.amber, 1, [3, 3]);
+            label(g.ctx, 'R = a', F.X(a) + 4, F.T + 4, COL.amber, '12px Inter, sans-serif');
+            dot(g.ctx, F.X(R), F.Y(Math.abs(E) / Emax));
+        }
+        onInputs(['slider-sph-a', 'slider-sph-rho', 'slider-sph-R'], drawSphere);
+
+        // =========================================================
+        // Section 6 — decay comparison
+        // =========================================================
+        const dec = { pt: true, ln: true, sh: true };
+        function drawDecay() {
+            const c = setupCanvas('canvas-decay'); if (!c) return;
+            const F = plotFrame(c.ctx, c.w, c.h, 0.2, 3, 0, 4, { xlabel: 'khoảng cách r (chuẩn hóa)', ylabel: 'E(r) / E(1)' });
+            if (dec.pt) curve(c.ctx, r => 1 / (r * r) > 4.05 ? NaN : 1 / (r * r), 0.2, 3, F.X, F.Y, COL.sky, 2.6, 400);
+            if (dec.ln) curve(c.ctx, r => 1 / r > 4.05 ? NaN : 1 / r, 0.2, 3, F.X, F.Y, COL.indigo, 2.6, 400);
+            if (dec.sh) curve(c.ctx, () => 1, 0.2, 3, F.X, F.Y, COL.rose, 2.6);
+            line(c.ctx, F.X(1), F.T, F.X(1), c.h - F.B, COL.muted, 1, [3, 3]);
+            label(c.ctx, 'r = 1', F.X(1) + 4, F.T + 6, COL.muted, '12px Inter, sans-serif');
+            if (dec.pt) label(c.ctx, '1/r²', F.X(0.55), F.Y(3.3), COL.sky, 'bold 13px Inter, sans-serif');
+            if (dec.ln) label(c.ctx, '1/r', F.X(0.36), F.Y(2.6) + 12, COL.indigo, 'bold 13px Inter, sans-serif');
+            if (dec.sh) label(c.ctx, 'hằng số', F.X(2.4), F.Y(1) - 12, COL.rose, 'bold 13px Inter, sans-serif');
+        }
+
+        // =========================================================
+        // Quiz & start-up
+        // =========================================================
+        window.addEventListener('load', () => {
+            renderQuiz([
+                { q: 'Vì sao hai nắp phẳng của mặt Gauss hình trụ bao quanh một điện tích dài vô hạn không đóng góp thông lượng?',
+                  opts: ['Trường bằng không trên các nắp.', '$\\mathbf{D}$ hướng theo bán kính nên vuông góc với pháp tuyến của nắp: $\\mathbf{D}\\cdot d\\mathbf{s} = 0$.', 'Điện tích dài kết thúc tại các nắp.'], ans: 1,
+                  why: 'Pháp tuyến của các nắp là $\\pm\\hat{\\mathbf{z}}$ trong khi $\\mathbf{D} = \\hat{\\mathbf{r}}D_r$.' },
+                { q: 'Định lý nào liên hệ $\\nabla\\cdot\\mathbf{D} = \\rho_{\\mathrm{v}}$ với $\\oint_S \\mathbf{D}\\cdot d\\mathbf{s} = Q$?',
+                  opts: ['Định lý Stokes', 'Định lý divergence', 'Định lý Helmholtz'], ans: 1,
+                  why: '$\\int_v \\nabla\\cdot\\mathbf{D}\\,dv = \\oint_S \\mathbf{D}\\cdot d\\mathbf{s}$.' },
+                { q: 'Tăng gấp đôi khoảng cách $r$ đến một điện tích dài vô hạn làm $|\\mathbf{E}|$ thay đổi theo hệ số:',
+                  opts: ['$1/4$', '$1/2$', '$1$ (không đổi)'], ans: 1, why: '$E = \\rho_{\\ell}/(2\\pi\\varepsilon_0 r) \\propto 1/r$.' },
+                { q: 'Một mặt kín không bao điện tích tổng nào nhưng nằm cạnh một điện tích lớn ở bên ngoài. Thông lượng tổng hướng ra là:',
+                  opts: ['đúng bằng không', 'dương, do điện tích bên ngoài', 'phụ thuộc vào hình dạng của mặt'], ans: 0,
+                  why: 'Thông lượng của điện tích bên ngoài đi vào và đi ra khỏi mặt với lượng bằng nhau.' },
+                { q: 'Bên trong một quả cầu tích điện đều ($R < a$), độ lớn của trường biến thiên theo:',
+                  opts: ['$R$ (tăng tuyến tính)', '$1/R^2$', 'bằng không tại mọi điểm bên trong'], ans: 0,
+                  why: 'Điện tích được bao tăng theo $R^3$ trong khi diện tích tăng theo $R^2$, nên $E = \\rho_{\\mathrm{v}}R/(3\\varepsilon_0)$.' },
+                { q: 'Trường của một mặt phẳng điện tích đều vô hạn $\\rho_{\\mathrm{s}}$ biến thiên theo khoảng cách $z$ đến mặt phẳng như thế nào?',
+                  opts: ['$1/z^2$', '$1/z$', 'không phụ thuộc vào $z$'], ans: 2,
+                  why: 'Mặt Gauss dạng hộp dẹt có cùng diện tích nắp tại mọi $z$, nên $E = \\rho_{\\mathrm{s}}/(2\\varepsilon_0)$ là hằng số, ứng với đường nằm ngang của mặt phẳng trong phần so sánh tốc độ suy giảm.' }
+            ]);
+            drawFlux(); updatePoint(); updateLine(); drawSphere(); drawDecay();
+            animate('canvas-point-sphere', drawPoint);
+            startLoop();
+            window.addEventListener('resize', () => { drawFlux(); updatePoint(); drawLine(); drawSphere(); drawDecay(); });
+            typeset();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điều kiện biên của từ trường - Học phần Trường điện từ</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="split" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Điều kiện biên của từ trường</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Tổng quan</button>
+<button onclick="scrollToSection('interface')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5"></i><span>Mô phỏng mặt phân cách</span></button>
+<button onclick="scrollToSection('worked')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition">Ví dụ vectơ</button>
+<button onclick="scrollToSection('comparison')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="table" class="w-3.5 h-3.5"></i><span>Tóm tắt điện – từ</span></button>
+<button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Kiểm tra</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Tĩnh từ · Điều kiện biên</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Từ trường tại mặt phân cách giữa hai vật liệu</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">Hai phương trình Maxwell tĩnh từ quy định cách $\mathbf{B}$ và $\mathbf{H}$ có thể thay đổi khi đi qua mặt phân cách (interface) giữa môi trường 1 và 2 — tức là các điều kiện biên (boundary conditions). Vectơ pháp tuyến đơn vị $\hat{\mathbf{n}}_2$ hướng từ môi trường 2 sang môi trường 1 (quy ước của Fawwaz T. Ulaby and Umberto Ravaioli). Tách trường thành pháp tuyến và tiếp tuyến trước khi áp dụng định luật. Mật độ từ thông pháp tuyến liên tục; cường độ từ trường tiếp tuyến có thể nhảy khi có dòng điện mặt.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">1. $\mathbf{B}$ pháp tuyến</span>
+                    <h3 class="text-base font-bold text-slate-900">Từ định luật Gauss $\oint\mathbf{B}\cdot d\mathbf{s} = 0$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$B_{1\mathrm{n}} = B_{2\mathrm{n}},\qquad \mu_1H_{1\mathrm{n}} = \mu_2H_{2\mathrm{n}}$$</div>
+                    <p class="text-sm text-slate-700">Một hộp trụ dẹt (pillbox) có chiều cao tiến tới 0: không có từ tích, nên từ thông đi vào một mặt sẽ đi ra ở mặt kia.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">2. $\mathbf{H}$ tiếp tuyến</span>
+                    <h3 class="text-base font-bold text-slate-900">Từ định luật Ampère</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\hat{\mathbf{n}}_2\times(\mathbf{H}_1 - \mathbf{H}_2) = \mathbf{J}_{\mathrm{s}}$$</div>
+                    <p class="text-sm text-slate-700">Một vòng chữ nhật mỏng chỉ bao quanh dòng điện mặt. Khi không có $\mathbf{J}_{\mathrm{s}}$ (mọi môi trường có độ dẫn điện hữu hạn), $H_{1\mathrm{t}} = H_{2\mathrm{t}}$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-violet-700 uppercase tracking-wider bg-violet-500/10 px-2.5 py-1 rounded-md">3. Khúc xạ</span>
+                    <h3 class="text-base font-bold text-slate-900">Sự uốn cong của đường sức</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-violet-700 text-sm">$$\frac{\tan\theta_1}{\tan\theta_2} = \frac{\mu_1}{\mu_2}\quad(\mathbf{J}_{\mathrm{s}} = 0)$$</div>
+                    <p class="text-sm text-slate-700">$\theta$ được đo từ pháp tuyến. Khi đi vào môi trường có $\mu$ lớn, đường sức uốn về phía bề mặt; khi từ sắt đi ra không khí, chúng ló ra gần như vuông góc.</p>
+                </div>
+            </div>
+        </section>
+        <section id="interface" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Trường hai bên mặt phân cách</h2>
+                <p class="text-sm text-slate-600 mt-1">Chọn độ từ thẩm (permeability) (thang log, từ 1 đến 1000), trường tới trong môi trường 1 và, tùy chọn, một lớp dòng điện mặt $\mathbf{J}_{\mathrm{s}} = \hat{\mathbf{y}}J_{\mathrm{s}}$ trên biên ($\otimes$ hướng vào trang khi $J_{\mathrm{s}} > 0$). Trang áp dụng cả hai điều kiện biên và vẽ $\mathbf{B}$ hoặc $\mathbf{H}$ ở hai bên, cùng các thành phần pháp tuyến và tiếp tuyến. Đầu tiên đặt dòng mặt bằng không rồi đổi độ từ thẩm. Sau đó thêm dòng mặt nhưng giữ vật liệu. Cách này phân biệt biến đổi do đáp ứng vật liệu với bước nhảy do dòng điện mặt.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><div id="show-group" class="flex flex-wrap gap-1.5 "><button data-v="B" class="chip on">Hiện B</button><button data-v="H" class="chip">Hiện H</button></div><span class="mx-1 text-slate-600">|</span><button id="tg-box" class="chip on">Hộp Gauss</button><button id="tg-loop" class="chip on-amber">Vòng Ampère</button><button id="tg-comp" class="chip on-emerald">Thành phần</button><span class="mx-1 text-slate-600">|</span><span class="text-sm text-slate-600">Mẫu có sẵn:</span><div id="pre-group" class="flex flex-wrap gap-1.5 "><button data-v="air-iron" class="chip">không khí → sắt</button><button data-v="iron-air" class="chip">sắt → không khí</button><button data-v="same" class="chip">μ₁ = μ₂</button><button data-v="sheet" class="chip">lớp dòng mặt</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[460px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-bc" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Môi trường 1 $\mu_{r1}$</span><input type="range" id="mu1" min="0" max="3" step="0.01" value="0" class="flex-1 min-w-0 accent-sky-600"><span id="val-mu1" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Môi trường 2 $\mu_{r2}$</span><input type="range" id="mu2" min="0" max="3" step="0.01" value="0.7" class="flex-1 min-w-0 accent-emerald-600"><span id="val-mu2" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">$|\mathbf{B}_1|$</span><input type="range" id="B1" min="0.1" max="2" step="0.05" value="1" class="flex-1 min-w-0 accent-violet-600"><span id="val-B1" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Góc $\theta_1$</span><input type="range" id="th1" min="0" max="89" step="1" value="45" class="flex-1 min-w-0 accent-violet-600"><span id="val-th1" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">$J_{\mathrm{s}}/|\mathbf{H}_1|$</span><input type="range" id="Js" min="-2" max="2" step="0.05" value="0" class="flex-1 min-w-0 accent-rose-600"><span id="val-Js" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$B_{1\mathrm{n}} = B_{2\mathrm{n}}$</span><span id="ro-Bn" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$H_{1\mathrm{t}}$, $H_{2\mathrm{t}}$</span><span id="ro-Ht" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$H_{1\mathrm{n}}$, $H_{2\mathrm{n}}$</span><span id="ro-Hn" class="text-indigo-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$\theta_2$</span><span id="ro-th2" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$|\mathbf{B}_2|$</span><span id="ro-B2" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\tan\theta_1/\tan\theta_2$ so với $\mu_1/\mu_2$</span><span id="ro-check" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Bước nhảy tiếp tuyến $H_{1\mathrm{t}} - H_{2\mathrm{t}}$</span><span id="ro-jump" class="text-rose-700 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">Quy ước dấu: môi trường 1 ở phía trên ($z > 0$), $\hat{\mathbf{n}}_2 = \hat{\mathbf{z}}$, hướng tiếp tuyến là $\hat{\mathbf{x}}$ (sang phải). Khi đó $\hat{\mathbf{z}}\times\hat{\mathbf{x}}(H_{1x} - H_{2x}) = \hat{\mathbf{y}}J_{\mathrm{s}}$, tức là $H_{2x} = H_{1x} - J_{\mathrm{s}}$.</p></div>
+            </div>
+        </section>
+        <!-- Worked example: vector field -->
+        <section id="worked" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Ví dụ minh họa</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Áp dụng điều kiện biên cho một trường vectơ</h2>
+                    <p class="text-sm text-slate-600 mt-1">Mặt phẳng $x$–$y$ phân cách môi trường 1 ($z > 0$, $\mu_{\mathrm{r1}}$) với môi trường 2 ($z < 0$, $\mu_{\mathrm{r2}}$), có thể có dòng điện mặt $\mathbf{J}_{\mathrm{s}}$ trên biên. Cho $\mathbf{B}_1$, tìm $\mathbf{B}_2$ và các góc $\theta_1$, $\theta_2$ mà trường tạo với trục $z$. Giá trị mặc định là không khí phía trên sắt ($\mu_{\mathrm{r2}} = 5000$) với $\mathbf{B}_1 = \hat{\mathbf{x}}\,4 - \hat{\mathbf{y}}\,6 + \hat{\mathbf{z}}\,8$ mT.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-4 glass-card rounded-2xl p-5 space-y-3 text-sm">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Dữ kiện</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="space-y-1"><span class="text-slate-700 block">$B_{1x}$</span><input type="number" id="we-bx" value="4" step="0.5" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <label class="space-y-1"><span class="text-slate-700 block">$B_{1y}$</span><input type="number" id="we-by" value="-6" step="0.5" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <label class="space-y-1"><span class="text-slate-700 block">$B_{1z}$</span><input type="number" id="we-bz" value="8" step="0.5" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <label class="space-y-1"><span class="text-slate-700 block">$\mu_{\mathrm{r1}}$</span><input type="number" id="we-m1" value="1" step="1" min="1" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <label class="space-y-1"><span class="text-slate-700 block">$\mu_{\mathrm{r2}}$</span><input type="number" id="we-m2" value="5000" step="1" min="1" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <div class="space-y-1"><span class="text-slate-700 block">đơn vị</span><span class="font-mono text-slate-600">mT</span></div>
+                        <label class="space-y-1"><span class="text-slate-700 block">$J_{\mathrm{s}x}$</span><input type="number" id="we-jx" value="0" step="0.5" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <label class="space-y-1"><span class="text-slate-700 block">$J_{\mathrm{s}y}$</span><input type="number" id="we-jy" value="0" step="0.5" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <div class="space-y-1"><span class="text-slate-700 block">đơn vị</span><span class="font-mono text-slate-600">kA/m</span></div>
+                    </div>
+                    <div class="relative h-44 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-we" class="w-full h-full"></canvas></div>
+                </div>
+                <div class="lg:col-span-8 glass-card rounded-2xl p-5 space-y-3 text-sm text-slate-700">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Lời giải</h3>
+                    <p><strong>Bước 1.</strong> Thành phần pháp tuyến ($z$) từ $B_{1\mathrm{n}} = B_{2\mathrm{n}}$:</p>
+                    <div id="we-step1" class="overflow-x-auto bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sky-800"></div>
+                    <p><strong>Bước 2.</strong> Các thành phần tiếp tuyến ($x$ và $y$) từ $\hat{\mathbf{n}}_2\times(\mathbf{H}_1 - \mathbf{H}_2) = \mathbf{J}_{\mathrm{s}}$, với $\hat{\mathbf{n}}_2 = \hat{\mathbf{z}}$.</p>
+                    <div id="we-step2" class="overflow-x-auto bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-emerald-800"></div>
+                    <p><strong>Bước 3.</strong> Góc so với pháp tuyến:</p>
+                    <div id="we-step3" class="overflow-x-auto bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-indigo-700"></div>
+                    <div id="we-result" class="overflow-x-auto p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-800"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparison" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-emerald-800 bg-emerald-400/10 px-2.5 py-1 rounded-md">Tra cứu</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Điều kiện biên tĩnh điện và tĩnh từ</h2>
+                <p class="text-sm text-slate-600 mt-1">Tóm tắt đối chiếu (theo kiểu Bảng 5-2 của Fawwaz T. Ulaby and Umberto Ravaioli).</p>
+            </div>
+            <div class="overflow-x-auto"><table class="w-full text-left text-sm border-collapse">
+                <thead><tr class="border-b border-slate-200 text-slate-600"><th class="p-3">Thành phần</th><th class="p-3 text-sky-800">Tĩnh điện</th><th class="p-3 text-amber-800">Tĩnh từ</th><th class="p-3">Lý do</th></tr></thead>
+                <tbody class="divide-y divide-slate-200 text-slate-700">
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-slate-900">Pháp tuyến</td><td class="p-3">$\hat{\mathbf{n}}_2\cdot(\mathbf{D}_1 - \mathbf{D}_2) = \rho_{\mathrm{s}}$</td><td class="p-3">$\hat{\mathbf{n}}_2\cdot(\mathbf{B}_1 - \mathbf{B}_2) = 0$</td><td class="p-3">Điện tích tự do tồn tại; từ tích thì không ($\nabla\cdot\mathbf{B} = 0$).</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-slate-900">Tiếp tuyến</td><td class="p-3">$\hat{\mathbf{n}}_2\times(\mathbf{E}_1 - \mathbf{E}_2) = 0$</td><td class="p-3">$\hat{\mathbf{n}}_2\times(\mathbf{H}_1 - \mathbf{H}_2) = \mathbf{J}_{\mathrm{s}}$</td><td class="p-3">$\mathbf{E}$ tĩnh có độ xoáy (curl) bằng 0; dòng điện mặt làm $\mathbf{H}_{\mathrm{t}}$ nhảy bậc.</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-slate-900">Mặt phân cách không có nguồn</td><td class="p-3">$\varepsilon_1E_{1\mathrm{n}} = \varepsilon_2E_{2\mathrm{n}}$, $E_{1\mathrm{t}} = E_{2\mathrm{t}}$</td><td class="p-3">$\mu_1H_{1\mathrm{n}} = \mu_2H_{2\mathrm{n}}$, $H_{1\mathrm{t}} = H_{2\mathrm{t}}$</td><td class="p-3">Môi trường điện môi / từ thông thường.</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-slate-900">Khúc xạ</td><td class="p-3">$\tan\theta_1/\tan\theta_2 = \varepsilon_1/\varepsilon_2$</td><td class="p-3">$\tan\theta_1/\tan\theta_2 = \mu_1/\mu_2$</td><td class="p-3">Cùng dạng toán học với $\varepsilon \leftrightarrow \mu$.</td></tr>
+                </tbody></table></div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Câu hỏi tự kiểm tra</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Làm lại</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Điểm: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Học phần Trường điện từ — Điều kiện biên của từ trường</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Câu ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Điểm: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Đúng. ' : '✗ Sai — đáp án đúng là ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Điểm: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // Magnetostatics toolkit (Topic 4)
+        // =========================================================
+        const MU0 = 4 * Math.PI * 1e-7;
+        // one-row sliders: fmts = { id: v => text }, onChange() called after every move
+        function bindSliders(fmts, onChange) {
+            Object.entries(fmts).forEach(([id, f]) => {
+                const el = $(id); if (!el) return;
+                const show = () => setText('val-' + id, f(+el.value));
+                el.addEventListener('input', () => { show(); onChange && onChange(id); });
+                show();
+            });
+        }
+        const val = id => +$(id).value;
+        // ⊙ (out of page) / ⊗ (into page) symbol
+        function currentDot(ctx, x, y, out, color = COL.amber, r = 9) {
+            ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = color;
+            if (out) { ctx.beginPath(); ctx.arc(x, y, r * 0.3, 0, 2 * Math.PI); ctx.fill(); }
+            else { const d = r * 0.55; ctx.beginPath(); ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d); ctx.moveTo(x + d, y - d); ctx.lineTo(x - d, y + d); ctx.stroke(); }
+            ctx.restore();
+        }
+        // complete elliptic integrals K(k), E(k) by the arithmetic-geometric mean (k = modulus)
+        function ellipKE(k) {
+            let a = 1, b = Math.sqrt(1 - k * k), c = k, sum = 0.5 * c * c, p = 1;
+            for (let i = 0; i < 30 && Math.abs(c) > 1e-15; i++) { const an = (a + b) / 2; c = (a - b) / 2; b = Math.sqrt(a * b); a = an; p *= 2; sum += 0.5 * p * c * c; }
+            const K = Math.PI / (2 * a); return [K, K * (1 - sum)];
+        }
+        // exact B of a circular loop (radius a, current I, in the z = 0 plane, axis z) at (r, z): [Br, Bz] in tesla
+        function loopB(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : r;
+            const q = (a + r) ** 2 + z * z, k2 = 4 * a * r / q, [K, E] = ellipKE(Math.sqrt(Math.min(k2, 1 - 1e-12)));
+            const d = (a - r) ** 2 + z * z, f = MU0 * I / (2 * Math.PI * Math.sqrt(q));
+            return [f * z / r * (-K + (a * a + r * r + z * z) / d * E), f * (K + (a * a - r * r - z * z) / d * E)];
+        }
+        // mutual inductance of two coaxial circular loops (Maxwell's formula)
+        function mutualLoops(a1, a2, d) {
+            const k = Math.sqrt(4 * a1 * a2 / ((a1 + a2) ** 2 + d * d)), [K, E] = ellipKE(Math.min(k, 1 - 1e-12));
+            return MU0 * Math.sqrt(a1 * a2) * ((2 / k - k) * K - 2 / k * E);
+        }
+        // trace a 2-D field line from (x, y) in world units; F(x, y) → [fx, fy]; returns array of points
+        function traceLine(F, x, y, dir, step, nmax, box) {
+            const pts = [[x, y]];
+            for (let i = 0; i < nmax; i++) {
+                const f1 = F(x, y), m1 = Math.hypot(...f1); if (!(m1 > 1e-30)) break;
+                const mx = x + dir * step / 2 * f1[0] / m1, my = y + dir * step / 2 * f1[1] / m1, f2 = F(mx, my), m2 = Math.hypot(...f2); if (!(m2 > 1e-30)) break;
+                x += dir * step * f2[0] / m2; y += dir * step * f2[1] / m2;
+                if (x < box[0] || x > box[1] || y < box[2] || y > box[3]) { pts.push([x, y]); break; }
+                pts.push([x, y]);
+                if (i > 20 && Math.hypot(x - pts[0][0], y - pts[0][1]) < step * 0.8) { pts.push(pts[0]); break; }   // closed loop
+            }
+            return pts;
+        }
+        function drawPath(ctx, pts, X, Y, color, width = 1.3, alpha = 0.8, arrowsEvery = 0) {
+            if (pts.length < 2) return;
+            ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+            if (arrowsEvery) for (let i = arrowsEvery; i < pts.length - 1; i += arrowsEvery) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; const dx = X(x1) - X(x0), dy = Y(y1) - Y(y0), m = Math.hypot(dx, dy) || 1; arrow(ctx, X(x0), Y(y0), dx / m * 8, dy / m * 8, color, alpha, width, 6); }
+        }
+        // world ↔ screen mapping helper for a rectangular view
+        function view2D(w, h, xmin, xmax, ymin, ymax, pad = 12) {
+            const s = Math.min((w - 2 * pad) / (xmax - xmin), (h - 2 * pad) / (ymax - ymin)), ox = (w - s * (xmax - xmin)) / 2, oy = (h - s * (ymax - ymin)) / 2;
+            return { s, X: x => ox + (x - xmin) * s, Y: y => h - oy - (y - ymin) * s, x: px => xmin + (px - ox) / s, y: py => ymin + (h - oy - py) / s };
+        }
+        const fmtE = (v, d = 3) => !isFinite(v) ? '—' : v === 0 ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-2 ? v.toExponential(d - 1) : (+v.toPrecision(d)).toString());
+        const redrawOnResize = (ids, fn) => { const f = () => requestAnimationFrame(fn); if ('ResizeObserver' in window) { const ro = new ResizeObserver(f); ids.forEach(id => $(id) && ro.observe($(id).parentElement)); } window.addEventListener('resize', f); };
+        // vector potential A_φ of a circular loop; field lines in the meridian plane are contours of ψ = r·A_φ
+        function loopAphi(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : Math.abs(r);
+            const k2 = 4 * a * r / ((a + r) ** 2 + z * z), k = Math.sqrt(Math.min(k2, 1 - 1e-12)), [K, E] = ellipKE(k);
+            return MU0 * I / (Math.PI * k) * Math.sqrt(a / r) * ((1 - k2 / 2) * K - E);
+        }
+
+        // =========================================================
+        // Magnetic boundary conditions
+        // =========================================================
+        const BC = { show: 'B', box: true, loop: true, comp: true };
+        const fA = v => fmtE(v) + ' A/m';
+        function solveBC() {
+            const mu1 = 10 ** val('mu1'), mu2 = 10 ** val('mu2'), B1 = val('B1'), t1 = val('th1') * Math.PI / 180;
+            const B1v = [B1 * Math.sin(t1), B1 * Math.cos(t1)];                // (tangential x, normal z); flux flows upward: from medium 2 through the boundary into medium 1
+            const H1v = [B1v[0] / (MU0 * mu1), B1v[1] / (MU0 * mu1)], Js = val('Js') * Math.hypot(...H1v);
+            const H2t = H1v[0] - Js, B2n = B1v[1], H2v = [H2t, B2n / (MU0 * mu2)], B2v = [MU0 * mu2 * H2v[0], B2n];
+            return { mu1, mu2, t1, B1v, H1v, Js, H2v, B2v, t2: Math.atan2(B2v[0], B2v[1]) };
+        }
+        function drawBC() {
+            const S = solveBC(), deg = v => (v * 180 / Math.PI).toFixed(1) + '°';
+            setText('ro-Bn', fmtSI(Math.abs(S.B1v[1]), 'T')); setText('ro-Ht', `${fA(S.H1v[0])}, ${fA(S.H2v[0])}`); setText('ro-Hn', `${fA(Math.abs(S.H1v[1]))}, ${fA(Math.abs(S.H2v[1]))}`);
+            setText('ro-th2', deg(S.t2)); setText('ro-B2', fmtSI(Math.hypot(...S.B2v), 'T') + (Math.hypot(...S.B2v) > 2 && S.mu2 > 50 ? ' (sắt thực bão hòa gần 2 T)' : '')); setText('ro-jump', fA(S.H1v[0] - S.H2v[0]));
+            setText('ro-check', Math.abs(val('Js')) < 1e-9 && S.t1 > 1e-6 ? `${(Math.tan(S.t1) / Math.tan(S.t2)).toFixed(4)} so với ${(S.mu1 / S.mu2).toFixed(4)}` : 'chỉ khi J_s = 0, θ₁ > 0');
+            const c = setupCanvas('cv-bc'); if (!c) return; const { ctx, w, h } = c, cy = h / 2, cx = w / 2;
+            const a1 = 0.04 + 0.1 * val('mu1') / 3, a2 = 0.04 + 0.1 * val('mu2') / 3;
+            ctx.fillStyle = `rgba(2,132,199,${a1})`; ctx.fillRect(0, 0, w, cy); ctx.fillStyle = `rgba(5,150,105,${a2})`; ctx.fillRect(0, cy, w, h - cy);
+            line(ctx, 0, cy, w, cy, COL.slate, 2);
+            label(ctx, `Môi trường 1: μᵣ₁ = ${fmtE(S.mu1)}`, 12, 22, COL.sky, 'bold 13px Inter, sans-serif'); label(ctx, `Môi trường 2: μᵣ₂ = ${fmtE(S.mu2)}`, 12, cy + 24, COL.emerald, 'bold 13px Inter, sans-serif');
+            line(ctx, cx, 30, cx, h - 30, COL.muted, 1, [4, 4]); label(ctx, 'n̂₂', cx + 6, 40, COL.slate, 'bold 13px Inter, sans-serif'); arrow(ctx, cx, cy, 0, -40, COL.slate, 0.8, 1.6, 7);
+            // flux lines: they come up from the bottom of medium 2, cross the boundary and continue to the top of medium 1
+            const u1 = [S.B1v[0], S.B1v[1]], u2 = [S.B2v[0], S.B2v[1]], m1 = Math.hypot(...u1), m2 = Math.hypot(...u2), L = Math.hypot(w, h);
+            for (let k = -6; k <= 6; k++) {
+                const x0 = cx + k * 70;
+                if (m1 > 0) { const d1 = [u1[0] / m1, -u1[1] / m1]; line(ctx, x0, cy, x0 + d1[0] * L, cy + d1[1] * L, COL.violet, 1.3, null, 0.45); }
+                if (m2 > 0) { const d2 = [u2[0] / m2, -u2[1] / m2]; line(ctx, x0 - d2[0] * L, cy - d2[1] * L, x0, cy, COL.violet, 1.3, null, 0.45); }
+            }
+            // main vectors: V1 starts on the boundary and points up into medium 1; V2 comes from medium 2 and ends on the boundary
+            const V1 = BC.show === 'B' ? S.B1v : S.H1v, V2 = BC.show === 'B' ? S.B2v : S.H2v, vm = Math.max(Math.hypot(...V1), Math.hypot(...V2)) || 1, K = 150 / vm;
+            const e1 = [V1[0] * K, -V1[1] * K], e2 = [V2[0] * K, -V2[1] * K];      // screen vectors (y down)
+            const T2 = [cx - e2[0], cy - e2[1]];                                       // tail of V2 (inside medium 2)
+            arrow(ctx, cx, cy, e1[0], e1[1], COL.sky, 1, 3.4, 12);
+            arrow(ctx, T2[0], T2[1], e2[0], e2[1], COL.emerald, 1, 3.4, 12);
+            label(ctx, BC.show + '₁', cx + e1[0] + (e1[0] >= 0 ? 14 : -14), cy + e1[1] - 8, COL.sky, 'bold 15px Inter, sans-serif', 'center');
+            label(ctx, BC.show + '₂', T2[0] + (e2[0] >= 0 ? -14 : 14), T2[1] + 14, COL.emerald, 'bold 15px Inter, sans-serif', 'center');
+            if (BC.comp) {
+                // medium 1: tangential along the boundary, then normal up to the tip
+                arrow(ctx, cx, cy, e1[0], 0, COL.amber, 0.9, 2, 8, [5, 3]); arrow(ctx, cx + e1[0], cy, 0, e1[1], COL.indigo, 0.9, 2, 8, [5, 3]);
+                // medium 2: normal up from the tail to the boundary, then tangential along the boundary to the origin
+                arrow(ctx, T2[0], T2[1], 0, e2[1], COL.indigo, 0.9, 2, 8, [5, 3]); arrow(ctx, T2[0], cy, e2[0], 0, COL.amber, 0.9, 2, 8, [5, 3]);
+                label(ctx, 'tiếp tuyến', cx + e1[0] / 2, cy - 8, COL.amber, '12px Inter, sans-serif', 'center');
+                label(ctx, 'pháp tuyến', cx + e1[0] + (e1[0] >= 0 ? 8 : -8), cy + e1[1] / 2, COL.indigo, '12px Inter, sans-serif', e1[0] >= 0 ? 'left' : 'right');
+                label(ctx, 'pháp tuyến', T2[0] + (e2[0] >= 0 ? -8 : 8), cy - e2[1] / 2, COL.indigo, '12px Inter, sans-serif', e2[0] >= 0 ? 'right' : 'left');
+            }
+            // angle arcs: θ₁ between +ẑ and V1 (above), θ₂ between −ẑ and the reversed V2 (below)
+            const R0 = 46, up = -Math.PI / 2, dn = Math.PI / 2;
+            const ang1 = Math.atan2(e1[1], e1[0]), ang2 = Math.atan2(-e2[1], -e2[0]);
+            ctx.save(); ctx.lineWidth = 1.8; ctx.strokeStyle = COL.violet;
+            if (Math.hypot(...e1) > 1) { ctx.beginPath(); ctx.arc(cx, cy, R0, up, ang1, ang1 < up); ctx.stroke(); }
+            if (Math.hypot(...e2) > 1) { ctx.beginPath(); ctx.arc(cx, cy, R0 + 8, dn, ang2, ang2 < dn); ctx.stroke(); }
+            ctx.restore();
+            const bis1 = (up + ang1) / 2, bis2 = (dn + ang2) / 2;
+            label(ctx, 'θ₁', cx + (R0 + 16) * Math.cos(bis1), cy + (R0 + 16) * Math.sin(bis1), COL.violet, 'bold 13px Inter, sans-serif', 'center');
+            label(ctx, 'θ₂', cx + (R0 + 24) * Math.cos(bis2), cy + (R0 + 24) * Math.sin(bis2) + 4, COL.violet, 'bold 13px Inter, sans-serif', 'center');
+            // surface current
+            if (Math.abs(S.Js) > 0) for (let x = 40; x < w - 20; x += 60) if (Math.abs(x - cx) > 30) currentDot(ctx, x, cy, S.Js < 0, COL.rose, 7);
+            if (Math.abs(S.Js) > 0) label(ctx, `J_s = ${fA(Math.abs(S.Js))} ${S.Js > 0 ? '⊗ (+ŷ, vào trang)' : '⊙ (−ŷ, ra khỏi trang)'}`, w - 12, h - 12, COL.rose, '600 12px Inter, sans-serif', 'right');
+            if (BC.box) { const bx = w * 0.28; ctx.save(); ctx.strokeStyle = COL.sky; ctx.lineWidth = 1.8; ctx.setLineDash([5, 3]); ctx.strokeRect(bx - 30, cy - 16, 60, 32); ctx.restore(); label(ctx, 'hộp dẹt Δh→0', bx, cy + 32, COL.sky, '600 12px Inter, sans-serif', 'center'); }
+            if (BC.loop) { const lx = w * 0.84; ctx.save(); ctx.strokeStyle = COL.amber; ctx.lineWidth = 1.8; ctx.setLineDash([5, 3]); ctx.strokeRect(lx - 40, cy - 14, 80, 28); ctx.restore(); arrow(ctx, lx - 10, cy - 14, 20, 0, COL.amber, 1, 1.8, 7); arrow(ctx, lx + 10, cy + 14, -20, 0, COL.amber, 1, 1.8, 7); label(ctx, 'vòng Ampère', lx, cy + 32, COL.amber, '600 12px Inter, sans-serif', 'center'); }
+        }
+        bindSliders({ mu1: v => fmtE(10 ** v), mu2: v => fmtE(10 ** v), B1: v => v.toFixed(2) + ' T', th1: v => v.toFixed(0) + '°', Js: v => v.toFixed(2) }, () => { document.querySelectorAll('#pre-group button').forEach(b => b.classList.remove('on')); drawBC(); });
+        chipGroup('show-group', v => { BC.show = v; drawBC(); });
+        [['tg-box', 'box', 'on'], ['tg-loop', 'loop', 'on-amber'], ['tg-comp', 'comp', 'on-emerald']].forEach(([id, k, c]) => $(id).addEventListener('click', e => { chipToggle(BC, k, e.currentTarget, c); drawBC(); }));
+        const PRE = { 'air-iron': [0, 3, 1, 20, 0], 'iron-air': [3, 0, 1, 85, 0], same: [0.7, 0.7, 1, 45, 0], sheet: [0, 0, 1, 45, 1] };
+        chipGroup('pre-group', k => { ['mu1', 'mu2', 'B1', 'th1', 'Js'].forEach((id, i) => { $(id).value = PRE[k][i]; setText('val-' + id, ''); }); ['mu1', 'mu2', 'B1', 'th1', 'Js'].forEach(id => $(id).dispatchEvent(new Event('input'))); document.querySelector(`#pre-group [data-v="${k}"]`).classList.add('on'); });
+        redrawOnResize(['cv-bc'], drawBC);
+        drawBC();
+
+        // =========================================================
+        // Worked example — applying the conditions to a vector field
+        // =========================================================
+        const nTeX = v => { if (!isFinite(v)) return '\\infty'; if (Math.abs(v) < 1e-12) return '0';
+            const a = Math.abs(v); if (a >= 1e4 || a < 1e-2) { const e = Math.floor(Math.log10(a)); const m = +(v / 10 ** e).toPrecision(3); return m === 1 ? `10^{${e}}` : m === -1 ? `-10^{${e}}` : `${m}\\times10^{${e}}`; }
+            return String(+v.toPrecision(4)); };
+        const vecTeX = v => { let s = ''; ['\\hat{\\mathbf{x}}', '\\hat{\\mathbf{y}}', '\\hat{\\mathbf{z}}'].forEach((u, i) => { const c = v[i]; if (Math.abs(c) < 1e-12) return;
+            s += (s ? (c < 0 ? ' - ' : ' + ') : (c < 0 ? '-' : '')) + u + '\\,' + nTeX(Math.abs(c)); }); return s || '0'; };
+        const weIds = ['we-bx', 'we-by', 'we-bz', 'we-jx', 'we-jy', 'we-m1', 'we-m2'];
+        function solveWE() {
+            const [bx, by, bz, jx, jy, m1r, m2r] = weIds.map(id => parseFloat($(id).value) || 0);
+            const m1 = Math.max(1, m1r), m2 = Math.max(1, m2r);
+            const B1 = [bx, by, bz], H1 = B1.map(v => v * 1e-3 / (MU0 * m1) * 1e-3);   // B in mT → H in kA/m
+            const hasJ = Math.hypot(jx, jy) > 0;
+            // ẑ × (H1 − H2) = Js  ⇒  H2x = H1x − Jsy,  H2y = H1y + Jsx
+            const H2x = H1[0] - jy, H2y = H1[1] + jx;
+            const k = MU0 * m2 * 1e3 * 1e3;                                              // kA/m → mT
+            const B2 = [k * H2x, k * H2y, bz], H2 = [H2x, H2y, bz * 1e-3 / (MU0 * m2) * 1e-3];
+            const Bt1 = Math.hypot(bx, by), Bt2 = Math.hypot(B2[0], B2[1]);
+            const th1 = Math.atan2(Bt1, Math.abs(bz)) * 180 / Math.PI, th2 = Math.atan2(Bt2, Math.abs(bz)) * 180 / Math.PI;
+            return { m1, m2, B1, H1, B2, H2, jx, jy, hasJ, th1, th2, Bt1, Bt2 };
+        }
+        function updateWE() {
+            const S = solveWE(), n = nTeX;
+            $('we-step1').innerHTML = `$$B_{2z} = B_{1z} = ${n(S.B1[2])}\\ \\mathrm{mT}$$`;
+            const mu = `\\frac{${n(S.m2)}}{${n(S.m1)}}`;
+            $('we-step2').innerHTML = S.hasJ
+                ? `<p class="text-slate-600 mb-1">Có dòng điện mặt, $H_{2x} = H_{1x} - J_{\\mathrm{s}y}$ và $H_{2y} = H_{1y} + J_{\\mathrm{s}x}$:</p>
+                   $$\\mathbf{H}_{1\\mathrm{t}} = \\frac{\\mathbf{B}_{1\\mathrm{t}}}{\\mu_1} = ${vecTeX([S.H1[0], S.H1[1], 0])}\\ \\mathrm{kA/m}$$
+                   $$H_{2x} = ${n(S.H1[0])} - (${n(S.jy)}) = ${n(S.H2[0])}\\ \\mathrm{kA/m}$$
+                   $$H_{2y} = ${n(S.H1[1])} + (${n(S.jx)}) = ${n(S.H2[1])}\\ \\mathrm{kA/m}$$
+                   $$B_{2x} = \\mu_2H_{2x} = ${n(S.B2[0])}\\ \\mathrm{mT}$$
+                   $$B_{2y} = \\mu_2H_{2y} = ${n(S.B2[1])}\\ \\mathrm{mT}$$`
+                : `<p class="text-slate-600 mb-1">Không có dòng điện mặt, nên $H_{2x} = H_{1x}$ và $H_{2y} = H_{1y}$, tức là $B_{2\\mathrm{t}} = (\\mu_{\\mathrm{r2}}/\\mu_{\\mathrm{r1}})\\,B_{1\\mathrm{t}}$:</p>
+                   $$B_{2x} = ${mu}(${n(S.B1[0])}) = ${n(S.B2[0])}\\ \\mathrm{mT}$$
+                   $$B_{2y} = ${mu}(${n(S.B1[1])}) = ${n(S.B2[1])}\\ \\mathrm{mT}$$`;
+            $('we-step3').innerHTML = `$$\\theta_1 = \\tan^{-1}\\frac{\\sqrt{B_{1x}^2+B_{1y}^2}}{|B_{1z}|} = ${S.th1.toFixed(2)}^\\circ$$ $$\\theta_2 = \\tan^{-1}\\frac{\\sqrt{B_{2x}^2+B_{2y}^2}}{|B_{2z}|} = ${S.th2.toFixed(2)}^\\circ$$`;
+            const t1 = Math.tan(S.th1 * Math.PI / 180), t2 = Math.tan(S.th2 * Math.PI / 180);
+            const check = !S.hasJ && S.Bt1 > 0 && S.B1[2] !== 0 ? `Kiểm tra: $\\tan\\theta_2/\\tan\\theta_1 = ${n(t2 / t1)}$ và $\\mu_2/\\mu_1 = ${n(S.m2 / S.m1)}$.` : (S.hasJ ? 'Khi có dòng điện mặt, định luật khúc xạ $\\tan\\theta_1/\\tan\\theta_2 = \\mu_1/\\mu_2$ không còn áp dụng được.' : '');
+            const sat = Math.hypot(...S.B2) > 2000 ? ' Giá trị trên khoảng 2 T vượt quá mức bão hòa của sắt thực — mô hình tuyến tính $\\mathbf{B} = \\mu\\mathbf{H}$ chỉ là một sự lý tưởng hóa.' : '';
+            $('we-result').innerHTML = `$$\\mathbf{B}_2 = ${vecTeX(S.B2)}\\ \\ \\mathrm{mT}$$ <span class="text-sm">${check}${sat}</span>`;
+            typeset([$('we-step1'), $('we-step2'), $('we-step3'), $('we-result')]);
+            drawWE(S);
+        }
+        function drawWE(S) {
+            const c = setupCanvas('cv-we'); if (!c) return;
+            const { ctx, w, h } = c, by = h / 2, cx = w / 2;
+            ctx.fillStyle = 'rgba(2,132,199,0.06)'; ctx.fillRect(0, 0, w, by); ctx.fillStyle = 'rgba(5,150,105,0.08)'; ctx.fillRect(0, by, w, h - by);
+            line(ctx, 0, by, w, by, COL.slate, 2);
+            // directions only (|B₂| may be thousands of times |B₁|): horizontal = |B_t|, vertical = B_z
+            const L = Math.min(by - 16, w / 2 - 16), u = (bt, bz) => { const m = Math.hypot(bt, bz) || 1; return [bt / m * L, Math.abs(bz) / m * L]; };
+            const [a1, b1] = u(S.Bt1, S.B1[2]), [a2, b2] = u(S.Bt2, S.B2[2]);
+            if (S.B1[2] <= 0) {   // field points down: B1 arrives at the boundary, B2 leaves it
+                arrow(ctx, cx - a1, by - b1, a1, b1, COL.sky, 1, 3, 10); arrow(ctx, cx, by, a2, b2, COL.emerald, 1, 3, 10);
+            } else {              // field points up: B2 arrives from below, B1 leaves upward
+                arrow(ctx, cx - a2, by + b2, a2, -b2, COL.emerald, 1, 3, 10); arrow(ctx, cx, by, a1, -b1, COL.sky, 1, 3, 10);
+            }
+            if (S.hasJ) label(ctx, 'J_s trên z = 0', w - 6, by - 6, COL.rose, '600 12px Inter, sans-serif', 'right');
+            label(ctx, 'B₁', 8, 14, COL.sky, 'bold 13px Inter, sans-serif'); label(ctx, 'B₂', 8, h - 12, COL.emerald, 'bold 13px Inter, sans-serif');
+            label(ctx, 'chỉ hướng · ngang: |Bt|, dọc: Bz', w - 6, 14, COL.slate, '12px Inter, sans-serif', 'right');
+        }
+        onInputs(weIds, updateWE);
+        redrawOnResize(['cv-we'], () => drawWE(solveWE()));
+        updateWE();
+        renderQuiz([
+            { q: 'Vì sao $B_{\\mathrm{n}}$ luôn liên tục khi đi qua mặt biên?', opts: ['Vì $\\mu$ như nhau ở mọi nơi', 'Vì không có từ tích: $\\oint_S\\mathbf{B}\\cdot d\\mathbf{s} = 0$', 'Vì dòng điện mặt không thể tồn tại', 'Vì $\\mathbf{H}$ liên tục'], ans: 1, why: 'Thu nhỏ hộp Gauss dẹt về sát mặt biên, chỉ còn lại từ thông qua hai mặt đáy: $B_{1\\mathrm{n}}\\Delta s - B_{2\\mathrm{n}}\\Delta s = 0$.' },
+            { q: 'Khi nào $H_{1\\mathrm{t}} = H_{2\\mathrm{t}}$?', opts: ['Luôn luôn', 'Khi không có dòng điện mặt trên biên', 'Chỉ khi $\\mu_1 = \\mu_2$', 'Chỉ với vật dẫn lý tưởng'], ans: 1, why: '$\\hat{\\mathbf{n}}_2\\times(\\mathbf{H}_1 - \\mathbf{H}_2) = \\mathbf{J}_{\\mathrm{s}}$. Dòng điện mặt chỉ tồn tại trên vật dẫn lý tưởng; với mọi độ dẫn điện hữu hạn, $\\mathbf{J}_{\\mathrm{s}} = 0$.' },
+            { q: 'Một đường sức đi từ không khí vào sắt ($\\mu_r = 1000$) với $\\theta_1 = 20°$. Trong sắt, nó', opts: ['uốn về phía pháp tuyến', 'uốn gần như song song với bề mặt ($\\theta_2 \\approx 90°$)', 'giữ nguyên góc', 'bị phản xạ'], ans: 1, why: '$\\tan\\theta_2 = (\\mu_2/\\mu_1)\\tan\\theta_1 = 1000\\tan20° \\approx 364$, nên $\\theta_2 \\approx 89.8°$. Hãy thử mẫu có sẵn không khí → sắt.' },
+            { q: 'Qua cùng một mặt phân cách, đại lượng nào gián đoạn khi $\\mu_1 \\ne \\mu_2$ và $\\mathbf{J}_{\\mathrm{s}} = 0$?', opts: ['$B_{\\mathrm{n}}$', '$H_{\\mathrm{t}}$', '$H_{\\mathrm{n}}$', 'Không đại lượng nào'], ans: 2, why: '$\\mu_1H_{1\\mathrm{n}} = \\mu_2H_{2\\mathrm{n}}$, nên $H_{\\mathrm{n}}$ nhảy theo tỉ số $\\mu_2/\\mu_1$, trong khi $B_{\\mathrm{n}}$ và $H_{\\mathrm{t}}$ liên tục.' },
+            { q: 'Vì sao đường sức từ ló ra khỏi mặt cực bằng sắt gần như vuông góc với mặt đó?', opts: ['Sắt không có dòng điện mặt', 'Với $\\mu_1 \\gg \\mu_2$, $\\tan\\theta_2 = (\\mu_2/\\mu_1)\\tan\\theta_1$ rất nhỏ, nên $\\theta_2 \\approx 0$ trong không khí', 'Không khí đẩy từ thông', 'Vì $B_{\\mathrm{t}}$ phải bằng 0 trong không khí'], ans: 1, why: 'Ngay cả khi $\\theta_1$ gần $90°$ bên trong sắt, việc chia cho $\\mu_r \\approx 1000$ làm góc trong không khí gần bằng 0. Hãy thử mẫu có sẵn sắt → không khí.' },
+            { q: 'Môi trường 1 là $z > 0$ và môi trường 2 là $z < 0$, nên $\\hat{\\mathbf{n}}_2 = \\hat{\\mathbf{z}}$. Nếu $\\mathbf{H}_{2\\mathrm{t}} = \\hat{\\mathbf{x}}\\,3$ A/m và biên mang $\\mathbf{J}_{\\mathrm{s}} = \\hat{\\mathbf{y}}\\,2$ A/m, thì $\\mathbf{H}_{1\\mathrm{t}}$ bằng', opts: ['$\\hat{\\mathbf{x}}\\,5$ A/m', '$\\hat{\\mathbf{x}}\\,1$ A/m', '$\\hat{\\mathbf{x}}\\,3 + \\hat{\\mathbf{y}}\\,2$ A/m', '$\\hat{\\mathbf{x}}\\,3$ A/m'], ans: 0, why: 'Với $\\mathbf{H}_{1\\mathrm{t}} - \\mathbf{H}_{2\\mathrm{t}} = \\hat{\\mathbf{x}}\\Delta_x + \\hat{\\mathbf{y}}\\Delta_y$, $\\hat{\\mathbf{z}}\\times(\\hat{\\mathbf{x}}\\Delta_x + \\hat{\\mathbf{y}}\\Delta_y) = \\hat{\\mathbf{y}}\\Delta_x - \\hat{\\mathbf{x}}\\Delta_y = \\hat{\\mathbf{y}}\\,2$, nên $\\Delta_x = 2$ và $\\Delta_y = 0$. Bước nhảy tiếp tuyến vuông góc với $\\mathbf{J}_{\\mathrm{s}}$, cho $\\mathbf{H}_{1\\mathrm{t}} = \\hat{\\mathbf{x}}\\,5$ A/m.' }
+        ]);
+
+    </script>
+</body>
+</html>

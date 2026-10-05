@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lực từ và mômen từ - Học phần Trường điện từ</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="rotate-cw" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Lực từ và mômen từ</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Tổng quan</button>
+<button onclick="scrollToSection('lorentz')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="atom" class="w-3.5 h-3.5"></i><span>Lực Lorentz</span></button>
+<button onclick="scrollToSection('particle3d')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="box" class="w-3.5 h-3.5"></i><span>Hạt trong 3D</span></button>
+<button onclick="scrollToSection('wire')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5"></i><span>Lực lên dây dẫn</span></button>
+<button onclick="scrollToSection('torque')" class="px-3 py-1.5 rounded-lg text-indigo-700 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition flex items-center gap-1.5"><i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i><span>Mômen lực và động cơ</span></button>
+<button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Kiểm tra</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Tĩnh từ học · Lực từ và mômen từ</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Lực tác dụng lên điện tích chuyển động, dòng điện và vòng dây</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">Một điện tích (charge) chuyển động với vận tốc $\mathbf{u}$ trong từ trường (magnetic field) chịu một lực vuông góc với chuyển động của nó. Lấy tổng trên các điện tích của một dòng điện (current), ta được lực tác dụng lên dây dẫn; với một vòng dây kín trong trường đều, hợp lực bằng không nhưng xuất hiện mômen lực (torque) làm quay động cơ. Dùng quy tắc bàn tay phải cho điện tích dương, rồi đảo hướng với điện tích âm. Từ trường đổi hướng hạt tự do; điện trường và nguồn cấp giải thích sự truyền năng lượng trong động cơ làm việc.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">1. Điện tích</span>
+                    <h3 class="text-base font-bold text-slate-900">Lực Lorentz</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\mathbf{F} = q\mathbf{E} + q\,\mathbf{u}\times\mathbf{B}$$</div>
+                    <p class="text-sm text-slate-700">$\mathbf{F}_{\mathrm{m}}\perp\mathbf{u}$, nên lực từ chỉ làm đổi hướng chuyển động và không sinh công.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">2. Dòng điện</span>
+                    <h3 class="text-base font-bold text-slate-900">Lực lên vật dẫn</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\mathbf{F}_{\mathrm{m}} = I\int_C d\mathbf{l}\times\mathbf{B}$$</div>
+                    <p class="text-sm text-slate-700">Trong trường đều $\mathbf{F}_{\mathrm{m}} = I\boldsymbol{\ell}\times\mathbf{B}$, với $\boldsymbol{\ell}$ nối hai đầu dây; với vòng kín $\mathbf{F}_{\mathrm{m}} = 0$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-violet-700 uppercase tracking-wider bg-violet-500/10 px-2.5 py-1 rounded-md">3. Vòng dây</span>
+                    <h3 class="text-base font-bold text-slate-900">Mômen từ</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-violet-700 text-sm">$$\mathbf{T} = \mathbf{m}\times\mathbf{B},\quad \mathbf{m} = \hat{\mathbf{n}}\,NIA$$</div>
+                    <p class="text-sm text-slate-700">$\hat{\mathbf{n}}$ theo quy tắc bàn tay phải. Mômen lực có xu hướng làm $\mathbf{m}$ thẳng hàng với $\mathbf{B}$.</p>
+                </div>
+            </div>
+        </section>
+        <section id="lorentz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 1</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Hạt mang điện trong trường E và B vuông góc</h2>
+                <p class="text-sm text-slate-600 mt-1">Hạt chuyển động trong mặt phẳng $x$–$y$ với $\mathbf{B} = \hat{\mathbf{z}}B_z$ (⊙ hướng ra khỏi trang khi $B_z > 0$) và $\mathbf{E} = \hat{\mathbf{y}}E_y$. Phương trình chuyển động được tích phân bằng phương pháp Runge–Kutta bậc bốn. Các giá trị hiển thị (readout) theo dõi công của từng lực: công của lực từ luôn bằng không. Đặt điện trường bằng không rồi so sánh tốc độ với độ cong quỹ đạo. Sau đó thêm điện trường: nó có thể đổi động năng, còn lực từ luôn vuông góc vận tốc tức thời.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Mẫu có sẵn:</span><div id="lor-pre" class="flex flex-wrap gap-1.5 "><button data-v="cyc" class="chip on">Cyclotron</button><button data-v="drift" class="chip">Trôi E×B (cycloid)</button><button data-v="sel" class="chip">Bộ lọc vận tốc</button><button data-v="elec" class="chip">Chỉ có điện trường</button></div><span class="mx-1 text-slate-600">|</span><button id="lor-play" class="chip on">Tạm dừng</button><button id="lor-reset" class="chip">Đặt lại</button></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[440px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-lor" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Trường $E_y$</span><input type="range" id="l-Ey" min="-10" max="10" step="0.2" value="0" class="flex-1 min-w-0 accent-amber-600"><span id="val-l-Ey" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Trường $B_z$</span><input type="range" id="l-Bz" min="-3" max="3" step="0.1" value="2" class="flex-1 min-w-0 accent-sky-600"><span id="val-l-Bz" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">$u_x$ ban đầu</span><input type="range" id="l-u" min="0" max="10" step="0.1" value="5" class="flex-1 min-w-0 accent-emerald-600"><span id="val-l-u" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Điện tích $q$</span><input type="range" id="l-q" min="-2" max="2" step="0.1" value="1" class="flex-1 min-w-0 accent-rose-600"><span id="val-l-q" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Khối lượng $m$</span><input type="range" id="l-m" min="0.2" max="5" step="0.1" value="1" class="flex-1 min-w-0 accent-slate-600"><span id="val-l-m" class="w-20 shrink-0 text-right font-mono text-slate-700"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$|\mathbf{F}_{\mathrm{e}}|$, $|\mathbf{F}_{\mathrm{m}}|$</span><span id="ro-F" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Tốc độ $u$</span><span id="ro-u" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Bán kính $mu_\perp/|q|B$</span><span id="ro-r" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\omega_c = |q|B/m$</span><span id="ro-w" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Tốc độ trôi $E/B$</span><span id="ro-vd" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Công của $\mathbf{F}_{\mathrm{e}}$ / của $\mathbf{F}_{\mathrm{m}}$</span><span id="ro-work" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\Delta K$</span><span id="ro-dK" class="text-slate-700 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">Đơn vị chỉ mang tính minh họa (C, kg, m/s, T, V/m) để dễ quan sát chuyển động; bản chất vật lý không phụ thuộc thang đo.</p></div>
+            </div>
+        </section>
+        <section id="particle3d" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 2</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Hạt mang điện trong trường E và B</h2>
+                <p class="text-sm text-slate-600 mt-1">Chuyển động được tích phân bằng phương pháp Boris, giữ tốc độ không đổi chính xác trong từ trường thuần túy. Trong $\mathbf{B}$ đều, hạt chuyển động tròn với bán kính quay (gyroradius) $r_{\mathrm{g}} = mu_\perp/|q|B$ và tần số góc (angular frequency) $\omega_{\mathrm{c}} = |q|B/m$; thành phần vận tốc dọc theo $\mathbf{B}$ kéo giãn đường tròn thành đường xoắn ốc. Trong chai từ (magnetic bottle), trường là trường chính xác của hai cuộn dây đồng trục: trường mạnh hơn tại các cuộn dây, và hạt có góc bước (pitch angle) nằm ngoài nón thoát (loss cone) bị phản xạ qua lại.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Mẫu có sẵn:</span><div id="p-pre" class="flex flex-wrap gap-1.5 "><button data-v="cyc" class="chip on">Cyclotron</button><button data-v="helix" class="chip">Xoắn ốc</button><button data-v="sel" class="chip">Bộ lọc vận tốc</button><button data-v="drift" class="chip">Trôi E×B</button><button data-v="bottle" class="chip">Chai từ</button><button data-v="escape" class="chip">Chai từ: nón thoát</button></div><span class="mx-1 text-slate-600">|</span><button id="p-play" class="chip on">Tạm dừng</button><button id="p-reset" class="chip">Chạy lại</button><span class="mx-1 text-slate-600">|</span><div id="p-view" class="flex flex-wrap gap-1.5 "><button data-v="iso" class="chip on">3D</button><button data-v="top" class="chip">Trên xuống</button><button data-v="front" class="chip">Bên cạnh</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[480px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-lor3" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Điện tích $q$</span><input type="range" id="p-q" min="-2" max="2" step="0.1" value="1" class="flex-1 min-w-0 accent-rose-600"><span id="val-p-q" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Khối lượng $m$</span><input type="range" id="p-m" min="0.2" max="5" step="0.1" value="1" class="flex-1 min-w-0 accent-slate-600"><span id="val-p-m" class="w-20 shrink-0 text-right font-mono text-slate-700"></span></div>
+<div class="text-sm font-semibold text-slate-600 pt-1">Vận tốc ban đầu (m/s)</div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$u_x$</span><input type="range" id="p-vx" min="-5" max="5" step="0.1" value="2" class="flex-1 min-w-0 accent-emerald-600"><span id="val-p-vx" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$u_y$</span><input type="range" id="p-vy" min="-5" max="5" step="0.1" value="0" class="flex-1 min-w-0 accent-emerald-600"><span id="val-p-vy" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$u_z$</span><input type="range" id="p-vz" min="-5" max="5" step="0.1" value="0" class="flex-1 min-w-0 accent-emerald-600"><span id="val-p-vz" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center justify-between pt-1"><span class="text-sm font-semibold text-slate-600">Từ trường (T)</span><div id="p-field" class="flex flex-wrap gap-1.5 "><button data-v="uni" class="chip on">Đều</button><button data-v="bottle" class="chip">Chai hai cuộn dây</button></div></div>
+<div id="f-uni" class="space-y-2"><div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$B_x$</span><input type="range" id="p-Bx" min="-2" max="2" step="0.1" value="0" class="flex-1 min-w-0 accent-violet-600"><span id="val-p-Bx" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div><div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$B_y$</span><input type="range" id="p-By" min="-2" max="2" step="0.1" value="0" class="flex-1 min-w-0 accent-violet-600"><span id="val-p-By" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div><div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$B_z$</span><input type="range" id="p-Bz" min="-2" max="2" step="0.1" value="1" class="flex-1 min-w-0 accent-violet-600"><span id="val-p-Bz" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div></div>
+<div id="f-bot" class="space-y-2 hidden"><div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Vị trí cuộn dây $\pm d$</span><input type="range" id="p-d" min="2" max="4.5" step="0.1" value="3" class="flex-1 min-w-0 accent-violet-600"><span id="val-p-d" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div><div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Trường tại tâm $B_0$</span><input type="range" id="p-B0" min="0.5" max="3" step="0.1" value="2" class="flex-1 min-w-0 accent-violet-600"><span id="val-p-B0" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div></div>
+<div class="text-sm font-semibold text-slate-600 pt-1">Điện trường (V/m)</div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$E_x$</span><input type="range" id="p-Ex" min="-5" max="5" step="0.1" value="0" class="flex-1 min-w-0 accent-amber-600"><span id="val-p-Ex" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$E_y$</span><input type="range" id="p-Ey" min="-5" max="5" step="0.1" value="0" class="flex-1 min-w-0 accent-amber-600"><span id="val-p-Ey" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$E_z$</span><input type="range" id="p-Ez" min="-5" max="5" step="0.1" value="0" class="flex-1 min-w-0 accent-amber-600"><span id="val-p-Ez" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Vị trí (m)</span><span id="ro-p3pos" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Tốc độ $|\mathbf{u}|$</span><span id="ro-p3u" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Động năng $\tfrac12mu^2$</span><span id="ro-p3K" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$|\mathbf{B}|$ tại vị trí hạt</span><span id="ro-p3B" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Bán kính quay $r_{\mathrm{g}}$</span><span id="ro-p3rg" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\omega_{\mathrm{c}} = |q|B/m$</span><span id="ro-p3wc" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Góc bước (giữa u và B)</span><span id="ro-p3pitch" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\mu = mu_\perp^2/2B$ (bất biến đoạn nhiệt)</span><span id="ro-p3mu" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Tỉ số gương / nón thoát</span><span id="ro-p3mirror" class="text-violet-700 font-bold text-right"></span></div></div></div>
+            </div>
+        </section>
+        <section id="wire" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 3</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Lực tác dụng lên vật dẫn mang dòng điện</h2>
+                <p class="text-sm text-slate-600 mt-1">Một dây dẫn đi từ $a$ đến $b$ theo các đường khác nhau. Lực $I\int d\mathbf{l}\times\mathbf{B}$ được cộng số trị dọc theo đường đi. Trong trường đều, mọi đường đi có cùng hai điểm đầu cuối cho cùng một lực $I\boldsymbol{\ell}_{ab}\times\mathbf{B}$, còn vòng kín cho lực bằng không: lực lên phần thẳng và phần cong triệt tiêu nhau (ví dụ nửa đường tròn trong sách của Fawwaz T. Ulaby and Umberto Ravaioli).</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Đường đi:</span><div id="w-path" class="flex flex-wrap gap-1.5 "><button data-v="straight" class="chip on">Thẳng</button><button data-v="semi" class="chip">Nửa đường tròn</button><button data-v="zig" class="chip">Zic-zắc</button><button data-v="loop" class="chip">Vòng kín (thẳng + cung)</button></div><span class="mx-1 text-slate-600">|</span><span class="text-sm text-slate-600">Trường:</span><div id="w-B" class="flex flex-wrap gap-1.5 "><button data-v="in" class="chip on">$\mathbf{B}$ hướng vào trang</button><button data-v="y" class="chip">$\mathbf{B} = \hat{\mathbf{y}}B_0$ (trong mặt phẳng)</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[400px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-wire" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Dòng điện $I$</span><input type="range" id="w-I" min="-5" max="5" step="0.1" value="2" class="flex-1 min-w-0 accent-amber-600"><span id="val-w-I" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Trường $B_0$</span><input type="range" id="w-B0" min="0" max="3" step="0.05" value="1.5" class="flex-1 min-w-0 accent-sky-600"><span id="val-w-B0" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Nửa khoảng cách $r$</span><input type="range" id="w-r" min="0.1" max="1" step="0.01" value="0.5" class="flex-1 min-w-0 accent-emerald-600"><span id="val-w-r" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\mathbf{F}$ trên đường đi (tổng số trị)</span><span id="ro-Fp" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$I\boldsymbol{\ell}_{ab}\times\mathbf{B}$</span><span id="ro-Fs" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Phần thẳng $\mathbf{F}_1$</span><span id="ro-F1" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Phần cong $\mathbf{F}_2$</span><span id="ro-F2" class="text-slate-700 font-bold text-right"></span></div></div><div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\mathbf{F}_1 = \hat{\mathbf{z}}\,2IrB_0,\qquad \mathbf{F}_2 = -\hat{\mathbf{z}}\,2IrB_0\quad(\mathbf{B} = \hat{\mathbf{y}}B_0)$$</div></div>
+            </div>
+        </section>
+        <section id="torque" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-violet-700 bg-violet-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 4</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Mômen lực lên vòng dây chữ nhật — động cơ điện một chiều</h2>
+                <p class="text-sm text-slate-600 mt-1">Một vòng dây chữ nhật ($N$ vòng, các cạnh $a \times b$) có thể quay quanh trục $z$ trong trường đều $\mathbf{B} = \hat{\mathbf{x}}B_0$. Lực lên hai cạnh song song với trục tạo thành một ngẫu lực. Thả vòng dây để thấy nó dao động về vị trí $\mathbf{m}\parallel\mathbf{B}$; bật cổ góp (commutator — đảo chiều dòng điện sau mỗi nửa vòng quay) thì nó quay liên tục như một động cơ điện một chiều. Tổng lực bằng không không có nghĩa mômen lực bằng không: hai lực đối nhau ở hai cạnh cách nhau tạo ngẫu lực. Đảo dòng điện và quan sát mômen lực đảo chiều.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><div id="t-mode" class="flex flex-wrap gap-1.5 "><button data-v="manual" class="chip on">Đặt góc</button><button data-v="free" class="chip">Thả (dao động)</button><button data-v="motor" class="chip">Động cơ (cổ góp)</button></div><span class="mx-1 text-slate-600">|</span><div id="t-view" class="flex flex-wrap gap-1.5 "><button data-v="iso" class="chip on">3D</button><button data-v="top" class="chip">Nhìn từ trên</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[420px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-tor" class="w-full h-full"></canvas></div><div class="relative h-44 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-torplot" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Góc $\theta$ (giữa m và B)</span><input type="range" id="t-th" min="0" max="360" step="1" value="60" class="flex-1 min-w-0 accent-violet-600"><span id="val-t-th" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Số vòng $N$</span><input type="range" id="t-N" min="1" max="50" step="1" value="10" class="flex-1 min-w-0 accent-sky-600"><span id="val-t-N" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Dòng điện $I$</span><input type="range" id="t-I" min="0" max="5" step="0.1" value="2" class="flex-1 min-w-0 accent-amber-600"><span id="val-t-I" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Trường $B_0$</span><input type="range" id="t-B" min="0" max="2" step="0.05" value="1" class="flex-1 min-w-0 accent-sky-600"><span id="val-t-B" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Diện tích $A = ab$</span><input type="range" id="t-A" min="0.01" max="0.2" step="0.005" value="0.12" class="flex-1 min-w-0 accent-emerald-600"><span id="val-t-A" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$m = NIA$</span><span id="ro-m" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$|\mathbf{T}| = mB_0\sin\theta$</span><span id="ro-T" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Lực lên mỗi cạnh dọc trục $NIbB_0$</span><span id="ro-Fs2" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Tốc độ góc</span><span id="ro-om" class="text-slate-700 font-bold text-right"></span></div></div></div>
+            </div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Câu hỏi tự kiểm tra</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Làm lại</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Điểm: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Học phần Trường điện từ — Lực từ và mômen từ</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Câu ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Điểm: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Đúng. ' : '✗ Sai — đáp án đúng là ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Điểm: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // mini3d — dependency-free 3-D view on a 2-D canvas (z is up)
+        // drag to rotate, wheel to zoom, double-click to reset
+        // =========================================================
+        const V3 = {
+            add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+            sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+            mul: (a, s) => [a[0] * s, a[1] * s, a[2] * s],
+            dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+            cross: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+            len: a => Math.hypot(a[0], a[1], a[2]),
+            unit: a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+        };
+        class View3D {
+            constructor(id, opts = {}) {
+                this.id = id; this.yaw = opts.yaw ?? 0.5; this.pitch = opts.pitch ?? 0.4; this.zoom = opts.zoom ?? 1; this.range = opts.range ?? 6; this.center = opts.center || [0, 0, 0];
+                this.def = { yaw: this.yaw, pitch: this.pitch, zoom: this.zoom }; this.onChange = opts.onChange || (() => {});
+                const cv = $(id); let last = null;
+                cv.style.touchAction = 'none';
+                cv.addEventListener('pointerdown', e => { if (this.pick && this.pick(e)) return; last = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+                cv.addEventListener('pointermove', e => { if (!last) return; this.yaw -= (e.clientX - last[0]) * 0.01; this.pitch = clamp(this.pitch + (e.clientY - last[1]) * 0.01, -1.55, 1.55); last = [e.clientX, e.clientY]; this.onChange(); });
+                const up = () => { last = null; cv.style.cursor = 'grab'; };
+                cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+                cv.addEventListener('wheel', e => { e.preventDefault(); this.zoom = clamp(this.zoom * (e.deltaY > 0 ? 0.9 : 1.1), 0.4, 4); this.onChange(); }, { passive: false });
+                cv.addEventListener('dblclick', () => this.reset());
+                cv.style.cursor = 'grab';
+            }
+            reset() { Object.assign(this, this.def); this.onChange(); }
+            setView(v) {
+                const V = { iso: [0.5, 0.4], top: [-Math.PI / 2, 1.5499], front: [-Math.PI / 2, 0], side: [0, 0], low: [0.5, 0.12] }[v];
+                if (V) { this.yaw = V[0]; this.pitch = V[1]; this.onChange(); }
+            }
+            begin() {
+                const c = setupCanvas(this.id); if (!c) return null;
+                this.ctx = c.ctx; this.w = c.w; this.h = c.h; this.s = Math.min(c.w, c.h) / (2 * this.range) * this.zoom;
+                this.cy_ = Math.cos(this.yaw); this.sy_ = Math.sin(this.yaw); this.cp = Math.cos(this.pitch); this.sp = Math.sin(this.pitch);
+                return this;
+            }
+            // camera coords: X right, Y up, D toward the viewer
+            cam([x0, y0, z0]) {
+                const x = x0 - this.center[0], y = y0 - this.center[1], z = z0 - this.center[2];
+                const X = -x * this.sy_ + y * this.cy_, Y0 = x * this.cy_ + y * this.sy_;   // viewer azimuth = yaw
+                return [X, z * this.cp - Y0 * this.sp, z * this.sp + Y0 * this.cp];
+            }
+            P(p) { const [X, Y, D] = this.cam(p); return [this.w / 2 + X * this.s, this.h / 2 - Y * this.s, D]; }
+            line(a, b, color, width = 1.5, dash = null, alpha = 1) { const A = this.P(a), B = this.P(b); line(this.ctx, A[0], A[1], B[0], B[1], color, width, dash, alpha); }
+            poly(pts, color, width = 1.5, dash = null, alpha = 1, close = false, fill = null) {
+                const ctx = this.ctx; ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+                ctx.beginPath(); pts.forEach((p, i) => { const [x, y] = this.P(p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); if (close) ctx.closePath();
+                if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (color) ctx.stroke(); ctx.restore();
+            }
+            arrow(from, vec, color, width = 2.5, head = 11, alpha = 1, dash = null) {
+                const A = this.P(from), B = this.P(V3.add(from, vec));
+                arrow(this.ctx, A[0], A[1], B[0] - A[0], B[1] - A[1], color, alpha, width, head, dash);
+            }
+            dot(p, color, r = 5) { const [x, y] = this.P(p); dot(this.ctx, x, y, color, r); }
+            text(p, t, color, font = 'bold 13px Inter, sans-serif', dx = 0, dy = 0) { const [x, y] = this.P(p); label(this.ctx, t, x + dx, y + dy, color, font, 'center'); }
+            axes(L = 5, labels = ['x', 'y', 'z'], color = COL.slate) {
+                const dirs = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+                dirs.forEach((d, i) => { this.line(V3.mul(d, -L * 0.35), [0, 0, 0], color, 1, [3, 3], 0.6); this.arrow([0, 0, 0], V3.mul(d, L), color, 1.6, 9, 0.9); this.text(V3.mul(d, L * 1.08), labels[i], color, 'italic bold 14px Inter, sans-serif'); });
+            }
+            grid(L = 5, step = 1, z = 0, color = COL.grid) {
+                for (let v = -L; v <= L + 1e-9; v += step) { this.line([v, -L, z], [v, L, z], color, 1); this.line([-L, v, z], [L, v, z], color, 1); }
+            }
+            circle(c, r, n1, n2, color, width = 1.2, dash = null, alpha = 1, a0 = 0, a1 = 2 * Math.PI) {   // n1, n2: orthonormal in-plane axes
+                const pts = []; for (let k = 0; k <= 64; k++) { const t = a0 + (a1 - a0) * k / 64; pts.push(V3.add(c, V3.add(V3.mul(n1, r * Math.cos(t)), V3.mul(n2, r * Math.sin(t))))); }
+                this.poly(pts, color, width, dash, alpha);
+            }
+        }
+        function viewButtons(id, view) { const g = $(id); if (!g) return; g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => view.setView(b.dataset.v))); }
+
+        // =========================================================
+        // Coordinate systems and basis vectors (Ulaby conventions)
+        // =========================================================
+        const COORD = {
+            cart2cyl: ([x, y, z]) => [Math.hypot(x, y), Math.atan2(y, x), z],
+            cart2sph: ([x, y, z]) => { const R = Math.hypot(x, y, z); return [R, R ? Math.acos(clamp(z / R, -1, 1)) : 0, Math.atan2(y, x)]; },
+            cyl2cart: ([r, p, z]) => [r * Math.cos(p), r * Math.sin(p), z],
+            sph2cart: ([R, t, p]) => [R * Math.sin(t) * Math.cos(p), R * Math.sin(t) * Math.sin(p), R * Math.cos(t)],
+            basisCyl: p => [[Math.cos(p), Math.sin(p), 0], [-Math.sin(p), Math.cos(p), 0], [0, 0, 1]],
+            basisSph: (t, p) => [[Math.sin(t) * Math.cos(p), Math.sin(t) * Math.sin(p), Math.cos(t)], [Math.cos(t) * Math.cos(p), Math.cos(t) * Math.sin(p), -Math.sin(t)], [-Math.sin(p), Math.cos(p), 0]]
+        };
+        const toCartVec = (comp, basis) => V3.add(V3.add(V3.mul(basis[0], comp[0]), V3.mul(basis[1], comp[1])), V3.mul(basis[2], comp[2]));
+        const fromCartVec = (v, basis) => basis.map(b => V3.dot(v, b));
+
+        // =========================================================
+        // Magnetostatics toolkit (Topic 4)
+        // =========================================================
+        const MU0 = 4 * Math.PI * 1e-7;
+        // one-row sliders: fmts = { id: v => text }, onChange() called after every move
+        function bindSliders(fmts, onChange) {
+            Object.entries(fmts).forEach(([id, f]) => {
+                const el = $(id); if (!el) return;
+                const show = () => setText('val-' + id, f(+el.value));
+                el.addEventListener('input', () => { show(); onChange && onChange(id); });
+                show();
+            });
+        }
+        const val = id => +$(id).value;
+        // ⊙ (out of page) / ⊗ (into page) symbol
+        function currentDot(ctx, x, y, out, color = COL.amber, r = 9) {
+            ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = color;
+            if (out) { ctx.beginPath(); ctx.arc(x, y, r * 0.3, 0, 2 * Math.PI); ctx.fill(); }
+            else { const d = r * 0.55; ctx.beginPath(); ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d); ctx.moveTo(x + d, y - d); ctx.lineTo(x - d, y + d); ctx.stroke(); }
+            ctx.restore();
+        }
+        // complete elliptic integrals K(k), E(k) by the arithmetic-geometric mean (k = modulus)
+        function ellipKE(k) {
+            let a = 1, b = Math.sqrt(1 - k * k), c = k, sum = 0.5 * c * c, p = 1;
+            for (let i = 0; i < 30 && Math.abs(c) > 1e-15; i++) { const an = (a + b) / 2; c = (a - b) / 2; b = Math.sqrt(a * b); a = an; p *= 2; sum += 0.5 * p * c * c; }
+            const K = Math.PI / (2 * a); return [K, K * (1 - sum)];
+        }
+        // exact B of a circular loop (radius a, current I, in the z = 0 plane, axis z) at (r, z): [Br, Bz] in tesla
+        function loopB(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : r;
+            const q = (a + r) ** 2 + z * z, k2 = 4 * a * r / q, [K, E] = ellipKE(Math.sqrt(Math.min(k2, 1 - 1e-12)));
+            const d = (a - r) ** 2 + z * z, f = MU0 * I / (2 * Math.PI * Math.sqrt(q));
+            return [f * z / r * (-K + (a * a + r * r + z * z) / d * E), f * (K + (a * a - r * r - z * z) / d * E)];
+        }
+        // mutual inductance of two coaxial circular loops (Maxwell's formula)
+        function mutualLoops(a1, a2, d) {
+            const k = Math.sqrt(4 * a1 * a2 / ((a1 + a2) ** 2 + d * d)), [K, E] = ellipKE(Math.min(k, 1 - 1e-12));
+            return MU0 * Math.sqrt(a1 * a2) * ((2 / k - k) * K - 2 / k * E);
+        }
+        // trace a 2-D field line from (x, y) in world units; F(x, y) → [fx, fy]; returns array of points
+        function traceLine(F, x, y, dir, step, nmax, box) {
+            const pts = [[x, y]];
+            for (let i = 0; i < nmax; i++) {
+                const f1 = F(x, y), m1 = Math.hypot(...f1); if (!(m1 > 1e-30)) break;
+                const mx = x + dir * step / 2 * f1[0] / m1, my = y + dir * step / 2 * f1[1] / m1, f2 = F(mx, my), m2 = Math.hypot(...f2); if (!(m2 > 1e-30)) break;
+                x += dir * step * f2[0] / m2; y += dir * step * f2[1] / m2;
+                if (x < box[0] || x > box[1] || y < box[2] || y > box[3]) { pts.push([x, y]); break; }
+                pts.push([x, y]);
+                if (i > 20 && Math.hypot(x - pts[0][0], y - pts[0][1]) < step * 0.8) { pts.push(pts[0]); break; }   // closed loop
+            }
+            return pts;
+        }
+        function drawPath(ctx, pts, X, Y, color, width = 1.3, alpha = 0.8, arrowsEvery = 0) {
+            if (pts.length < 2) return;
+            ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+            if (arrowsEvery) for (let i = arrowsEvery; i < pts.length - 1; i += arrowsEvery) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; const dx = X(x1) - X(x0), dy = Y(y1) - Y(y0), m = Math.hypot(dx, dy) || 1; arrow(ctx, X(x0), Y(y0), dx / m * 8, dy / m * 8, color, alpha, width, 6); }
+        }
+        // world ↔ screen mapping helper for a rectangular view
+        function view2D(w, h, xmin, xmax, ymin, ymax, pad = 12) {
+            const s = Math.min((w - 2 * pad) / (xmax - xmin), (h - 2 * pad) / (ymax - ymin)), ox = (w - s * (xmax - xmin)) / 2, oy = (h - s * (ymax - ymin)) / 2;
+            return { s, X: x => ox + (x - xmin) * s, Y: y => h - oy - (y - ymin) * s, x: px => xmin + (px - ox) / s, y: py => ymin + (h - oy - py) / s };
+        }
+        const fmtE = (v, d = 3) => !isFinite(v) ? '—' : v === 0 ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-2 ? v.toExponential(d - 1) : (+v.toPrecision(d)).toString());
+        const redrawOnResize = (ids, fn) => { const f = () => requestAnimationFrame(fn); if ('ResizeObserver' in window) { const ro = new ResizeObserver(f); ids.forEach(id => $(id) && ro.observe($(id).parentElement)); } window.addEventListener('resize', f); };
+        // vector potential A_φ of a circular loop; field lines in the meridian plane are contours of ψ = r·A_φ
+        function loopAphi(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : Math.abs(r);
+            const k2 = 4 * a * r / ((a + r) ** 2 + z * z), k = Math.sqrt(Math.min(k2, 1 - 1e-12)), [K, E] = ellipKE(k);
+            return MU0 * I / (Math.PI * k) * Math.sqrt(a / r) * ((1 - k2 / 2) * K - E);
+        }
+
+        // =========================================================
+        // Magnetic forces and torques
+        // =========================================================
+        const vfmt = (v, u) => `(${v.map(c => fmtE(Math.abs(c) < 1e-12 ? 0 : c)).join(', ')}) ${u}`;
+
+        // ---------- 1. Lorentz force ----------
+        const LOR = { run: true, p: [0, 0], v: [5, 0], trail: [], We: 0, Wm: 0, K0: 0, cx: 0, cy: 0 };
+        const lp = () => ({ E: val('l-Ey'), B: val('l-Bz'), q: val('l-q'), m: val('l-m') });
+        function lorReset() { const { m } = lp(); LOR.p = [0, 0]; LOR.v = [val('l-u'), 0]; LOR.trail = [[0, 0]]; LOR.We = 0; LOR.Wm = 0; LOR.K0 = 0.5 * m * LOR.v[0] ** 2; LOR.cx = 0; LOR.cy = 0; }
+        const acc = (v, P) => [P.q * (v[1] * P.B) / P.m, P.q * (P.E - v[0] * P.B) / P.m];   // q(E + u×B)/m with u×B = (u_y B, −u_x B)
+        function lorStep(dt) {
+            const P = lp(), n = 40, h = dt / n;
+            for (let k = 0; k < n; k++) {
+                const v = LOR.v, a1 = acc(v, P), v2 = [v[0] + a1[0] * h / 2, v[1] + a1[1] * h / 2], a2 = acc(v2, P), v3 = [v[0] + a2[0] * h / 2, v[1] + a2[1] * h / 2], a3 = acc(v3, P), v4 = [v[0] + a3[0] * h, v[1] + a3[1] * h], a4 = acc(v4, P);
+                const vn = [v[0] + h / 6 * (a1[0] + 2 * a2[0] + 2 * a3[0] + a4[0]), v[1] + h / 6 * (a1[1] + 2 * a2[1] + 2 * a3[1] + a4[1])], vm = [(v[0] + vn[0]) / 2, (v[1] + vn[1]) / 2];
+                LOR.p = [LOR.p[0] + h / 6 * (v[0] + 2 * v2[0] + 2 * v3[0] + v4[0]), LOR.p[1] + h / 6 * (v[1] + 2 * v2[1] + 2 * v3[1] + v4[1])];
+                LOR.We += P.q * P.E * vm[1] * h; LOR.Wm += P.q * (vm[1] * P.B * vm[0] - vm[0] * P.B * vm[1]) * h; LOR.v = vn;
+            }
+            LOR.trail.push(LOR.p.slice()); if (LOR.trail.length > 1500) LOR.trail.shift();
+        }
+        function drawLor() {
+            const P = lp(), u = Math.hypot(...LOR.v), Fe = Math.abs(P.q * P.E), Fm = Math.abs(P.q) * u * Math.abs(P.B);
+            setText('ro-F', `${Fe.toFixed(2)} N, ${Fm.toFixed(2)} N`); setText('ro-u', u.toFixed(2) + ' m/s');
+            setText('ro-r', Math.abs(P.B) > 1e-6 && Math.abs(P.q) > 1e-6 ? (P.m * u / (Math.abs(P.q) * Math.abs(P.B))).toFixed(2) + ' m' : '∞');
+            setText('ro-w', (Math.abs(P.q * P.B) / P.m).toFixed(2) + ' rad/s'); setText('ro-vd', Math.abs(P.B) > 1e-6 ? Math.abs(P.E / P.B).toFixed(2) + ' m/s (theo E×B)' : '—');
+            setText('ro-work', `${LOR.We.toFixed(3)} J / ${LOR.Wm.toFixed(3)} J`); setText('ro-dK', (0.5 * P.m * u * u - LOR.K0).toFixed(3) + ' J');
+            const c = setupCanvas('cv-lor'); if (!c) return; const { ctx, w, h } = c, span = 14;
+            // follow the particle when it leaves the central area
+            const V0 = view2D(w, h, -span, span, -span * h / w, span * h / w, 6);
+            const halfX = span * 0.7, halfY = span * h / w * 0.7;
+            if (Math.abs(LOR.p[0] - LOR.cx) > halfX) LOR.cx = LOR.p[0]; if (Math.abs(LOR.p[1] - LOR.cy) > halfY) LOR.cy = LOR.p[1];
+            const X = x => V0.X(x - LOR.cx), Y = y => V0.Y(y - LOR.cy);
+            if (Math.abs(P.B) > 1e-6) for (let gx = -span; gx <= span; gx += 2.5) for (let gy = -span; gy <= span; gy += 2.5) { const px = V0.X(gx) - (((LOR.cx % 2.5) + 2.5) % 2.5) * V0.s, py = V0.Y(gy) + (((LOR.cy % 2.5) + 2.5) % 2.5) * V0.s; if (px > 0 && px < w && py > 0 && py < h) { ctx.save(); ctx.globalAlpha = 0.25; currentDot(ctx, px, py, P.B > 0, COL.sky, 5); ctx.restore(); } }
+            if (Math.abs(P.E) > 1e-6) for (let gx = -span + 1.2; gx <= span; gx += 5) arrow(ctx, V0.X(gx), h - 20, 0, -Math.sign(P.E) * 40, COL.amber, 0.35, 1.6, 7);
+            ctx.save(); ctx.strokeStyle = P.q >= 0 ? COL.rose : COL.indigo; ctx.lineWidth = 2; ctx.beginPath(); LOR.trail.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+            const px = X(LOR.p[0]), py = Y(LOR.p[1]), K = 9;
+            const fe = [0, P.q * P.E], fm = [P.q * LOR.v[1] * P.B, -P.q * LOR.v[0] * P.B], ft = [fe[0] + fm[0], fe[1] + fm[1]];
+            [[LOR.v, COL.emerald, 'u', 8], [fe, COL.amber, 'Fe', K], [fm, COL.sky, 'Fm', K], [ft, COL.rose, 'F', K]].forEach(([v, cl, lab, s]) => { const m = Math.hypot(...v); if (m < 1e-6) return; if (lab === 'F' && (Math.hypot(...fe) < 1e-6 || Math.hypot(...fm) < 1e-6)) return; const L = clamp(s * Math.sqrt(m) * 3, 14, 90); arrow(ctx, px, py, v[0] / m * L, -v[1] / m * L, cl, 1, 2.6, 9); label(ctx, lab, px + v[0] / m * (L + 12), py - v[1] / m * (L + 12) + 4, cl, 'bold 13px Inter, sans-serif', 'center'); });
+            dot(ctx, px, py, P.q >= 0 ? COL.rose : COL.indigo, 7);
+            label(ctx, `B ${P.B >= 0 ? '⊙ ra khỏi trang' : '⊗ vào trang'} · E theo ${P.E >= 0 ? '+y' : '−y'}`, 10, 18, COL.slate, '600 12px Inter, sans-serif');
+        }
+        bindSliders({ 'l-Ey': v => v.toFixed(1) + ' V/m', 'l-Bz': v => v.toFixed(1) + ' T', 'l-u': v => v.toFixed(1) + ' m/s', 'l-q': v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' C', 'l-m': v => v.toFixed(1) + ' kg' }, id => { document.querySelectorAll('#lor-pre button').forEach(b => b.classList.remove('on')); if (id === 'l-u' || id === 'l-m') lorReset(); drawLor(); });
+        const LPRE = { cyc: [0, 2, 5, 1, 1], drift: [4, 2, 0, 1, 1], sel: [6, 2, 3, 1, 1], elec: [3, 0, 3, 1, 1] };
+        chipGroup('lor-pre', k => { ['l-Ey', 'l-Bz', 'l-u', 'l-q', 'l-m'].forEach((id, i) => { $(id).value = LPRE[k][i]; $(id).dispatchEvent(new Event('input')); }); document.querySelector(`#lor-pre [data-v="${k}"]`).classList.add('on'); lorReset(); drawLor(); });
+        $('lor-play').addEventListener('click', e => { LOR.run = !LOR.run; e.currentTarget.textContent = LOR.run ? 'Tạm dừng' : 'Chạy'; e.currentTarget.classList.toggle('on', LOR.run); });
+        $('lor-reset').addEventListener('click', () => { lorReset(); drawLor(); });
+        animate('cv-lor', dt => { if (LOR.run) lorStep(dt * 1.5); drawLor(); });
+        lorReset();
+
+        // ---------- 2. force on a wire ----------
+        const WIRE = { path: 'straight', B: 'in' };
+        function wirePath(kind, r) {
+            const P = [], n = 400;
+            if (kind === 'straight') for (let k = 0; k <= n; k++) P.push([-r + 2 * r * k / n, 0]);
+            if (kind === 'semi') for (let k = 0; k <= n; k++) { const t = Math.PI - Math.PI * k / n; P.push([r * Math.cos(t), r * Math.sin(t)]); }
+            if (kind === 'zig') { const pts = [[-r, 0], [-0.6 * r, 0.7 * r], [-0.2 * r, -0.5 * r], [0.2 * r, 0.9 * r], [0.6 * r, -0.4 * r], [r, 0]]; for (let s = 0; s < pts.length - 1; s++) for (let k = 0; k < 80; k++) P.push([pts[s][0] + (pts[s + 1][0] - pts[s][0]) * k / 80, pts[s][1] + (pts[s + 1][1] - pts[s][1]) * k / 80]); P.push([r, 0]); }
+            if (kind === 'loop') { for (let k = 0; k <= n / 2; k++) P.push([-r + 2 * r * k / (n / 2), 0]); for (let k = 1; k <= n / 2; k++) { const t = Math.PI * k / (n / 2); P.push([r * Math.cos(t), r * Math.sin(t)]); } }
+            return P;
+        }
+        const dlxB = (dx, dy, mode, B0) => mode === 'in' ? [-B0 * dy, B0 * dx, 0] : [0, 0, dx * B0];
+        function wireForce(P, from, to, mode, B0, I) { const F = [0, 0, 0]; for (let k = from; k < to; k++) { const f = dlxB(P[k + 1][0] - P[k][0], P[k + 1][1] - P[k][1], mode, B0); F[0] += I * f[0]; F[1] += I * f[1]; F[2] += I * f[2]; } return F; }
+        function drawWire() {
+            const I = val('w-I'), B0 = val('w-B0'), r = val('w-r'), P = wirePath(WIRE.path, r), n = P.length - 1;
+            const F = wireForce(P, 0, n, WIRE.B, B0, I), Fs = WIRE.path === 'loop' ? [0, 0, 0] : (f => [I * f[0], I * f[1], I * f[2]])(dlxB(2 * r, 0, WIRE.B, B0));
+            setText('ro-Fp', vfmt(F, 'N')); setText('ro-Fs', vfmt(Fs, 'N') + (WIRE.path === 'loop' ? ' (kín: ℓ = 0)' : ''));
+            if (WIRE.path === 'loop') { const half = n / 2; setText('ro-F1', vfmt(wireForce(P, 0, half, WIRE.B, B0, I), 'N')); setText('ro-F2', vfmt(wireForce(P, half, n, WIRE.B, B0, I), 'N')); } else { setText('ro-F1', '—'); setText('ro-F2', '—'); }
+            const c = setupCanvas('cv-wire'); if (!c) return; const { ctx, w, h } = c, V = view2D(w, h, -1.4, 1.4, -0.9, 1.3, 10);
+            if (WIRE.B === 'in') { for (let gx = -1.3; gx <= 1.3; gx += 0.26) for (let gy = -0.8; gy <= 1.25; gy += 0.26) { ctx.save(); ctx.globalAlpha = 0.25; currentDot(ctx, V.X(gx), V.Y(gy), false, COL.sky, 5); ctx.restore(); } }
+            else for (let gx = -1.3; gx <= 1.3; gx += 0.35) arrow(ctx, V.X(gx), V.Y(-0.85), 0, -(2.1) * V.s, COL.sky, 0.18, 1.4, 8);
+            ctx.save(); ctx.strokeStyle = COL.amber; ctx.lineWidth = 4; ctx.beginPath(); P.forEach(([x, y], i) => i ? ctx.lineTo(V.X(x), V.Y(y)) : ctx.moveTo(V.X(x), V.Y(y))); ctx.stroke(); ctx.restore();
+            const sgnI = Math.sign(I) || 1;
+            for (let k = 40; k < n; k += 80) { const [x0, y0] = P[k - 1], [x1, y1] = P[k + 1], d = [x1 - x0, y1 - y0], m = Math.hypot(...d);
+                arrow(ctx, V.X(P[k][0]), V.Y(P[k][1]), sgnI * d[0] / m * 12, -sgnI * d[1] / m * 12, '#92400e', 1, 2, 7);
+                const f = dlxB(d[0] / m, d[1] / m, WIRE.B, B0).map(v => v * I);
+                if (WIRE.B === 'in') { const fm = Math.hypot(f[0], f[1]); if (fm > 1e-9) arrow(ctx, V.X(P[k][0]), V.Y(P[k][1]), f[0] / fm * 30, -f[1] / fm * 30, COL.rose, 0.8, 2, 8); }
+                else if (Math.abs(f[2]) > 1e-9) currentDot(ctx, V.X(P[k][0]) + 14, V.Y(P[k][1]) - 14, f[2] > 0, COL.rose, 6); }
+            dot(ctx, V.X(-r), V.Y(0), COL.slate, 5); dot(ctx, V.X(r), V.Y(0), COL.slate, 5); label(ctx, 'a', V.X(-r) - 12, V.Y(0) + 16, COL.slate, 'bold 14px Inter, sans-serif'); label(ctx, 'b', V.X(r) + 6, V.Y(0) + 16, COL.slate, 'bold 14px Inter, sans-serif');
+            const Fm = Math.hypot(F[0], F[1]), Fz = F[2];
+            if (WIRE.B === 'in' && Fm > 1e-6) { arrow(ctx, V.X(0), V.Y(0.45), F[0] / Fm * 70, -F[1] / Fm * 70, COL.rose, 1, 4, 13); label(ctx, `F = ${Fm.toFixed(2)} N`, V.X(0) + F[0] / Fm * 70 + 10, V.Y(0.45) - F[1] / Fm * 70, COL.rose, 'bold 14px Inter, sans-serif'); }
+            if (WIRE.B === 'y' && Math.abs(Fz) > 1e-6) { currentDot(ctx, V.X(0), V.Y(0.45), Fz > 0, COL.rose, 14); label(ctx, `F = ${Fz.toFixed(2)} ẑ N`, V.X(0) + 22, V.Y(0.45) + 5, COL.rose, 'bold 14px Inter, sans-serif'); }
+            if ((WIRE.B === 'in' ? Fm : Math.abs(Fz)) <= 1e-6) label(ctx, 'hợp lực = 0', V.X(0), V.Y(-0.45), COL.emerald, 'bold 15px Inter, sans-serif', 'center');
+            label(ctx, WIRE.B === 'in' ? 'B ⊗ vào trang · mũi tên hồng nhỏ: dF dọc theo dây' : 'B = ŷ B₀ trong mặt phẳng · ⊙/⊗: dF ra khỏi / vào trang', 10, h - 10, COL.muted, '12px Inter, sans-serif');
+        }
+        chipGroup('w-path', v => { WIRE.path = v; drawWire(); }); chipGroup('w-B', v => { WIRE.B = v; drawWire(); });
+        bindSliders({ 'w-I': v => v.toFixed(1) + ' A', 'w-B0': v => v.toFixed(2) + ' T', 'w-r': v => v.toFixed(2) + ' m' }, drawWire);
+
+        // ---------- 3. torque / motor ----------
+        const TOR = { mode: 'manual', phi: 60 * Math.PI / 180, om: 0 };
+        const tview = new View3D('cv-tor', { range: 2.2, onChange: () => drawTor() });
+        chipGroup('t-view', v => tview.setView(v));
+        const tp = () => ({ N: val('t-N'), I: val('t-I'), B: val('t-B'), A: val('t-A') });
+        function torStep(dt) {
+            const { N, I, B, A } = tp(), m = N * I * A, J = 0.1, c = TOR.mode === 'motor' ? 0.25 : 0.02;   // motor: friction + back-EMF load keeps ω moderate
+            for (let k = 0; k < 20; k++) {
+                const h = dt / 20, s = Math.sin(TOR.phi), T = TOR.mode === 'motor' ? -m * B * Math.abs(s) : -m * B * s;
+                TOR.om += (T - c * TOR.om) / J * h; TOR.phi += TOR.om * h;
+            }
+            TOR.phi = ((TOR.phi % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+            $('t-th').value = TOR.phi * 180 / Math.PI; setText('val-t-th', (TOR.phi * 180 / Math.PI).toFixed(0) + '°');
+        }
+        function drawTor() {
+            const { N, I, B, A } = tp(), phi = TOR.phi, m = N * I * A, s = Math.sin(phi), Iloop = TOR.mode === 'motor' ? I * (s >= 0 ? 1 : -1) : I;
+            const side = Math.sqrt(A), a = side, b = side;   // square loop, sides a (vertical) × b
+            setText('ro-m', fmtE(m) + ' A·m²'); setText('ro-T', fmtE(-m * B * s * (TOR.mode === 'motor' ? Math.sign(s) || 1 : 1)) + ' N·m  (T_z)'); setText('ro-Fs2', fmtE(N * I * a * B) + ' N'); setText('ro-om', (TOR.om).toFixed(2) + ' rad/s');
+            const v = tview.begin(); if (!v) return;
+            const S = 1.4 / Math.sqrt(0.12), hw = b / 2 * S, hh = a / 2 * S, n = [Math.cos(phi), Math.sin(phi), 0], t = [-Math.sin(phi), Math.cos(phi), 0];
+            v.axes(2); for (let k = -2; k <= 2; k++) v.arrow([-1.9, k * 0.45, -1.1], [3.6, 0, 0], COL.sky, 1.2, 8, 0.35);
+            v.text([1.9, 0.9, -1.1], 'B', COL.sky, 'bold 15px Inter, sans-serif');
+            const C = [V3.add(V3.mul(t, hw), [0, 0, -hh]), V3.add(V3.mul(t, hw), [0, 0, hh]), V3.add(V3.mul(t, -hw), [0, 0, hh]), V3.add(V3.mul(t, -hw), [0, 0, -hh])];
+            v.poly([...C, C[0]], COL.amber, 3.4, null, 1, true, 'rgba(217,119,6,0.08)');
+            const sg = Math.sign(Iloop) || 1;
+            for (let k = 0; k < 4; k++) { const p0 = C[k], p1 = C[(k + 1) % 4], mid = V3.mul(V3.add(p0, p1), 0.5), d = V3.unit(V3.sub(p1, p0)); v.arrow(V3.sub(mid, V3.mul(d, 0.15 * sg)), V3.mul(d, 0.3 * sg), '#92400e', 2.4, 9); }
+            // forces on the axial sides: F = N I a ẑ × B x̂ = ± N I a B ŷ
+            const Fm = 0.9 * Math.min(1, N * Math.abs(Iloop) * a * B / 0.6);
+            if (Fm > 0.02) { v.arrow(V3.mul(t, hw), [0, sg * Fm, 0], COL.rose, 3, 11); v.arrow(V3.mul(t, -hw), [0, -sg * Fm, 0], COL.rose, 3, 11); v.text(V3.add(V3.mul(t, hw), [0, sg * (Fm + 0.2), 0]), 'F', COL.rose, 'bold 14px Inter, sans-serif'); }
+            const mm = 1.2 * Math.min(1, Math.abs(m) / 1.2 + 0.2); v.arrow([0, 0, 0], V3.mul(n, mm * sg), COL.violet, 3.4, 12); v.text(V3.mul(n, (mm + 0.25) * sg), 'm', COL.violet, 'bold 15px Inter, sans-serif');
+            const Tz = -m * B * s * (TOR.mode === 'motor' ? Math.sign(s) || 1 : 1); if (Math.abs(Tz) > 1e-6) v.arrow([0, 0, 0], [0, 0, Math.sign(Tz) * 1.3], COL.emerald, 3, 11), v.text([0, 0, Math.sign(Tz) * 1.5], 'T', COL.emerald, 'bold 15px Inter, sans-serif');
+            label(v.ctx, 'kéo: xoay góc nhìn · T theo ẑ (trục quay)', 10, v.h - 10, COL.muted, '12px Inter, sans-serif');
+            // T(θ) plot
+            const c2 = setupCanvas('cv-torplot'); if (!c2) return; const g = c2.ctx, W = c2.w, H = c2.h, Tm = Math.max(m * B, 1e-9);
+            const F = plotFrame(g, W, H, 0, 360, -1.2 * Tm, 1.2 * Tm, { left: 60, bottom: 32, xlabel: 'θ (°)', ylabel: 'T_z (N·m)' });
+            [0, 90, 180, 270, 360].forEach(x => label(g, x + '°', F.X(x), H - F.B + 14, COL.muted, '11px Inter, sans-serif', 'center'));
+            [[Tm, fmtE(Tm)], [0, '0'], [-Tm, fmtE(-Tm)]].forEach(([y, t]) => label(g, t, F.L - 6, F.Y(y) + 4, COL.muted, '11px Inter, sans-serif', 'right'));
+            curve(g, x => -m * B * Math.sin(x * Math.PI / 180), 0, 360, F.X, F.Y, COL.emerald, 2.2, 200, TOR.mode === 'motor' ? [5, 4] : null);
+            if (TOR.mode === 'motor') curve(g, x => -m * B * Math.abs(Math.sin(x * Math.PI / 180)), 0, 360, F.X, F.Y, COL.rose, 2.4, 200);
+            dot(g, F.X(phi * 180 / Math.PI), F.Y(Tz), COL.violet, 5);
+        }
+        bindSliders({ 't-th': v => v.toFixed(0) + '°', 't-N': v => v.toFixed(0), 't-I': v => v.toFixed(1) + ' A', 't-B': v => v.toFixed(2) + ' T', 't-A': v => v.toFixed(3) + ' m²' }, id => { if (id === 't-th') { TOR.phi = val('t-th') * Math.PI / 180; TOR.om = 0; } drawTor(); });
+        chipGroup('t-mode', k => { TOR.mode = k; TOR.om = 0; if (k !== 'manual' && Math.abs(Math.sin(TOR.phi)) < 0.05) TOR.phi += 0.3; });
+        animate('cv-tor', dt => { if (TOR.mode !== 'manual') torStep(dt); drawTor(); });
+
+        // ---------- 2. 3D particle (same engine as the magnetostatics 3D lab) ----------
+        (() => {
+        const fmtV = (v, d = 2) => '(' + v.map(c => (Math.abs(c) < 5e-3 ? 0 : c).toFixed(d)).join(', ') + ')';
+        // ---------- 1. particle motion (Boris integrator) ----------
+        const RC = 2;   // bottle coil radius (m)
+        const PT = { x: [0, 0, 0], v: [2, 0, 0], trail: [], run: true, field: 'uni', out: false, start: [0, 0, 0], lines: null, linesKey: '' };
+        const lview = new View3D('cv-lor3', { range: 6.5, onChange: () => drawLor() });
+        chipGroup('p-view', v => lview.setView(v));
+        const coilI = () => val('p-B0') / (2 * loopB(RC, 1, 0, val('p-d'))[1]);
+        function Bat(p) {
+            if (PT.field === 'uni') return [val('p-Bx'), val('p-By'), val('p-Bz')];
+            const d = val('p-d'), I = coilI(), rho = Math.hypot(p[0], p[1]);
+            const [a1, b1] = loopB(RC, I, rho, p[2] - d), [a2, b2] = loopB(RC, I, rho, p[2] + d), br = a1 + a2;
+            return rho < 1e-9 ? [0, 0, b1 + b2] : [br * p[0] / rho, br * p[1] / rho, b1 + b2];
+        }
+        const Eat = () => [val('p-Ex'), val('p-Ey'), val('p-Ez')];
+        function boris(h) {
+            const qm = val('p-q') / val('p-m'), E = Eat(), B = Bat(PT.x);
+            const vm = V3.add(PT.v, V3.mul(E, qm * h / 2)), t = V3.mul(B, qm * h / 2), s = V3.mul(t, 2 / (1 + V3.dot(t, t)));
+            const vp = V3.add(vm, V3.cross(vm, t)), vpl = V3.add(vm, V3.cross(vp, s));
+            PT.v = V3.add(vpl, V3.mul(E, qm * h / 2)); PT.x = V3.add(PT.x, V3.mul(PT.v, h));
+        }
+        function restart() {
+            PT.x = [...PT.start]; PT.v = [val('p-vx'), val('p-vy'), val('p-vz')]; PT.trail = [[...PT.x]]; PT.out = false;
+            const B = Bat(PT.x), Bm = V3.len(B), u = V3.len(PT.v); PT.pitch0 = Bm > 0 && u > 0 ? Math.acos(clamp(V3.dot(PT.v, B) / (u * Bm), -1, 1)) : null;
+            drawLor();
+        }
+        function stepLor(dt) {
+            if (!PT.run || PT.out) return;
+            const B = V3.len(Bat(PT.x)), wc = Math.abs(val('p-q')) * B / val('p-m'), T = (PT.field === 'bottle' ? 5 : 2.5) * dt, n = Math.max(4, Math.ceil(T / Math.min(0.02, 0.08 / (wc || 1))));
+            for (let k = 0; k < n; k++) boris(T / n);
+            PT.trail.push([...PT.x]); if (PT.trail.length > 4000) PT.trail.shift();
+            if (Math.max(...PT.x.map(Math.abs)) > 14) PT.out = true;
+        }
+        function bottleLines() {
+            const key = val('p-d').toFixed(2); if (PT.linesKey === key) return PT.lines;
+            const d = val('p-d'), F = (r, z) => { const [a1, b1] = loopB(RC, 1, Math.abs(r), z - d), [a2, b2] = loopB(RC, 1, Math.abs(r), z + d); return [(a1 + a2) * Math.sign(r || 1), b1 + b2]; };
+            const L = []; [0.3, 0.8, 1.3, 1.7].forEach(r0 => [1, -1].forEach(dir => L.push(traceLine(F, r0, 0, dir, 0.05, 400, [-4, 4, -7, 7]))));
+            PT.lines = L; PT.linesKey = key; return L;
+        }
+        function drawLor() {
+            const v = lview.begin(); if (!v) return;
+            const q = val('p-q'), m = val('p-m'), B = Bat(PT.x), Bm = V3.len(B), E = Eat(), u = V3.len(PT.v);
+            v.axes(4);
+            if (PT.field === 'uni') {
+                if (Bm > 1e-9) { const b = V3.unit(B), e1 = V3.unit(Math.abs(b[2]) < 0.9 ? V3.cross(b, [0, 0, 1]) : V3.cross(b, [1, 0, 0])), e2 = V3.cross(b, e1);
+                    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const p0 = V3.add(V3.add(V3.mul(e1, 3.5 * i), V3.mul(e2, 3.5 * j)), V3.mul(b, -3)); v.arrow(p0, V3.mul(b, 6), COL.violet, 1.2, 8, 0.3); } }
+            } else {
+                const d = val('p-d'); [d, -d].forEach(z => v.circle([0, 0, z], RC, [1, 0, 0], [0, 1, 0], COL.amber, 4));
+                bottleLines().forEach(pts => [0, Math.PI / 2, Math.PI, 3 * Math.PI / 2].forEach(ph => v.poly(pts.map(([r, z]) => [r * Math.cos(ph), r * Math.sin(ph), z]), COL.violet, 1, null, 0.3)));
+            }
+            if (V3.len(E) > 1e-9) { const e = V3.unit(E); [[-3, -3, 3], [3, 3, 3], [-3, 3, -3], [3, -3, -3]].forEach(p => v.arrow(p, V3.mul(e, 1.6), COL.amber, 1.4, 8, 0.45)); }
+            if (PT.trail.length > 1) v.poly(PT.trail, q >= 0 ? COL.rose : COL.sky, 1.8, null, 0.9);
+            const F = V3.mul(V3.add(E, V3.cross(PT.v, B)), q), Fm = V3.len(F);
+            if (u > 1e-6) v.arrow(PT.x, V3.mul(PT.v, 1.2 / Math.max(u, 1)), COL.emerald, 2.4, 10);
+            if (Fm > 1e-6) v.arrow(PT.x, V3.mul(F, 1.2 / Math.max(Fm, 1)), COL.rose, 2.4, 10);
+            if (Bm > 1e-9) v.arrow(PT.x, V3.mul(B, 1 / Bm), COL.violet, 2, 9);
+            v.dot(PT.x, q >= 0 ? COL.rose : COL.sky, 6);
+            label(v.ctx, 'lục: u · hồng: F · tím: B', 10, 18, COL.slate, '600 12px Inter, sans-serif');
+            label(v.ctx, PT.out ? 'hạt đã ra khỏi khung nhìn — nhấn Chạy lại' : 'kéo để xoay · cuộn chuột để phóng to', 10, v.h - 10, PT.out ? COL.rose : COL.muted, PT.out ? 'bold 13px Inter, sans-serif' : '12px Inter, sans-serif');
+            // readouts
+            const up = Bm > 0 ? V3.dot(PT.v, B) / Bm : 0, uperp = Math.sqrt(Math.max(0, u * u - up * up));
+            setText('ro-p3pos', fmtV(PT.x)); setText('ro-p3u', u.toFixed(4) + ' m/s'); setText('ro-p3K', (0.5 * m * u * u).toFixed(4) + ' J'); setText('ro-p3B', Bm.toFixed(3) + ' T');
+            setText('ro-p3rg', Bm > 1e-9 && q !== 0 ? (m * uperp / (Math.abs(q) * Bm)).toFixed(3) + ' m' : '—'); setText('ro-p3wc', Bm > 1e-9 ? (Math.abs(q) * Bm / m).toFixed(3) + ' rad/s' : '—');
+            setText('ro-p3pitch', Bm > 1e-9 && u > 1e-9 ? (Math.acos(clamp(up / u, -1, 1)) * 180 / Math.PI).toFixed(1) + '°' : '—'); setText('ro-p3mu', Bm > 1e-9 ? (m * uperp * uperp / (2 * Bm)).toFixed(4) + ' J/T' : '—');
+            if (PT.field === 'bottle') { const R = V3.len(Bat([0, 0, val('p-d')])) / val('p-B0'), lc = Math.asin(1 / Math.sqrt(R)) * 180 / Math.PI, p0 = PT.pitch0 === null ? null : Math.min(PT.pitch0, Math.PI - PT.pitch0) * 180 / Math.PI;
+                setText('ro-p3mirror', `R = ${R.toFixed(2)}, θ_lc = ${lc.toFixed(1)}°` + (p0 === null ? '' : ` → ban đầu ${p0.toFixed(0)}°: ${p0 > lc ? 'bị giữ lại' : 'thoát ra'}`)); }
+            else setText('ro-p3mirror', '— (trường đều)');
+        }
+        const PRE = {
+            cyc: { f: 'uni', v: [2, 0, 0], B: [0, 0, 1], E: [0, 0, 0], x: [0, 0, 0] }, helix: { f: 'uni', v: [2, 0, 0.5], B: [0, 0, 1], E: [0, 0, 0], x: [0, 0, -3] },
+            sel: { f: 'uni', v: [2, 0, 0], B: [0, 0, 1], E: [0, 2, 0], x: [-6, 0, 0] }, drift: { f: 'uni', v: [0, 0, 0], B: [0, 0, 1], E: [0, 1, 0], x: [-5, 0, 0] },
+            bottle: { f: 'bottle', v: [0, 0.7, 0.7], E: [0, 0, 0], x: [0, 0, 0] }, escape: { f: 'bottle', v: [0, 0.4, 0.9], E: [0, 0, 0], x: [0, 0, 0] }
+        };
+        const setS = (id, x) => { $(id).value = x; $(id).dispatchEvent(new Event('input')); };
+        function setField(f) { PT.field = f; $('f-uni').classList.toggle('hidden', f !== 'uni'); $('f-bot').classList.toggle('hidden', f === 'uni'); document.querySelectorAll('#p-field button').forEach(b => b.classList.toggle('on', b.dataset.v === f)); }
+        chipGroup('p-pre', k => { const P = PRE[k]; PT.silent = true; setS('p-q', 1); setS('p-m', 1); ['vx', 'vy', 'vz'].forEach((c, i) => setS('p-' + c, P.v[i])); ['Ex', 'Ey', 'Ez'].forEach((c, i) => setS('p-' + c, P.E[i]));
+            if (P.B) ['Bx', 'By', 'Bz'].forEach((c, i) => setS('p-' + c, P.B[i])); else { setS('p-d', 3); setS('p-B0', 2); }
+            setField(P.f); PT.start = [...P.x]; PT.silent = false; restart(); });
+        chipGroup('p-field', f => { setField(f); restart(); });
+        const f1 = v => v.toFixed(1);
+        bindSliders({ 'p-q': v => f1(v) + ' C', 'p-m': v => f1(v) + ' kg', 'p-vx': f1, 'p-vy': f1, 'p-vz': f1, 'p-Bx': f1, 'p-By': f1, 'p-Bz': f1, 'p-Ex': f1, 'p-Ey': f1, 'p-Ez': f1, 'p-d': v => f1(v) + ' m', 'p-B0': v => f1(v) + ' T' },
+            id => { if (PT.silent) return; if (['p-vx', 'p-vy', 'p-vz', 'p-d'].includes(id)) restart(); else drawLor(); });
+        $('p-play').addEventListener('click', () => { PT.run = !PT.run; $('p-play').textContent = PT.run ? 'Tạm dừng' : 'Chạy'; $('p-play').classList.toggle('on', PT.run); });
+        $('p-reset').addEventListener('click', restart);
+        animate('cv-lor3', dt => { stepLor(dt); drawLor(); });
+        redrawOnResize(['cv-lor3'], () => drawLor());
+        restart();
+
+        })();
+
+        const drawAll = () => { drawLor(); drawWire(); drawTor(); };
+        redrawOnResize(['cv-lor', 'cv-wire', 'cv-tor', 'cv-torplot'], drawAll);
+        drawAll(); startLoop();
+        renderQuiz([
+            { q: 'Lực từ sinh công bao nhiêu lên một điện tích chuyển động?', opts: ['$quB\\,d$', 'Bằng không: $\\mathbf{F}_{\\mathrm{m}}\\perp\\mathbf{u}$, nên $\\mathbf{F}_{\\mathrm{m}}\\cdot\\mathbf{u} = 0$', 'Phụ thuộc vào dấu của $q$', '$\\tfrac12mu^2$'], ans: 1, why: 'Công suất $\\mathbf{F}_{\\mathrm{m}}\\cdot\\mathbf{u} = q(\\mathbf{u}\\times\\mathbf{B})\\cdot\\mathbf{u} = 0$. Trong mô phỏng, công của lực từ luôn bằng 0 còn công của lực điện bằng $\\Delta K$.' },
+            { q: 'Trong bộ lọc vận tốc với $\\mathbf{E}$ và $\\mathbf{B}$ vuông góc nhau, hạt đi thẳng qua khi', opts: ['$u = qEB$', '$u = E/B$', '$u = B/E$', '$u = 0$'], ans: 1, why: '$qE = quB$ cho $u = E/B$, không phụ thuộc điện tích và khối lượng. Thử mẫu có sẵn Bộ lọc vận tốc, rồi thay đổi $u_x$.' },
+            { q: 'Hợp lực từ tác dụng lên một vòng dây kín mang dòng điện trong trường ĐỀU bằng', opts: ['không', 'tỉ lệ với diện tích vòng dây', '$IB$ nhân với chu vi', 'luôn hướng theo $\\mathbf{B}$'], ans: 0, why: '$\\mathbf{F} = I\\left(\\oint d\\mathbf{l}\\right)\\times\\mathbf{B}$ and $\\oint d\\mathbf{l} = 0$. Ví dụ nửa đường tròn cho thấy $\\mathbf{F}_1 = -\\mathbf{F}_2$.' },
+            { q: 'Mômen lực tác dụng lên vòng dây mang dòng điện lớn nhất khi', opts: ['$\\mathbf{m}\\parallel\\mathbf{B}$ ($\\theta = 0$)', '$\\mathbf{B}$ nằm trong mặt phẳng vòng dây ($\\theta = 90°$)', 'vòng dây vuông góc với trục của nó', 'nó không bao giờ thay đổi'], ans: 1, why: '$|\\mathbf{T}| = mB\\sin\\theta$ đạt cực đại tại $\\theta = 90°$, tức là khi $\\mathbf{B}$ song song với mặt phẳng vòng dây.' },
+            { q: 'Cổ góp trong động cơ điện một chiều có tác dụng gì?', opts: ['Tăng $B$', 'Đảo chiều dòng điện trong vòng dây sau mỗi nửa vòng quay để mômen lực giữ nguyên dấu', 'Dừng vòng dây tại $\\theta = 0$', 'Biến đổi dòng một chiều thành xoay chiều trong cuộn kích từ'], ans: 1, why: 'Nếu không có nó, vòng dây dao động quanh vị trí $\\mathbf{m}\\parallel\\mathbf{B}$. Đảo chiều $I$ khi $\\sin\\theta$ đổi dấu làm $T \\propto -|\\sin\\theta|$, một mômen lực một chiều (đường màu hồng).' },
+            { q: 'Một hạt mang điện chuyển động vuông góc với $\\mathbf{B}$ đều, không có $\\mathbf{E}$. Nếu tốc độ của nó tăng gấp đôi thì bán kính quay', opts: ['giảm một nửa', 'không đổi', 'tăng gấp đôi', 'tăng gấp bốn'], ans: 2, why: '$r_{\\mathrm{g}} = mu_\\perp/|q|B$ tăng tuyến tính theo tốc độ, còn chu kỳ $2\\pi m/|q|B$ không đổi. Thử với mẫu có sẵn Cyclotron.' }
+        ]);
+
+    </script>
+</body>
+</html>

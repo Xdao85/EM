@@ -10,6 +10,26 @@
   var docEl = document.documentElement;
 
   /* ------------------------------------------------------------------------
+     0. Language (English / Vietnamese). Pages live in <root>/en/... and <root>/vi/...;
+        the page language comes from <html lang>. EM.t() translates the few strings
+        this file writes itself; EM.langUrl(l) gives the same page in the other language.
+     ------------------------------------------------------------------------ */
+  EM.lang = /^vi/i.test(docEl.getAttribute('lang') || '') ? 'vi' : 'en';
+  var VI = {
+    '✓ Your answer · correct': '✓ Bạn chọn · đúng', '✗ Your answer': '✗ Bạn chọn', '✓ Correct answer': '✓ Đáp án đúng',
+    'Live formula': 'Công thức trực tiếp', 'Edit ': 'Sửa ', ', now ': ', hiện tại ', 'Score: ': 'Điểm: ', 'Question ': 'Câu ',
+    'Reset quiz': 'Làm lại', 'click a highlighted value to change it': 'bấm vào giá trị được tô màu để thay đổi', 'Close': 'Đóng', 'Self-assessment quiz': 'Câu hỏi tự kiểm tra',
+    '<strong>Correct.</strong> ': '<strong>Đúng.</strong> ', '<strong>Not quite.</strong> ': '<strong>Chưa đúng.</strong> '
+  };
+  function T(s) { return EM.lang === 'vi' && VI[s] ? VI[s] : s; }
+  EM.t = T;
+  EM.langUrl = function (lang, href) {
+    var u = href || location.href, i = Math.max(u.lastIndexOf('/en/'), u.lastIndexOf('/vi/'));
+    return i < 0 ? null : u.slice(0, i) + '/' + lang + '/' + u.slice(i + 4);
+  };
+  EM.setLang = function (lang) { try { localStorage.setItem('em-lang', lang); } catch (e) {} };
+
+  /* ------------------------------------------------------------------------
      1. Math rendering (KaTeX)
      ------------------------------------------------------------------------ */
   var DELIMITERS = [
@@ -139,9 +159,9 @@
       b.classList.add('em-q-locked');
       b.removeAttribute('onclick');
       var tag = null;
-      if (b === chosen && b === correct) { b.classList.add('em-q-chosen', 'em-q-correct'); tag = '✓ Your answer · correct'; }
-      else if (b === chosen)             { b.classList.add('em-q-chosen', 'em-q-wrong');   tag = '✗ Your answer'; }
-      else if (b === correct)            { b.classList.add('em-q-correct', 'em-q-reveal'); tag = '✓ Correct answer'; }
+      if (b === chosen && b === correct) { b.classList.add('em-q-chosen', 'em-q-correct'); tag = T('✓ Your answer · correct'); }
+      else if (b === chosen)             { b.classList.add('em-q-chosen', 'em-q-wrong');   tag = T('✗ Your answer'); }
+      else if (b === correct)            { b.classList.add('em-q-correct', 'em-q-reveal'); tag = T('✓ Correct answer'); }
       if (tag) {
         Array.prototype.forEach.call(b.querySelectorAll('svg, i[data-lucide]'), function (ic) { ic.style.display = 'none'; });
         var t = document.createElement('span');
@@ -485,7 +505,7 @@
       while (anchor && !names.every(function (n) { return anchor.contains(inputs[n]); })) anchor = anchor.parentElement;
     }
     var box = el('div', 'em-live');
-    var head = el('div', 'em-live-head', '<span>' + (cfg.title || 'Live formula') + '</span><span class="em-live-hint">click a highlighted value to change it</span>');
+    var head = el('div', 'em-live-head', '<span>' + (cfg.title || T('Live formula')) + '</span><span class="em-live-hint">' + T('click a highlighted value to change it') + '</span>');
     var body = el('div', 'em-live-body');
     box.appendChild(head); box.appendChild(body);
     if (cfg.after) cfg.after.insertAdjacentElement('afterend', box);
@@ -517,8 +537,8 @@
         var n = node.getAttribute('data-p'), spec = cfg.params[n];
         node.setAttribute('tabindex', '0');
         node.setAttribute('role', 'button');
-        node.setAttribute('aria-label', 'Edit ' + (spec.label || n) + ', now ' + inputs[n].value);
-        node.title = 'Edit ' + (spec.label || n);
+        node.setAttribute('aria-label', T('Edit ') + (spec.label || n) + T(', now ') + inputs[n].value);
+        node.title = T('Edit ') + (spec.label || n);
       });
       focusPending();
     }
@@ -577,11 +597,11 @@
     var score = 0, answered = 0;
     var scoreEl = opts.scoreEl || null;
     function updateScore() {
-      if (scoreEl) scoreEl.textContent = 'Score: ' + score + ' / ' + questions.length;
+      if (scoreEl) scoreEl.textContent = T('Score: ') + score + ' / ' + questions.length;
     }
     questions.forEach(function (Q, qi) {
       var box = el('div', 'em-quiz-q');
-      box.appendChild(el('div', 'em-quiz-q-title', 'Question ' + (qi + 1)));
+      box.appendChild(el('div', 'em-quiz-q-title', T('Question ') + (qi + 1)));
       box.appendChild(el('div', 'em-quiz-q-text', Q.q));
       var fb = el('div', 'em-quiz-fb');
       fb.setAttribute('role', 'status');
@@ -596,11 +616,11 @@
           if (oi === Q.answer) {
             score++;
             fb.className = 'em-quiz-fb show ok';
-            fb.innerHTML = '<strong>Correct.</strong> ' + (Q.explain || '');
+            fb.innerHTML = T('<strong>Correct.</strong> ') + (Q.explain || '');
           } else {
             b.classList.add('wrong');
             fb.className = 'em-quiz-fb show bad';
-            fb.innerHTML = '<strong>Not quite.</strong> ' + (Q.explain || '');
+            fb.innerHTML = T('<strong>Not quite.</strong> ') + (Q.explain || '');
           }
           EM.typeset(fb);
           updateScore();
@@ -611,7 +631,7 @@
       box.appendChild(fb);
       container.appendChild(box);
     });
-    var reset = el('button', 'em-quiz-reset', 'Reset quiz');
+    var reset = el('button', 'em-quiz-reset', T('Reset quiz'));
     reset.type = 'button';
     reset.addEventListener('click', function () { EM.quiz(container, questions, opts); });
     container.appendChild(reset);
@@ -637,7 +657,7 @@
     var right = el('div', '');
     right.style.display = 'flex'; right.style.alignItems = 'center'; right.style.gap = '12px';
     var extra = el('span', 'em-quiz-score', '');
-    var close = el('button', 'em-quiz-close', 'Close');
+    var close = el('button', 'em-quiz-close', T('Close'));
     close.type = 'button';
     right.appendChild(extra); right.appendChild(close);
     head.appendChild(right);
@@ -666,7 +686,7 @@
 
   EM.quizButton = function (questions, title) {
     return EM.dialogButton({
-      label: 'Self-assessment quiz', icon: 'fa-circle-question', title: title || 'Self-assessment quiz',
+      label: T('Self-assessment quiz'), icon: 'fa-circle-question', title: title || T('Self-assessment quiz'),
       build: function (body, scoreEl) { EM.quiz(body, questions, { scoreEl: scoreEl }); }
     });
   };
@@ -700,8 +720,8 @@
         var correct = /emerald/.test(x.className);
         if (x === b) {
           x.classList.add('em-q-chosen', correct ? 'em-q-correct-chosen' : 'em-q-wrong');
-          addTag(x, correct ? '✓ Your answer · correct' : '✗ Your answer');
-        } else if (correct) { x.classList.add('em-q-reveal'); addTag(x, '✓ Correct answer'); }
+          addTag(x, correct ? T('✓ Your answer · correct') : T('✗ Your answer'));
+        } else if (correct) { x.classList.add('em-q-reveal'); addTag(x, T('✓ Correct answer')); }
       });
     }, 0);
   }, true);
@@ -732,7 +752,20 @@
   /* ------------------------------------------------------------------------
      6. First render: typeset the page, then reveal it.
      ------------------------------------------------------------------------ */
+  /* Language switch for module pages opened on their own (inside index.html the shell has its own). */
+  function langSwitch() {
+    if (window.parent !== window || !/\/topic\d\//.test(location.pathname.replace(/\\/g, '/'))) return;
+    var other = EM.lang === 'vi' ? 'en' : 'vi', url = EM.langUrl(other); if (!url) return;
+    var box = document.createElement('div');
+    box.className = 'em-lang-switch';
+    box.setAttribute('role', 'group'); box.setAttribute('aria-label', EM.lang === 'vi' ? 'Ngôn ngữ' : 'Language');
+    box.innerHTML = '<span class="on" aria-current="true">' + EM.lang.toUpperCase() + '</span><a href="' + url + '" lang="' + other + '" title="' +
+      (other === 'vi' ? 'Xem bằng tiếng Việt' : 'View in English') + '">' + other.toUpperCase() + '</a>';
+    box.querySelector('a').addEventListener('click', function () { EM.setLang(other); });
+    document.body.appendChild(box);
+  }
   function firstRender() {
+    langSwitch();
     EM.typeset(document.body);
     requestAnimationFrame(function () { docEl.classList.remove('em-pending'); });
   }

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tra cứu nhanh | Cổng học phần Trường điện từ</title>
+<meta name="description" content="Các hằng số vật lý, hệ thức quan trọng, đồng nhất thức giải tích vectơ và các toán tử trong ba hệ tọa độ.">
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <link rel="stylesheet" href="../../assets/css/portal.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<script src="../../assets/vendor/lucide/lucide.min.js"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+<a href="#main" class="skip">Chuyển đến nội dung</a>
+
+<header class="border-b border-slate-200 px-4 lg:px-8 py-3">
+  <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    <a href="../welcome.html" data-file="welcome.html" class="nav flex items-center gap-3">
+      <div class="p-2.5 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="radio" class="w-6 h-6"></i></div>
+      <div>
+        <p class="text-lg font-bold tracking-tight bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600 bg-clip-text text-transparent">Trường điện từ ECE</p>
+        <p class="text-sm text-slate-600">Cổng học phần tương tác</p>
+      </div>
+    </a>
+    <nav id="top-nav" aria-label="Các trang của cổng học phần" class="flex gap-1.5 text-sm font-medium overflow-x-auto max-w-full"></nav>
+  </div>
+</header>
+
+<main id="main" class="flex-grow max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <span class="badge text-amber-800 bg-amber-400/10">Tra cứu nhanh</span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mt-2">Hằng số và các hệ thức quan trọng</h1>
+      <p class="text-base text-slate-700 mt-2 max-w-3xl">Mọi thứ bạn cần tra cứu khi giải bài tập, gói gọn trong một trang. Trước khi dùng một hệ thức, kiểm tra ý nghĩa, đơn vị và giả thiết của nó. Các bài liên kết cung cấp diễn giải và mô phỏng để hiểu kết quả.</p>
+    </div>
+    <button type="button" onclick="window.print()" class="chip inline-flex items-center gap-1.5"><i data-lucide="printer" class="w-4 h-4"></i> In</button>
+  </div>
+  <section aria-labelledby="c-h" class="grid lg:grid-cols-2 gap-4">
+    <div class="card rounded-xl overflow-hidden">
+      <h2 id="c-h" class="px-4 pt-4 pb-2 text-lg font-bold text-slate-900">Hằng số vật lý</h2>
+      <table class="w-full text-sm">
+        <thead class="bg-slate-100 text-slate-700"><tr><th scope="col" class="text-left px-4 py-2 font-semibold">Đại lượng</th><th scope="col" class="text-left px-4 py-2 font-semibold">Ký hiệu</th><th scope="col" class="text-left px-4 py-2 font-semibold">Giá trị</th></tr></thead>
+        <tbody class="divide-y divide-slate-200 text-slate-800">
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Vận tốc ánh sáng trong chân không</td><td class="px-4 py-2">$c$</td><td class="px-4 py-2">$2.998\times10^{8}$ m/s</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Độ điện thẩm (permittivity) của chân không</td><td class="px-4 py-2">$\varepsilon_0$</td><td class="px-4 py-2">$8.854\times10^{-12}\approx\dfrac{10^{-9}}{36\pi}$ F/m</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Độ từ thẩm (permeability) của chân không</td><td class="px-4 py-2">$\mu_0$</td><td class="px-4 py-2">$4\pi\times10^{-7}$ H/m</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Trở kháng sóng (intrinsic impedance) của chân không</td><td class="px-4 py-2">$\eta_0$</td><td class="px-4 py-2">$\approx 120\pi \approx 377$ $\Omega$</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Điện tích nguyên tố</td><td class="px-4 py-2">$e$</td><td class="px-4 py-2">$1.602\times10^{-19}$ C</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Khối lượng electron</td><td class="px-4 py-2">$m_e$</td><td class="px-4 py-2">$9.109\times10^{-31}$ kg</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Khối lượng proton</td><td class="px-4 py-2">$m_p$</td><td class="px-4 py-2">$1.673\times10^{-27}$ kg</td></tr>
+          <tr class="hover:bg-slate-200/50"><td class="px-4 py-2">Hằng số hấp dẫn</td><td class="px-4 py-2">$G$</td><td class="px-4 py-2">$6.674\times10^{-11}$ N·m²/kg²</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card rounded-xl p-5">
+      <h2 class="text-lg font-bold text-slate-900 mb-3">Các hệ thức quan trọng</h2>
+      <div class="grid sm:grid-cols-2 gap-x-6 gap-y-4 text-sm text-slate-800">
+      <div><div class="text-sm font-semibold text-sky-800 mb-1">Sóng</div><div class="eq">$u_p = \dfrac{\omega}{\beta} = f\lambda,\quad \beta = \dfrac{2\pi}{\lambda}$</div></div>
+      <div><div class="text-sm font-semibold text-sky-800 mb-1">Phasor</div><div class="eq">$\dfrac{\partial}{\partial t} \rightarrow j\omega,\quad \int dt \rightarrow \dfrac{1}{j\omega}$</div></div>
+      <div><div class="text-sm font-semibold text-indigo-700 mb-1">Chân không</div><div class="eq">$c = \dfrac{1}{\sqrt{\mu_0\varepsilon_0}},\quad \eta_0 = \sqrt{\dfrac{\mu_0}{\varepsilon_0}}$</div></div>
+      <div><div class="text-sm font-semibold text-purple-700 mb-1">Hệ thức vật liệu</div><div class="eq">$\mathbf{D} = \varepsilon\mathbf{E},\quad \mathbf{B} = \mu\mathbf{H},\quad \mathbf{J} = \sigma\mathbf{E}$</div></div>
+      <div><div class="text-sm font-semibold text-purple-700 mb-1">Điện thế</div><div class="eq">$\mathbf{E} = -\nabla V,\quad V_{21} = -\int_{P_1}^{P_2}\mathbf{E}\cdot d\boldsymbol{\ell}$</div></div>
+      <div><div class="text-sm font-semibold text-purple-700 mb-1">Năng lượng</div><div class="eq">$w_e = \tfrac{1}{2}\varepsilon E^2,\quad w_m = \tfrac{1}{2}\mu H^2$</div></div>
+      <div><div class="text-sm font-semibold text-amber-800 mb-1">Lực Lorentz</div><div class="eq">$\mathbf{F} = q(\mathbf{E} + \mathbf{u}\times\mathbf{B})$</div></div>
+      <div><div class="text-sm font-semibold text-amber-800 mb-1">Biot–Savart</div><div class="eq">$d\mathbf{H} = \dfrac{I}{4\pi}\,\dfrac{d\boldsymbol{\ell}\times\boldsymbol{\hat{R}}}{R^2}$</div></div>
+      <div><div class="text-sm font-semibold text-rose-700 mb-1">Faraday</div><div class="eq">$V_{\text{emf}} = -N\dfrac{d\Phi}{dt}$</div></div>
+      <div><div class="text-sm font-semibold text-rose-700 mb-1">Phương trình liên tục</div><div class="eq">$\nabla\cdot\mathbf{J} = -\dfrac{\partial\rho_v}{\partial t}$</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="id-h" class="card rounded-xl p-5">
+    <h2 id="id-h" class="text-lg font-bold text-slate-900 mb-3">Đồng nhất thức và định lý giải tích vectơ</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 text-sm text-slate-800">
+      <div><div class="text-sm font-semibold text-indigo-700 mb-1">Độ xoáy (curl) của gradient</div><div class="eq">$\nabla\times(\nabla V) = 0$</div></div>
+      <div><div class="text-sm font-semibold text-indigo-700 mb-1">Độ phân kỳ (divergence) của độ xoáy</div><div class="eq">$\nabla\cdot(\nabla\times\mathbf{A}) = 0$</div></div>
+      <div><div class="text-sm font-semibold text-indigo-700 mb-1">Toán tử Laplace (Laplacian)</div><div class="eq">$\nabla^2 V = \nabla\cdot(\nabla V)$</div></div>
+      <div><div class="text-sm font-semibold text-indigo-700 mb-1">Toán tử Laplace vectơ</div><div class="eq">$\nabla\times\nabla\times\mathbf{A} = \nabla(\nabla\cdot\mathbf{A}) - \nabla^2\mathbf{A}$</div></div>
+      <div><div class="text-sm font-semibold text-indigo-700 mb-1">Định lý divergence</div><div class="eq">$\int_V \nabla\cdot\mathbf{E}\,dv = \oint_S \mathbf{E}\cdot d\mathbf{s}$</div></div>
+      <div><div class="text-sm font-semibold text-indigo-700 mb-1">Định lý Stokes</div><div class="eq">$\int_S (\nabla\times\mathbf{B})\cdot d\mathbf{s} = \oint_C \mathbf{B}\cdot d\boldsymbol{\ell}$</div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="op-h" class="card rounded-xl overflow-hidden">
+    <h2 id="op-h" class="px-4 pt-4 pb-2 text-lg font-bold text-slate-900">Các toán tử trong ba hệ tọa độ</h2>
+    <div class="overflow-x-auto">
+    <table class="w-full text-sm min-w-[56rem]">
+      <thead class="bg-slate-100 text-slate-700"><tr><th scope="col" class="text-left px-4 py-2 font-semibold">Toán tử</th><th scope="col" class="text-left px-4 py-2 font-semibold">Descartes $(x, y, z)$</th><th scope="col" class="text-left px-4 py-2 font-semibold">Trụ $(r, \phi, z)$</th><th scope="col" class="text-left px-4 py-2 font-semibold">Cầu $(R, \theta, \phi)$</th></tr></thead>
+      <tbody class="divide-y divide-slate-200 text-slate-800">
+        <tr class="align-top"><th scope="row" class="px-4 py-3 text-left font-semibold text-slate-800 whitespace-nowrap">Gradient<div class="font-normal text-slate-600">$\nabla V$</div></th><td class="px-4 py-3"><div class="eq">$\boldsymbol{\hat{x}}\dfrac{\partial V}{\partial x}+\boldsymbol{\hat{y}}\dfrac{\partial V}{\partial y}+\boldsymbol{\hat{z}}\dfrac{\partial V}{\partial z}$</div></td><td class="px-4 py-3"><div class="eq">$\boldsymbol{\hat{r}}\dfrac{\partial V}{\partial r}+\boldsymbol{\hat{\phi}}\dfrac{1}{r}\dfrac{\partial V}{\partial \phi}+\boldsymbol{\hat{z}}\dfrac{\partial V}{\partial z}$</div></td><td class="px-4 py-3"><div class="eq">$\boldsymbol{\hat{R}}\dfrac{\partial V}{\partial R}+\boldsymbol{\hat{\theta}}\dfrac{1}{R}\dfrac{\partial V}{\partial \theta}+\boldsymbol{\hat{\phi}}\dfrac{1}{R\sin\theta}\dfrac{\partial V}{\partial \phi}$</div></td></tr>
+        <tr class="align-top"><th scope="row" class="px-4 py-3 text-left font-semibold text-slate-800 whitespace-nowrap">Độ phân kỳ<div class="font-normal text-slate-600">$\nabla\cdot\mathbf{A}$</div></th><td class="px-4 py-3"><div class="eq">$\dfrac{\partial A_x}{\partial x}+\dfrac{\partial A_y}{\partial y}+\dfrac{\partial A_z}{\partial z}$</div></td><td class="px-4 py-3"><div class="eq">$\dfrac{1}{r}\dfrac{\partial (rA_r)}{\partial r}+\dfrac{1}{r}\dfrac{\partial A_\phi}{\partial \phi}+\dfrac{\partial A_z}{\partial z}$</div></td><td class="px-4 py-3"><div class="eq">$\dfrac{1}{R^2}\dfrac{\partial (R^2A_R)}{\partial R}+\dfrac{1}{R\sin\theta}\dfrac{\partial (A_\theta\sin\theta)}{\partial \theta}+\dfrac{1}{R\sin\theta}\dfrac{\partial A_\phi}{\partial \phi}$</div></td></tr>
+        <tr class="align-top"><th scope="row" class="px-4 py-3 text-left font-semibold text-slate-800 whitespace-nowrap">Toán tử Laplace<div class="font-normal text-slate-600">$\nabla^2 V$</div></th><td class="px-4 py-3"><div class="eq">$\dfrac{\partial^2 V}{\partial x^2}+\dfrac{\partial^2 V}{\partial y^2}+\dfrac{\partial^2 V}{\partial z^2}$</div></td><td class="px-4 py-3"><div class="eq">$\dfrac{1}{r}\dfrac{\partial}{\partial r}\Big(r\dfrac{\partial V}{\partial r}\Big)+\dfrac{1}{r^2}\dfrac{\partial^2 V}{\partial \phi^2}+\dfrac{\partial^2 V}{\partial z^2}$</div></td><td class="px-4 py-3"><div class="eq">$\dfrac{1}{R^2}\dfrac{\partial}{\partial R}\Big(R^2\dfrac{\partial V}{\partial R}\Big)+\dfrac{1}{R^2\sin\theta}\dfrac{\partial}{\partial \theta}\Big(\sin\theta\dfrac{\partial V}{\partial \theta}\Big)+\dfrac{1}{R^2\sin^2\theta}\dfrac{\partial^2 V}{\partial \phi^2}$</div></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="px-4 py-3 text-sm text-slate-600 border-t border-slate-200">Độ xoáy trong từng hệ tọa độ được trình bày ở trang <a href="../topic2/curl_operator.html" data-file="topic2/curl_operator.html" class="nav font-semibold text-sky-800 hover:underline">2.6 Độ xoáy của trường vectơ</a>.</p>
+  </section>
+</main>
+
+<footer class="border-t border-slate-200 py-5 px-4 text-center text-sm text-slate-600 mt-10">
+  Cổng học phần Trường điện từ — Chủ đề 1 đến 5 · Ký hiệu theo Fawwaz T. Ulaby and Umberto Ravaioli, <i>Fundamentals of Applied Electromagnetics</i>, 8th Edition, Pearson.
+</footer>
+
+<script src="../../assets/js/portal.vi.js"></script>
+<script src="../../assets/js/portal.js"></script>
+<script>
+topNav();
+
+portalReady();
+</script>
+</body>
+</html>

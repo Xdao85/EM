@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phương pháp ảnh điện - Học phần Trường điện từ</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="flip-vertical-2" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Phương pháp ảnh điện</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Nguyên lý</button>
+                <button onclick="scrollToSection('sim')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="scan-eye" class="w-3.5 h-3.5"></i><span>Trực quan hóa trường</span></button>
+                <button onclick="scrollToSection('induced')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="waves" class="w-3.5 h-3.5"></i><span>Điện tích cảm ứng và lực</span></button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Kiểm tra</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Bài toán giá trị biên</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Phương pháp ảnh điện cho mặt phẳng dẫn</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">Một điện tích điểm (point charge) $Q$ đặt ở độ cao $d$ phía trên một mặt phẳng dẫn điện lý tưởng, vô hạn và nối đất (ground plane). Các điện tích cảm ứng (induced) trên mặt phẳng khiến việc tính trường trực tiếp trở nên khó khăn. Mẹo ở đây: bỏ mặt phẳng đi và đặt một điện tích <em>ảnh</em> (image charge) $-Q$ tại vị trí đối xứng gương. Cặp điện tích này cho $V = 0$ trên mặt phẳng cũ, và vì nghiệm của phương trình Poisson với các giá trị biên cho trước là duy nhất, trường phía trên mặt phẳng hoàn toàn chính xác. Điện tích ảnh là phép thay thế toán học, không phải điện tích thật trong vật dẫn. Nó hữu ích vì thỏa cùng điều kiện biên trong miền cần tìm trường vật lý.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-400/10 px-2.5 py-1 rounded-md">1. Bài toán tương đương</span>
+                    <h3 class="text-base font-bold text-slate-900">Điện tích và ảnh</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$Q\ \text{tại}\ (0,0,d),\quad -Q\ \text{tại}\ (0,0,-d)$$</div>
+                    <p class="text-sm text-slate-700">Mọi điểm trên mặt phẳng $z = 0$ cách đều hai điện tích, nên tại đó $V = 0$, giống hệt vật dẫn nối đất.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">2. Trường khi $z \ge 0$</span>
+                    <h3 class="text-base font-bold text-slate-900">Chồng chất</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\mathbf{E} = \frac{Q}{4\pi\varepsilon_0}\left(\frac{\mathbf{R}_1}{R_1^3} - \frac{\mathbf{R}_2}{R_2^3}\right)$$</div>
+                    <p class="text-sm text-slate-700">$\mathbf{R}_1$, $\mathbf{R}_2$ hướng từ $Q$ và $-Q$ đến điểm quan sát. Phía dưới mặt phẳng, trường thực bằng không.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-400/10 px-2.5 py-1 rounded-md">3. Điện tích cảm ứng</span>
+                    <h3 class="text-base font-bold text-slate-900">Trên vật dẫn</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\rho_{\mathrm{s}} = \varepsilon_0\,\hat{\mathbf{z}}\cdot\mathbf{E}\big|_{z=0} = \frac{-Qd}{2\pi(r^2+d^2)^{3/2}}$$</div>
+                    <p class="text-sm text-slate-700">Điều kiện biên (boundary condition) $D_{\mathrm{n}} = \rho_{\mathrm{s}}$ chuyển trường của ảnh trở lại thành điện tích mặt thực.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="sim" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 1</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Bài toán thực và bài toán ảnh tương đương</h2>
+                    <p class="text-sm text-slate-600 mt-1">Chuyển đổi chế độ xem: các đường sức và mặt đẳng thế (equipotential) trong miền vật lý giống hệt nhau. Kéo $Q$ và điểm quan sát $P$. Hãy thử góc 90°, trường hợp cần ba điện tích ảnh. Chỉ so sánh hai cách biểu diễn ở phía trên mặt dẫn. Khi nguồn tiến gần mặt, điện tích cảm ứng tập trung hơn và lực hút tăng.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-8 flex flex-col space-y-3">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <div id="geom-group" class="flex gap-1.5"><button data-v="plane" class="chip on">Mặt phẳng dẫn</button><button data-v="corner" class="chip">Góc 90°</button></div>
+                        <span class="mx-1 text-slate-600">|</span>
+                        <div id="view-group" class="flex gap-1.5"><button data-v="real" class="chip on">Thực (vật dẫn)</button><button data-v="image" class="chip">Tương đương (ảnh)</button></div>
+                        <span class="mx-1 text-slate-600">|</span>
+                        <button onclick="chipToggle(im, 'equi', this, 'on-indigo'); drawSim()" class="chip on-indigo">Đường đẳng thế</button>
+                    </div>
+                    <div class="relative h-[440px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-sim" class="w-full h-full cursor-grab"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Điện tích $Q$</span><span id="val-q" class="font-mono text-sky-800"></span></div><input type="range" id="slider-q" min="1" max="20" step="1" value="10" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Độ cao $d$ (hoặc kéo $Q$)</span><span id="val-d" class="font-mono text-amber-800"></span></div><input type="range" id="slider-d" min="0.5" max="6" step="0.1" value="3" class="w-full accent-amber-600"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-4 glass-card rounded-2xl p-5 space-y-3 text-sm">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Trường tại $P$</h3>
+                    <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                        <div class="flex justify-between"><span class="font-sans text-slate-600">$P(r, z)$</span><span id="ro-p" class="text-emerald-800 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans text-slate-600">$R_1$, $R_2$</span><span id="ro-r" class="text-slate-900 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans text-slate-600">$V(P)$</span><span id="ro-v" class="text-indigo-700 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans text-slate-600">$E_r$, $E_z$</span><span id="ro-ec" class="text-slate-900 font-bold"></span></div>
+                        <div class="flex justify-between border-t border-slate-200 pt-2"><span class="font-sans font-semibold text-slate-900">$|\mathbf{E}(P)|$</span><span id="ro-e" class="text-rose-700 font-bold"></span></div>
+                    </div>
+                    <div id="img-list" class="p-3 rounded-xl bg-slate-100/90 border border-slate-200 text-slate-700"></div>
+                    <p class="text-slate-600">Đường sức xuất phát từ $Q$ và kết thúc vuông góc trên vật dẫn, nơi có điện tích âm cảm ứng. Khoảng cách tính bằng cm.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="induced" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 2</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Điện tích mặt cảm ứng và lực tác dụng lên $Q$</h2>
+                    <p class="text-sm text-slate-600 mt-1">Với một mặt phẳng: điện tích cảm ứng tập trung ngay dưới $Q$ và trải rộng ra khi $d$ tăng, nhưng tổng của nó luôn đúng bằng $-Q$. Mặt phẳng hút $Q$ như thể điện tích ảnh là có thật.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-60 rounded-2xl bg-white border border-slate-200 overflow-hidden"><canvas id="canvas-rho" class="w-full h-full"></canvas></div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-3 text-sm text-slate-700">
+                    <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                        <div class="flex justify-between"><span class="font-sans text-slate-600">$\rho_{\mathrm{s}}$ cực đại (tại $r = 0$)</span><span id="ro-rho0" class="text-rose-700 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans text-slate-600">$\int_0^\infty \rho_{\mathrm{s}}\, 2\pi r\, dr$ (tính số)</span><span id="ro-qind" class="text-rose-700 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans text-slate-600">Một nửa điện tích cảm ứng nằm trong</span><span id="ro-half" class="text-amber-800 font-bold"></span></div>
+                        <div class="flex justify-between border-t border-slate-200 pt-2"><span class="font-sans font-semibold text-slate-900">Lực $\mathbf{F} = -\hat{\mathbf{z}}\,\dfrac{Q^2}{4\pi\varepsilon_0 (2d)^2}$</span><span id="ro-f" class="text-sky-800 font-bold"></span></div>
+                    </div>
+                    <p>Lưu ý ảnh chỉ cho trường đúng trong miền vật lý: năng lượng của hệ thực bằng một nửa năng lượng của cặp điện tích – ảnh, vì trường phía dưới mặt phẳng không tồn tại.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Câu hỏi tự kiểm tra</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Làm lại</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Điểm: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Học phần Trường điện từ — Phương pháp ảnh điện</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Câu ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Điểm: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Đúng. ' : '✗ Sai — đáp án đúng là ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Điểm: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // Method of images: plane and 90° corner
+        // =========================================================
+        const im = { geom: 'plane', view: 'real', equi: true, Q: { x: 0, z: 3 }, P: { x: 2.5, z: 4.5 } };
+        const KV = 8.9875517923e9 * 1e-9 / 1e-2;   // V for q in nC and R in cm → 899 q/R
+        function qnC() { return num('slider-q'); }
+        function sources() {
+            const q = qnC(), { x, z } = im.Q;
+            if (im.geom === 'plane') return [{ x, z, q, real: true }, { x, z: -z, q: -q }];
+            return [{ x, z, q, real: true }, { x: -x, z, q: -q }, { x, z: -z, q: -q }, { x: -x, z: -z, q }];
+        }
+        const physical = (x, z) => im.geom === 'plane' ? z > 0 : (x > 0 && z > 0);
+        function geom(w, h) {
+            if (im.geom === 'plane') { const S = Math.min(w / 16.4, h / 14.4), top = (h - 14 * S) / 2; return { S, X: x => w / 2 + x * S, Y: z => top + (8.5 - z) * S, wx: px => (px - w / 2) / S, wz: py => 8.5 - (py - top) / S }; }
+            const S = Math.min(w / 14.4, h / 14.4); return { S, X: x => w / 2 + (x - 2) * S, Y: z => h / 2 - (z - 2) * S, wx: px => (px - w / 2) / S + 2, wz: py => 2 - (py - h / 2) / S };
+        }
+        function Vat(x, z, src) { let V = 0; src.forEach(s => V += KV * s.q / Math.max(Math.hypot(x - s.x, z - s.z), 0.05)); return V; }
+        function Eat(x, z, src) {   // V/m, with x,z in cm
+            let ex = 0, ez = 0;
+            src.forEach(s => { const dx = (x - s.x) * 1e-2, dz = (z - s.z) * 1e-2, r = Math.max(Math.hypot(dx, dz), 5e-4); const k = 8.9875517923e9 * s.q * 1e-9 / (r * r * r); ex += k * dx; ez += k * dz; });
+            return [ex, ez];
+        }
+        function traceLine(x, z, src, G, w, h, real) {
+            const pts = [[x, z]];
+            for (let i = 0; i < 1600; i++) {
+                const [e1x, e1z] = Eat(x, z, src), m1 = Math.hypot(e1x, e1z) || 1, st = 0.06;
+                const xm = x + e1x / m1 * st / 2, zm = z + e1z / m1 * st / 2, [e2x, e2z] = Eat(xm, zm, src), m2 = Math.hypot(e2x, e2z) || 1;
+                const nx = x + e2x / m2 * st, nz = z + e2z / m2 * st;
+                if (real && !physical(nx, nz)) {
+                    // clip to the boundary
+                    if (im.geom === 'plane' || (nz <= 0 && z > 0)) { const t = z / (z - nz); pts.push([x + (nx - x) * t, 0]); }
+                    else { const t = x / (x - nx); pts.push([0, z + (nz - z) * t]); }
+                    break;
+                }
+                x = nx; z = nz; pts.push([x, z]);
+                const px = G.X(x), py = G.Y(z);
+                if (px < -20 || px > w + 20 || py < -20 || py > h + 20) break;
+                if (src.some(s => s.q < 0 && Math.hypot(x - s.x, z - s.z) < 0.2)) break;
+            }
+            return pts;
+        }
+        function drawSim() {
+            const q = qnC(); setText('val-q', q + ' nC'); setText('val-d', im.Q.z.toFixed(1) + ' cm');
+            const c = setupCanvas('canvas-sim'); if (!c) return;
+            const { ctx, w, h } = c, G = geom(w, h), src = sources(), real = im.view === 'real';
+            // grid
+            for (let x = -10; x <= 12; x++) line(ctx, G.X(x), 0, G.X(x), h, COL.grid, 1);
+            for (let z = -10; z <= 12; z++) line(ctx, 0, G.Y(z), w, G.Y(z), COL.grid, 1);
+            // conductor region (real view)
+            if (real) {
+                ctx.save(); ctx.fillStyle = 'rgba(100, 116, 139, 0.35)';
+                if (im.geom === 'plane') ctx.fillRect(0, G.Y(0), w, h - G.Y(0));
+                else { ctx.fillRect(0, G.Y(0), w, h - G.Y(0)); ctx.fillRect(0, 0, G.X(0), G.Y(0)); }
+                ctx.restore();
+                label(ctx, 'vật dẫn nối đất (V = 0, bên trong E = 0)', 10, h - 12, COL.slate, '600 12px Inter, sans-serif');
+            }
+            // equipotentials
+            if (im.equi) {
+                const lv = [25, 50, 100, 200, 400, 800, 1600].map(v => v * q / 10);
+                contours(ctx, w, h, (px, py) => { const x = G.wx(px), z = G.wz(py); if (real && !physical(x, z)) return NaN; return Vat(x, z, src); },
+                    [...lv, ...lv.map(v => -v)], v => v > 0 ? 'rgba(3, 105, 161, 0.4)' : 'rgba(190, 18, 60, 0.4)', 5, 1);
+            }
+            // V = 0 planes
+            ctx.save(); ctx.strokeStyle = real ? COL.slate : COL.emerald; ctx.lineWidth = real ? 3 : 2; if (!real) ctx.setLineDash([8, 5]);
+            ctx.beginPath(); ctx.moveTo(im.geom === 'plane' ? 0 : G.X(0), G.Y(0)); ctx.lineTo(w, G.Y(0));
+            if (im.geom === 'corner') { ctx.moveTo(G.X(0), G.Y(0)); ctx.lineTo(G.X(0), 0); }
+            ctx.stroke(); ctx.restore();
+            if (!real) label(ctx, 'V = 0 (vị trí vật dẫn cũ)', w - 10, G.Y(0) - 10, COL.emerald, '600 12px Inter, sans-serif', 'right');
+            // field lines
+            const starts = real ? src.filter(s => s.real) : src.filter(s => s.q > 0);
+            starts.forEach(s => {
+                const N = 22;
+                for (let k = 0; k < N; k++) {
+                    const a = 2 * Math.PI * (k + 0.5) / N, pts = traceLine(s.x + 0.25 * Math.cos(a), s.z + 0.25 * Math.sin(a), src, G, w, h, real);
+                    if (pts.length < 2) continue;
+                    ctx.save(); ctx.strokeStyle = s.real ? 'rgba(79, 70, 229, 0.8)' : 'rgba(79, 70, 229, 0.4)'; ctx.lineWidth = 1.5; ctx.beginPath();
+                    pts.forEach(([x, z], i) => i ? ctx.lineTo(G.X(x), G.Y(z)) : ctx.moveTo(G.X(x), G.Y(z))); ctx.stroke(); ctx.restore();
+                    const mid = pts[Math.min(pts.length - 2, 24)], nx = pts[Math.min(pts.length - 1, 25)];
+                    if (mid && nx) arrow(ctx, G.X(mid[0]), G.Y(mid[1]), G.X(nx[0]) - G.X(mid[0]), G.Y(nx[1]) - G.Y(mid[1]), 'rgba(79, 70, 229, 0.9)', 1, 1.5, 6);
+                }
+            });
+            // induced charge marks along the boundary (real view)
+            if (real) {
+                for (let x = -9; x <= 12; x += 0.5) {
+                    const pts = im.geom === 'plane' ? [[x, 0.001]] : (x > 0 ? [[x, 0.001], [0.001, x]] : []);
+                    pts.forEach(([bx, bz]) => {
+                        const [ex, ez] = Eat(bx, bz, src), en = im.geom === 'plane' || bz < 0.01 ? ez : ex, f = clamp(Math.abs(en) / (8.99e9 * q * 1e-9 / Math.pow(im.Q.z * 1e-2, 2)) * 1.4, 0, 1);
+                        if (f < 0.04) return;
+                        const sx = G.X(bx), sy = G.Y(bz), off = 8;
+                        label(ctx, en > 0 ? '+' : '−', im.geom === 'plane' || bz < 0.01 ? sx : sx - off, im.geom === 'plane' || bz < 0.01 ? sy + off : sy, en > 0 ? COL.sky : COL.rose, `bold ${Math.round(9 + 8 * f)}px Inter, sans-serif`, 'center');
+                    });
+                }
+            }
+            // charges
+            src.forEach(s => {
+                if (real && !s.real) return;
+                ctx.save(); ctx.globalAlpha = s.real ? 1 : 0.55; chargeDisc(ctx, G.X(s.x), G.Y(s.z), s.q, 13); ctx.restore();
+                label(ctx, s.real ? `Q = +${q} nC` : `${s.q > 0 ? '+' : '−'}Q (ảnh)`, G.X(s.x), G.Y(s.z) - 22, s.q > 0 ? COL.sky : COL.rose, '600 12px Inter, sans-serif', 'center');
+            });
+            // P
+            const P = im.P, [ex, ez] = Eat(P.x, P.z, src), m = Math.hypot(ex, ez);
+            if (m > 0) arrow(ctx, G.X(P.x), G.Y(P.z), ex / m * 40, -ez / m * 40, COL.amber, 1, 2.6, 10);
+            ctx.save(); ctx.beginPath(); ctx.arc(G.X(P.x), G.Y(P.z), 8, 0, Math.PI * 2); ctx.fillStyle = COL.emerald; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+            label(ctx, 'P', G.X(P.x) + 12, G.Y(P.z) + 12, COL.emerald, 'bold 13px Inter, sans-serif');
+            const R1 = Math.hypot(P.x - src[0].x, P.z - src[0].z), R2 = Math.hypot(P.x - src[1].x, P.z - src[1].z);
+            setText('ro-p', `(${P.x.toFixed(1)}, ${P.z.toFixed(1)}) cm`); setText('ro-r', `${R1.toFixed(2)}, ${R2.toFixed(2)} cm`);
+            setText('ro-v', fmtSI(Vat(P.x, P.z, src), 'V')); setText('ro-ec', `${fmtSI(ex, 'V/m', 3)}, ${fmtSI(ez, 'V/m', 3)}`); setText('ro-e', fmtSI(m, 'V/m'));
+            $('img-list').innerHTML = '<span class="font-semibold text-slate-900">Các điện tích ảnh:</span> ' + src.filter(s => !s.real).map(s => `${s.q > 0 ? '+' : '−'}Q tại (${s.x.toFixed(1)}, ${s.z.toFixed(1)})`).join(', ');
+            drawRho();
+        }
+        chipGroup('geom-group', v => {
+            im.geom = v;
+            if (v === 'plane') { im.Q = { x: 0, z: 3 }; im.P = { x: 2.5, z: 4.5 }; } else { im.Q = { x: 3, z: 2.5 }; im.P = { x: 5.5, z: 5 }; }
+            $('slider-d').value = im.Q.z; drawSim();
+        });
+        chipGroup('view-group', v => { im.view = v; drawSim(); });
+        draggable('canvas-sim', (x, y, w, h) => {
+            const G = geom(w, h);
+            if (Math.hypot(G.X(im.P.x) - x, G.Y(im.P.z) - y) < 16) return 'P';
+            if (Math.hypot(G.X(im.Q.x) - x, G.Y(im.Q.z) - y) < 18) return 'Q';
+            return null;
+        }, (k, x, y, w, h) => {
+            const G = geom(w, h), X = G.wx(x), Z = G.wz(y), lo = im.geom === 'corner' ? 0.5 : -7.5;
+            im[k].x = clamp(Math.round(X * 10) / 10, k === 'Q' && im.geom === 'plane' ? -6 : lo, im.geom === 'corner' ? 8.5 : 7.5);
+            im[k].z = clamp(Math.round(Z * 10) / 10, 0.5, im.geom === 'corner' ? 8.5 : 8);
+            if (k === 'Q') $('slider-d').value = im.Q.z;
+            drawSim();
+        });
+        onInputs(['slider-q'], drawSim);
+        onInputs(['slider-d'], () => { im.Q.z = num('slider-d'); drawSim(); });
+
+        // =========================================================
+        // Induced surface charge on the plane and force on Q
+        // =========================================================
+        function drawRho() {
+            const Q = qnC() * 1e-9, d = im.Q.z * 1e-2;
+            const rho = r => -Q * d / (2 * Math.PI * Math.pow(r * r + d * d, 1.5));
+            let tot = 0, prev = 0; const N = 4000;
+            for (let i = 1; i <= N; i++) { const r = d * (Math.pow(10, 4 * i / N) - 1), r0 = d * (Math.pow(10, 4 * (i - 1) / N) - 1); tot += 0.5 * (rho(r) * 2 * Math.PI * r + rho(r0) * 2 * Math.PI * r0) * (r - r0); }
+            setText('ro-rho0', fmtSI(rho(0), 'C/m²')); setText('ro-qind', fmtSI(tot, 'C') + ` (= −Q)`);
+            setText('ro-half', `r = √3 d = ${(Math.sqrt(3) * im.Q.z).toFixed(2)} cm`);
+            setText('ro-f', fmtSI(8.9875517923e9 * Q * Q / Math.pow(2 * d, 2), 'N') + ' (lực hút)');
+            const c = setupCanvas('canvas-rho'); if (!c) return;
+            const { ctx, w, h } = c;
+            const r0 = Math.abs(rho(0));
+            const F = plotFrame(ctx, w, h, -10, 10, 0, 1.08, { left: 30, xlabel: 'r (cm) dọc theo mặt phẳng', ylabel: '|ρs| / |ρs(0)|' });
+            for (let k = 0; k < 200; k++) { const x0 = -10 + 20 * k / 200, v = Math.abs(rho(Math.abs(x0) * 1e-2)) / r0; ctx.fillStyle = `rgba(225, 29, 72, ${0.08 + 0.55 * v})`; ctx.fillRect(F.X(x0), h - F.B - 8, F.X(x0 + 0.1) - F.X(x0) + 1, 8); }
+            curve(ctx, x => Math.abs(rho(Math.abs(x) * 1e-2)) / r0, -10, 10, F.X, F.Y, COL.rose, 2.6, 300);
+            [-1, 1].forEach(s => line(ctx, F.X(s * Math.sqrt(3) * im.Q.z), F.T, F.X(s * Math.sqrt(3) * im.Q.z), h - F.B, COL.amber, 1, [3, 3]));
+            label(ctx, 'một nửa điện tích cảm ứng', F.X(0), F.T + 4, COL.amber, '12px Inter, sans-serif', 'center');
+            label(ctx, `d = ${im.Q.z.toFixed(1)} cm${im.geom === 'corner' ? ' (trường hợp một mặt phẳng)' : ''}`, w - 14, F.T + 22, COL.slate, '12px Inter, sans-serif', 'right');
+        }
+
+        window.addEventListener('load', () => {
+            renderQuiz([
+                { q: 'Vì sao có thể thay mặt phẳng nối đất bằng một điện tích ảnh khi tìm trường trong miền $z > 0$?', opts: ['Cặp điện tích thỏa mãn cùng phương trình và cùng điều kiện biên $V = 0$, và nghiệm đó là duy nhất.', 'Điện tích ảnh tồn tại thật bên trong vật dẫn.', 'Vật dẫn trong suốt đối với điện trường.'], ans: 0, why: 'Tính duy nhất: cùng điện tích trong miền và cùng giá trị biên thì cho cùng một trường.' },
+                { q: 'Tổng điện tích cảm ứng trên mặt phẳng nối đất vô hạn là:', opts: ['$+Q$', '$-Q$', 'bằng không'], ans: 1, why: '$\\int_0^\\infty \\rho_{\\mathrm{s}} 2\\pi r\\,dr = -Q$: mọi đường sức xuất phát từ $Q$ đều kết thúc trên mặt phẳng.' },
+                { q: 'Lực giữa $Q$ và mặt phẳng nối đất là:', opts: ['lực đẩy', 'lực hút, $Q^2/[4\\pi\\varepsilon_0(2d)^2]$', 'bằng không'], ans: 1, why: 'Nó bằng lực do điện tích ảnh $-Q$ ở khoảng cách $2d$ gây ra.' },
+                { q: 'Với một điện tích điểm nằm trong góc dẫn điện 90°, cần bao nhiêu điện tích ảnh?', opts: ['1', '2', '3'], ans: 2, why: 'Hai ảnh gương cộng với một ảnh thứ ba (ảnh của ảnh) có cùng dấu với điện tích gốc.' },
+                { q: 'Trường tính bằng điện tích ảnh có giá trị:', opts: ['ở mọi nơi', 'chỉ trong miền bên ngoài vật dẫn', 'chỉ bên trong vật dẫn'], ans: 1, why: 'Bên trong vật dẫn, trường thực bằng không; ảnh chỉ là công cụ toán học cho miền vật lý.' },
+                { q: 'Ngay dưới $Q$ (tại $r = 0$ trên mặt phẳng nối đất), mật độ điện tích mặt cảm ứng là:', opts: ['$-Q/(2\\pi d^2)$', '$-Q/(4\\pi d^2)$', '$+Q/(2\\pi d^2)$'], ans: 0, why: 'Thay $r = 0$ vào $\\rho_{\\mathrm{s}} = -Qd/[2\\pi(r^2 + d^2)^{3/2}]$ được $-Q/(2\\pi d^2)$, giá trị cực đại của điện tích cảm ứng.' }
+            ]);
+            drawSim();
+            window.addEventListener('resize', drawSim);
+            typeset();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free-Charge Dissipation in a Conductor - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="zap-off" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Free-Charge Dissipation in a Conductor</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Overview</button>
+<button onclick="scrollToSection('sim')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5"></i><span>Relaxation</span></button>
+<button onclick="scrollToSection('table')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i><span>Materials</span></button>
+<button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Time-Varying Fields · Charge Relaxation</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Free-Charge Dissipation in a Conductor</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">A conductor is normally neutral inside: $\rho_{\mathrm{v}} = 0$. If an excess charge is placed in its interior, the field it creates pushes the mobile charges around until neutrality is restored inside and the excess sits on the outer surface. How fast? Combining charge continuity, Ohm's law and Gauss's law gives a simple exponential with a time constant $\tau_{\mathrm{r}} = \varepsilon/\sigma$. This exponential model assumes homogeneous, linear permittivity and conductivity. Charge is redistributed rather than destroyed; disappearance of interior charge is accompanied by accumulation at the surface.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">1. Three Equations</span>
+                    <h3 class="text-base font-bold text-slate-900">Continuity, Ohm, Gauss</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\nabla\cdot\mathbf{J} = -\frac{\partial\rho_{\mathrm{v}}}{\partial t},\quad \mathbf{J} = \sigma\mathbf{E},\quad \nabla\cdot\mathbf{E} = \frac{\rho_{\mathrm{v}}}{\varepsilon}$$</div>
+                    <p class="text-sm text-slate-700">Substituting the second and third into the first eliminates $\mathbf{J}$ and $\mathbf{E}$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">2. Decay Law</span>
+                    <h3 class="text-base font-bold text-slate-900">First-order equation</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\frac{\partial\rho_{\mathrm{v}}}{\partial t} + \frac{\sigma}{\varepsilon}\rho_{\mathrm{v}} = 0\ \Rightarrow\ \rho_{\mathrm{v}}(t) = \rho_{\mathrm{vo}}e^{-t/\tau_{\mathrm{r}}}$$</div>
+                    <p class="text-sm text-slate-700">The decay is the same at every interior point; the charge does not "travel" to the surface as a front.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">3. Relaxation Time</span>
+                    <h3 class="text-base font-bold text-slate-900">Material constant</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\tau_{\mathrm{r}} = \frac{\varepsilon}{\sigma}$$</div>
+                    <p class="text-sm text-slate-700">About $1.5\times10^{-19}$ s for copper: neutrality is restored essentially instantly. For a good insulator it can take hours or days.</p>
+                </div>
+            </div>
+        </section>
+        <section id="sim" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Relaxation of an Injected Charge</h2>
+                <p class="text-sm text-slate-600 mt-1">A ball of charge $Q$ is injected at the centre of a conducting sphere. The interior density decays as $e^{-t/\tau_{\mathrm{r}}}$ everywhere at once, and the same amount appears as surface charge. The total charge is conserved, so the field <em>outside</em> the sphere never changes; only the field inside disappears. Time is shown in units of $\tau_{\mathrm{r}}$, with the real time alongside. Change the material parameters and compare the normalized decay with its physical time. The local continuum model does not represent a literal instantaneous signal across the whole conductor; its extremely short metal time constants should be read within that model's limits.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Material:</span><div id="r-pre" class="flex flex-wrap gap-1.5 "><button data-v="cu" class="chip on">Copper</button><button data-v="sea" class="chip">Seawater</button><button data-v="water" class="chip">Pure water</button><button data-v="glass" class="chip">Glass</button><button data-v="mica" class="chip">Mica</button><button data-v="quartz" class="chip">Fused quartz</button></div><span class="mx-1 text-slate-600">|</span><button id="r-play" class="chip on">Pause</button><button id="r-reset" class="chip">Inject again</button></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[360px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-rel" class="w-full h-full"></canvas></div><div class="relative h-[200px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-relp" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">$\log_{10}\sigma$ (S/m)</span><input type="range" id="r-ls" min="-17" max="8" step="0.001" value="7.763" class="flex-1 min-w-0 accent-amber-600"><span id="val-r-ls" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">$\varepsilon_{\mathrm{r}}$</span><input type="range" id="r-er" min="1" max="81" step="0.1" value="1" class="flex-1 min-w-0 accent-sky-600"><span id="val-r-er" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\tau_{\mathrm{r}} = \varepsilon/\sigma$</span><span id="ro-tau" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Elapsed $t/\tau_{\mathrm{r}}$</span><span id="ro-tt" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Real time $t$</span><span id="ro-treal" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Interior charge $\rho_{\mathrm{v}}/\rho_{\mathrm{vo}}$</span><span id="ro-rho" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Charge on the surface</span><span id="ro-surf" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Field just outside the sphere</span><span id="ro-Eout" class="text-sky-800 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">At $t = \tau_{\mathrm{r}}$ 36.8 % of the interior charge remains; after $5\tau_{\mathrm{r}}$ only 0.67 %.</p></div>
+            </div>
+        </section>
+        <section id="table" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-emerald-800 bg-emerald-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Relaxation Times from Metals to Insulators</h2>
+                <p class="text-sm text-slate-600 mt-1">The relaxation time spans more than 25 orders of magnitude. The bars use a logarithmic time axis; the dashed lines mark familiar time scales.</p>
+            </div>
+            <div class="relative h-[300px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-bars" class="w-full h-full"></canvas></div><div class="overflow-x-auto"><table class="w-full text-left text-sm border-collapse">
+                <thead><tr class="border-b border-slate-200 text-slate-600"><th class="p-3">Material</th><th class="p-3">$\sigma$ (S/m)</th><th class="p-3">$\varepsilon_{\mathrm{r}}$</th><th class="p-3 text-emerald-800">$\tau_{\mathrm{r}} = \varepsilon/\sigma$</th></tr></thead>
+                <tbody class="divide-y divide-slate-200 text-slate-700">
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-slate-900">Copper</td><td class="p-3">$5.8\times10^{7}$</td><td class="p-3">1</td><td class="p-3 text-emerald-800 font-semibold">$1.53\times10^{-19}$ s</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-slate-900">Seawater</td><td class="p-3">4</td><td class="p-3">81</td><td class="p-3 text-emerald-800 font-semibold">$1.79\times10^{-10}$ s</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-slate-900">Pure water</td><td class="p-3">$10^{-4}$</td><td class="p-3">80</td><td class="p-3 text-emerald-800 font-semibold">$7.08\times10^{-6}$ s</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-slate-900">Glass</td><td class="p-3">$10^{-12}$</td><td class="p-3">5</td><td class="p-3 text-emerald-800 font-semibold">44 s</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-slate-900">Mica</td><td class="p-3">$10^{-15}$</td><td class="p-3">6</td><td class="p-3 text-emerald-800 font-semibold">$5.31\times10^{4}$ s (about 15 hours)</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-slate-900">Fused quartz</td><td class="p-3">$10^{-17}$</td><td class="p-3">3.8</td><td class="p-3 text-emerald-800 font-semibold">$3.4\times10^{6}$ s (about 39 days)</td></tr>
+                </tbody></table></div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Free-Charge Dissipation</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Score: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // Magnetostatics toolkit (Topic 4)
+        // =========================================================
+        const MU0 = 4 * Math.PI * 1e-7;
+        // one-row sliders: fmts = { id: v => text }, onChange() called after every move
+        function bindSliders(fmts, onChange) {
+            Object.entries(fmts).forEach(([id, f]) => {
+                const el = $(id); if (!el) return;
+                const show = () => setText('val-' + id, f(+el.value));
+                el.addEventListener('input', () => { show(); onChange && onChange(id); });
+                show();
+            });
+        }
+        const val = id => +$(id).value;
+        // ⊙ (out of page) / ⊗ (into page) symbol
+        function currentDot(ctx, x, y, out, color = COL.amber, r = 9) {
+            ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = color;
+            if (out) { ctx.beginPath(); ctx.arc(x, y, r * 0.3, 0, 2 * Math.PI); ctx.fill(); }
+            else { const d = r * 0.55; ctx.beginPath(); ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d); ctx.moveTo(x + d, y - d); ctx.lineTo(x - d, y + d); ctx.stroke(); }
+            ctx.restore();
+        }
+        // complete elliptic integrals K(k), E(k) by the arithmetic-geometric mean (k = modulus)
+        function ellipKE(k) {
+            let a = 1, b = Math.sqrt(1 - k * k), c = k, sum = 0.5 * c * c, p = 1;
+            for (let i = 0; i < 30 && Math.abs(c) > 1e-15; i++) { const an = (a + b) / 2; c = (a - b) / 2; b = Math.sqrt(a * b); a = an; p *= 2; sum += 0.5 * p * c * c; }
+            const K = Math.PI / (2 * a); return [K, K * (1 - sum)];
+        }
+        // exact B of a circular loop (radius a, current I, in the z = 0 plane, axis z) at (r, z): [Br, Bz] in tesla
+        function loopB(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : r;
+            const q = (a + r) ** 2 + z * z, k2 = 4 * a * r / q, [K, E] = ellipKE(Math.sqrt(Math.min(k2, 1 - 1e-12)));
+            const d = (a - r) ** 2 + z * z, f = MU0 * I / (2 * Math.PI * Math.sqrt(q));
+            return [f * z / r * (-K + (a * a + r * r + z * z) / d * E), f * (K + (a * a - r * r - z * z) / d * E)];
+        }
+        // mutual inductance of two coaxial circular loops (Maxwell's formula)
+        function mutualLoops(a1, a2, d) {
+            const k = Math.sqrt(4 * a1 * a2 / ((a1 + a2) ** 2 + d * d)), [K, E] = ellipKE(Math.min(k, 1 - 1e-12));
+            return MU0 * Math.sqrt(a1 * a2) * ((2 / k - k) * K - 2 / k * E);
+        }
+        // trace a 2-D field line from (x, y) in world units; F(x, y) → [fx, fy]; returns array of points
+        function traceLine(F, x, y, dir, step, nmax, box) {
+            const pts = [[x, y]];
+            for (let i = 0; i < nmax; i++) {
+                const f1 = F(x, y), m1 = Math.hypot(...f1); if (!(m1 > 1e-30)) break;
+                const mx = x + dir * step / 2 * f1[0] / m1, my = y + dir * step / 2 * f1[1] / m1, f2 = F(mx, my), m2 = Math.hypot(...f2); if (!(m2 > 1e-30)) break;
+                x += dir * step * f2[0] / m2; y += dir * step * f2[1] / m2;
+                if (x < box[0] || x > box[1] || y < box[2] || y > box[3]) { pts.push([x, y]); break; }
+                pts.push([x, y]);
+                if (i > 20 && Math.hypot(x - pts[0][0], y - pts[0][1]) < step * 0.8) { pts.push(pts[0]); break; }   // closed loop
+            }
+            return pts;
+        }
+        function drawPath(ctx, pts, X, Y, color, width = 1.3, alpha = 0.8, arrowsEvery = 0) {
+            if (pts.length < 2) return;
+            ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+            if (arrowsEvery) for (let i = arrowsEvery; i < pts.length - 1; i += arrowsEvery) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; const dx = X(x1) - X(x0), dy = Y(y1) - Y(y0), m = Math.hypot(dx, dy) || 1; arrow(ctx, X(x0), Y(y0), dx / m * 8, dy / m * 8, color, alpha, width, 6); }
+        }
+        // world ↔ screen mapping helper for a rectangular view
+        function view2D(w, h, xmin, xmax, ymin, ymax, pad = 12) {
+            const s = Math.min((w - 2 * pad) / (xmax - xmin), (h - 2 * pad) / (ymax - ymin)), ox = (w - s * (xmax - xmin)) / 2, oy = (h - s * (ymax - ymin)) / 2;
+            return { s, X: x => ox + (x - xmin) * s, Y: y => h - oy - (y - ymin) * s, x: px => xmin + (px - ox) / s, y: py => ymin + (h - oy - py) / s };
+        }
+        const fmtE = (v, d = 3) => !isFinite(v) ? '—' : v === 0 ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-2 ? v.toExponential(d - 1) : (+v.toPrecision(d)).toString());
+        const redrawOnResize = (ids, fn) => { const f = () => requestAnimationFrame(fn); if ('ResizeObserver' in window) { const ro = new ResizeObserver(f); ids.forEach(id => $(id) && ro.observe($(id).parentElement)); } window.addEventListener('resize', f); };
+        // vector potential A_φ of a circular loop; field lines in the meridian plane are contours of ψ = r·A_φ
+        function loopAphi(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : Math.abs(r);
+            const k2 = 4 * a * r / ((a + r) ** 2 + z * z), k = Math.sqrt(Math.min(k2, 1 - 1e-12)), [K, E] = ellipKE(k);
+            return MU0 * I / (Math.PI * k) * Math.sqrt(a / r) * ((1 - k2 / 2) * K - E);
+        }
+        // =========================================================
+        // Time-varying fields toolkit (Topic 5)
+        // =========================================================
+        const C0 = 299792458;
+        // rolling history buffer
+        function Trace(n = 500) { return { d: [], n, push(v) { this.d.push(v); if (this.d.length > this.n) this.d.shift(); }, clear() { this.d = []; } }; }
+        // oscilloscope: series = [{ tr: Trace or array, color, label, dash, scale }], ymax symmetric range
+        function scope(id, series, ymax, opts = {}) {
+            const c = setupCanvas(id); if (!c) return null; const { ctx, w, h } = c, L = opts.left ?? 54, R = 12, T = 22, B = 22;
+            const X = i => L + i / ((opts.n ?? 500) - 1) * (w - L - R), Y = v => T + (h - T - B) / 2 * (1 - v / ymax);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            for (let k = 0; k <= 8; k++) { const x = L + k * (w - L - R) / 8; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, h - B); ctx.stroke(); }
+            [-1, -0.5, 0, 0.5, 1].forEach(f => { ctx.beginPath(); ctx.moveTo(L, Y(f * ymax)); ctx.lineTo(w - R, Y(f * ymax)); ctx.stroke(); });
+            ctx.strokeStyle = '#94a3b8'; ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); ctx.restore();
+            label(ctx, opts.ylab ? `${opts.ylab}` : fmtE(ymax), L - 6, T + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            label(ctx, opts.ylab0 ?? '0', L - 6, Y(0) + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            series.forEach(s => { const d = s.tr.d || s.tr, sc = s.scale ?? 1; if (d.length < 2) return; ctx.save(); ctx.strokeStyle = s.color; ctx.lineWidth = s.width ?? 2.2; if (s.dash) ctx.setLineDash(s.dash); ctx.beginPath();
+                const off = (opts.n ?? 500) - d.length; d.forEach((v, i) => { const y = Y(clamp(v * sc, -ymax * 1.05, ymax * 1.05)); i ? ctx.lineTo(X(i + off), y) : ctx.moveTo(X(i + off), y); }); ctx.stroke(); ctx.restore(); });
+            let lx = L + 8; series.forEach(s => { if (!s.label) return; ctx.save(); ctx.font = '600 12px Inter, sans-serif'; const tw = ctx.measureText(s.label).width; ctx.restore(); ctx.save(); ctx.strokeStyle = s.color; ctx.lineWidth = 2.5; if (s.dash) ctx.setLineDash(s.dash); ctx.beginPath(); ctx.moveTo(lx, 12); ctx.lineTo(lx + 16, 12); ctx.stroke(); ctx.restore(); label(ctx, s.label, lx + 20, 16, s.color, '600 12px Inter, sans-serif'); lx += tw + 36; });
+            if (opts.xlab) label(ctx, opts.xlab, w - R, h - 6, COL.muted, '11px Inter, sans-serif', 'right');
+            return { ctx, w, h, X, Y };
+        }
+        const deg = r => r * 180 / Math.PI;
+        // small play/pause helper bound to a chip button
+        function playButton(id, state, key = 'run') { const b = $(id); if (!b) return; b.addEventListener('click', () => { state[key] = !state[key]; b.textContent = state[key] ? 'Pause' : 'Play'; b.classList.toggle('on', state[key]); }); }
+        const fmtT = s => { const a = Math.abs(s); return a >= 86400 * 365 ? (s / (86400 * 365)).toPrecision(3) + ' yr' : a >= 86400 ? (s / 86400).toPrecision(3) + ' days' : a >= 3600 ? (s / 3600).toPrecision(3) + ' h' : a >= 60 ? (s / 60).toPrecision(3) + ' min' : fmtSI(s, 's'); };
+        // =========================================================
+        // Free-charge dissipation (charge relaxation)
+        // =========================================================
+        const MATS = { cu: ['Copper', 5.8e7, 1], sea: ['Seawater', 4, 81], water: ['Pure water', 1e-4, 80], glass: ['Glass', 1e-12, 5], mica: ['Mica', 1e-15, 6], quartz: ['Fused quartz', 1e-17, 3.8] };
+        const RL = { t: 0, run: true, seed: [] };
+        for (let k = 0; k < 90; k++) { const r = 0.33 * Math.sqrt(Math.random()), a = Math.random() * 2 * Math.PI; RL.seed.push([r * Math.cos(a), r * Math.sin(a), Math.random()]); }
+        const tauR = () => val('r-er') * EPS0 / Math.pow(10, val('r-ls'));
+        chipGroup('r-pre', k => { const [, s, e] = MATS[k]; $('r-ls').value = Math.log10(s); $('r-er').value = e; ['r-ls', 'r-er'].forEach(id => $(id).dispatchEvent(new Event('input'))); RL.t = 0; });
+        function drawRel(dt) {
+            if (RL.run) { RL.t += dt; if (RL.t > 7) RL.t = 0; }
+            const tt = RL.t, frac = Math.exp(-tt), tau = tauR();
+            setText('ro-tau', fmtT(tau)); setText('ro-tt', tt.toFixed(2)); setText('ro-treal', fmtT(tt * tau)); setText('ro-rho', (100 * frac).toFixed(2) + ' %'); setText('ro-surf', (100 * (1 - frac)).toFixed(2) + ' % of Q'); setText('ro-Eout', 'Q/4πε₀R², unchanged at all times');
+            const c = setupCanvas('cv-rel'); if (!c) return; const { ctx, w, h } = c, cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.38;
+            ctx.save(); ctx.fillStyle = '#f1f5f9'; ctx.strokeStyle = COL.slate; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2 * Math.PI); ctx.fill(); ctx.stroke(); ctx.restore();
+            ctx.save(); ctx.fillStyle = `rgba(217,119,6,${0.45 * frac})`; ctx.beginPath(); ctx.arc(cx, cy, 0.33 * R, 0, 2 * Math.PI); ctx.fill(); ctx.restore();
+            RL.seed.forEach(([x, y, u]) => { if (u < frac) label(ctx, '+', cx + x * R, cy + y * R + 4, COL.amber, 'bold 12px Inter, sans-serif', 'center'); });
+            const ns = Math.round(40 * (1 - frac)); for (let k = 0; k < ns; k++) { const a = k * 2 * Math.PI / Math.max(ns, 1) + 0.1; label(ctx, '+', cx + (R - 9) * Math.cos(a), cy + (R - 9) * Math.sin(a) + 4, COL.emerald, 'bold 12px Inter, sans-serif', 'center'); }
+            // radial E inside (from the remaining interior charge) and outside (total charge, constant)
+            const r0 = 0.33, Ein = r => frac * Math.pow(Math.min(r, r0), 3) / (r * r), Emax = r0;
+            [0.2, 0.33, 0.5, 0.7, 0.88].forEach(r => { const L = 60 * Ein(r) / Emax; if (L > 2) for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6 + r; arrow(ctx, cx + r * R * Math.cos(a), cy + r * R * Math.sin(a), L * Math.cos(a), L * Math.sin(a), COL.sky, 0.85, 1.8, 7); } });
+            for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6 + 0.26, r = 1.08, L = 60 * r0 ** 3 / (r * r) / Emax; arrow(ctx, cx + r * R * Math.cos(a), cy + r * R * Math.sin(a), L * Math.cos(a), L * Math.sin(a), COL.sky, 0.85, 1.8, 7); }
+            label(ctx, 'amber: interior charge · emerald: surface charge · sky: E', 10, 18, COL.slate, '600 12px Inter, sans-serif');
+            label(ctx, `t = ${tt.toFixed(2)} τ_r`, 10, h - 10, COL.slate, 'bold 13px Inter, sans-serif');
+            const c2 = setupCanvas('cv-relp'); if (!c2) return; const g = c2.ctx, W = c2.w, H = c2.h;
+            const F = plotFrame(g, W, H, 0, 7, 0, 1.08, { left: 40, bottom: 28, xlabel: 't / τ_r', ylabel: 'fraction of Q' });
+            for (let x = 0; x <= 7; x++) label(g, x, F.X(x), H - F.B + 14, COL.muted, '11px Inter, sans-serif', 'center');
+            label(g, '1', F.L - 6, F.Y(1) + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            curve(g, x => Math.exp(-x), 0, 7, F.X, F.Y, COL.amber, 2.4); curve(g, x => 1 - Math.exp(-x), 0, 7, F.X, F.Y, COL.emerald, 2.4);
+            line(g, F.X(1), F.Y(0), F.X(1), F.Y(0.368), COL.slate, 1, [3, 3]); label(g, '36.8 %', F.X(1) + 4, F.Y(0.368) - 4, COL.slate, '11px Inter, sans-serif');
+            dot(g, F.X(tt), F.Y(frac), COL.amber, 5); dot(g, F.X(tt), F.Y(1 - frac), COL.emerald, 5);
+            label(g, 'interior', F.X(5.5), F.Y(0.12), COL.amber, 'bold 12px Inter, sans-serif'); label(g, 'surface', F.X(5.5), F.Y(0.9), COL.emerald, 'bold 12px Inter, sans-serif');
+        }
+        bindSliders({ 'r-ls': v => Math.pow(10, v).toExponential(1) + ' S/m', 'r-er': v => v.toFixed(1) }, () => { drawRel(0); drawBars(); });
+        playButton('r-play', RL); $('r-reset').addEventListener('click', () => { RL.t = 0; });
+        animate('cv-rel', drawRel);
+
+        function drawBars() {
+            const c = setupCanvas('cv-bars'); if (!c) return; const { ctx, w, h } = c, L = 110, Rr = 20, T = 20, B = 30, lo = -20, hi = 8;
+            const X = v => L + (v - lo) / (hi - lo) * (w - L - Rr), items = Object.values(MATS).map(([n, s, e]) => [n, e * EPS0 / s]);
+            items.push(['Your material', tauR()]);
+            const bh = (h - T - B) / items.length;
+            [[-9, '1 ns'], [0, '1 s'], [Math.log10(86400), '1 day'], [Math.log10(3.15e7), '1 yr']].forEach(([v, t]) => { line(ctx, X(v), T, X(v), h - B, COL.muted, 1, [4, 4]); label(ctx, t, X(v) + 3, T + 10, COL.muted, '11px Inter, sans-serif'); });
+            for (let v = lo; v <= hi; v += 4) label(ctx, '10^' + v, X(v), h - B + 16, COL.muted, '11px Inter, sans-serif', 'center');
+            label(ctx, 'τ_r (s, log scale)', w - Rr, h - 4, COL.slate, '12px Inter, sans-serif', 'right');
+            items.forEach(([n, t], i) => { const y = T + i * bh + bh * 0.2, lv = clamp(Math.log10(t), lo, hi); ctx.save(); ctx.fillStyle = i === items.length - 1 ? COL.violet : COL.emerald; ctx.globalAlpha = 0.8; ctx.fillRect(X(lo), y, X(lv) - X(lo), bh * 0.6); ctx.restore(); label(ctx, n, L - 8, y + bh * 0.45, i === items.length - 1 ? COL.violet : COL.slate, '600 12px Inter, sans-serif', 'right'); label(ctx, fmtT(t), X(lv) + 6, y + bh * 0.45, COL.slate, '11px Inter, sans-serif'); });
+        }
+        redrawOnResize(['cv-rel', 'cv-relp', 'cv-bars'], () => { drawRel(0); drawBars(); });
+        drawRel(0); drawBars(); startLoop();
+        renderQuiz([
+            { q: 'Excess charge injected inside a conductor ends up', opts: ['trapped where it was injected', 'on the outer surface, leaving the interior neutral', 'spread uniformly through the volume forever', 'at the centre'], ans: 1, why: 'The interior density decays as $e^{-t/\\tau_{\\mathrm{r}}}$ and the same charge appears on the surface.' },
+            { q: 'The relaxation time constant is', opts: ['$\\tau_{\\mathrm{r}} = \\varepsilon/\\sigma$', '$\\tau_{\\mathrm{r}} = \\sigma\\varepsilon$', '$\\tau_{\\mathrm{r}} = \\sigma/\\varepsilon$', '$\\tau_{\\mathrm{r}} = 1/\\sigma$'], ans: 0, why: 'From $\\partial\\rho_{\\mathrm{v}}/\\partial t + (\\sigma/\\varepsilon)\\rho_{\\mathrm{v}} = 0$.' },
+            { q: 'How does $\\rho_{\\mathrm{v}}$ change with time?', opts: ['Linearly to zero at $t = \\tau_{\\mathrm{r}}$', 'Exponentially: $\\rho_{\\mathrm{v}} = \\rho_{\\mathrm{vo}}e^{-t/\\tau_{\\mathrm{r}}}$', 'It oscillates', 'It stays constant'], ans: 1, why: 'A first-order linear equation gives an exponential. At $t = \\tau_{\\mathrm{r}}$ 36.8 % remains.' },
+            { q: 'During the relaxation, the electric field just outside the sphere', opts: ['grows from zero', 'stays constant', 'decays like the interior charge', 'reverses'], ans: 1, why: 'The total charge inside any surface enclosing the sphere is unchanged, so by Gauss\'s law the outside field is unchanged. Only the interior field vanishes.' },
+            { q: 'Which relaxation time is correct for mica ($\\sigma = 10^{-15}$ S/m, $\\varepsilon_{\\mathrm{r}} = 6$)?', opts: ['$5.3\\times10^{3}$ s', '$5.3\\times10^{4}$ s (about 15 hours)', '$5.3\\times10^{-4}$ s', '$1.5\\times10^{-19}$ s'], ans: 1, why: '$6\\times8.854\\times10^{-12}/10^{-15} = 5.31\\times10^{4}$ s.' },
+            { q: 'How long does it take for the interior charge density to fall to 1 % of its initial value?', opts: ['about $10\\,\\tau_{\\mathrm{r}}$', 'about $2.3\\,\\tau_{\\mathrm{r}}$', 'about $4.6\\,\\tau_{\\mathrm{r}}$', 'exactly $\\tau_{\\mathrm{r}}$'], ans: 2, why: '$e^{-t/\\tau_{\\mathrm{r}}} = 0.01$ gives $t = \\tau_{\\mathrm{r}}\\ln100 \\approx 4.6\\,\\tau_{\\mathrm{r}}$; $2.3\\,\\tau_{\\mathrm{r}}$ only brings it down to 10 %.' }
+        ]);
+
+    </script>
+</body>
+</html>

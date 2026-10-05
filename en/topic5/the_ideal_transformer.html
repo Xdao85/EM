@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ideal Transformer - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="zap" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">The Ideal Transformer</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Overview</button>
+<button onclick="scrollToSection('sim')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5"></i><span>Workbench</span></button>
+<button onclick="scrollToSection('matching')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="sliders" class="w-3.5 h-3.5"></i><span>Impedance Matching</span></button>
+<button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Time-Varying Fields · The Ideal Transformer</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Transforming Voltage, Current and Impedance</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">Two coils share one high-permeability core, so the same flux $\Phi$ links every turn of both. Faraday's law then fixes the voltage ratio, conservation of energy fixes the current ratio, and together they make a load look $n^2$ times larger from the primary side. The currents are defined so that, when both are positive, the flux from $I_2$ opposes the flux from $I_1$. An ideal transformer exchanges voltage for current while conserving power; it cannot increase both. The model neglects leakage flux, winding resistance and core loss, so real devices depart from these ratios under load.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">1. Voltage</span>
+                    <h3 class="text-base font-bold text-slate-900">Faraday's law on each coil</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\frac{V_1}{V_2} = \frac{N_1}{N_2} = n$$</div>
+                    <p class="text-sm text-slate-700">$V_1 = -N_1\,d\Phi/dt$ and $V_2 = -N_2\,d\Phi/dt$: the flux derivative cancels in the ratio.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">2. Current</span>
+                    <h3 class="text-base font-bold text-slate-900">No losses</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\frac{I_1}{I_2} = \frac{N_2}{N_1} = \frac1n$$</div>
+                    <p class="text-sm text-slate-700">With $P_1 = P_2$ (or, equivalently, zero net magnetomotive force $N_1I_1 - N_2I_2 = 0$ in a core with $\mu \to \infty$).</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">3. Impedance</span>
+                    <h3 class="text-base font-bold text-slate-900">Seen from the primary</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$Z_{\mathrm{in}} = \frac{V_1}{I_1} = \left(\frac{N_1}{N_2}\right)^2Z_{\mathrm{L}}$$</div>
+                    <p class="text-sm text-slate-700">An 8 Ω speaker behind a 5:1 transformer looks like 200 Ω to the amplifier.</p>
+                </div>
+            </div>
+        </section>
+        <section id="sim" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Transformer Workbench</h2>
+                <p class="text-sm text-slate-600 mt-1">Set the source, the turns and the load. The scope shows $v_1$, $v_2$ (measured at the top terminal of the secondary) and the currents. The dot marks the terminal of each winding at which the induced voltages have the same polarity: winding the secondary the other way moves its dot to the bottom and inverts $v_2$ at the top terminal. Switch to a real core to see the magnetizing current, which the ideal model neglects. Increase secondary turns and compare voltage with current for the same load. Use the dots to determine relative voltage polarity before assigning current signs; the dot convention describes winding orientation, not the direction of energy transfer.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Secondary winding:</span><div id="t-sense" class="flex flex-wrap gap-1.5 "><button data-v="same" class="chip on">Same sense (dot at top)</button><button data-v="opp" class="chip">Opposite sense (dot at bottom)</button></div><span class="mx-1 text-slate-600">|</span><span class="text-sm text-slate-600">Core:</span><div id="t-core" class="flex flex-wrap gap-1.5 "><button data-v="ideal" class="chip on">Ideal ($\mu \to \infty$)</button><button data-v="real" class="chip">Real (finite $\mu_{\mathrm{r}}$)</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6"><div class="lg:col-span-6 flex flex-col space-y-3"><div class="relative h-[380px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-tc" class="w-full h-full"></canvas></div></div><div class="lg:col-span-6 flex flex-col space-y-3"><div class="relative h-[380px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-tsc" class="w-full h-full"></canvas></div></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-6 flex flex-col space-y-3"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">$V_1$ (RMS)</span><input type="range" id="t-V1" min="10" max="240" step="5" value="120" class="flex-1 min-w-0 accent-amber-600"><span id="val-t-V1" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Primary $N_1$</span><input type="range" id="t-N1" min="50" max="1000" step="10" value="400" class="flex-1 min-w-0 accent-sky-600"><span id="val-t-N1" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Secondary $N_2$</span><input type="range" id="t-N2" min="50" max="1000" step="10" value="200" class="flex-1 min-w-0 accent-rose-600"><span id="val-t-N2" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Load $R_{\mathrm{L}}$</span><input type="range" id="t-RL" min="1" max="200" step="1" value="30" class="flex-1 min-w-0 accent-emerald-600"><span id="val-t-RL" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Load $X_{\mathrm{L}}$</span><input type="range" id="t-XL" min="-100" max="100" step="1" value="0" class="flex-1 min-w-0 accent-indigo-600"><span id="val-t-XL" class="w-20 shrink-0 text-right font-mono text-indigo-700"></span></div>
+<div id="t-realbox" class="hidden"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Core $\mu_{\mathrm{r}}$</span><input type="range" id="t-mu" min="50" max="5000" step="50" value="500" class="flex-1 min-w-0 accent-slate-600"><span id="val-t-mu" class="w-20 shrink-0 text-right font-mono text-slate-700"></span></div></div></div></div>
+                <div class="lg:col-span-6 space-y-4"><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$n = N_1/N_2$</span><span id="ro-n" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$V_2$ (RMS, top terminal)</span><span id="ro-V2" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$I_2 = V_2/Z_{\mathrm{L}}$</span><span id="ro-I2" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$I_1$</span><span id="ro-I1" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$Z_{\mathrm{in}} = V_1/I_1$</span><span id="ro-Zin" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$n^2Z_{\mathrm{L}}$</span><span id="ro-n2Z" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$P_1$ (average)</span><span id="ro-P1" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$P_2$ (average)</span><span id="ro-P2" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Magnetizing current</span><span id="ro-Im" class="text-slate-700 font-bold text-right"></span></div></div></div>
+            </div>
+        </section>
+        <section id="matching" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Impedance Matching with a Transformer</h2>
+                <p class="text-sm text-slate-600 mt-1">A source with internal resistance $R_{\mathrm{s}}$ drives a load $R_{\mathrm{L}}$ through a transformer. The load receives the most power when the reflected resistance equals the source resistance, $n^2R_{\mathrm{L}} = R_{\mathrm{s}}$, that is $n = \sqrt{R_{\mathrm{s}}/R_{\mathrm{L}}}$. Maximum load power is a matching condition, not maximum efficiency: a matched resistive source also dissipates power internally. This distinction matters when choosing between signal matching and efficient power transfer.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[320px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-match" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Source $R_{\mathrm{s}}$</span><input type="range" id="m-Rs" min="10" max="2000" step="10" value="200" class="flex-1 min-w-0 accent-amber-600"><span id="val-m-Rs" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Load $R_{\mathrm{L}}$</span><input type="range" id="m-RL" min="1" max="100" step="1" value="8" class="flex-1 min-w-0 accent-emerald-600"><span id="val-m-RL" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Turns ratio $n$</span><input type="range" id="m-n" min="0.2" max="20" step="0.1" value="2" class="flex-1 min-w-0 accent-sky-600"><span id="val-m-n" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Source $V_{\mathrm{s}}$ (RMS)</span><input type="range" id="m-Vs" min="1" max="50" step="1" value="10" class="flex-1 min-w-0 accent-rose-600"><span id="val-m-Vs" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Reflected $n^2R_{\mathrm{L}}$</span><span id="ro-mR" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Load power $P_{\mathrm{L}}$</span><span id="ro-mP" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Best ratio $\sqrt{R_{\mathrm{s}}/R_{\mathrm{L}}}$</span><span id="ro-mn" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Maximum $V_{\mathrm{s}}^2/4R_{\mathrm{s}}$</span><span id="ro-mPmax" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Without a transformer</span><span id="ro-m0" class="text-slate-700 font-bold text-right"></span></div></div></div>
+            </div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — The Ideal Transformer</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Score: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // Magnetostatics toolkit (Topic 4)
+        // =========================================================
+        const MU0 = 4 * Math.PI * 1e-7;
+        // one-row sliders: fmts = { id: v => text }, onChange() called after every move
+        function bindSliders(fmts, onChange) {
+            Object.entries(fmts).forEach(([id, f]) => {
+                const el = $(id); if (!el) return;
+                const show = () => setText('val-' + id, f(+el.value));
+                el.addEventListener('input', () => { show(); onChange && onChange(id); });
+                show();
+            });
+        }
+        const val = id => +$(id).value;
+        // ⊙ (out of page) / ⊗ (into page) symbol
+        function currentDot(ctx, x, y, out, color = COL.amber, r = 9) {
+            ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = color;
+            if (out) { ctx.beginPath(); ctx.arc(x, y, r * 0.3, 0, 2 * Math.PI); ctx.fill(); }
+            else { const d = r * 0.55; ctx.beginPath(); ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d); ctx.moveTo(x + d, y - d); ctx.lineTo(x - d, y + d); ctx.stroke(); }
+            ctx.restore();
+        }
+        // complete elliptic integrals K(k), E(k) by the arithmetic-geometric mean (k = modulus)
+        function ellipKE(k) {
+            let a = 1, b = Math.sqrt(1 - k * k), c = k, sum = 0.5 * c * c, p = 1;
+            for (let i = 0; i < 30 && Math.abs(c) > 1e-15; i++) { const an = (a + b) / 2; c = (a - b) / 2; b = Math.sqrt(a * b); a = an; p *= 2; sum += 0.5 * p * c * c; }
+            const K = Math.PI / (2 * a); return [K, K * (1 - sum)];
+        }
+        // exact B of a circular loop (radius a, current I, in the z = 0 plane, axis z) at (r, z): [Br, Bz] in tesla
+        function loopB(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : r;
+            const q = (a + r) ** 2 + z * z, k2 = 4 * a * r / q, [K, E] = ellipKE(Math.sqrt(Math.min(k2, 1 - 1e-12)));
+            const d = (a - r) ** 2 + z * z, f = MU0 * I / (2 * Math.PI * Math.sqrt(q));
+            return [f * z / r * (-K + (a * a + r * r + z * z) / d * E), f * (K + (a * a - r * r - z * z) / d * E)];
+        }
+        // mutual inductance of two coaxial circular loops (Maxwell's formula)
+        function mutualLoops(a1, a2, d) {
+            const k = Math.sqrt(4 * a1 * a2 / ((a1 + a2) ** 2 + d * d)), [K, E] = ellipKE(Math.min(k, 1 - 1e-12));
+            return MU0 * Math.sqrt(a1 * a2) * ((2 / k - k) * K - 2 / k * E);
+        }
+        // trace a 2-D field line from (x, y) in world units; F(x, y) → [fx, fy]; returns array of points
+        function traceLine(F, x, y, dir, step, nmax, box) {
+            const pts = [[x, y]];
+            for (let i = 0; i < nmax; i++) {
+                const f1 = F(x, y), m1 = Math.hypot(...f1); if (!(m1 > 1e-30)) break;
+                const mx = x + dir * step / 2 * f1[0] / m1, my = y + dir * step / 2 * f1[1] / m1, f2 = F(mx, my), m2 = Math.hypot(...f2); if (!(m2 > 1e-30)) break;
+                x += dir * step * f2[0] / m2; y += dir * step * f2[1] / m2;
+                if (x < box[0] || x > box[1] || y < box[2] || y > box[3]) { pts.push([x, y]); break; }
+                pts.push([x, y]);
+                if (i > 20 && Math.hypot(x - pts[0][0], y - pts[0][1]) < step * 0.8) { pts.push(pts[0]); break; }   // closed loop
+            }
+            return pts;
+        }
+        function drawPath(ctx, pts, X, Y, color, width = 1.3, alpha = 0.8, arrowsEvery = 0) {
+            if (pts.length < 2) return;
+            ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+            if (arrowsEvery) for (let i = arrowsEvery; i < pts.length - 1; i += arrowsEvery) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; const dx = X(x1) - X(x0), dy = Y(y1) - Y(y0), m = Math.hypot(dx, dy) || 1; arrow(ctx, X(x0), Y(y0), dx / m * 8, dy / m * 8, color, alpha, width, 6); }
+        }
+        // world ↔ screen mapping helper for a rectangular view
+        function view2D(w, h, xmin, xmax, ymin, ymax, pad = 12) {
+            const s = Math.min((w - 2 * pad) / (xmax - xmin), (h - 2 * pad) / (ymax - ymin)), ox = (w - s * (xmax - xmin)) / 2, oy = (h - s * (ymax - ymin)) / 2;
+            return { s, X: x => ox + (x - xmin) * s, Y: y => h - oy - (y - ymin) * s, x: px => xmin + (px - ox) / s, y: py => ymin + (h - oy - py) / s };
+        }
+        const fmtE = (v, d = 3) => !isFinite(v) ? '—' : v === 0 ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-2 ? v.toExponential(d - 1) : (+v.toPrecision(d)).toString());
+        const redrawOnResize = (ids, fn) => { const f = () => requestAnimationFrame(fn); if ('ResizeObserver' in window) { const ro = new ResizeObserver(f); ids.forEach(id => $(id) && ro.observe($(id).parentElement)); } window.addEventListener('resize', f); };
+        // vector potential A_φ of a circular loop; field lines in the meridian plane are contours of ψ = r·A_φ
+        function loopAphi(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : Math.abs(r);
+            const k2 = 4 * a * r / ((a + r) ** 2 + z * z), k = Math.sqrt(Math.min(k2, 1 - 1e-12)), [K, E] = ellipKE(k);
+            return MU0 * I / (Math.PI * k) * Math.sqrt(a / r) * ((1 - k2 / 2) * K - E);
+        }
+        // =========================================================
+        // Time-varying fields toolkit (Topic 5)
+        // =========================================================
+        const C0 = 299792458;
+        // rolling history buffer
+        function Trace(n = 500) { return { d: [], n, push(v) { this.d.push(v); if (this.d.length > this.n) this.d.shift(); }, clear() { this.d = []; } }; }
+        // oscilloscope: series = [{ tr: Trace or array, color, label, dash, scale }], ymax symmetric range
+        function scope(id, series, ymax, opts = {}) {
+            const c = setupCanvas(id); if (!c) return null; const { ctx, w, h } = c, L = opts.left ?? 54, R = 12, T = 22, B = 22;
+            const X = i => L + i / ((opts.n ?? 500) - 1) * (w - L - R), Y = v => T + (h - T - B) / 2 * (1 - v / ymax);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            for (let k = 0; k <= 8; k++) { const x = L + k * (w - L - R) / 8; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, h - B); ctx.stroke(); }
+            [-1, -0.5, 0, 0.5, 1].forEach(f => { ctx.beginPath(); ctx.moveTo(L, Y(f * ymax)); ctx.lineTo(w - R, Y(f * ymax)); ctx.stroke(); });
+            ctx.strokeStyle = '#94a3b8'; ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); ctx.restore();
+            label(ctx, opts.ylab ? `${opts.ylab}` : fmtE(ymax), L - 6, T + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            label(ctx, opts.ylab0 ?? '0', L - 6, Y(0) + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            series.forEach(s => { const d = s.tr.d || s.tr, sc = s.scale ?? 1; if (d.length < 2) return; ctx.save(); ctx.strokeStyle = s.color; ctx.lineWidth = s.width ?? 2.2; if (s.dash) ctx.setLineDash(s.dash); ctx.beginPath();
+                const off = (opts.n ?? 500) - d.length; d.forEach((v, i) => { const y = Y(clamp(v * sc, -ymax * 1.05, ymax * 1.05)); i ? ctx.lineTo(X(i + off), y) : ctx.moveTo(X(i + off), y); }); ctx.stroke(); ctx.restore(); });
+            let lx = L + 8; series.forEach(s => { if (!s.label) return; ctx.save(); ctx.font = '600 12px Inter, sans-serif'; const tw = ctx.measureText(s.label).width; ctx.restore(); ctx.save(); ctx.strokeStyle = s.color; ctx.lineWidth = 2.5; if (s.dash) ctx.setLineDash(s.dash); ctx.beginPath(); ctx.moveTo(lx, 12); ctx.lineTo(lx + 16, 12); ctx.stroke(); ctx.restore(); label(ctx, s.label, lx + 20, 16, s.color, '600 12px Inter, sans-serif'); lx += tw + 36; });
+            if (opts.xlab) label(ctx, opts.xlab, w - R, h - 6, COL.muted, '11px Inter, sans-serif', 'right');
+            return { ctx, w, h, X, Y };
+        }
+        const deg = r => r * 180 / Math.PI;
+        // small play/pause helper bound to a chip button
+        function playButton(id, state, key = 'run') { const b = $(id); if (!b) return; b.addEventListener('click', () => { state[key] = !state[key]; b.textContent = state[key] ? 'Pause' : 'Play'; b.classList.toggle('on', state[key]); }); }
+        const fmtT = s => { const a = Math.abs(s); return a >= 86400 * 365 ? (s / (86400 * 365)).toPrecision(3) + ' yr' : a >= 86400 ? (s / 86400).toPrecision(3) + ' days' : a >= 3600 ? (s / 3600).toPrecision(3) + ' h' : a >= 60 ? (s / 60).toPrecision(3) + ' min' : fmtSI(s, 's'); };
+        // =========================================================
+        // Ideal transformer
+        // =========================================================
+        const CX = { mul: (a, b) => [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]], div: (a, b) => { const d = b[0] * b[0] + b[1] * b[1]; return [(a[0] * b[0] + a[1] * b[1]) / d, (a[1] * b[0] - a[0] * b[1]) / d]; }, add: (a, b) => [a[0] + b[0], a[1] + b[1]], abs: a => Math.hypot(a[0], a[1]), arg: a => Math.atan2(a[1], a[0]), s: (a, u, d = 1) => `${a[0].toFixed(d)} ${a[1] < 0 ? '−' : '+'} j${Math.abs(a[1]).toFixed(d)} ${u}` };
+        const TF = { sense: 'same', core: 'ideal', ph: 0 }, F50 = 2 * Math.PI * 50, AC = 4e-3, LC = 0.4;
+        function tfSolve() {
+            const V1 = [val('t-V1'), 0], N1 = val('t-N1'), N2 = val('t-N2'), n = N1 / N2, s = TF.sense === 'same' ? 1 : -1, ZL = [val('t-RL'), val('t-XL')];
+            const V2 = [s * V1[0] / n, 0], I2 = CX.div(V2, ZL), Iload = CX.div(V1, CX.mul([n * n, 0], ZL));
+            const Lm = MU0 * val('t-mu') * N1 * N1 * AC / LC, Im = TF.core === 'real' ? CX.div(V1, [0, F50 * Lm]) : [0, 0], I1 = CX.add(Iload, Im);
+            return { n, s, V1, V2, I2, I1, Im, ZL, Zin: CX.div(V1, I1), P1: V1[0] * I1[0], P2: CX.abs(I2) ** 2 * ZL[0], N1, N2 };
+        }
+        function drawTF(dt) {
+            TF.ph += dt * 2 * Math.PI * 0.4;
+            const S = tfSolve(), n2Z = [S.n * S.n * S.ZL[0], S.n * S.n * S.ZL[1]];
+            setText('ro-n', S.n.toFixed(3)); setText('ro-V2', `${S.V2[0].toFixed(2)} V${S.s < 0 ? ' (inverted)' : ''}`); setText('ro-I2', `${CX.abs(S.I2).toFixed(3)} A ∠ ${deg(CX.arg(S.I2)).toFixed(1)}°`);
+            setText('ro-I1', `${CX.abs(S.I1).toFixed(3)} A ∠ ${deg(CX.arg(S.I1)).toFixed(1)}°`); setText('ro-Zin', CX.s(S.Zin, 'Ω')); setText('ro-n2Z', CX.s(n2Z, 'Ω'));
+            setText('ro-P1', S.P1.toFixed(2) + ' W'); setText('ro-P2', S.P2.toFixed(2) + ' W'); setText('ro-Im', TF.core === 'real' ? `${CX.abs(S.Im).toFixed(3)} A (lags V₁ by 90°)` : '0 (ideal core)');
+            const inst = (P, sc = Math.SQRT2) => sc * CX.abs(P) * Math.cos(TF.ph + CX.arg(P)), i1 = inst(S.I1), i2 = inst(S.I2), v1 = inst(S.V1);
+            // core drawing
+            const c = setupCanvas('cv-tc'); if (!c) return; const { ctx, w, h } = c;
+            const cw = w * 0.42, ch = h * 0.62, x0 = (w - cw) / 2, y0 = (h - ch) / 2 + 6, th = 30;
+            ctx.save(); ctx.fillStyle = '#cbd5e1'; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.rect(x0, y0, cw, ch); ctx.rect(x0 + th, y0 + th, cw - 2 * th, ch - 2 * th); ctx.fill('evenodd'); ctx.stroke(); ctx.restore();
+            const flux = -Math.sin(TF.ph);   // Φ ∝ ∫v1 dt
+            const per = 2 * (cw - th) + 2 * (ch - th), pts = 18;
+            for (let k = 0; k < pts; k++) { let d = ((k / pts) * per + TF.ph * 30 * Math.sign(flux)) % per; if (d < 0) d += per; const a = cw - th, b = ch - th; let px, py;
+                if (d < a) { px = x0 + th / 2 + d; py = y0 + th / 2; } else if (d < a + b) { px = x0 + cw - th / 2; py = y0 + th / 2 + d - a; } else if (d < 2 * a + b) { px = x0 + cw - th / 2 - (d - a - b); py = y0 + ch - th / 2; } else { px = x0 + th / 2; py = y0 + ch - th / 2 - (d - 2 * a - b); }
+                dot(ctx, px, py, `rgba(124,58,237,${0.25 + 0.7 * Math.abs(flux)})`, 3.5); }
+            const coil = (xc, col, slant, turns) => { const top = y0 + th + 12, bot = y0 + ch - th - 12, k = Math.min(turns, 12); for (let i = 0; i < k; i++) { const y = top + (bot - top) * (i + 0.5) / k; line(ctx, xc - th / 2 - 8, y - slant * 5, xc + th / 2 + 8, y + slant * 5, col, 3); } return [top, bot]; };
+            const [pt, pb] = coil(x0 + th / 2, COL.amber, 1, Math.round(S.N1 / 60) + 3), [st, sb] = coil(x0 + cw - th / 2, COL.rose, S.s, Math.round(S.N2 / 60) + 3);
+            const lx = x0 - 26, rx = x0 + cw + 26;
+            line(ctx, x0 + th / 2 - th / 2 - 8, pt, lx, pt, COL.amber, 2); line(ctx, x0 - 8, pb, lx, pb, COL.amber, 2); line(ctx, lx, pt, lx - 30, pt, COL.amber, 2); line(ctx, lx, pb, lx - 30, pb, COL.amber, 2);
+            ctx.save(); ctx.strokeStyle = COL.amber; ctx.lineWidth = 2; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(lx - 30, (pt + pb) / 2, 16, 0, 2 * Math.PI); ctx.fill(); ctx.stroke(); ctx.restore(); label(ctx, '~', lx - 30, (pt + pb) / 2 + 6, COL.amber, 'bold 20px Inter, sans-serif', 'center');
+            line(ctx, lx - 30, pt, lx - 30, (pt + pb) / 2 - 16, COL.amber, 2); line(ctx, lx - 30, pb, lx - 30, (pt + pb) / 2 + 16, COL.amber, 2);
+            line(ctx, x0 + cw + 8, st, rx + 30, st, COL.rose, 2); line(ctx, x0 + cw + 8, sb, rx + 30, sb, COL.rose, 2); line(ctx, rx + 30, st, rx + 30, sb, COL.rose, 2);
+            ctx.save(); ctx.fillStyle = '#ffffff'; ctx.strokeStyle = COL.emerald; ctx.lineWidth = 2.5; ctx.fillRect(rx + 20, (st + sb) / 2 - 24, 20, 48); ctx.strokeRect(rx + 20, (st + sb) / 2 - 24, 20, 48); ctx.restore(); label(ctx, 'Z_L', rx + 46, (st + sb) / 2 + 4, COL.emerald, 'bold 12px Inter, sans-serif');
+            dot(ctx, x0 - 14, pt - 10, COL.slate, 5); dot(ctx, x0 + cw + 14, S.s > 0 ? st - 10 : sb + 10, COL.slate, 5);
+            // currents: i1 into the top primary terminal, i2 out of the top secondary terminal
+            if (Math.abs(i1) > 1e-6) arrow(ctx, lx - 10 - 10 * Math.sign(i1), pt, 20 * Math.sign(i1), 0, COL.sky, 1, 2.6, 9);
+            if (Math.abs(i2) > 1e-6) arrow(ctx, rx + 6 - 10 * Math.sign(i2), st, 20 * Math.sign(i2), 0, COL.emerald, 1, 2.6, 9);
+            label(ctx, `N₁ = ${S.N1}`, x0 + th / 2, y0 + ch + 20, COL.amber, 'bold 12px Inter, sans-serif', 'center'); label(ctx, `N₂ = ${S.N2}`, x0 + cw - th / 2, y0 + ch + 20, COL.rose, 'bold 12px Inter, sans-serif', 'center');
+            label(ctx, '• = dotted terminals · violet dots: core flux · sky: i₁ · emerald: i₂', 10, 18, COL.slate, '600 12px Inter, sans-serif');
+            // waveforms: two cycles with a moving cursor
+            const c2 = setupCanvas('cv-tsc'); if (!c2) return; const g = c2.ctx, W = c2.w, H = c2.h;
+            const Vm = Math.SQRT2 * Math.max(val('t-V1'), Math.abs(S.V2[0])) * 1.1, Im = Math.SQRT2 * Math.max(CX.abs(S.I1), CX.abs(S.I2), 1e-6) * 1.1;
+            const F = plotFrame(g, W, H, 0, 4 * Math.PI, -1, 1, { left: 16, bottom: 20, top: 30 });
+            const wave = (P, sc, col, dash) => curve(g, x => Math.SQRT2 * CX.abs(P) * Math.cos(x + CX.arg(P)) / sc, 0, 4 * Math.PI, F.X, F.Y, col, 2.2, 300, dash);
+            wave(S.V1, Vm, COL.amber); wave(S.V2, Vm, COL.rose); wave(S.I1, Im, COL.sky, [6, 4]); wave(S.I2, Im, COL.emerald, [6, 4]);
+            const xc = (TF.ph % (2 * Math.PI)) + 2 * Math.PI * 0; line(g, F.X(xc), F.T, F.X(xc), H - F.B, COL.slate, 1, [3, 3]);
+            [['v₁', COL.amber], ['v₂', COL.rose], ['i₁', COL.sky], ['i₂', COL.emerald]].forEach(([t, col], k) => label(g, t, 24 + k * 44, 16, col, 'bold 13px Inter, sans-serif'));
+            label(g, `voltages: ±${fmtE(Vm)} V · currents: ±${fmtE(Im)} A (full scale)`, W - 10, 16, COL.muted, '12px Inter, sans-serif', 'right');
+        }
+        chipGroup('t-sense', k => { TF.sense = k; drawTF(0); });
+        chipGroup('t-core', k => { TF.core = k; $('t-realbox').classList.toggle('hidden', k !== 'real'); drawTF(0); });
+        bindSliders({ 't-V1': v => v.toFixed(0) + ' V', 't-N1': v => v.toFixed(0), 't-N2': v => v.toFixed(0), 't-RL': v => v.toFixed(0) + ' Ω', 't-XL': v => (v >= 0 ? '+' : '') + v.toFixed(0) + ' Ω', 't-mu': v => v.toFixed(0) }, () => drawTF(0));
+        animate('cv-tc', drawTF);
+
+        // ---------- 2. impedance matching ----------
+        function drawMatch() {
+            const Rs = val('m-Rs'), RL = val('m-RL'), n = val('m-n'), Vs = val('m-Vs'), P = n2 => Vs * Vs * n2 * RL / (Rs + n2 * RL) ** 2, nb = Math.sqrt(Rs / RL);
+            setText('ro-mR', (n * n * RL).toFixed(1) + ' Ω'); setText('ro-mP', fmtSI(P(n * n), 'W')); setText('ro-mn', nb.toFixed(2)); setText('ro-mPmax', fmtSI(Vs * Vs / (4 * Rs), 'W')); setText('ro-m0', fmtSI(P(1), 'W') + ' (n = 1)');
+            const c = setupCanvas('cv-match'); if (!c) return; const { ctx, w, h } = c, Pm = Vs * Vs / (4 * Rs);
+            const F = plotFrame(ctx, w, h, Math.log10(0.2), Math.log10(20), 0, Pm * 1.15, { left: 60, bottom: 30, xlabel: 'turns ratio n (log scale)', ylabel: 'P_L' });
+            [0.2, 0.5, 1, 2, 5, 10, 20].forEach(x => label(ctx, x, F.X(Math.log10(x)), h - F.B + 14, COL.muted, '11px Inter, sans-serif', 'center'));
+            label(ctx, fmtSI(Pm, 'W'), F.L - 6, F.Y(Pm) + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            curve(ctx, lx => P(Math.pow(10, 2 * lx)), Math.log10(0.2), Math.log10(20), F.X, F.Y, COL.emerald, 2.4, 300);
+            if (nb >= 0.2 && nb <= 20) { line(ctx, F.X(Math.log10(nb)), F.T, F.X(Math.log10(nb)), h - F.B, COL.sky, 1.2, [4, 4]); label(ctx, 'n²R_L = R_s', F.X(Math.log10(nb)) + 6, F.T + 10, COL.sky, 'bold 12px Inter, sans-serif'); }
+            dot(ctx, F.X(Math.log10(n)), F.Y(P(n * n)), COL.amber, 6);
+        }
+        bindSliders({ 'm-Rs': v => v.toFixed(0) + ' Ω', 'm-RL': v => v.toFixed(0) + ' Ω', 'm-n': v => v.toFixed(1), 'm-Vs': v => v.toFixed(0) + ' V' }, drawMatch);
+
+        redrawOnResize(['cv-tc', 'cv-tsc', 'cv-match'], () => { drawTF(0); drawMatch(); });
+        drawTF(0); drawMatch(); startLoop();
+        renderQuiz([
+            { q: 'An ideal transformer has $N_1 = 1000$ and $N_2 = 250$. With $V_1 = 120$ V, $V_2$ is', opts: ['480 V', '30 V', '120 V', '7.5 V'], ans: 1, why: '$V_2 = V_1N_2/N_1 = 120/4 = 30$ V.' },
+            { q: 'A load $Z_{\\mathrm{L}} = 10 + j5\\ \\Omega$ is connected to a transformer with $n = N_1/N_2 = 4$. The primary sees', opts: ['$2.5 + j1.25\\ \\Omega$', '$40 + j20\\ \\Omega$', '$160 + j80\\ \\Omega$', '$10 + j5\\ \\Omega$'], ans: 2, why: '$Z_{\\mathrm{in}} = n^2Z_{\\mathrm{L}} = 16(10 + j5)$.' },
+            { q: 'With $n = 5$ and $I_1 = 2$ A in an ideal transformer, $I_2$ is', opts: ['0.4 A', '10 A', '2 A', '50 A'], ans: 1, why: '$I_2 = nI_1 = 10$ A: a step-down transformer steps the current up.' },
+            { q: 'Why are $I_1$ and $I_2$ defined so that their fluxes oppose?', opts: ['To cancel the core flux completely', 'Because the secondary current, by Lenz\'s law, opposes the flux change that induces it; the primary draws extra current to compensate', 'To double the power', 'It is an arbitrary convention with no physics'], ans: 1, why: 'In an ideal core the net magnetomotive force $N_1I_1 - N_2I_2$ is zero; the flux itself is fixed by $V_1$, not by the load.' },
+            { q: 'What changes when the ideal core is replaced by a real core with finite $\\mu_{\\mathrm{r}}$?', opts: ['Nothing', 'The primary draws an extra magnetizing current $V_1/j\\omega L_{\\mathrm{m}}$, so $I_1 \\ne I_2/n$ and $Z_{\\mathrm{in}} \\ne n^2Z_{\\mathrm{L}}$', 'The voltage ratio changes to $n^2$', 'The secondary voltage becomes zero'], ans: 1, why: 'Try a low $\\mu_{\\mathrm{r}}$ with a light load: the magnetizing current can dominate $I_1$. It is 90° out of phase, so it carries no average power.' },
+            { q: 'An ideal transformer with $n = N_1/N_2 = 2$ has $V_1 = 240$ V and a 12 $\\Omega$ resistor on the secondary. The primary current is', opts: ['20 A', '10 A', '2.5 A', '5 A'], ans: 3, why: '$V_2 = V_1/n = 120$ V gives $I_2 = 10$ A, and $I_1 = I_2/n = 5$ A. Equivalently, the primary sees $n^2R = 48\\ \\Omega$, and $240/48 = 5$ A.' }
+        ]);
+
+    </script>
+</body>
+</html>

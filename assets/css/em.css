@@ -229,3 +229,11 @@ button[data-j]:not(:disabled):active { transform: scale(.985); }
 .em-q-reveal, .em-q-correct-chosen { background-color: #ecfdf5 !important; border-color: #047857 !important; color: #064e3b !important; opacity: 1 !important; }
 .em-q-wrong { opacity: 1 !important; }
 .em-q-tag { color: inherit; }
+
+/* EN | VI switch on module pages opened on their own */
+.em-lang-switch { position: fixed; left: 14px; bottom: 14px; z-index: 70; display: flex; gap: 2px; padding: 3px; border-radius: 9999px; background: rgba(255,255,255,.95); border: 1px solid #cbd5e1; box-shadow: 0 4px 14px -6px rgba(15,23,42,.35); font: 600 13px/1 Inter, system-ui, sans-serif; }
+.em-lang-switch > * { padding: .4rem .7rem; border-radius: 9999px; color: #334155; text-decoration: none; }
+.em-lang-switch .on { background: #0f172a; color: #fff; }
+.em-lang-switch a:hover { background: #f1f5f9; }
+.em-lang-switch a:focus-visible { outline: 2px solid #0284c7; outline-offset: 1px; }
+@media print { .em-lang-switch { display: none; } }

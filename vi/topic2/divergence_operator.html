@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Độ phân kỳ của trường vectơ - Học phần Trường điện từ</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="radiation" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Độ phân kỳ của trường vectơ</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Khái niệm</button>
+                <button onclick="scrollToSection('sim')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="box" class="w-3.5 h-3.5"></i><span>Khám phá 3D</span></button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Kiểm tra</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Giải tích vectơ · Độ phân kỳ</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Độ phân kỳ: thông lượng ra ròng trên một đơn vị thể tích</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">Độ phân kỳ (divergence) của trường vectơ $\mathbf{F}$ tại một điểm đo mức độ trường tỏa ra khỏi (nguồn) hoặc hội tụ vào (hố) một thể tích rất nhỏ quanh điểm đó. Định luật Gauss dạng vi phân, $\nabla\cdot\mathbf{D} = \rho_{\mathrm{v}}$, cho biết nguồn của $\mathbf{D}$ chính là các điện tích. Divergence đo chênh lệch cục bộ giữa thông lượng ra và vào, không đơn thuần đo độ lớn mũi tên. Một trường đều khác không vẫn có divergence bằng không.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">1. Định nghĩa</span>
+                    <h3 class="text-base font-bold text-slate-900">Giới hạn của thông lượng</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\nabla\cdot\mathbf{F} = \lim_{\Delta v\to 0}\frac{\oint_S \mathbf{F}\cdot d\mathbf{s}}{\Delta v}$$</div>
+                    <p class="text-sm text-slate-700">Lấy thông lượng ra ròng qua một mặt kín $S$ chia cho thể tích được bao $\Delta v$. Giới hạn này không phụ thuộc vào hình dạng của $S$.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-500/10 px-2.5 py-1 rounded-md">2. Nguồn và hố</span>
+                    <h3 class="text-base font-bold text-slate-900">Dấu của $\nabla\cdot\mathbf{F}$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\nabla\cdot\mathbf{F} > 0\ \text{nguồn},\quad < 0\ \text{hố}$$</div>
+                    <p class="text-sm text-slate-700">Trường có $\nabla\cdot\mathbf{F} = 0$ ở mọi nơi là trường <em>solenoid</em> (không phân kỳ): bao nhiêu chảy vào thì bấy nhiêu chảy ra. Mật độ từ thông luôn thỏa mãn $\nabla\cdot\mathbf{B} = 0$.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">3. Định lý divergence</span>
+                    <h3 class="text-base font-bold text-slate-900">Thể tích ↔ mặt</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\int_V \nabla\cdot\mathbf{F}\,dv = \oint_S \mathbf{F}\cdot d\mathbf{s}$$</div>
+                    <p class="text-sm text-slate-700">Cộng độ phân kỳ trên toàn thể tích cho tổng thông lượng đi ra qua biên của nó.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="sim" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Khám phá độ phân kỳ</h2>
+                <p class="text-sm text-slate-600 mt-1">Nhập ba thành phần của $\mathbf{F}$ trong hệ tọa độ đã chọn. Lát cắt được tô màu theo $\nabla\cdot\mathbf{F}$: <span class="text-rose-700 font-semibold">đỏ = nguồn</span>, <span class="text-sky-800 font-semibold">xanh = hố</span>. Kéo $P$ trong lát cắt. So sánh trường đều với nguồn hướng tâm. Chuyển điểm quan sát và phân biệt giá trị trường tại điểm với tốc độ lan tỏa theo không gian. Đơn vị divergence bằng đơn vị trường chia cho chiều dài.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 glass-card rounded-2xl p-4 space-y-3 text-sm">
+                        <div id="sys-group" class="flex flex-wrap gap-1.5"><button data-v="cart" class="chip on">Descartes (x, y, z)</button><button data-v="cyl" class="chip">Trụ (r, φ, z)</button><button data-v="sph" class="chip">Cầu (R, θ, φ)</button></div>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2"><label id="lab-f0" for="in-f0" class="w-14 text-sm font-semibold text-slate-700 font-mono">F</label><input id="in-f0" type="text" spellcheck="false" class="in-f flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white font-mono text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-600/40"></div>
+                            <div class="flex items-center gap-2"><label id="lab-f1" for="in-f1" class="w-14 text-sm font-semibold text-slate-700 font-mono">F</label><input id="in-f1" type="text" spellcheck="false" class="in-f flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white font-mono text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-600/40"></div>
+                            <div class="flex items-center gap-2"><label id="lab-f2" for="in-f2" class="w-14 text-sm font-semibold text-slate-700 font-mono">F</label><input id="in-f2" type="text" spellcheck="false" class="in-f flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white font-mono text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-600/40"></div>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="text-sm text-slate-600">Biến: <span id="hint-vars" class="font-mono text-slate-700"></span>; ngoài ra <span class="font-mono">sin cos tan exp ln sqrt pi ^</span></p>
+                            <button id="btn-apply" class="px-4 py-2 rounded-lg bg-sky-700 hover:bg-sky-800 text-white font-semibold shrink-0">Áp dụng</button>
+                        </div>
+                        <p id="in-err" class="hidden text-sm text-rose-700 font-medium"></p>
+                        <div><p class="text-sm font-semibold text-slate-700 mb-1.5">Mẫu có sẵn</p><div id="preset-box" class="flex flex-wrap gap-1.5"></div></div>
+                </div>
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="glass-card rounded-2xl p-4 space-y-3 text-sm">
+                        <p class="font-semibold text-slate-900">Điểm $P$ (tọa độ theo hệ đã chọn)</p>
+                            <div class="flex items-center gap-3"><span id="lab-p0" class="w-14 shrink-0 text-slate-700 font-mono">x</span><input type="range" id="p0" class="flex-1 min-w-0 accent-amber-600"><span id="val-p0" class="w-14 shrink-0 text-right font-mono text-amber-800"></span></div>
+                            <div class="flex items-center gap-3"><span id="lab-p1" class="w-14 shrink-0 text-slate-700 font-mono">x</span><input type="range" id="p1" class="flex-1 min-w-0 accent-amber-600"><span id="val-p1" class="w-14 shrink-0 text-right font-mono text-amber-800"></span></div>
+                            <div class="flex items-center gap-3"><span id="lab-p2" class="w-14 shrink-0 text-slate-700 font-mono">x</span><input type="range" id="p2" class="flex-1 min-w-0 accent-amber-600"><span id="val-p2" class="w-14 shrink-0 text-right font-mono text-amber-800"></span></div>
+                </div>
+                    <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm">
+                        <div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$P$ (hệ này)</span><span id="ro-p" class="text-amber-800 font-bold"></span></div>
+                        <div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$P(x, y, z)$</span><span id="ro-pc" class="text-slate-900 font-bold"></span></div>
+                        <div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\mathbf{F}(P)$</span><span id="ro-f" class="text-sky-800 font-bold text-right"></span></div>
+                        <div class="border-t border-slate-200"></div>
+                        <div class="flex justify-between gap-3"><span class="font-sans text-slate-600 shrink-0">$\nabla\cdot\mathbf{F}(P)$ tính số</span><span id="ro-num" class="text-rose-700 font-bold text-right"></span></div>
+                        <div class="flex justify-between gap-3"><span class="font-sans text-slate-600 shrink-0">từ biểu thức giải tích</span><span id="ro-ana" class="text-slate-700 font-bold text-right"></span></div>
+                </div>
+                </div>
+                <div class="lg:col-span-12 glass-card rounded-2xl p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-[12rem_minmax(0,1fr)] gap-x-4 gap-y-1 items-center">
+                        <p class="text-sm font-bold text-indigo-700 uppercase tracking-wider">Toán tử trong hệ này</p>
+                        <div id="tex-op" class="text-sm text-slate-800 tex-box"></div>
+                        <div class="md:col-span-2 border-t border-slate-200"></div>
+                        <p class="text-sm font-bold text-sky-800 uppercase tracking-wider">Thiết lập với dữ liệu của bạn</p>
+                        <div id="tex-setup" class="text-sm text-slate-800 tex-box"></div>
+                        <div class="md:col-span-2 border-t border-slate-200"></div>
+                        <p class="text-sm font-bold text-rose-700 uppercase tracking-wider">Kết quả</p>
+                        <div id="tex-res" class="text-sm text-slate-800 tex-box"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="flex flex-col space-y-3">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <div id="view3d-group" class="flex flex-wrap gap-1.5"><button data-v="iso" class="chip">3D</button><button data-v="top" class="chip">Trên</button><button data-v="front" class="chip">Trước</button><button data-v="side" class="chip">Bên</button></div>
+                        <span class="mx-1 text-slate-600">|</span>
+                        <button id="tg-field" class="chip on">Mũi tên trường</button>
+                        <button id="tg-basis" class="chip on-emerald">Vectơ đơn vị tại P</button>
+                    </div>
+                    <div class="relative h-[440px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-3d" class="w-full h-full"></canvas></div>
+                </div>
+                <div class="flex flex-col space-y-3">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <div id="plane-group" class="flex gap-1.5"><button data-v="xy" class="chip on">Lát cắt xy</button><button data-v="xz" class="chip">Lát cắt xz</button><button data-v="yz" class="chip">Lát cắt yz</button></div>
+                        <span class="mx-1 text-slate-600">|</span><span class="text-sm text-slate-600">Màu:</span>
+                        <div id="heat-group" class="flex gap-1.5"></div>
+                    </div>
+                    <div class="relative h-[440px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="cv-slice" class="w-full h-full cursor-crosshair"></canvas></div>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600"><span class="font-semibold text-slate-800">Lát cắt:</span> Mũi tên: phần nằm trong mặt phẳng của $\mathbf{F}$. Đỏ/xanh: mật độ nguồn/hố $\nabla\cdot\mathbf{F}$. Lát cắt đi qua $P$; kéo điểm màu hổ phách để di chuyển $P$ trong lát cắt.</p>
+        </section>
+
+
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Câu hỏi tự kiểm tra</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Làm lại</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Điểm: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Học phần Trường điện từ — Độ phân kỳ của trường vectơ</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Câu ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Điểm: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Đúng. ' : '✗ Sai — đáp án đúng là ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Điểm: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // mini3d — dependency-free 3-D view on a 2-D canvas (z is up)
+        // drag to rotate, wheel to zoom, double-click to reset
+        // =========================================================
+        const V3 = {
+            add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+            sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+            mul: (a, s) => [a[0] * s, a[1] * s, a[2] * s],
+            dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+            cross: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+            len: a => Math.hypot(a[0], a[1], a[2]),
+            unit: a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+        };
+        class View3D {
+            constructor(id, opts = {}) {
+                this.id = id; this.yaw = opts.yaw ?? 0.5; this.pitch = opts.pitch ?? 0.4; this.zoom = opts.zoom ?? 1; this.range = opts.range ?? 6; this.center = opts.center || [0, 0, 0];
+                this.def = { yaw: this.yaw, pitch: this.pitch, zoom: this.zoom }; this.onChange = opts.onChange || (() => {});
+                const cv = $(id); let last = null;
+                cv.style.touchAction = 'none';
+                cv.addEventListener('pointerdown', e => { if (this.pick && this.pick(e)) return; last = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+                cv.addEventListener('pointermove', e => { if (!last) return; this.yaw -= (e.clientX - last[0]) * 0.01; this.pitch = clamp(this.pitch + (e.clientY - last[1]) * 0.01, -1.55, 1.55); last = [e.clientX, e.clientY]; this.onChange(); });
+                const up = () => { last = null; cv.style.cursor = 'grab'; };
+                cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+                cv.addEventListener('wheel', e => { e.preventDefault(); this.zoom = clamp(this.zoom * (e.deltaY > 0 ? 0.9 : 1.1), 0.4, 4); this.onChange(); }, { passive: false });
+                cv.addEventListener('dblclick', () => this.reset());
+                cv.style.cursor = 'grab';
+            }
+            reset() { Object.assign(this, this.def); this.onChange(); }
+            setView(v) {
+                const V = { iso: [0.5, 0.4], top: [-Math.PI / 2, 1.5499], front: [-Math.PI / 2, 0], side: [0, 0], low: [0.5, 0.12] }[v];
+                if (V) { this.yaw = V[0]; this.pitch = V[1]; this.onChange(); }
+            }
+            begin() {
+                const c = setupCanvas(this.id); if (!c) return null;
+                this.ctx = c.ctx; this.w = c.w; this.h = c.h; this.s = Math.min(c.w, c.h) / (2 * this.range) * this.zoom;
+                this.cy_ = Math.cos(this.yaw); this.sy_ = Math.sin(this.yaw); this.cp = Math.cos(this.pitch); this.sp = Math.sin(this.pitch);
+                return this;
+            }
+            // camera coords: X right, Y up, D toward the viewer
+            cam([x0, y0, z0]) {
+                const x = x0 - this.center[0], y = y0 - this.center[1], z = z0 - this.center[2];
+                const X = -x * this.sy_ + y * this.cy_, Y0 = x * this.cy_ + y * this.sy_;   // viewer azimuth = yaw
+                return [X, z * this.cp - Y0 * this.sp, z * this.sp + Y0 * this.cp];
+            }
+            P(p) { const [X, Y, D] = this.cam(p); return [this.w / 2 + X * this.s, this.h / 2 - Y * this.s, D]; }
+            line(a, b, color, width = 1.5, dash = null, alpha = 1) { const A = this.P(a), B = this.P(b); line(this.ctx, A[0], A[1], B[0], B[1], color, width, dash, alpha); }
+            poly(pts, color, width = 1.5, dash = null, alpha = 1, close = false, fill = null) {
+                const ctx = this.ctx; ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+                ctx.beginPath(); pts.forEach((p, i) => { const [x, y] = this.P(p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); if (close) ctx.closePath();
+                if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (color) ctx.stroke(); ctx.restore();
+            }
+            arrow(from, vec, color, width = 2.5, head = 11, alpha = 1, dash = null) {
+                const A = this.P(from), B = this.P(V3.add(from, vec));
+                arrow(this.ctx, A[0], A[1], B[0] - A[0], B[1] - A[1], color, alpha, width, head, dash);
+            }
+            dot(p, color, r = 5) { const [x, y] = this.P(p); dot(this.ctx, x, y, color, r); }
+            text(p, t, color, font = 'bold 13px Inter, sans-serif', dx = 0, dy = 0) { const [x, y] = this.P(p); label(this.ctx, t, x + dx, y + dy, color, font, 'center'); }
+            axes(L = 5, labels = ['x', 'y', 'z'], color = COL.slate) {
+                const dirs = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+                dirs.forEach((d, i) => { this.line(V3.mul(d, -L * 0.35), [0, 0, 0], color, 1, [3, 3], 0.6); this.arrow([0, 0, 0], V3.mul(d, L), color, 1.6, 9, 0.9); this.text(V3.mul(d, L * 1.08), labels[i], color, 'italic bold 14px Inter, sans-serif'); });
+            }
+            grid(L = 5, step = 1, z = 0, color = COL.grid) {
+                for (let v = -L; v <= L + 1e-9; v += step) { this.line([v, -L, z], [v, L, z], color, 1); this.line([-L, v, z], [L, v, z], color, 1); }
+            }
+            circle(c, r, n1, n2, color, width = 1.2, dash = null, alpha = 1, a0 = 0, a1 = 2 * Math.PI) {   // n1, n2: orthonormal in-plane axes
+                const pts = []; for (let k = 0; k <= 64; k++) { const t = a0 + (a1 - a0) * k / 64; pts.push(V3.add(c, V3.add(V3.mul(n1, r * Math.cos(t)), V3.mul(n2, r * Math.sin(t))))); }
+                this.poly(pts, color, width, dash, alpha);
+            }
+        }
+        function viewButtons(id, view) { const g = $(id); if (!g) return; g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => view.setView(b.dataset.v))); }
+
+        // =========================================================
+        // Coordinate systems and basis vectors (Ulaby conventions)
+        // =========================================================
+        const COORD = {
+            cart2cyl: ([x, y, z]) => [Math.hypot(x, y), Math.atan2(y, x), z],
+            cart2sph: ([x, y, z]) => { const R = Math.hypot(x, y, z); return [R, R ? Math.acos(clamp(z / R, -1, 1)) : 0, Math.atan2(y, x)]; },
+            cyl2cart: ([r, p, z]) => [r * Math.cos(p), r * Math.sin(p), z],
+            sph2cart: ([R, t, p]) => [R * Math.sin(t) * Math.cos(p), R * Math.sin(t) * Math.sin(p), R * Math.cos(t)],
+            basisCyl: p => [[Math.cos(p), Math.sin(p), 0], [-Math.sin(p), Math.cos(p), 0], [0, 0, 1]],
+            basisSph: (t, p) => [[Math.sin(t) * Math.cos(p), Math.sin(t) * Math.sin(p), Math.cos(t)], [Math.cos(t) * Math.cos(p), Math.cos(t) * Math.sin(p), -Math.sin(t)], [-Math.sin(p), Math.cos(p), 0]]
+        };
+        const toCartVec = (comp, basis) => V3.add(V3.add(V3.mul(basis[0], comp[0]), V3.mul(basis[1], comp[1])), V3.mul(basis[2], comp[2]));
+        const fromCartVec = (v, basis) => basis.map(b => V3.dot(v, b));
+
+        // =========================================================
+        // Safe expression parser (no eval) + numerical vector calculus
+        // =========================================================
+        const FUNCS = { sin: Math.sin, cos: Math.cos, tan: Math.tan, asin: Math.asin, acos: Math.acos, atan: Math.atan, sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh, asinh: Math.asinh, acosh: Math.acosh, atanh: Math.atanh,
+            exp: Math.exp, log: Math.log, ln: Math.log, sqrt: Math.sqrt, abs: Math.abs, sec: v => 1 / Math.cos(v), csc: v => 1 / Math.sin(v), cot: v => 1 / Math.tan(v) };
+        const CONSTS = { pi: Math.PI, e: Math.E };
+        const VARS = ['x', 'y', 'z', 'r', 'phi', 'R', 'theta'];
+        function parseExpr(src) {
+            const toks = []; let i = 0; const s = String(src).replace(/\*\*/g, '^').replace(/·|×/g, '*').replace(/π/g, 'pi').replace(/θ/g, 'theta').replace(/φ/g, 'phi');
+            const NAMES = [...Object.keys(FUNCS), 'pow', ...Object.keys(CONSTS), ...VARS].sort((a, b) => b.length - a.length);
+            const splitId = w => {      // "xy" → x·y, "Rsin" → R·sin (longest known name first)
+                if (NAMES.includes(w)) return [w]; const out = []; let k = 0;
+                while (k < w.length) { const nm = NAMES.find(n => w.startsWith(n, k)); if (!nm) throw new Error(`Tên không xác định "${w}"`); out.push(nm); k += nm.length; }
+                return out;
+            };
+            while (i < s.length) {
+                const ch = s[i];
+                if (/\s/.test(ch)) { i++; continue; }
+                if (/[0-9.]/.test(ch)) { let j = i; while (j < s.length && /[0-9.eE]/.test(s[j]) && !(/[eE]/.test(s[j]) && !/[0-9+\-]/.test(s[j + 1] || ''))) { if (/[eE]/.test(s[j]) && /[+\-]/.test(s[j + 1])) j++; j++; } toks.push({ t: 'n', v: parseFloat(s.slice(i, j)) }); i = j; }
+                else if (/[A-Za-z_]/.test(ch)) { let j = i; while (j < s.length && /[A-Za-z_0-9]/.test(s[j])) j++; splitId(s.slice(i, j)).forEach(v => toks.push({ t: 'id', v })); i = j; }
+                else if ('+-*/^(),'.includes(ch)) { toks.push({ t: ch }); i++; }
+                else throw new Error(`Ký tự không hợp lệ "${ch}"`);
+            }
+            let p = 0;
+            const peek = () => toks[p], eat = t => { if (!toks[p] || toks[p].t !== t) throw new Error(`Thiếu "${t}"`); return toks[p++]; };
+            function primary() {
+                const tk = toks[p++];
+                if (!tk) throw new Error('Biểu thức kết thúc đột ngột');
+                if (tk.t === 'n') return { k: 'n', v: tk.v };
+                if (tk.t === '(') { const e = expr(); eat(')'); return e; }
+                if (tk.t === 'id') {
+                    if (peek() && peek().t === '(') { if (!FUNCS[tk.v] && tk.v !== 'pow') throw new Error(`Hàm không xác định "${tk.v}"`); p++; const args = [expr()]; while (peek() && peek().t === ',') { p++; args.push(expr()); } eat(')'); return tk.v === 'pow' ? { k: '^', a: args[0], b: args[1] } : { k: 'f', f: tk.v, a: args[0] }; }
+                    if (FUNCS[tk.v] && peek() && peek().t !== '(') return { k: 'f', f: tk.v, a: power() };   // sin x, ln r
+                    if (tk.v in CONSTS) return { k: 'n', v: CONSTS[tk.v], name: tk.v };
+                    if (VARS.includes(tk.v)) return { k: 'v', v: tk.v };
+                    throw new Error(`Biến không xác định "${tk.v}"`);
+                }
+                throw new Error(`Không mong đợi "${tk.t}"`);
+            }
+            function power() { const b = primary(); if (peek() && peek().t === '^') { p++; return { k: '^', a: b, b: unary() }; } return b; }
+            function unary() { if (peek() && (peek().t === '-' || peek().t === '+')) { const op = toks[p++].t; const a = unary(); return op === '-' ? { k: 'neg', a } : a; } return power(); }
+            function term() { let a = unary(); while (peek() && (peek().t === '*' || peek().t === '/' || peek().t === '(' || peek().t === 'id' || peek().t === 'n')) { const op = (peek().t === '*' || peek().t === '/') ? toks[p++].t : '*'; a = { k: op, a, b: unary() }; } return a; }
+            function expr() { let a = term(); while (peek() && (peek().t === '+' || peek().t === '-')) { const op = toks[p++].t; a = { k: op, a, b: term() }; } return a; }
+            const ast = expr();
+            if (p < toks.length) throw new Error('Có dữ liệu thừa sau biểu thức');
+            return ast;
+        }
+        function compileAst(n) {
+            switch (n.k) {
+                case 'n': return () => n.v;
+                case 'v': return s => s[n.v];
+                case 'neg': { const a = compileAst(n.a); return s => -a(s); }
+                case 'f': { const a = compileAst(n.a), f = FUNCS[n.f]; return s => f(a(s)); }
+                case '^': { const a = compileAst(n.a), b = compileAst(n.b); return s => Math.pow(a(s), b(s)); }
+                case '+': { const a = compileAst(n.a), b = compileAst(n.b); return s => a(s) + b(s); }
+                case '-': { const a = compileAst(n.a), b = compileAst(n.b); return s => a(s) - b(s); }
+                case '*': { const a = compileAst(n.a), b = compileAst(n.b); return s => a(s) * b(s); }
+                case '/': { const a = compileAst(n.a), b = compileAst(n.b); return s => a(s) / b(s); }
+            }
+        }
+        const TEXV = { x: 'x', y: 'y', z: 'z', r: 'r', phi: '\\phi', R: 'R', theta: '\\theta' };
+        function astTex(n, parent = 0) {
+            const wrap = (t, prec) => prec < parent ? `\\left(${t}\\right)` : t;
+            switch (n.k) {
+                case 'n': return n.name === 'pi' ? '\\pi' : n.name === 'e' ? 'e' : String(+n.v.toFixed(6));
+                case 'v': return TEXV[n.v];
+                case 'neg': return wrap('-' + astTex(n.a, 3), 2);
+                case 'f': return `\\${n.f === 'ln' ? 'ln' : ['sec', 'csc', 'cot', 'sinh', 'cosh', 'tanh', 'sin', 'cos', 'tan', 'exp', 'log'].includes(n.f) ? n.f : 'operatorname{' + n.f + '}'}\\left(${astTex(n.a)}\\right)`.replace('\\sqrt\\left(', '\\sqrt{').replace(/\\operatorname\{sqrt\}\\left\((.*)\\right\)$/, '\\sqrt{$1}');
+                case '^': return wrap(`{${astTex(n.a, 5)}}^{${astTex(n.b)}}`, 4);
+                case '+': return wrap(`${astTex(n.a, 1)} + ${astTex(n.b, 1)}`, 1);
+                case '-': return wrap(`${astTex(n.a, 1)} - ${astTex(n.b, 2)}`, 1);
+                case '*': return wrap(`${astTex(n.a, 2)}\\,${astTex(n.b, 3)}`, 2);
+                case '/': return wrap(`\\frac{${astTex(n.a)}}{${astTex(n.b)}}`, 3);
+            }
+        }
+        function makeFn(src) { const ast = parseExpr(src); return { f: compileAst(ast), tex: astTex(ast), src }; }
+
+        // system coordinates u → full scope (all variable names available)
+        const SYS = {
+            cart: { vars: ['x', 'y', 'z'], hats: ['\\hat{\\mathbf{x}}', '\\hat{\\mathbf{y}}', '\\hat{\\mathbf{z}}'], names: ['x', 'y', 'z'], plain: ['x̂', 'ŷ', 'ẑ'] },
+            cyl: { vars: ['r', 'phi', 'z'], hats: ['\\hat{\\mathbf{r}}', '\\boldsymbol{\\hat{\\phi}}', '\\hat{\\mathbf{z}}'], names: ['r', 'φ', 'z'], plain: ['r̂', 'φ̂', 'ẑ'] },
+            sph: { vars: ['R', 'theta', 'phi'], hats: ['\\hat{\\mathbf{R}}', '\\boldsymbol{\\hat{\\theta}}', '\\boldsymbol{\\hat{\\phi}}'], names: ['R', 'θ', 'φ'], plain: ['R̂', 'θ̂', 'φ̂'] }
+        };
+        function scopeOf(sys, u) {
+            let c;
+            if (sys === 'cart') c = u; else if (sys === 'cyl') c = COORD.cyl2cart(u); else c = COORD.sph2cart(u);
+            const [x, y, z] = c, cy = COORD.cart2cyl(c), sp = COORD.cart2sph(c);
+            const phi = sys === 'cyl' ? u[1] : sys === 'sph' ? u[2] : cy[1];
+            return { x, y, z, r: cy[0], phi, R: sp[0], theta: sys === 'sph' ? u[1] : sp[1] };
+        }
+        const evalAt = (fn, sys, u) => fn.f(scopeOf(sys, u));
+        function dPart(g, u, i, order = 1) {     // numerical partial derivative of g(u) w.r.t. u[i]
+            const h = 1e-4 * Math.max(1, Math.abs(u[i])), up = u.slice(), dn = u.slice();
+            up[i] += h; dn[i] -= h;
+            if (order === 1) return (g(up) - g(dn)) / (2 * h);
+            return (g(up) - 2 * g(u) + g(dn)) / (h * h);
+        }
+        // Gradient, divergence, curl, Laplacian in Cartesian, cylindrical and spherical coordinates
+        const OPS = {
+            grad(fn, sys, u) {
+                const g = v => evalAt(fn, sys, v), d = i => dPart(g, u, i);
+                if (sys === 'cart') return [d(0), d(1), d(2)];
+                if (sys === 'cyl') return [d(0), d(1) / u[0], d(2)];
+                return [d(0), d(1) / u[0], d(2) / (u[0] * Math.sin(u[1]))];
+            },
+            div(F, sys, u) {
+                const c = i => v => evalAt(F[i], sys, v);
+                if (sys === 'cart') return dPart(c(0), u, 0) + dPart(c(1), u, 1) + dPart(c(2), u, 2);
+                if (sys === 'cyl') { const r = u[0]; return dPart(v => v[0] * c(0)(v), u, 0) / r + dPart(c(1), u, 1) / r + dPart(c(2), u, 2); }
+                const R = u[0], st = Math.sin(u[1]);
+                return dPart(v => v[0] * v[0] * c(0)(v), u, 0) / (R * R) + dPart(v => Math.sin(v[1]) * c(1)(v), u, 1) / (R * st) + dPart(c(2), u, 2) / (R * st);
+            },
+            curl(F, sys, u) {
+                const c = i => v => evalAt(F[i], sys, v), d = (g, i) => dPart(g, u, i);
+                if (sys === 'cart') return [d(c(2), 1) - d(c(1), 2), d(c(0), 2) - d(c(2), 0), d(c(1), 0) - d(c(0), 1)];
+                if (sys === 'cyl') { const r = u[0]; return [d(c(2), 1) / r - d(c(1), 2), d(c(0), 2) - d(c(2), 0), (d(v => v[0] * c(1)(v), 0) - d(c(0), 1)) / r]; }
+                const R = u[0], st = Math.sin(u[1]);
+                return [(d(v => Math.sin(v[1]) * c(2)(v), 1) - d(c(1), 2)) / (R * st), (d(c(0), 2) / st - d(v => v[0] * c(2)(v), 0)) / R, (d(v => v[0] * c(1)(v), 0) - d(c(0), 1)) / R];
+            },
+            lap(fn, sys, u) {
+                const g = v => evalAt(fn, sys, v), d2 = i => dPart(g, u, i, 2), d1 = i => dPart(g, u, i, 1);
+                if (sys === 'cart') return d2(0) + d2(1) + d2(2);
+                if (sys === 'cyl') { const r = u[0]; return d2(0) + d1(0) / r + d2(1) / (r * r) + d2(2); }
+                const R = u[0], t = u[1], st = Math.sin(t);
+                return d2(0) + 2 * d1(0) / R + (d2(1) + Math.cos(t) / st * d1(1)) / (R * R) + d2(2) / (R * R * st * st);
+            }
+        };
+        // system-component vector at point u → Cartesian vector
+        function sysVecToCart(comp, sys, u) {
+            if (sys === 'cart') return comp;
+            if (sys === 'cyl') return toCartVec(comp, COORD.basisCyl(u[1]));
+            return toCartVec(comp, COORD.basisSph(u[1], u[2]));
+        }
+        function sysToCart(sys, u) { return sys === 'cart' ? u : sys === 'cyl' ? COORD.cyl2cart(u) : COORD.sph2cart(u); }
+        function cartToSys(sys, c) { return sys === 'cart' ? c : sys === 'cyl' ? COORD.cart2cyl(c) : COORD.cart2sph(c); }
+        const fmtN = (v, d = 3) => !isFinite(v) ? '—' : (Math.abs(v) < 5 * Math.pow(10, -d) ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-3 ? v.toExponential(2) : (+v.toFixed(d)).toString()));
+        const fmtVec = (v, sys, d = 3) => v.map((c, i) => `${i ? (c < 0 && fmtN(c, d) !== '0' ? '− ' : '+ ') : (c < 0 && fmtN(c, d) !== '0' ? '−' : '')}${fmtN(Math.abs(c), d)} ${SYS[sys].plain[i]}`).join(' ');
+
+        // =========================================================
+        // Symbolic engine: differentiation + simplification + TeX
+        // (works on the parser's AST; any input function gets a closed form)
+        // =========================================================
+        const SY = (() => {
+            const N = v => ({ k: 'n', v }), C = name => ({ k: 'n', v: CONSTS[name], name });
+            const isNum = a => a.k === 'n' && !a.name, isZero = a => isNum(a) && a.v === 0, isOne = a => isNum(a) && a.v === 1;
+            const V = v => ({ k: 'v', v }), Fn = (f, a) => ({ k: 'f', f, a });
+            const add = (...t) => ({ k: '+', t }), mul = (...t) => ({ k: '*', t }), pow = (a, b) => ({ k: '^', a, b });
+            const neg = a => mul(N(-1), a), sub = (a, b) => add(a, neg(b)), div = (a, b) => mul(a, pow(b, N(-1)));
+            // parser AST → normalized n-ary form
+            function norm(n) {
+                switch (n.k) {
+                    case 'n': return n.name ? C(n.name) : N(n.v);
+                    case 'v': return V(n.v);
+                    case 'neg': return neg(norm(n.a));
+                    case 'f': return Fn(n.f === 'log' ? 'ln' : n.f, norm(n.a));
+                    case '^': return pow(norm(n.a), norm(n.b));
+                    case '+': return add(norm(n.a), norm(n.b));
+                    case '-': return sub(norm(n.a), norm(n.b));
+                    case '*': return mul(norm(n.a), norm(n.b));
+                    case '/': return div(norm(n.a), norm(n.b));
+                    default: return n;
+                }
+            }
+            const key = n => n.k === 'n' ? (n.name || String(+n.v.toPrecision(12))) : n.k === 'v' ? n.v : n.k === 'f' ? `${n.f}(${key(n.a)})` : n.k === '^' ? `(${key(n.a)})^(${key(n.b)})` : `${n.k}[${n.t.map(key).join(',')}]`;
+            function subst(n, map) {
+                if (n.k === 'v') return map[n.v] ? map[n.v] : n;
+                if (n.k === 'f') return Fn(n.f, subst(n.a, map));
+                if (n.k === '^') return pow(subst(n.a, map), subst(n.b, map));
+                if (n.t) return { k: n.k, t: n.t.map(c => subst(c, map)) };
+                return n;
+            }
+            const DF = {
+                sin: u => Fn('cos', u), cos: u => neg(Fn('sin', u)), tan: u => pow(Fn('cos', u), N(-2)),
+                asin: u => pow(sub(N(1), pow(u, N(2))), N(-0.5)), acos: u => neg(pow(sub(N(1), pow(u, N(2))), N(-0.5))), atan: u => pow(add(N(1), pow(u, N(2))), N(-1)),
+                asinh: u => pow(add(pow(u, N(2)), N(1)), N(-0.5)), acosh: u => pow(add(pow(u, N(2)), N(-1)), N(-0.5)), atanh: u => pow(sub(N(1), pow(u, N(2))), N(-1)),
+                sinh: u => Fn('cosh', u), cosh: u => Fn('sinh', u), tanh: u => pow(Fn('cosh', u), N(-2)),
+                exp: u => Fn('exp', u), ln: u => pow(u, N(-1)), sqrt: u => mul(N(0.5), pow(Fn('sqrt', u), N(-1))), abs: u => div(u, Fn('abs', u)),
+                sec: u => mul(Fn('sec', u), Fn('tan', u)), csc: u => neg(mul(Fn('csc', u), Fn('cot', u))), cot: u => neg(pow(Fn('sin', u), N(-2)))
+            };
+            const dep = (n, x) => n.k === 'v' ? (n.v === x || (n.v === 'phi' && (x === 'x' || x === 'y'))) : n.k === 'n' ? false : n.k === 'f' ? dep(n.a, x) : n.k === '^' ? dep(n.a, x) || dep(n.b, x) : n.t.some(c => dep(c, x));
+            function d(n, x) {
+                if (!dep(n, x)) return N(0);
+                switch (n.k) {
+                    // Cartesian azimuth is evaluated by scopeOf/atan2, on its smooth branch.
+                    case 'v': if (n.v === 'phi' && x !== 'phi') { const den = add(pow(V('x'), N(2)), pow(V('y'), N(2))); return x === 'x' ? div(neg(V('y')), den) : div(V('x'), den); } return N(1);
+                    case '+': return add(...n.t.map(c => d(c, x)));
+                    case '*': return add(...n.t.map((c, i) => mul(...n.t.map((o, j) => i === j ? d(o, x) : o))));
+                    case 'f': return mul(DF[n.f](n.a), d(n.a, x));
+                    case '^': if (!dep(n.b, x)) return mul(n.b, pow(n.a, add(n.b, N(-1))), d(n.a, x));
+                        return mul(n, add(mul(d(n.b, x), Fn('ln', n.a)), mul(n.b, d(n.a, x), pow(n.a, N(-1)))));
+                }
+            }
+            // ---------- simplifier ----------
+            const EXACT = { sin: [[0, 0]], cos: [[0, 1]], tan: [[0, 0]], exp: [[0, 1]], ln: [[1, 0]], sqrt: [[0, 0], [1, 1], [4, 2], [9, 3]], cosh: [[0, 1]], sinh: [[0, 0]], atan: [[0, 0]], asin: [[0, 0]], abs: [] };
+            const splitCoef = n => { if (n.k === 'n' && !n.name) return [n.v, N(1)]; if (n.k === '*') { const c = n.t.filter(isNum), r = n.t.filter(t => !isNum(t)); const cv = c.reduce((p, q) => p * q.v, 1); return [cv, r.length === 0 ? N(1) : r.length === 1 ? r[0] : mul(...r)]; } return [1, n]; };
+            function S(n, depth = 0) {
+                if (depth > 40) return n;
+                switch (n.k) {
+                    case 'n': case 'v': return n;
+                    case 'f': {
+                        const a = S(n.a, depth + 1);
+                        if (isNum(a)) { const e = (EXACT[n.f] || []).find(([x]) => x === a.v); if (e) return N(e[1]); if (n.f === 'abs') return N(Math.abs(a.v)); }
+                        if (isNum(a) && a.v < 0 && ['sin', 'tan', 'sinh', 'tanh', 'asin', 'atan'].includes(n.f)) return S(neg(Fn(n.f, N(-a.v))), depth + 1);
+                        if (isNum(a) && a.v < 0 && ['cos', 'cosh'].includes(n.f)) return Fn(n.f, N(-a.v));
+                        if (n.f === 'tan') return S(div(Fn('sin', a), Fn('cos', a)), depth + 1);
+                        if (n.f === 'cot') return S(div(Fn('cos', a), Fn('sin', a)), depth + 1);
+                        if (n.f === 'sec') return S(pow(Fn('cos', a), N(-1)), depth + 1);
+                        if (n.f === 'csc') return S(pow(Fn('sin', a), N(-1)), depth + 1);
+                        if (n.f === 'ln' && a.k === 'f' && a.f === 'exp') return a.a;
+                        if (n.f === 'exp' && a.k === 'f' && a.f === 'ln') return a.a;
+                        if (n.f === 'sqrt' && a.k === '^' && isNum(a.b) && a.b.v === 2) return Fn('abs', a.a);
+                        return Fn(n.f, a);
+                    }
+                    case '^': {
+                        const a = S(n.a, depth + 1), b = S(n.b, depth + 1);
+                        if (isZero(b)) return N(1); if (isOne(b)) return a;
+                        if (isNum(a) && isNum(b)) { const v = Math.pow(a.v, b.v); if (isFinite(v) && Math.abs(v - Math.round(v * 1e6) / 1e6) < 1e-12) return N(v); }
+                        if (isOne(a)) return N(1);
+                        if (isZero(a) && isNum(b) && b.v > 0) return N(0);
+                        if (a.k === '^' && isNum(b) && isNum(a.b) && (Number.isInteger(b.v) || !(a.b.v % 2 === 0))) return S(pow(a.a, N(a.b.v * b.v)), depth + 1);
+                        if (a.k === 'f' && a.f === 'sqrt' && isNum(b) && b.v % 2 === 0) return S(pow(a.a, N(b.v / 2)), depth + 1);
+                        if (a.k === '*' && isNum(b) && Number.isInteger(b.v)) return S(mul(...a.t.map(f => pow(f, b))), depth + 1);
+                        if (a.k === 'f' && a.f === 'exp') return S(Fn('exp', mul(a.a, b)), depth + 1);
+                        return pow(a, b);
+                    }
+                    case '*': {
+                        let fs = []; n.t.map(c => S(c, depth + 1)).forEach(c => c.k === '*' ? fs.push(...c.t) : fs.push(c));
+                        let coef = 1; const bases = new Map(); const other = [];
+                        for (const f of fs) {
+                            if (isNum(f)) { coef *= f.v; continue; }
+                            let base = f, ex = N(1);
+                            if (f.k === '^' && isNum(f.b)) { base = f.a; ex = f.b; }
+                            if (f.k === 'f' && f.f === 'exp') { other.push(f); continue; }
+                            const kk = key(base); if (!bases.has(kk)) bases.set(kk, [base, 0, []]);
+                            if (isNum(ex)) bases.get(kk)[1] += ex.v; else bases.get(kk)[2].push(ex);
+                        }
+                        if (coef === 0) return N(0);
+                        // merge exponentials: e^a e^b = e^{a+b}
+                        const exps = other.filter(f => f.k === 'f' && f.f === 'exp');
+                        const out = [];
+                        for (const [, [base, e]] of bases) { if (Math.abs(e) > 1e-12) out.push(Math.abs(e - 1) < 1e-12 ? base : S(pow(base, N(+e.toFixed(10))), depth + 1)); }
+                        if (exps.length === 1) out.push(exps[0]); else if (exps.length > 1) { const e = S(Fn('exp', add(...exps.map(f => f.a))), depth + 1); if (!isOne(e)) out.push(e); }
+                        // re-flatten (powers of products may expand)
+                        let flat = []; out.forEach(o => o.k === '*' ? flat.push(...o.t) : flat.push(o));
+                        if (flat.some(o => o.k === '*' || isNum(o))) { const r = S(mul(N(coef), ...flat), depth + 1); return r; }
+                        if (flat.length === 0) return N(coef);
+                        // distribute over a single sum (makes 1/r·(r A + B) → A + B/r)
+                        const sums = flat.filter(o => o.k === '+');
+                        if (sums.length === 1 && depth < 30) { const rest = flat.filter(o => o !== sums[0]); return S(add(...sums[0].t.map(t => mul(N(coef), ...rest, t))), depth + 1); }
+                        flat.sort((p, q) => key(p) < key(q) ? -1 : 1);
+                        if (coef === 1) return flat.length === 1 ? flat[0] : mul(...flat);
+                        return mul(N(coef), ...flat);
+                    }
+                    case '+': {
+                        let ts = []; n.t.map(c => S(c, depth + 1)).forEach(c => c.k === '+' ? ts.push(...c.t) : ts.push(c));
+                        const groups = new Map(); let cst = 0;
+                        for (const t of ts) { if (isNum(t)) { cst += t.v; continue; } const [cv, r] = splitCoef(t), kk = key(r); if (!groups.has(kk)) groups.set(kk, [r, 0]); groups.get(kk)[1] += cv; }
+                        // sin²u + cos²u → 1 (same coefficient and same co-factors)
+                        for (const [kk, g] of [...groups]) {
+                            if (!g[1]) continue;
+                            const facs = g[0].k === '*' ? g[0].t : [g[0]];
+                            for (let idx = 0; idx < facs.length; idx++) {
+                                const f = facs[idx]; if (!(f.k === '^' && isNum(f.b) && f.b.v === 2 && f.a.k === 'f' && f.a.f === 'sin')) continue;
+                                const rest = facs.filter((_, i) => i !== idx), twin = S(mul(pow(Fn('cos', f.a.a), N(2)), ...rest), depth + 1), k2 = key(twin);
+                                const g2 = groups.get(k2); if (!g2 || Math.abs(g2[1] - g[1]) > 1e-12) continue;
+                                const c = g[1]; g[1] = 0; g2[1] = 0;
+                                const nt = rest.length ? S(mul(N(c), ...rest), depth + 1) : N(c);
+                                if (isNum(nt)) cst += nt.v; else { const [cv2, r2] = splitCoef(nt), k3 = key(r2); if (!groups.has(k3)) groups.set(k3, [r2, 0]); groups.get(k3)[1] += cv2; }
+                                break;
+                            }
+                        }
+                        const out = [];
+                        for (const [, [r, cv]] of groups) { if (Math.abs(cv) < 1e-12) continue; out.push(cv === 1 ? r : S(mul(N(+cv.toFixed(12)), r), depth + 1)); }
+                        if (Math.abs(cst) > 1e-12) out.push(N(+cst.toFixed(12)));
+                        if (!out.length) return N(0);
+                        return out.length === 1 ? out[0] : add(...out);
+                    }
+                }
+                return n;
+            }
+            const simp = n => { let a = n, k0 = ''; for (let i = 0; i < 4; i++) { a = S(a); const k1 = key(a); if (k1 === k0) break; k0 = k1; } return a; };
+            // Zero identities are simplified algebraically; finite samples cannot prove an identity.
+            // ---------- numeric evaluation ----------
+            function ev(n, s) {
+                switch (n.k) {
+                    case 'n': return n.v; case 'v': return s[n.v];
+                    case 'f': { const a = ev(n.a, s); return n.f === 'ln' ? Math.log(a) : FUNCS[n.f](a); }
+                    case '^': return Math.pow(ev(n.a, s), ev(n.b, s));
+                    case '+': return n.t.reduce((p, c) => p + ev(c, s), 0);
+                    case '*': return n.t.reduce((p, c) => p * ev(c, s), 1);
+                }
+            }
+            // ---------- TeX ----------
+            const TV = { x: 'x', y: 'y', z: 'z', r: 'r', phi: '\\phi', R: 'R', theta: '\\theta' };
+            function numTex(v) {
+                if (Number.isInteger(v)) return String(v);
+                for (let q = 2; q <= 12; q++) { const p = Math.round(v * q); if (Math.abs(p / q - v) < 1e-9) return `${p < 0 ? '-' : ''}\\frac{${Math.abs(p)}}{${q}}`; }
+                return String(+v.toPrecision(5));
+            }
+            const FT = { sin: '\\sin', cos: '\\cos', tan: '\\tan', sec: '\\sec', csc: '\\csc', cot: '\\cot', sinh: '\\sinh', cosh: '\\cosh', tanh: '\\tanh', ln: '\\ln', asin: '\\sin^{-1}', acos: '\\cos^{-1}', atan: '\\tan^{-1}', asinh: '\\sinh^{-1}', acosh: '\\cosh^{-1}', atanh: '\\tanh^{-1}' };
+            const needParen = a => a.k === '+' || (a.k === '*') || (a.k === 'n' && a.v < 0);
+            function atomTex(a) { const t = tex(a); return (a.k === '+' || a.k === '*' || (isNum(a) && (a.v < 0 || !Number.isInteger(a.v)))) ? `\\left(${t}\\right)` : t; }
+            function fTex(f, a, ex) {
+                if (f === 'sqrt') return ex ? `\\left(\\sqrt{${tex(a)}}\\right)^{${ex}}` : `\\sqrt{${tex(a)}}`;
+                if (f === 'exp') return (ex ? `\\left(e^{${tex(a)}}\\right)^{${ex}}` : `e^{${tex(a)}}`);
+                if (f === 'abs') return `\\left|${tex(a)}\\right|` + (ex ? `^{${ex}}` : '');
+                const simple = a.k === 'v' || (a.k === '*' && a.t.length === 2 && isNum(a.t[0]) && a.t[1].k === 'v');
+                const arg = simple ? tex(a) : `\\left(${tex(a)}\\right)`;
+                const nm = FT[f] || `\\operatorname{${f}}`;
+                return ex ? (nm.includes('^{-1}') ? `\\left(${nm}${arg}\\right)^{${ex}}` : `${nm}^{${ex}}${simple ? ' ' : ''}${arg}`) : `${nm}${simple ? ' ' : ''}${arg}`;
+            }
+            function powTex(base, e) {   // e: positive number or node
+                const et = typeof e === 'number' ? numTex(e) : tex(e);
+                if (typeof e === 'number' && e === 0.5) return base.k === 'f' ? `\\sqrt{${tex(base)}}` : `\\sqrt{${tex(base)}}`;
+                if (typeof e === 'number' && e === 1) return base.k === '+' ? `\\left(${tex(base)}\\right)` : tex(base);
+                if (base.k === 'f') return fTex(base.f, base.a, et);
+                const bt = (base.k === 'v' || (base.k === 'n' && base.name) || (isNum(base) && base.v >= 0 && Number.isInteger(base.v))) ? tex(base) : `\\left(${tex(base)}\\right)`;
+                return `{${bt}}^{${et}}`;
+            }
+            function tex(n) {
+                switch (n.k) {
+                    case 'n': return n.name === 'pi' ? '\\pi' : n.name === 'e' ? 'e' : numTex(n.v);
+                    case 'v': return TV[n.v] || n.v;
+                    case 'f': return fTex(n.f, n.a);
+                    case '^': return isNum(n.b) && n.b.v < 0 ? `\\frac{1}{${powTex(n.a, -n.b.v)}}` : powTex(n.a, isNum(n.b) ? n.b.v : n.b);
+                    case '+': {
+                        const ts = n.t.slice().sort((p, q) => (isNum(p) ? 1 : 0) - (isNum(q) ? 1 : 0));
+                        return ts.map((t, i) => { const [cv] = splitCoef(t); const s = cv < 0 ? tex(mul(N(-1), t)) : tex(t); const st = cv < 0 ? tex(simp(mul(N(-1), t))) : tex(t); return (i === 0 ? (cv < 0 ? '-' : '') : (cv < 0 ? ' - ' : ' + ')) + st; }).join('');
+                    }
+                    case '*': {
+                        let coef = 1; const num = [], den = [];
+                        n.t.forEach(f => { if (isNum(f)) coef *= f.v; else if (f.k === '^' && isNum(f.b) && f.b.v < 0) den.push(f.b.v === -1 ? f.a : pow(f.a, N(-f.b.v))); else num.push(f); });
+                        const rank = f => { const b = f.k === '^' ? f.a : f; if (b.k === 'v') return 'a' + ['x', 'y', 'z', 'r', 'R', 'phi', 'theta'].indexOf(b.v); if (b.k === 'n') return 'b'; if (b.k === 'f') return b.f === 'exp' ? 'e' : b.f === 'sqrt' ? 'd' : 'c' + key(b); return 'f'; };
+                        num.sort((p, q) => rank(p) < rank(q) ? -1 : 1); den.sort((p, q) => rank(p) < rank(q) ? -1 : 1);
+                        const part = arr => arr.map(f => f.k === '+' ? `\\left(${tex(f)}\\right)` : f.k === '^' ? tex(f) : tex(f)).join('\\,');
+                        const sign = coef < 0 ? '-' : '', ac = Math.abs(coef);
+                        let cN = ac, cD = 1; if (!Number.isInteger(ac)) { for (let q = 2; q <= 12; q++) { const p = Math.round(ac * q); if (Math.abs(p / q - ac) < 1e-9) { cN = p; cD = q; break; } } }
+                        if (!Number.isInteger(cN)) { cN = +ac.toPrecision(5); cD = 1; }
+                        const nt = (cN === 1 && num.length ? '' : String(cN) + (num.length ? '\\,' : '')) + part(num);
+                        if (!den.length && cD === 1) return sign + (nt || '1');
+                        const dt = (cD !== 1 ? String(cD) + (den.length ? '\\,' : '') : '') + part(den);
+                        return `${sign}\\frac{${nt || '1'}}{${dt}}`;
+                    }
+                }
+                return '?';
+            }
+            // display-only: pull factors common to every term of a sum out front
+            function pretty(n) {
+                if (n.k === 'f') return Fn(n.f, pretty(n.a));
+                if (n.k === '^') return pow(pretty(n.a), n.b);
+                if (n.k === '*') return mul(...n.t.map(pretty));
+                if (n.k !== '+') return n;
+                const ts = n.t.map(pretty);
+                const facList = t => { const fs = t.k === '*' ? t.t : [t]; const m = new Map(); fs.forEach(f => { if (isNum(f)) return; const b = f.k === '^' && isNum(f.b) ? f.a : f, e = f.k === '^' && isNum(f.b) ? f.b.v : 1; m.set(key(b), [b, e]); }); return m; };
+                const lists = ts.map(facList), common = [];
+                for (const [k, [b, e]] of lists[0]) { if (b.k === '+') continue; let emin = e, ok = true; for (const L of lists.slice(1)) { const q = L.get(k); if (!q || Math.sign(q[1]) !== Math.sign(e)) { ok = false; break; } emin = e > 0 ? Math.min(emin, q[1]) : Math.max(emin, q[1]); } if (ok) common.push([b, emin]); }
+                if (!common.length || ts.length < 2) return add(...ts);
+                const inner = simp(add(...ts.map(t => mul(t, ...common.map(([b, e]) => pow(b, N(-e)))))));
+                const cf = common.map(([b, e]) => e === 1 ? b : pow(b, N(e)));
+                return mul(...cf, inner.k === '+' ? inner : inner);
+            }
+            const texP = n => tex(pretty(n));
+            return { norm, subst, d, simp, ev, tex, texP, pretty, key, N, V, Fn, add, mul, pow, neg, sub, div, isZero: n => isZero(n) };
+        })();
+
+        // system-variable substitutions so any variable may appear in any system
+        const SYSUB = (() => {
+            const P = s => SY.norm(parseExpr(s));
+            return {
+                cart: { r: P('sqrt(x^2+y^2)'), R: P('sqrt(x^2+y^2+z^2)'), phi: SY.V('phi'), theta: P('acos(z/sqrt(x^2+y^2+z^2))') },
+                cyl: { x: P('r*cos(phi)'), y: P('r*sin(phi)'), R: P('sqrt(r^2+z^2)'), theta: P('acos(z/sqrt(r^2+z^2))') },
+                sph: { x: P('R*sin(theta)*cos(phi)'), y: P('R*sin(theta)*sin(phi)'), z: P('R*cos(theta)'), r: P('R*sin(theta)') }
+            };
+        })();
+        const symIn = (src, sys) => SY.simp(SY.subst(SY.norm(parseExpr(src)), SYSUB[sys]));
+        // symbolic ∇, ∇·, ∇×, ∇² (Ulaby formulas); inputs are sources (strings), results are normalized ASTs
+        const SYMOPS = (() => {
+            const { d, simp, mul, add, sub, div, pow, V, N, Fn } = SY;
+            const r = V('r'), R = V('R'), sT = Fn('sin', V('theta'));
+            return {
+                grad(f, sys) {
+                    if (sys === 'cart') return ['x', 'y', 'z'].map(v => simp(d(f, v)));
+                    if (sys === 'cyl') return [d(f, 'r'), div(d(f, 'phi'), r), d(f, 'z')].map(simp);
+                    return [d(f, 'R'), div(d(f, 'theta'), R), div(d(f, 'phi'), mul(R, sT))].map(simp);
+                },
+                div(F, sys) {
+                    if (sys === 'cart') return simp(add(d(F[0], 'x'), d(F[1], 'y'), d(F[2], 'z')));
+                    if (sys === 'cyl') return simp(add(div(d(mul(r, F[0]), 'r'), r), div(d(F[1], 'phi'), r), d(F[2], 'z')));
+                    return simp(add(div(d(mul(pow(R, N(2)), F[0]), 'R'), pow(R, N(2))), div(d(mul(sT, F[1]), 'theta'), mul(R, sT)), div(d(F[2], 'phi'), mul(R, sT))));
+                },
+                curl(F, sys) {
+                    if (sys === 'cart') return [sub(d(F[2], 'y'), d(F[1], 'z')), sub(d(F[0], 'z'), d(F[2], 'x')), sub(d(F[1], 'x'), d(F[0], 'y'))].map(simp);
+                    if (sys === 'cyl') return [sub(div(d(F[2], 'phi'), r), d(F[1], 'z')), sub(d(F[0], 'z'), d(F[2], 'r')), div(sub(d(mul(r, F[1]), 'r'), d(F[0], 'phi')), r)].map(simp);
+                    return [div(sub(d(mul(sT, F[2]), 'theta'), d(F[1], 'phi')), mul(R, sT)), div(sub(div(d(F[0], 'phi'), sT), d(mul(R, F[2]), 'R')), R), div(sub(d(mul(R, F[1]), 'R'), d(F[0], 'theta')), R)].map(simp);
+                },
+                lap(f, sys) {
+                    if (sys === 'cart') return simp(add(...['x', 'y', 'z'].map(v => d(d(f, v), v))));
+                    if (sys === 'cyl') return simp(add(div(d(mul(r, d(f, 'r')), 'r'), r), div(d(d(f, 'phi'), 'phi'), pow(r, N(2))), d(d(f, 'z'), 'z')));
+                    return simp(add(div(d(mul(pow(R, N(2)), d(f, 'R')), 'R'), pow(R, N(2))), div(d(mul(sT, d(f, 'theta')), 'theta'), mul(pow(R, N(2)), sT)), div(d(d(f, 'phi'), 'phi'), mul(pow(R, N(2)), pow(sT, N(2))))));
+                }
+            };
+        })();
+
+        // =========================================================
+        // Operator formulas (Ulaby, Table / Eqs. 3.72–3.113 style)
+        // =========================================================
+        const HX = '\\hat{\\mathbf{x}}', HY = '\\hat{\\mathbf{y}}', HZ = '\\hat{\\mathbf{z}}', HR = '\\hat{\\mathbf{r}}', HRR = '\\hat{\\mathbf{R}}', HP = '\\boldsymbol{\\hat{\\phi}}', HT = '\\boldsymbol{\\hat{\\theta}}';
+        const pd = (a, b) => `\\frac{\\partial ${a}}{\\partial ${b}}`, pd2 = (a, b) => `\\frac{\\partial^2 ${a}}{\\partial ${b}^2}`;
+        const OPTEX = {
+            grad: {
+                cart: `\\nabla F = ${HX}\\,${pd('F', 'x')} + ${HY}\\,${pd('F', 'y')} + ${HZ}\\,${pd('F', 'z')}`,
+                cyl: `\\nabla F = ${HR}\\,${pd('F', 'r')} + ${HP}\\,\\frac{1}{r}${pd('F', '\\phi')} + ${HZ}\\,${pd('F', 'z')}`,
+                sph: `\\nabla F = ${HRR}\\,${pd('F', 'R')} + ${HT}\\,\\frac{1}{R}${pd('F', '\\theta')} + ${HP}\\,\\frac{1}{R\\sin\\theta}${pd('F', '\\phi')}`
+            },
+            div: {
+                cart: `\\nabla\\cdot\\mathbf{F} = ${pd('F_x', 'x')} + ${pd('F_y', 'y')} + ${pd('F_z', 'z')}`,
+                cyl: `\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}\\left(r F_r\\right) + \\frac{1}{r}${pd('F_\\phi', '\\phi')} + ${pd('F_z', 'z')}`,
+                sph: `\\nabla\\cdot\\mathbf{F} = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left(R^2 F_R\\right) + \\frac{1}{R\\sin\\theta}\\frac{\\partial}{\\partial\\theta}\\left(F_\\theta\\sin\\theta\\right) + \\frac{1}{R\\sin\\theta}${pd('F_\\phi', '\\phi')}`
+            },
+            curl: {
+                cart: `\\begin{aligned}\\nabla\\times\\mathbf{F} &= ${HX}\\left(${pd('F_z', 'y')} - ${pd('F_y', 'z')}\\right) + ${HY}\\left(${pd('F_x', 'z')} - ${pd('F_z', 'x')}\\right)\\\\ &\\quad + ${HZ}\\left(${pd('F_y', 'x')} - ${pd('F_x', 'y')}\\right)\\end{aligned}`,
+                cyl: `\\begin{aligned}\\nabla\\times\\mathbf{F} &= ${HR}\\left(\\frac{1}{r}${pd('F_z', '\\phi')} - ${pd('F_\\phi', 'z')}\\right) + ${HP}\\left(${pd('F_r', 'z')} - ${pd('F_z', 'r')}\\right)\\\\ &\\quad + ${HZ}\\,\\frac{1}{r}\\left[\\frac{\\partial}{\\partial r}\\left(r F_\\phi\\right) - ${pd('F_r', '\\phi')}\\right]\\end{aligned}`,
+                sph: `\\begin{aligned}\\nabla\\times\\mathbf{F} &= ${HRR}\\,\\frac{1}{R\\sin\\theta}\\left[\\frac{\\partial}{\\partial\\theta}\\left(F_\\phi\\sin\\theta\\right) - ${pd('F_\\theta', '\\phi')}\\right] \\\\ &\\quad + ${HT}\\,\\frac{1}{R}\\left[\\frac{1}{\\sin\\theta}${pd('F_R', '\\phi')} - \\frac{\\partial}{\\partial R}\\left(R F_\\phi\\right)\\right] \\\\ &\\quad + ${HP}\\,\\frac{1}{R}\\left[\\frac{\\partial}{\\partial R}\\left(R F_\\theta\\right) - ${pd('F_R', '\\theta')}\\right]\\end{aligned}`
+            },
+            lap: {
+                cart: `\\nabla^2 F = ${pd2('F', 'x')} + ${pd2('F', 'y')} + ${pd2('F', 'z')}`,
+                cyl: `\\nabla^2 F = \\frac{1}{r}\\frac{\\partial}{\\partial r}\\left(r ${pd('F', 'r')}\\right) + \\frac{1}{r^2}${pd2('F', '\\phi')} + ${pd2('F', 'z')}`,
+                sph: `\\nabla^2 F = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left(R^2 ${pd('F', 'R')}\\right) + \\frac{1}{R^2\\sin\\theta}\\frac{\\partial}{\\partial\\theta}\\left(\\sin\\theta\\,${pd('F', '\\theta')}\\right) + \\frac{1}{R^2\\sin^2\\theta}${pd2('F', '\\phi')}`
+            }
+        };
+        // Substituted set-up (shown for any input). Terms whose component is identically 0 are dropped.
+        const P_ = t => `\\left(${t}\\right)`;
+        const dOf = (v, t) => `\\frac{\\partial}{\\partial ${v}}${P_(t)}`, d2Of = (v, t) => `\\frac{\\partial^2}{\\partial ${v}^2}${P_(t)}`;
+        const SETUP = {
+            grad: {
+                cart: f => `\\nabla F = ${HX}\\,${dOf('x', f)} + ${HY}\\,${dOf('y', f)} + ${HZ}\\,${dOf('z', f)}`,
+                cyl: f => `\\nabla F = ${HR}\\,${dOf('r', f)} + ${HP}\\,\\frac{1}{r}${dOf('\\phi', f)} + ${HZ}\\,${dOf('z', f)}`,
+                sph: f => `\\nabla F = ${HRR}\\,${dOf('R', f)} + ${HT}\\,\\frac{1}{R}${dOf('\\theta', f)} + ${HP}\\,\\frac{1}{R\\sin\\theta}${dOf('\\phi', f)}`
+            },
+            lap: {
+                cart: f => `\\nabla^2 F = ${d2Of('x', f)} + ${d2Of('y', f)} + ${d2Of('z', f)}`,
+                cyl: f => `\\nabla^2 F = \\frac{1}{r}\\frac{\\partial}{\\partial r}\\left[r\\,${dOf('r', f)}\\right] + \\frac{1}{r^2}${d2Of('\\phi', f)} + ${d2Of('z', f)}`,
+                sph: f => `\\nabla^2 F = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left[R^2\\,${dOf('R', f)}\\right] + \\frac{1}{R^2\\sin\\theta}\\frac{\\partial}{\\partial\\theta}\\left[\\sin\\theta\\,${dOf('\\theta', f)}\\right] + \\frac{1}{R^2\\sin^2\\theta}${d2Of('\\phi', f)}`
+            },
+            div: {   // [term tex(F), component index]
+                cart: [[F => dOf('x', F[0]), 0], [F => dOf('y', F[1]), 1], [F => dOf('z', F[2]), 2]],
+                cyl: [[F => `\\frac{1}{r}\\frac{\\partial}{\\partial r}\\left[r${P_(F[0])}\\right]`, 0], [F => `\\frac{1}{r}${dOf('\\phi', F[1])}`, 1], [F => dOf('z', F[2]), 2]],
+                sph: [[F => `\\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left[R^2${P_(F[0])}\\right]`, 0], [F => `\\frac{1}{R\\sin\\theta}\\frac{\\partial}{\\partial\\theta}\\left[\\sin\\theta${P_(F[1])}\\right]`, 1], [F => `\\frac{1}{R\\sin\\theta}${dOf('\\phi', F[2])}`, 2]]
+            },
+            curl: {  // per unit vector: list of [sign, term(F), comp]
+                cart: [[[1, F => dOf('y', F[2]), 2], [-1, F => dOf('z', F[1]), 1]], [[1, F => dOf('z', F[0]), 0], [-1, F => dOf('x', F[2]), 2]], [[1, F => dOf('x', F[1]), 1], [-1, F => dOf('y', F[0]), 0]]],
+                cyl: [[[1, F => `\\frac{1}{r}${dOf('\\phi', F[2])}`, 2], [-1, F => dOf('z', F[1]), 1]], [[1, F => dOf('z', F[0]), 0], [-1, F => dOf('r', F[2]), 2]],
+                      [[1, F => `\\frac{1}{r}\\frac{\\partial}{\\partial r}\\left[r${P_(F[1])}\\right]`, 1], [-1, F => `\\frac{1}{r}${dOf('\\phi', F[0])}`, 0]]],
+                sph: [[[1, F => `\\frac{1}{R\\sin\\theta}\\frac{\\partial}{\\partial\\theta}\\left[\\sin\\theta${P_(F[2])}\\right]`, 2], [-1, F => `\\frac{1}{R\\sin\\theta}${dOf('\\phi', F[1])}`, 1]],
+                      [[1, F => `\\frac{1}{R\\sin\\theta}${dOf('\\phi', F[0])}`, 0], [-1, F => `\\frac{1}{R}\\frac{\\partial}{\\partial R}\\left[R${P_(F[2])}\\right]`, 2]],
+                      [[1, F => `\\frac{1}{R}\\frac{\\partial}{\\partial R}\\left[R${P_(F[1])}\\right]`, 1], [-1, F => `\\frac{1}{R}${dOf('\\theta', F[0])}`, 0]]]
+            }
+        };
+
+        // =========================================================
+        // Shared engine for the ∇, ∇·, ∇×, ∇² pages
+        // =========================================================
+        const LEB26 = (() => {   // Lebedev 26-point rule on the unit sphere (exact to degree 7)
+            const P = [], s2 = Math.SQRT1_2, s3 = 1 / Math.sqrt(3);
+            [[1, 0, 0], [0, 1, 0], [0, 0, 1]].forEach(v => [1, -1].forEach(g => P.push([v.map(c => c * g), 1 / 21])));
+            [[0, 1, 2], [1, 2, 0], [2, 0, 1]].forEach(([i, j]) => [1, -1].forEach(a => [1, -1].forEach(b => { const v = [0, 0, 0]; v[i] = a * s2; v[j] = b * s2; P.push([v, 4 / 105]); })));
+            [1, -1].forEach(a => [1, -1].forEach(b => [1, -1].forEach(c => P.push([[a * s3, b * s3, c * s3], 9 / 280]))));
+            return P;
+        })();
+        const GL5 = [[-0.9061798459, 0.2369268851], [-0.5384693101, 0.4786286705], [0, 0.5688888889], [0.5384693101, 0.4786286705], [0.9061798459, 0.2369268851]];
+        const PLANES = { xy: { ia: 0, ib: 1, ic: 2, n: [0, 0, 1], la: 'x', lb: 'y', nl: 'ẑ' }, xz: { ia: 0, ib: 2, ic: 1, n: [0, -1, 0], la: 'x', lb: 'z', nl: '−ŷ' }, yz: { ia: 1, ib: 2, ic: 0, n: [1, 0, 0], la: 'y', lb: 'z', nl: 'x̂' } };
+        const SLIDERS = {
+            cart: [['x', -2.5, 2.5, 0.05, 1], ['y', -2.5, 2.5, 0.05, 1], ['z', -2.5, 2.5, 0.05, 1]],
+            cyl: [['r', 0.1, 3, 0.05, 1], ['φ (°)', 0, 359, 1, Math.PI / 180], ['z', -2.5, 2.5, 0.05, 1]],
+            sph: [['R', 0.1, 3.5, 0.05, 1], ['θ (°)', 1, 179, 1, Math.PI / 180], ['φ (°)', 0, 359, 1, Math.PI / 180]]
+        };
+        const pct = (arr, q) => { const a = arr.filter(isFinite).map(Math.abs).sort((x, y) => x - y); return a.length ? a[Math.min(a.length - 1, Math.floor(q * a.length))] : 0; };
+        const mixW = (rgb, a) => `rgb(${rgb.map(c => Math.round(255 + (c - 255) * a)).join(',')})`;       // opaque blend with white (no seams between cells)
+        const heatCol = (t, seq) => seq ? mixW([79, 70, 229], clamp(t, 0, 1) * 0.55) : (t >= 0 ? mixW([225, 29, 72], clamp(t, 0, 1) * 0.55) : mixW([2, 132, 199], clamp(-t, 0, 1) * 0.55));
+        const deg = v => (v * 180 / Math.PI).toFixed(0) + '°';
+
+        function initOperatorPage(cfg) {
+            const kind = cfg.kind, isVec = kind === 'div' || kind === 'curl', L = 3;
+            const S = { sys: 'cart', Pc: cfg.P0 || [1.2, 0.8, 0.6], plane: 'xy', heat: 0, basis: true, field: true, s: 0.8, alpha: 30, src: {}, spin: 0, key: '', layer: null, limKey: '' };
+            ['cart', 'cyl', 'sph'].forEach(sy => S.src[sy] = cfg.presets[sy][0].f);
+            const norm = v => JSON.stringify(v).replace(/\s+/g, '');
+
+            // ---------- evaluation ----------
+            const U = c => { const u = cartToSys(S.sys, c); if (S.sys !== 'cart') { const i = S.sys === 'cyl' ? 1 : 2; if (u[i] < 0) u[i] += 2 * Math.PI; } return u; };
+            const scalar = c => S.fn.f(scopeOf(S.sys, U(c)));
+            const Fsys = u => S.F.map(f => f.f(scopeOf(S.sys, u)));
+            const Fcart = c => { const u = U(c); return sysVecToCart(Fsys(u), S.sys, u); };
+            const result = c => { const u = U(c); return kind === 'grad' ? OPS.grad(S.fn, S.sys, u) : kind === 'div' ? OPS.div(S.F, S.sys, u) : kind === 'curl' ? OPS.curl(S.F, S.sys, u) : OPS.lap(S.fn, S.sys, u); };
+            const resultCart = c => { const r = result(c); return Array.isArray(r) ? sysVecToCart(r, S.sys, U(c)) : r; };
+            const gradCart = c => { const u = U(c); return sysVecToCart(OPS.grad(S.fn, S.sys, u), S.sys, u); };
+            const analytic = c => { const sc = scopeOf(S.sys, U(c));
+                if (S.sym && typeof SY !== 'undefined') return Array.isArray(S.sym) ? S.sym.map(e => SY.ev(e, sc)) : SY.ev(S.sym, sc);
+                if (!S.res) return null; return Array.isArray(S.res) ? S.res.map(f => f.f(sc)) : S.res.f(sc); };
+            const arrowField = c => isVec ? Fcart(c) : gradCart(c);
+            const PL = () => PLANES[S.plane];
+            const nrm = () => PL().n;
+            const HEATS = {
+                grad: [['F', scalar, false], ['|∇F|', c => V3.len(gradCart(c)), true]],
+                lap: [['F', scalar, false], ['∇²F', c => result(c), false]],
+                div: [['∇·F', c => result(c), false], ['|F|', c => V3.len(Fcart(c)), true]],
+                curl: [['(∇×F)·n̂', c => V3.dot(resultCart(c), nrm()), false], ['|F|', c => V3.len(Fcart(c)), true]]
+            }[kind];
+
+            // limit-definition estimates (all in Cartesian geometry around P)
+            function divEst(s) {
+                let flux = 0; const n = 3, h = s / n, Q = [];      // 3×3 panels × 5×5 Gauss points per face
+                for (let a = 0; a < n; a++) GL5.forEach(([t, w]) => Q.push([-s / 2 + (a + (1 + t) / 2) * h, w * h / 2]));
+                for (let k = 0; k < 3; k++) { const i = (k + 1) % 3, j = (k + 2) % 3;
+                    for (const g of [1, -1]) for (const [qa, wa] of Q) for (const [qb, wb] of Q) {
+                        const c = S.Pc.slice(); c[k] += g * s / 2; c[i] += qa; c[j] += qb;
+                        flux += g * Fcart(c)[k] * wa * wb; } }
+                return flux / (s * s * s);
+            }
+            function curlEst(s) {
+                const { ia, ib } = PL(), C = [[1, 1], [-1, 1], [-1, -1], [1, -1]].map(([a, b]) => [a * s / 2, b * s / 2]);
+                let circ = 0;
+                for (let k = 0; k < 4; k++) { const A = C[(k + 3) % 4], B = C[k];     // counter-clockwise: (+,−)→(+,+)→(−,+)→(−,−)
+                    for (let pn = 0; pn < 10; pn++) GL5.forEach(([t, w]) => { const m = (pn + (1 + t) / 2) / 10, c = S.Pc.slice(); c[ia] += A[0] + (B[0] - A[0]) * m; c[ib] += A[1] + (B[1] - A[1]) * m;
+                        const F = Fcart(c); circ += w / 20 * (F[ia] * (B[0] - A[0]) + F[ib] * (B[1] - A[1])); }); }
+                return circ / (s * s);
+            }
+            function lapEst(s) { const f0 = scalar(S.Pc); let avg = 0; LEB26.forEach(([v, w]) => { avg += w * scalar(V3.add(S.Pc, V3.mul(v, s))); }); return 6 * (avg - f0) / (s * s); }
+            const EST = { div: divEst, curl: curlEst, lap: lapEst }[kind];
+            const dirVec = () => { const { ia, ib } = PL(), a = S.alpha * Math.PI / 180, v = [0, 0, 0]; v[ia] = Math.cos(a); v[ib] = Math.sin(a); return v; };
+            const dFdl = (al, h = 1e-4) => { const { ia, ib } = PL(), v = [0, 0, 0]; v[ia] = Math.cos(al); v[ib] = Math.sin(al); return (scalar(V3.add(S.Pc, V3.mul(v, h))) - scalar(V3.sub(S.Pc, V3.mul(v, h)))) / (2 * h); };
+
+            // ---------- UI: system, inputs, presets, sliders ----------
+            function setErr(m) { const e = $('in-err'); e.textContent = m; e.classList.toggle('hidden', !m); }
+            function fillInputs() {
+                const src = S.src[S.sys];
+                if (isVec) src.forEach((v, i) => { $('in-f' + i).value = v; $('lab-f' + i).innerHTML = `F<sub>${SYS[S.sys].names[i]}</sub> =`; });
+                else $('in-f').value = src;
+                $('hint-vars').textContent = S.sys === 'cart' ? 'x, y, z' : S.sys === 'cyl' ? 'r, phi, z' : 'R, theta, phi';
+            }
+            function readInputs() { return isVec ? [0, 1, 2].map(i => $('in-f' + i).value.trim() || '0') : ($('in-f').value.trim() || '0'); }
+            function buildPresets() {
+                $('preset-box').innerHTML = cfg.presets[S.sys].map((p, i) => `<button data-i="${i}" class="chip">${p.label}</button>`).join('');
+                $('preset-box').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { S.src[S.sys] = cfg.presets[S.sys][+b.dataset.i].f; fillInputs(); compile(); }));
+            }
+            function compile() {
+                const src = S.src[S.sys];
+                try { if (isVec) S.F = src.map(makeFn); else S.fn = makeFn(src); setErr(''); }
+                catch (e) { setErr('⚠ ' + e.message); return; }
+                const i = cfg.presets[S.sys].findIndex(p => norm(p.f) === norm(src)); S.pre = i >= 0 ? cfg.presets[S.sys][i] : null;
+                S.res = S.pre ? (Array.isArray(S.pre.res) ? S.pre.res.map(makeFn) : makeFn(S.pre.res)) : null;
+                S.sym = null;
+                if (typeof SYMOPS !== 'undefined') { try { const inp = isVec ? src.map(v => symIn(v, S.sys)) : symIn(src, S.sys); S.sym = SYMOPS[kind](inp, S.sys); } catch (e) { S.sym = null; } }
+                $('preset-box').querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
+                showTex(); S.key = ''; S.limKey = ''; update();
+            }
+            function showTex() {
+                const sy = S.sys;
+                const oneLine = t => t.replace(/\\begin\{(aligned|gathered)\}|\\end\{(aligned|gathered)\}/g, '').replace(/\\\\(\[[^\]]*\])?\s*(&\\quad)?/g, ' ').replace(/&/g, '');
+                $('tex-op').innerHTML = `$$${oneLine(OPTEX[kind][sy])}$$`;
+                let setup;
+                if (isVec) {
+                    const T = S.F.map(f => f.tex), zero = S.src[sy].map(s => { try { return makeFn(s).tex === '0'; } catch (e) { return false; } });
+                    const input = `\\mathbf{F} = ` + T.map((t, i) => zero[i] ? null : `${SYS[sy].hats[i]}${P_(t)}`).filter(Boolean).join(' + ') || '0';
+                    if (kind === 'div') { const terms = SETUP.div[sy].filter(([, c]) => !zero[c]).map(([f]) => f(T)); setup = `${input},\\qquad \\nabla\\cdot\\mathbf{F} = ${terms.join(' + ') || '0'}`; }
+                    else { const rows = SETUP.curl[sy].map((pair, k) => { const t = pair.filter(([, , c]) => !zero[c]).map(([sg, f], j) => (sg < 0 ? ' - ' : j ? ' + ' : '') + f(T)).join(''); return t ? `${SYS[sy].hats[k]}\\left[${t}\\right]` : null; }).filter(Boolean);
+                        setup = `${input},\\qquad \\nabla\\times\\mathbf{F} = ${rows.join(' + ') || '0'}`; }
+                } else setup = `F = ${S.fn.tex},\\qquad ${SETUP[kind][sy](S.fn.tex)}`;
+                $('tex-setup').innerHTML = `$$${setup}$$`;
+                const LHS = { grad: '\\nabla F', div: '\\nabla\\cdot\\mathbf{F}', curl: '\\nabla\\times\\mathbf{F}', lap: '\\nabla^2 F' }[kind];
+                const symTex = () => { if (!Array.isArray(S.sym)) return SY.texP(S.sym);
+                    const parts = S.sym.map((c, i) => { if (SY.isZero(c)) return null; const pc = SY.pretty(c), t = SY.tex(pc); if (pc.k === '+') return ` + ${SYS[sy].hats[i]}\\left(${t}\\right)`; const body = t.startsWith('-') ? t.slice(1) : t, term = pc.k === 'n' ? `${body}\\,${SYS[sy].hats[i]}` : `${SYS[sy].hats[i]}\\,${body}`; return (t.startsWith('-') ? ' - ' : ' + ') + term; }).filter(Boolean);
+                    if (!parts.length) return '0'; const j = parts.join(''); return j.startsWith(' + ') ? j.slice(3) : '-' + j.slice(3); };
+                $('tex-res').innerHTML = S.sym ? `$$${LHS} = ${symTex()}$$<p class="text-sm text-slate-600">Biểu thức giải tích thu được bằng đạo hàm ký hiệu từ dữ liệu bạn nhập.</p>` : S.pre ? `$$${S.pre.resTex}$$` : `<p class="text-sm text-slate-600">Dữ liệu tự nhập: không có sẵn biểu thức giải tích. Trang tính ${cfg.symbol} bằng số với sai phân trung tâm của công thức trên (bước $h \\approx 10^{-4}$).</p>`;
+                typeset([$('tex-op'), $('tex-setup'), $('tex-res')]);
+            }
+            function syncSliders() {
+                const u = U(S.Pc);
+                SLIDERS[S.sys].forEach(([lab, mn, mx, st, f], i) => {
+                    const el = $('p' + i); el.min = mn; el.max = mx; el.step = st; el.value = clamp(u[i] / f, mn, mx); $('lab-p' + i).textContent = lab;
+                    setText('val-p' + i, f === 1 ? (+el.value).toFixed(2) : (+el.value).toFixed(0) + '°');
+                });
+            }
+            function fromSliders() {
+                const u = SLIDERS[S.sys].map(([, , , , f], i) => num('p' + i) * f);
+                S.Pc = sysToCart(S.sys, u).map(v => Math.abs(v) < 1e-12 ? 0 : v);
+                SLIDERS[S.sys].forEach(([, , , , f], i) => setText('val-p' + i, f === 1 ? num('p' + i).toFixed(2) : num('p' + i).toFixed(0) + '°'));
+                update();
+            }
+            function setSys(sy) {
+                S.sys = sy; document.querySelectorAll('#sys-group button').forEach(b => b.classList.toggle('on', b.dataset.v === sy));
+                buildPresets(); fillInputs(); syncSliders(); compile();
+            }
+
+            // ---------- readouts ----------
+            function readouts() {
+                const u = U(S.Pc), c = S.Pc, sy = S.sys;
+                const pS = sy === 'cart' ? `(${u.map(v => fmtN(v, 2)).join(', ')})` : sy === 'cyl' ? `(${fmtN(u[0], 2)}, ${deg(u[1])}, ${fmtN(u[2], 2)})` : `(${fmtN(u[0], 2)}, ${deg(u[1])}, ${deg(u[2])})`;
+                setText('ro-p', pS); setText('ro-pc', `(${c.map(v => fmtN(v, 2)).join(', ')})`);
+                setText('ro-f', isVec ? fmtVec(Fsys(u), sy) : fmtN(scalar(c), 4));
+                const r = result(c), a = analytic(c);
+                setText('ro-num', Array.isArray(r) ? fmtVec(r, sy) : fmtN(r, 4));
+                setText('ro-ana', a === null ? 'dữ liệu tự nhập' : Array.isArray(a) ? fmtVec(a, sy) : fmtN(a, 4));
+                if ($('ro-mag')) setText('ro-mag', Array.isArray(r) ? fmtN(V3.len(r), 4) : '');
+                if (kind === 'grad') {
+                    const d = dirVec(), g = gradCart(c), gp = [g[PL().ia], g[PL().ib]];
+                    setText('ro-dl', fmtN(dFdl(S.alpha * Math.PI / 180), 4)); setText('ro-gdot', fmtN(V3.dot(g, d), 4));
+                    setText('ro-max', `${fmtN(Math.hypot(...gp), 4)} tại α = ${((Math.atan2(gp[1], gp[0]) * 180 / Math.PI + 360) % 360).toFixed(0)}°`);
+                } else if ($('ro-lim')) {
+                    const e = EST(S.s), ex = kind === 'curl' ? V3.dot(resultCart(c), nrm()) : r;
+                    setText('ro-lim', fmtN(e, 4)); setText('ro-exact', fmtN(ex, 4)); setText('ro-err', isFinite(ex) && Math.abs(ex) > 1e-9 ? (100 * Math.abs(e - ex) / Math.abs(ex)).toFixed(2) + ' %' : `|Δ| = ${fmtN(Math.abs(e - ex), 4)}`);
+                }
+            }
+
+            // ---------- 3-D view ----------
+            const view = new View3D('cv-3d', { range: 4.2, onChange: () => draw3d() });
+            viewButtons('view3d-group', view);
+            function draw3d() {
+                if (!view.begin()) return;
+                const ctx = view.ctx, P = S.Pc, { ia, ib, ic } = PL();
+                view.grid(3, 1, 0); view.axes(3.4);
+                // slice plane
+                const corner = (a, b) => { const c = [0, 0, 0]; c[ia] = a; c[ib] = b; c[ic] = P[ic]; return c; };
+                view.poly([corner(-L, -L), corner(L, -L), corner(L, L), corner(-L, L)], COL.indigo, 1, [4, 4], 0.7, true, 'rgba(79,70,229,0.06)');
+                if (S.field) {
+                    if (kind === 'lap') {
+                        const pts = [], vals = [];
+                        for (const x of [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5]) for (const y of [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5]) for (const z of [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5]) { pts.push([x, y, z]); vals.push(scalar([x, y, z])); }
+                        const ref = pct(vals, 0.9) || 1;
+                        pts.map((p, i) => [p, vals[i], view.P(p)[2]]).sort((a, b) => a[2] - b[2]).forEach(([p, v]) => { if (!isFinite(v)) return; const t = clamp(v / ref, -1, 1); view.dot(p, t >= 0 ? `rgba(225,29,72,${0.15 + 0.7 * t})` : `rgba(2,132,199,${0.15 - 0.7 * t})`, 2.5 + 2.5 * Math.abs(t)); });
+                    } else {
+                        const pts = [], vecs = [];
+                        for (const x of [-2.4, -0.8, 0.8, 2.4]) for (const y of [-2.4, -0.8, 0.8, 2.4]) for (const z of [-2.4, -0.8, 0.8, 2.4]) { pts.push([x, y, z]); vecs.push(arrowField([x, y, z])); }
+                        const ref = pct(vecs.map(V3.len), 0.85) || 1; S.ref3 = ref;
+                        pts.forEach((p, i) => { const v = vecs[i], m = V3.len(v); if (!isFinite(m) || m < 1e-12) return; const Ls = 0.75 * Math.min(1, Math.sqrt(m / ref)); view.arrow(V3.sub(p, V3.mul(v, Ls / m / 2)), V3.mul(v, Ls / m), COL.sky, 1.4, 6, 0.55); });
+                    }
+                }
+                // point P and basis
+                view.line([P[0], P[1], 0], P, COL.muted, 1, [3, 3]);
+                if (S.basis) {
+                    const u = U(P), B = S.sys === 'cart' ? [[1, 0, 0], [0, 1, 0], [0, 0, 1]] : S.sys === 'cyl' ? COORD.basisCyl(u[1]) : COORD.basisSph(u[1], u[2]);
+                    [COL.emerald, COL.violet, COL.indigo].forEach((cl, i) => { view.arrow(P, V3.mul(B[i], 0.8), cl, 2, 8, 0.9); view.text(V3.add(P, V3.mul(B[i], 0.98)), SYS[S.sys].plain[i], cl, 'bold 13px Inter, sans-serif'); });
+                }
+                if (isVec) { const F = Fcart(P), m = V3.len(F); if (m > 1e-9) { const Ls = 1.5 * m / (m + 1); view.arrow(P, V3.mul(F, Ls / m), COL.sky, 3.2, 12); view.text(V3.add(P, V3.mul(F, (Ls + 0.25) / m)), 'F', COL.sky, 'bold 14px Inter, sans-serif'); } }
+                if (kind === 'grad' || kind === 'curl') {
+                    const r = resultCart(P), m = V3.len(r);
+                    let rref = S.ref3 || 1;
+                    if (kind === 'curl') { const cv = []; for (const x of [-2.4, -0.8, 0.8, 2.4]) for (const y of [-2.4, -0.8, 0.8, 2.4]) for (const z of [-2.4, -0.8, 0.8, 2.4]) cv.push(V3.len(resultCart([x, y, z]))); rref = pct(cv, 0.85) || 1; }
+                    if (m > 1e-9 && isFinite(m)) { const Ls = clamp(1.2 * Math.sqrt(m / rref), 0.35, 2.2); view.arrow(P, V3.mul(r, Ls / m), COL.rose, 3.2, 12); view.text(V3.add(P, V3.mul(r, (Ls + 0.3) / m)), kind === 'grad' ? '∇F' : '∇×F', COL.rose, 'bold 14px Inter, sans-serif'); }
+                }
+                if (kind === 'div' && $('sl-s')) {
+                    const d = result(P), cl = d >= 0 ? COL.rose : COL.sky, h = S.s / 2, V = [];
+                    for (const a of [-h, h]) for (const b of [-h, h]) for (const c of [-h, h]) V.push(V3.add(P, [a, b, c]));
+                    [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [3, 7], [4, 5], [4, 6], [5, 7], [6, 7]].forEach(([i, j]) => view.line(V[i], V[j], cl, 1.6, null, 0.9));
+                    [[1, 0, 0], [0, 1, 0], [0, 0, 1]].forEach(e => [1, -1].forEach(g => { const c = V3.add(P, V3.mul(e, g * h)), fl = V3.dot(Fcart(c), V3.mul(e, g)); if (Math.abs(fl) > 1e-6) view.arrow(c, V3.mul(e, g * Math.sign(fl) * 0.45), fl > 0 ? COL.rose : COL.sky, 1.8, 7, 0.9); }));
+                }
+                if (kind === 'lap' && $('sl-s')) { const ex = [1, 0, 0], ey = [0, 1, 0], ez = [0, 0, 1]; view.circle(P, S.s, ex, ey, COL.emerald, 1.4); view.circle(P, S.s, ex, ez, COL.emerald, 1.4, [3, 3]); view.circle(P, S.s, ey, ez, COL.emerald, 1.4, [3, 3]); }
+                view.dot(P, COL.amber, 6); view.text(P, 'P', COL.amber, 'bold 14px Inter, sans-serif', -14, -8);
+                label(ctx, 'kéo: xoay · cuộn: thu phóng · nhấp đúp: đặt lại', 10, view.h - 10, COL.muted, '12px Inter, sans-serif');
+            }
+
+            // ---------- 2-D slice ----------
+            let geo = null;
+            function sliceGeo(w, h) { const Sz = Math.min(w - 24, h - 54), ox = (w - Sz) / 2, oy = 28; return { Sz, ox, oy, X: a => ox + (a + L) / (2 * L) * Sz, Y: b => oy + (L - b) / (2 * L) * Sz, A: x => (x - ox) / Sz * 2 * L - L, B: y => L - (y - oy) / Sz * 2 * L }; }
+            const worldAt = (a, b) => { const { ia, ib } = PL(), c = S.Pc.slice(); c[ia] = a; c[ib] = b; return c; };
+            function renderLayer(w, h) {
+                const dpr = window.devicePixelRatio || 1, off = document.createElement('canvas'); off.width = Math.round(w * dpr); off.height = Math.round(h * dpr);
+                const ctx = off.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                const g = sliceGeo(w, h), N = 64, cell = 2 * L / N, [, hf, seq] = HEATS[S.heat], vals = new Float64Array(N * N);
+                for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { let v; try { v = hf(worldAt(-L + (i + 0.5) * cell, -L + (j + 0.5) * cell)); } catch (e) { v = NaN; } vals[j * N + i] = v; }
+                const arr = Array.from(vals), ref = pct(arr, 0.95), maxAbs = pct(arr, 1);
+                S.heatRef = ref;
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(g.ox, g.oy, g.Sz, g.Sz);
+                if (ref > 1e-9) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const v = vals[j * N + i]; if (!isFinite(v)) continue; ctx.fillStyle = heatCol(v / ref, seq); ctx.fillRect(g.X(-L + i * cell) - 0.3, g.Y(-L + (j + 1) * cell) - 0.3, g.Sz / N + 0.6, g.Sz / N + 0.6); }
+                S.heatZero = !(maxAbs > 1e-6);
+                // equipotential contours of F (scalar pages)
+                if (!isVec) {
+                    const fv = []; for (let k = 0; k < 400; k++) { const v = scalar(worldAt(-L + 2 * L * Math.random(), -L + 2 * L * Math.random())); if (isFinite(v)) fv.push(v); }
+                    fv.sort((a, b) => a - b); const lo = fv[Math.floor(fv.length * 0.04)], hi = fv[Math.floor(fv.length * 0.96)];
+                    if (hi - lo > 1e-9) { const lv = []; for (let k = 1; k <= 12; k++) lv.push(lo + (hi - lo) * k / 13);
+                        ctx.save(); ctx.beginPath(); ctx.rect(g.ox, g.oy, g.Sz, g.Sz); ctx.clip();
+                        contours(ctx, w, h, (x, y) => { const a = g.A(x), b = g.B(y); return Math.abs(a) > L + 0.1 || Math.abs(b) > L + 0.1 ? NaN : scalar(worldAt(a, b)); }, lv, () => 'rgba(71,85,105,0.55)', 5, 1);
+                        ctx.restore(); }
+                }
+                // in-plane arrows
+                const { ia, ib } = PL(), M = 13, st = 2 * L / M, pts = [];
+                for (let j = 0; j < M; j++) for (let i = 0; i < M; i++) { const a = -L + (i + 0.5) * st, b = -L + (j + 0.5) * st; let v; try { v = arrowField(worldAt(a, b)); } catch (e) { v = [NaN, NaN, NaN]; } pts.push([a, b, v[ia], v[ib]]); }
+                const aref = pct(pts.map(p => Math.hypot(p[2], p[3])), 0.85) || 1, px = g.Sz / M; S.aref = aref;
+                pts.forEach(([a, b, va, vb]) => { const m = Math.hypot(va, vb); if (!isFinite(m) || m < 1e-12) return; const Ls = px * 0.85 * Math.min(1, Math.sqrt(m / aref)); arrow(ctx, g.X(a) - va / m * Ls / 2, g.Y(b) + vb / m * Ls / 2, va / m * Ls, -vb / m * Ls, '#334155', 0.75, 1.3, 5); });
+                // frame and ticks
+                ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1; ctx.strokeRect(g.ox, g.oy, g.Sz, g.Sz);
+                line(ctx, g.X(0), g.oy, g.X(0), g.oy + g.Sz, '#cbd5e1', 1, [3, 3]); line(ctx, g.ox, g.Y(0), g.ox + g.Sz, g.Y(0), '#cbd5e1', 1, [3, 3]);
+                for (let t = -L; t <= L; t++) { label(ctx, String(t), g.X(t), g.oy + g.Sz + 13, COL.muted, '11px Inter, sans-serif', 'center'); }
+                label(ctx, PL().la + ' →', g.ox + g.Sz - 4, g.oy + g.Sz - 6, COL.slate, 'italic 600 13px Inter, sans-serif', 'right');
+                label(ctx, PL().lb + ' ↑', g.ox + 6, g.oy + 16, COL.slate, 'italic 600 13px Inter, sans-serif');
+                return off;
+            }
+            function drawSlice() {
+                const c = setupCanvas('cv-slice'); if (!c) return; const { ctx, w, h } = c; geo = sliceGeo(w, h);
+                const key = [S.sys, norm(S.src[S.sys]), S.plane, S.heat, S.Pc[PL().ic].toFixed(4), w, h].join('|');
+                if (key !== S.key || !S.layer) { S.layer = renderLayer(w, h); S.key = key; }
+                ctx.drawImage(S.layer, 0, 0, w, h);
+                const g = geo, { ia, ib, ic } = PL(), P = S.Pc, px = g.X(P[ia]), py = g.Y(P[ib]);
+                const [hl, , seq] = HEATS[S.heat];
+                label(ctx, `Lát cắt ${'xyz'[ic]} = ${fmtN(P[ic], 2)}  ·  màu: ${hl}${S.heatZero ? ' ≈ 0 ở mọi nơi' : ` (${seq ? '0' : '±'}${fmtN(S.heatRef, 3)})`}`, 12, 18, COL.text, '600 13px Inter, sans-serif');
+                if (kind === 'curl') label(ctx, `n̂ = ${PL().nl} (hướng ra khỏi màn hình)`, w - 12, 18, COL.muted, '12px Inter, sans-serif', 'right');
+                const sc = g.Sz / (2 * L);
+                if (kind === 'grad') {
+                    const gr = gradCart(P), gp = [gr[ia], gr[ib]], m = Math.hypot(...gp);
+                    if (m > 1e-9) { const Ls = clamp(60 * Math.sqrt(m / (S.aref || 1)), 18, 120); arrow(ctx, px, py, gp[0] / m * Ls, -gp[1] / m * Ls, COL.rose, 1, 3, 11); label(ctx, '∇F', px + gp[0] / m * (Ls + 14), py - gp[1] / m * (Ls + 14) + 4, COL.rose, 'bold 13px Inter, sans-serif', 'center'); }
+                    if ($('sl-a')) { const a = S.alpha * Math.PI / 180; arrow(ctx, px, py, 50 * Math.cos(a), -50 * Math.sin(a), COL.emerald, 1, 2.4, 9, [5, 3]);
+                    label(ctx, 'â', px + 62 * Math.cos(a), py - 62 * Math.sin(a) + 4, COL.emerald, 'bold 13px Inter, sans-serif', 'center'); }
+                }
+                if (kind === 'div' && $('sl-s')) { const d = result(P); ctx.save(); ctx.strokeStyle = d >= 0 ? COL.rose : COL.sky; ctx.lineWidth = 2; ctx.strokeRect(px - S.s / 2 * sc, py - S.s / 2 * sc, S.s * sc, S.s * sc); ctx.restore(); }
+                if (kind === 'lap' && $('sl-s')) { ctx.save(); ctx.strokeStyle = COL.emerald; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py, S.s * sc, 0, 2 * Math.PI); ctx.stroke(); ctx.restore(); }
+                if (kind === 'curl') {
+                    const hs = S.s / 2 * sc, cn = [[hs, hs], [-hs, hs], [-hs, -hs], [hs, -hs]];
+                    if ($('sl-s')) { ctx.save(); ctx.strokeStyle = COL.violet; ctx.lineWidth = 1.8; ctx.setLineDash([5, 3]); ctx.strokeRect(px - hs, py - hs, 2 * hs, 2 * hs); ctx.restore(); }
+                    if ($('sl-s')) cn.forEach((q, k) => { const r = cn[(k + 1) % 4]; const mx = px + (q[0] + r[0]) / 2, my = py - (q[1] + r[1]) / 2; arrow(ctx, mx - (r[0] - q[0]) * 0.12, my + (r[1] - q[1]) * 0.12, (r[0] - q[0]) * 0.24, -(r[1] - q[1]) * 0.24, COL.violet, 0.9, 1.8, 7); });
+                    // paddle wheel
+                    const R0 = 22; ctx.save(); ctx.translate(px, py); ctx.rotate(-S.spin); ctx.strokeStyle = COL.amber; ctx.lineWidth = 3;
+                    for (let k = 0; k < 4; k++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(R0, 0); ctx.stroke(); ctx.fillStyle = COL.amber; ctx.fillRect(R0 - 5, -5, 5, 10); }
+                    ctx.restore();
+                }
+                dot(ctx, px, py, COL.amber, 6); label(ctx, 'P', px - 16, py + 18, COL.amber, 'bold 14px Inter, sans-serif');
+            }
+            draggable('cv-slice', (x, y) => { if (!geo) return null; const { ia, ib } = PL(); return Math.hypot(x - geo.X(S.Pc[ia]), y - geo.Y(S.Pc[ib])) < 26 ? 1 : null; },
+                (hd, x, y) => { const { ia, ib } = PL(); const c = S.Pc.slice(); c[ia] = clamp(geo.A(x), -2.9, 2.9); c[ib] = clamp(geo.B(y), -2.9, 2.9); if (S.sys === 'cyl' && Math.hypot(c[0], c[1]) < 0.1) return; if (S.sys === 'sph' && V3.len(c) < 0.1) return; S.Pc = c; syncSliders(); update(); });
+
+            // ---------- limit / directional-derivative plot ----------
+            function drawLim() {
+                if (!$('cv-lim')) return;
+                const c = setupCanvas('cv-lim'); if (!c) return; const { ctx, w, h } = c;
+                if (kind === 'grad') {
+                    const gr = gradCart(S.Pc), { ia, ib } = PL(), gp = [gr[ia], gr[ib]], m = Math.hypot(...gp) || 1, T = 2 * Math.PI;
+                    const F = plotFrame(ctx, w, h, 0, 360, -1.25 * m, 1.25 * m, { left: 56, bottom: 40, xlabel: 'góc hướng α (°) trong mặt phẳng lát cắt', ylabel: 'dF/dl' });
+                    [0, 90, 180, 270, 360].forEach(t => label(ctx, t + '°', F.X(t), h - F.B + 15, COL.muted, '11px Inter, sans-serif', 'center'));
+                    [-m, 0, m].forEach(v => label(ctx, fmtN(v, 2), F.L - 6, F.Y(v) + 4, COL.muted, '11px Inter, sans-serif', 'right'));
+                    curve(ctx, t => gp[0] * Math.cos(t * T / 360) + gp[1] * Math.sin(t * T / 360), 0, 360, F.X, F.Y, COL.rose, 2.4);
+                    for (let t = 0; t <= 360; t += 15) dot(ctx, F.X(t), F.Y(dFdl(t * T / 360, 1e-3)), COL.sky, 3.2);
+                    const a0 = (Math.atan2(gp[1], gp[0]) * 180 / Math.PI + 360) % 360; line(ctx, F.X(a0), F.T, F.X(a0), h - F.B, COL.rose, 1, [4, 3]); label(ctx, 'cực đại theo ∇F', F.X(a0) + 4, F.T + 8, COL.rose, '12px Inter, sans-serif');
+                    line(ctx, F.X(S.alpha), F.T, F.X(S.alpha), h - F.B, COL.emerald, 1.5); dot(ctx, F.X(S.alpha), F.Y(dFdl(S.alpha * T / 360)), COL.emerald, 6);
+                    label(ctx, '— ∇F·â (công thức)   ● [F(P+hâ)−F(P−hâ)]/2h', w - 12, F.T + 8, COL.slate, '12px Inter, sans-serif', 'right');
+                    return;
+                }
+                const key = [S.sys, norm(S.src[S.sys]), S.plane, S.Pc.join(',')].join('|');
+                if (key !== S.limKey) { S.limKey = key; S.limCurve = []; for (let k = 0; k <= 60; k++) { const s = 0.04 + (3 - 0.04) * k / 60; S.limCurve.push([s, EST(s)]); } }
+                const ex = kind === 'curl' ? V3.dot(resultCart(S.Pc), nrm()) : result(S.Pc);
+                const ys = S.limCurve.map(p => p[1]).filter(isFinite).concat(isFinite(ex) ? [ex] : []);
+                const ysS = ys.slice().sort((p, q) => p - q), q3 = ysS[Math.floor(0.04 * (ysS.length - 1))], q97 = ysS[Math.ceil(0.96 * (ysS.length - 1))];
+                let lo = Math.min(q3, isFinite(ex) ? ex : q3), hi = Math.max(q97, isFinite(ex) ? ex : q97); if (hi - lo < 1e-6) { lo -= 1; hi += 1; } const pad = (hi - lo) * 0.15; lo -= pad; hi += pad;
+                const F = plotFrame(ctx, w, h, 0, 3.05, lo, hi, { left: 60, bottom: 40, xlabel: kind === 'lap' ? 'bán kính cầu a' : kind === 'div' ? 'cạnh khối lập phương a' : 'cạnh vòng a', ylabel: kind === 'div' ? '∮F·ds / Δv' : kind === 'curl' ? '∮F·dl / Δs' : '6[⟨F⟩ − F(P)] / a²' });
+                [0, 0.5, 1, 1.5, 2, 2.5, 3].forEach(t => label(ctx, String(t), F.X(t), h - F.B + 15, COL.muted, '11px Inter, sans-serif', 'center'));
+                [lo + pad, hi - pad].forEach(v => label(ctx, fmtN(v, 3), F.L - 6, F.Y(v) + 4, COL.muted, '11px Inter, sans-serif', 'right'));
+                if (isFinite(ex)) { line(ctx, F.L, F.Y(ex), w - F.R, F.Y(ex), COL.rose, 1.6, [6, 4]); label(ctx, `chính xác ${cfg.symbol} = ${fmtN(ex, 4)}`, w - F.R - 4, F.Y(ex) - 6, COL.rose, '600 12px Inter, sans-serif', 'right'); }
+                ctx.save(); ctx.beginPath(); ctx.rect(F.L, F.T - 8, w - F.L - F.R, h - F.T - F.B + 8); ctx.clip(); ctx.strokeStyle = COL.sky; ctx.lineWidth = 2.4; ctx.beginPath(); let pen = false;
+                S.limCurve.forEach(([s, v]) => { if (!isFinite(v)) { pen = false; return; } const Yv = F.Y(clamp(v, lo - pad, hi + pad)); if (!pen) { ctx.moveTo(F.X(s), Yv); pen = true; } else ctx.lineTo(F.X(s), Yv); }); ctx.stroke(); ctx.restore();
+                const e = EST(S.s); if (isFinite(e)) dot(ctx, F.X(S.s), F.Y(clamp(e, lo, hi)), COL.emerald, 6);
+                line(ctx, F.X(S.s), F.T, F.X(S.s), h - F.B, COL.emerald, 1, [3, 3]);
+            }
+
+            // ---------- wiring ----------
+            function update() { readouts(); draw3d(); drawSlice(); drawLim(); }
+            chipGroup('sys-group', setSys);
+            chipGroup('plane-group', v => { S.plane = v; update(); });
+            $('heat-group').innerHTML = HEATS.map(([l], i) => `<button data-v="${i}" class="chip${i ? '' : ' on'}">${l}</button>`).join('');
+            chipGroup('heat-group', v => { S.heat = +v; drawSlice(); });
+            $('tg-field').addEventListener('click', e => { chipToggle(S, 'field', e.currentTarget, 'on'); draw3d(); });
+            $('tg-basis').addEventListener('click', e => { chipToggle(S, 'basis', e.currentTarget, 'on-emerald'); draw3d(); });
+            $('btn-apply').addEventListener('click', () => { S.src[S.sys] = readInputs(); compile(); });
+            document.querySelectorAll('.in-f').forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') { S.src[S.sys] = readInputs(); compile(); } }));
+            onInputs(['p0', 'p1', 'p2'], fromSliders);
+            if (kind === 'grad') onInputs(['sl-a'], () => { S.alpha = num('sl-a'); setText('val-a', S.alpha + '°'); readouts(); drawSlice(); drawLim(); });
+            else onInputs(['sl-s'], () => { S.s = num('sl-s'); setText('val-s', S.s.toFixed(2)); readouts(); draw3d(); drawSlice(); drawLim(); });
+            if (kind === 'curl') animate('cv-slice', dt => { const cz = V3.dot(resultCart(S.Pc), nrm()); if (isFinite(cz)) S.spin += clamp(0.5 * cz, -4, 4) * dt; drawSlice(); });
+            let rq = 0; const onResize = () => { if (rq) return; rq = requestAnimationFrame(() => { rq = 0; S.key = ''; update(); }); };
+            if ('ResizeObserver' in window) { const ro = new ResizeObserver(onResize); ['cv-3d', 'cv-slice', 'cv-lim'].filter(id => $(id)).forEach(id => ro.observe($(id).parentElement)); }
+            window.addEventListener('resize', onResize);
+            window.OPSTATE = S; window.OPUPDATE = update;
+            setSys('cart');
+        }
+
+        // =========================================================
+        // Divergence page
+        // =========================================================
+        const PRESETS = {
+            cart: [
+                { label: 'x x̂ + y ŷ + z ẑ', f: ['x', 'y', 'z'], res: '3', resTex: '\\nabla\\cdot\\mathbf{F} = 1 + 1 + 1 = 3' },
+                { label: '−y x̂ + x ŷ', f: ['-y', 'x', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = 0 \\quad\\text{(quay thuần túy, solenoid)}' },
+                { label: 'x² x̂ + y² ŷ + z² ẑ', f: ['x^2', 'y^2', 'z^2'], res: '2x + 2y + 2z', resTex: '\\nabla\\cdot\\mathbf{F} = 2x + 2y + 2z' },
+                { label: 'xy x̂ + yz ŷ + zx ẑ', f: ['x*y', 'y*z', 'z*x'], res: 'x + y + z', resTex: '\\nabla\\cdot\\mathbf{F} = y + z + x' },
+                { label: 'x e^{−y} x̂ + e^{−y} ŷ', f: ['x*exp(-y)', 'exp(-y)', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = e^{-y} - e^{-y} = 0' }
+            ],
+            cyl: [
+                { label: 'r r̂ + z ẑ', f: ['r', '0', 'z'], res: '3', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(r^2) + 1 = 3' },
+                { label: 'r̂ / r (điện tích dài)', f: ['1/r', '0', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(1) = 0 \\quad (r \\ne 0)' },
+                { label: 'r φ̂ (quay)', f: ['0', 'r', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial r}{\\partial\\phi} = 0' },
+                { label: 'r² r̂', f: ['r^2', '0', '0'], res: '3r', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(r^3) = 3r' },
+                { label: 'r cos φ r̂ − r sin φ φ̂', f: ['r*cos(phi)', '-r*sin(phi)', '0'], res: 'cos(phi)', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\,2r\\cos\\phi - \\frac{1}{r}\\,r\\cos\\phi = \\cos\\phi' }
+            ],
+            sph: [
+                { label: 'R R̂', f: ['R', '0', '0'], res: '3', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}(R^3) = 3' },
+                { label: 'R̂ / R² (điện tích điểm)', f: ['1/R^2', '0', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}(1) = 0 \\quad (R \\ne 0)' },
+                { label: 'sin θ θ̂', f: ['0', 'sin(theta)', '0'], res: '2cos(theta)/R', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R\\sin\\theta}\\frac{\\partial}{\\partial\\theta}(\\sin^2\\theta) = \\frac{2\\cos\\theta}{R}' },
+                { label: 'e^{−R} R̂', f: ['exp(-R)', '0', '0'], res: 'exp(-R)*(2/R - 1)', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left(R^2 e^{-R}\\right) = e^{-R}\\left(\\frac{2}{R} - 1\\right)' },
+                { label: 'R cos θ R̂ − R sin θ θ̂', f: ['R*cos(theta)', '-R*sin(theta)', '0'], res: 'cos(theta)', resTex: '\\nabla\\cdot\\mathbf{F} = 3\\cos\\theta - 2\\cos\\theta = \\cos\\theta' }
+            ]
+        };
+        initOperatorPage({ kind: 'div', presets: PRESETS, symbol: '∇·F', P0: [1.2, -0.9, 0.7] });
+        renderQuiz([
+            { q: 'Độ phân kỳ của trường vectơ tại một điểm được định nghĩa là', opts: ['Lưu số trên một đơn vị diện tích', 'Thông lượng ra ròng trên một đơn vị thể tích, khi thể tích co về 0', 'Độ lớn của trường', 'Tốc độ biến thiên dọc theo các đường sức'], ans: 1, why: '$\\nabla\\cdot\\mathbf{F} = \\lim_{\\Delta v\\to 0}\\oint\\mathbf{F}\\cdot d\\mathbf{s}/\\Delta v$. Dấu của nó cho biết $P$ là nguồn ($>0$) hay hố ($<0$).' },
+            { q: 'Với $\\mathbf{F} = \\hat{\\mathbf{R}}/R^2$, $\\nabla\\cdot\\mathbf{F}$ tại $R \\neq 0$ bằng', opts: ['$-2/R^3$', '$1/R^2$', '$0$', '$3$'], ans: 2, why: '$\\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left(R^2\\cdot\\frac{1}{R^2}\\right) = 0$. Toàn bộ thông lượng ($4\\pi$) đến từ gốc tọa độ, nơi độ phân kỳ là một hàm delta. Đây là trường Coulomb của một điện tích điểm.' },
+            { q: 'Trường có $\\nabla\\cdot\\mathbf{F} = 0$ ở mọi nơi được gọi là', opts: ['Trường không xoáy', 'Trường bảo toàn', 'Trường solenoid', 'Trường điều hòa'], ans: 2, why: 'Trường solenoid (độ phân kỳ bằng 0) không có nguồn hay hố. Mật độ từ thông luôn là trường solenoid: $\\nabla\\cdot\\mathbf{B} = 0$.' },
+            { q: '$\\nabla\\cdot\\mathbf{F}$ của $\\mathbf{F} = x^2\\hat{\\mathbf{x}} + y^2\\hat{\\mathbf{y}} + z^2\\hat{\\mathbf{z}}$ tại $(1, 0, -1)$ bằng bao nhiêu?', opts: ['$0$', '$2$', '$4$', '$-2$'], ans: 0, why: '$\\nabla\\cdot\\mathbf{F} = 2x + 2y + 2z = 2 + 0 - 2 = 0$.' },
+            { q: "Định luật Gauss dạng vi phân, $\\nabla\\cdot\\mathbf{D} = \\rho_{\\mathrm{v}}$, kết hợp với định lý divergence cho", opts: ['$\\oint_C\\mathbf{D}\\cdot d\\mathbf{l} = Q$', '$\\oint_S\\mathbf{D}\\cdot d\\mathbf{s} = Q_{\\mathrm{enc}}$', '$\\mathbf{D} = \\varepsilon\\mathbf{E}$', '$\\nabla\\times\\mathbf{E} = 0$'], ans: 1, why: 'Lấy tích phân trên một thể tích: $\\int_V\\nabla\\cdot\\mathbf{D}\\,dv = \\oint_S\\mathbf{D}\\cdot d\\mathbf{s} = \\int_V\\rho_{\\mathrm{v}}\\,dv = Q_{\\mathrm{enc}}$, chính là dạng tích phân của định luật Gauss.' },
+            { q: 'Với $\\mathbf{F} = \\hat{\\mathbf{r}}\\,r$ trong hệ tọa độ trụ, $\\nabla\\cdot\\mathbf{F}$ bằng', opts: ['$1$', '$0$', '$3$', '$2$'], ans: 3, why: '$\\frac{1}{r}\\frac{\\partial}{\\partial r}(r\\cdot r) = \\frac{2r}{r} = 2$. Ở dạng Descartes $\\mathbf{F} = x\\hat{\\mathbf{x}} + y\\hat{\\mathbf{y}}$ và $\\nabla\\cdot\\mathbf{F} = 1 + 1 = 2$, cùng một nguồn đều ở mọi nơi.' }
+        ]);
+        startLoop();
+
+    </script>
+    <script>
+        // ---- Default inputs loaded when the page opens ----
+        function loadWorkedExample() {
+            const ex = { f: ['3*x^2', '2*z', 'x^2*z'], P: [2, -2, 0] };
+            EM.clickChip('sys-group', 'cart');
+            if (Array.isArray(ex.f)) ex.f.forEach((v, i) => { document.getElementById('in-f' + i).value = v; });
+            else document.getElementById('in-f').value = ex.f;
+            document.getElementById('btn-apply').click();
+            ex.P.forEach((v, i) => EM.setControl('p' + i, v));
+        }
+        window.addEventListener('load', () => setTimeout(loadWorkedExample, 0));
+    </script>
+</body>
+</html>

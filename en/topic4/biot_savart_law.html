@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biot–Savart Law - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="magnet" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">The Biot–Savart Law</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Overview</button>
+<button onclick="scrollToSection('linear')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5"></i><span>Straight Wire</span></button>
+<button onclick="scrollToSection('loop')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="circle-dot" class="w-3.5 h-3.5"></i><span>Loop & Dipole</span></button>
+<button onclick="scrollToSection('biot3d')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5"><i data-lucide="box" class="w-3.5 h-3.5"></i><span>Biot–Savart 3D</span></button>
+<button onclick="scrollToSection('parallel')" class="px-3 py-1.5 rounded-lg text-indigo-700 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition flex items-center gap-1.5"><i data-lucide="move-horizontal" class="w-3.5 h-3.5"></i><span>Parallel Wires</span></button>
+<button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Magnetostatics · Biot–Savart Law</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">The Biot–Savart Law</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">A steady current element $I\,d\mathbf{l}$ produces a magnetic field $d\mathbf{H}$ at an observation point $P$. The field is perpendicular to both $d\mathbf{l}$ and the unit vector $\hat{\mathbf{R}}$ pointing from the element to $P$, and it falls off as $1/R^2$, just like Coulomb's law. Adding up (integrating) all elements gives the field of any current distribution. Determine the direction of each contribution with the cross product before summing magnitudes. The law is used for steady currents; a short isolated wire segment is a contribution to a complete current path, not a self-contained steady source.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">1. Current Element</span>
+                    <h3 class="text-base font-bold text-slate-900">Differential field</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$d\mathbf{H} = \frac{I}{4\pi}\,\frac{d\mathbf{l}\times\hat{\mathbf{R}}}{R^2}\quad(\mathrm{A/m})$$</div>
+                    <p class="text-sm text-slate-700">$\mathbf{R} = R\hat{\mathbf{R}}$ runs from the element to $P$. The cross product makes $d\mathbf{H}$ circle around $d\mathbf{l}$ (right-hand rule).</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">2. Line Current</span>
+                    <h3 class="text-base font-bold text-slate-900">Integrate along the wire</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\mathbf{H} = \frac{I}{4\pi}\int_l \frac{d\mathbf{l}\times\hat{\mathbf{R}}}{R^2},\quad \mathbf{B} = \mu_0\mathbf{H}$$</div>
+                    <p class="text-sm text-slate-700">For any closed or open wire, sum the contributions of all elements. The simulations below do this both analytically and numerically.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">3. Distributed Currents</span>
+                    <h3 class="text-base font-bold text-slate-900">Surface and volume</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$I\,d\mathbf{l}\ \leftrightarrow\ \mathbf{J}_{\mathrm{s}}\,ds\ \leftrightarrow\ \mathbf{J}\,dv$$</div>
+                    <p class="text-sm text-slate-700">$\mathbf{H} = \frac{1}{4\pi}\int_S \frac{\mathbf{J}_{\mathrm{s}}\times\hat{\mathbf{R}}}{R^2}ds$ for sheets and $\frac{1}{4\pi}\int_v \frac{\mathbf{J}\times\hat{\mathbf{R}}}{R^2}dv$ for volumes.</p>
+                </div>
+            </div>
+        </section>
+        <section id="linear" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Field of a Straight Wire Segment</h2>
+                <p class="text-sm text-slate-600 mt-1">A wire of length $l$ lies on the $z$-axis and carries current $I$ upward. Drag $P$ (or use the sliders) anywhere beside the wire: the angles $\theta_1$, $\theta_2$ to the two ends set the field, and the numerical Biot–Savart sum (blue) matches the closed form. Move closer to an end and compare the finite-wire result with the infinite-wire approximation. The approximation improves when the observation point is far from both ends relative to its distance from the wire.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[420px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-lin" class="w-full h-full"></canvas></div><div class="flex flex-wrap items-center gap-1.5"><button id="tg-elem" class="chip on-amber">Show current elements</button><span class="text-sm text-slate-600">Screen: $x$ to the right, $z$ up; $\hat{\boldsymbol{\phi}}$ at $P$ points into the page.</span></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Current $I$</span><input type="range" id="lin-I" min="0.5" max="20" step="0.5" value="5" class="flex-1 min-w-0 accent-sky-600"><span id="val-lin-I" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Length $l$</span><input type="range" id="lin-l" min="0.1" max="4" step="0.05" value="1.2" class="flex-1 min-w-0 accent-amber-600"><span id="val-lin-l" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Distance $r$</span><input type="range" id="lin-r" min="0.05" max="1.5" step="0.01" value="0.3" class="flex-1 min-w-0 accent-emerald-600"><span id="val-lin-r" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Height $z_P$</span><input type="range" id="lin-z" min="-2" max="2" step="0.01" value="0" class="flex-1 min-w-0 accent-violet-600"><span id="val-lin-z" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div></div><div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\mathbf{H} = \hat{\boldsymbol{\phi}}\,\frac{I}{4\pi r}\left(\cos\theta_1 - \cos\theta_2\right)$$</div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\theta_1$, $\theta_2$</span><span id="ro-th" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$H_\phi$ closed form</span><span id="ro-H" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$H_\phi$ numerical sum (200 elements)</span><span id="ro-Hn" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$B_\phi = \mu_0 H_\phi$</span><span id="ro-B" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Infinite wire $\mu_0 I/2\pi r$</span><span id="ro-Binf" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Finite / infinite</span><span id="ro-ratio" class="text-slate-700 font-bold text-right"></span></div></div></div>
+            </div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center"><div class="lg:col-span-7"><div class="relative h-56 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-linplot" class="w-full h-full"></canvas></div></div><p class="lg:col-span-5 text-sm text-slate-600">$B_\phi(r)$ at the current height $z_P$ for the finite segment (sky) and an infinitely long wire (amber, dashed). Close to the wire ($r \ll l$) the two agree; far away the segment looks like a short current element and $B$ falls off as $1/r^2$ instead of $1/r$.</p></div>
+        </section>
+        <section id="loop" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-emerald-800 bg-emerald-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Circular Loop and the Magnetic Dipole</h2>
+                <p class="text-sm text-slate-600 mt-1">Cross-section ($x$–$z$ plane) of a loop of radius $a$ in the $x$–$y$ plane. The field lines are computed from the exact solution (elliptic integrals). Drag $P$ anywhere; on the axis the field reduces to the on-axis formula of Fawwaz T. Ulaby and Umberto Ravaioli, and far away it becomes the dipole field of $\mathbf{m} = \hat{\mathbf{z}}\,I\pi a^2$. Compare the field near the loop with the far field. A dipole approximation captures the distant pattern but loses the detailed shape near the winding, which matters in coil and sensor design.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[440px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-loop" class="w-full h-full"></canvas></div><div class="flex flex-wrap items-center gap-1.5"><button id="tg-dip" class="chip">Overlay dipole approximation</button><span class="text-sm text-slate-600">⊙ current out of the page, ⊗ into the page.</span></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Radius $a$</span><input type="range" id="loop-a" min="0.2" max="1.2" step="0.01" value="0.5" class="flex-1 min-w-0 accent-emerald-600"><span id="val-loop-a" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Current $I$</span><input type="range" id="loop-I" min="-10" max="10" step="0.5" value="4" class="flex-1 min-w-0 accent-amber-600"><span id="val-loop-I" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">$P$: $x$</span><input type="range" id="loop-x" min="-2.4" max="2.4" step="0.01" value="0" class="flex-1 min-w-0 accent-violet-600"><span id="val-loop-x" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">$P$: $z$</span><input type="range" id="loop-z" min="-2" max="2" step="0.01" value="0.8" class="flex-1 min-w-0 accent-violet-600"><span id="val-loop-z" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$m = I\pi a^2$</span><span id="ro-m" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\mathbf{H}(P)$ exact</span><span id="ro-Hex" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\mathbf{H}(P)$ dipole approx.</span><span id="ro-Hdip" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">On-axis formula $\frac{Ia^2}{2(a^2+z^2)^{3/2}}$</span><span id="ro-Hax" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Dipole error</span><span id="ro-err" class="text-rose-700 font-bold text-right"></span></div></div><div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\mathbf{H}_{\text{dip}} = \frac{m}{4\pi R^3}\left(\hat{\mathbf{R}}\,2\cos\theta + \hat{\boldsymbol{\theta}}\sin\theta\right)$$</div></div>
+            </div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center"><div class="lg:col-span-7"><div class="relative h-56 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-loopplot" class="w-full h-full"></canvas></div></div><p class="lg:col-span-5 text-sm text-slate-600">Axial profile $H_z(z)$: exact (emerald) and dipole approximation $m/(2\pi|z|^3)$ (amber, dashed). On the whole axis $H_z$ has the sign of $I$: field lines go through the loop in the same direction on both sides. The dipole formula is within about 4% at $|z| = 6a$ (dotted lines) and within 1% once $|z| \gtrsim 12a$.</p></div>
+        </section>
+        <section id="biot3d" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 3</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Biot–Savart Field of Current Geometries</h2>
+                <p class="text-sm text-slate-600 mt-1">Each conductor is split into straight segments, and the exact field of each segment is summed. Arrows show the direction of $\mathbf{B}$ on the chosen slice, colored from <span class="text-sky-800 font-semibold">weak</span> to <span class="text-rose-700 font-semibold">strong</span> (log scale). Field lines are traced through the numerical field. Move the probe with the sliders and compare the numerical value with the textbook formula.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Geometry:</span><div id="b-geo" class="flex flex-wrap gap-1.5 "><button data-v="wire" class="chip">Straight wire</button><button data-v="same" class="chip">Two wires (same)</button><button data-v="opp" class="chip">Two wires (opposite)</button><button data-v="loop" class="chip on">Circular loop</button><button data-v="helm" class="chip">Helmholtz pair</button><button data-v="sol" class="chip">Solenoid</button></div></div><div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Arrows on:</span><div id="b-slice" class="flex flex-wrap gap-1.5 "><button data-v="xz" class="chip on">x–z plane</button><button data-v="xy" class="chip">x–y plane</button><button data-v="3d" class="chip">3D lattice</button><button data-v="none" class="chip">None</button></div><span class="mx-1 text-slate-600">|</span><span class="text-sm text-slate-600">Density:</span><div id="b-res" class="flex flex-wrap gap-1.5 "><button data-v="7" class="chip">Coarse</button><button data-v="11" class="chip on">Medium</button><button data-v="15" class="chip">Fine</button></div><span class="mx-1 text-slate-600">|</span><button id="b-lines" class="chip on">Field lines</button><span class="mx-1 text-slate-600">|</span><div id="b-view" class="flex flex-wrap gap-1.5 "><button data-v="iso" class="chip on">3D</button><button data-v="front" class="chip">Side</button><button data-v="top" class="chip">Top</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[480px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-bs3" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">Current $I$</span><input type="range" id="b-I" min="1" max="20" step="0.5" value="10" class="flex-1 min-w-0 accent-amber-600"><span id="val-b-I" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="text-sm font-semibold text-slate-600 pt-1">Probe position (m)</div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$x$</span><input type="range" id="b-px" min="-4" max="4" step="0.05" value="0" class="flex-1 min-w-0 accent-violet-600"><span id="val-b-px" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$y$</span><input type="range" id="b-py" min="-4" max="4" step="0.05" value="0" class="flex-1 min-w-0 accent-violet-600"><span id="val-b-py" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$z$</span><input type="range" id="b-pz" min="-4" max="4" step="0.05" value="1" class="flex-1 min-w-0 accent-violet-600"><span id="val-b-pz" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$|\mathbf{B}|$ at the probe (Biot–Savart sum)</span><span id="ro-bB" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\mathbf{B}$ components</span><span id="ro-bvec" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Formula</span><span id="ro-bf" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Formula value</span><span id="ro-bex" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Difference</span><span id="ro-bdiff" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Segments summed</span><span id="ro-bn" class="text-slate-700 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">The straight wire is 16 m long, so near the middle it behaves like the infinite wire of the textbook ($\mu_0I/2\pi r$). The loop comparison uses the exact off-axis solution with elliptic integrals.</p></div>
+            </div>
+        </section>
+        <section id="parallel" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 4</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Force Between Two Parallel Wires</h2>
+                <p class="text-sm text-slate-600 mt-1">Two long wires perpendicular to the page, separated by $d$. The background shows the combined field lines. Each wire sits in the field of the other and feels $\mathbf{F}' = I\,\hat{\boldsymbol{\ell}}\times\mathbf{B}$ per unit length: like currents attract, opposite currents repel. Wire 1 is at $x = -d/2$, wire 2 at $x = +d/2$; positive current flows along $+\hat{\mathbf{z}}$ (out of the page).</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[400px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-par" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Current $I_1$</span><input type="range" id="par-I1" min="-20" max="20" step="1" value="10" class="flex-1 min-w-0 accent-sky-600"><span id="val-par-I1" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Current $I_2$</span><input type="range" id="par-I2" min="-20" max="20" step="1" value="10" class="flex-1 min-w-0 accent-amber-600"><span id="val-par-I2" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Separation $d$</span><input type="range" id="par-d" min="0.02" max="0.5" step="0.01" value="0.1" class="flex-1 min-w-0 accent-rose-600"><span id="val-par-d" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$B_1$ at wire 2: $\mu_0 I_1/2\pi d$</span><span id="ro-B1" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$|\mathbf{F}'|$ per unit length</span><span id="ro-F" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Type</span><span id="ro-type" class="text-slate-700 font-bold text-right"></span></div></div><div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\mathbf{F}'_2 = -\hat{\mathbf{x}}\,\frac{\mu_0 I_1 I_2}{2\pi d},\qquad \mathbf{F}'_1 = -\mathbf{F}'_2$$</div><p class="text-sm text-slate-600">The ampere was historically defined from this force: $I_1 = I_2 = 1$ A at $d = 1$ m gives $2\times10^{-7}$ N/m. Since 2019 the ampere is fixed by the elementary charge, but the result is unchanged.</p></div>
+            </div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — The Biot–Savart Law</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Score: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // mini3d — dependency-free 3-D view on a 2-D canvas (z is up)
+        // drag to rotate, wheel to zoom, double-click to reset
+        // =========================================================
+        const V3 = {
+            add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+            sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+            mul: (a, s) => [a[0] * s, a[1] * s, a[2] * s],
+            dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+            cross: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+            len: a => Math.hypot(a[0], a[1], a[2]),
+            unit: a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+        };
+        class View3D {
+            constructor(id, opts = {}) {
+                this.id = id; this.yaw = opts.yaw ?? 0.5; this.pitch = opts.pitch ?? 0.4; this.zoom = opts.zoom ?? 1; this.range = opts.range ?? 6; this.center = opts.center || [0, 0, 0];
+                this.def = { yaw: this.yaw, pitch: this.pitch, zoom: this.zoom }; this.onChange = opts.onChange || (() => {});
+                const cv = $(id); let last = null;
+                cv.style.touchAction = 'none';
+                cv.addEventListener('pointerdown', e => { if (this.pick && this.pick(e)) return; last = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+                cv.addEventListener('pointermove', e => { if (!last) return; this.yaw -= (e.clientX - last[0]) * 0.01; this.pitch = clamp(this.pitch + (e.clientY - last[1]) * 0.01, -1.55, 1.55); last = [e.clientX, e.clientY]; this.onChange(); });
+                const up = () => { last = null; cv.style.cursor = 'grab'; };
+                cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+                cv.addEventListener('wheel', e => { e.preventDefault(); this.zoom = clamp(this.zoom * (e.deltaY > 0 ? 0.9 : 1.1), 0.4, 4); this.onChange(); }, { passive: false });
+                cv.addEventListener('dblclick', () => this.reset());
+                cv.style.cursor = 'grab';
+            }
+            reset() { Object.assign(this, this.def); this.onChange(); }
+            setView(v) {
+                const V = { iso: [0.5, 0.4], top: [-Math.PI / 2, 1.5499], front: [-Math.PI / 2, 0], side: [0, 0], low: [0.5, 0.12] }[v];
+                if (V) { this.yaw = V[0]; this.pitch = V[1]; this.onChange(); }
+            }
+            begin() {
+                const c = setupCanvas(this.id); if (!c) return null;
+                this.ctx = c.ctx; this.w = c.w; this.h = c.h; this.s = Math.min(c.w, c.h) / (2 * this.range) * this.zoom;
+                this.cy_ = Math.cos(this.yaw); this.sy_ = Math.sin(this.yaw); this.cp = Math.cos(this.pitch); this.sp = Math.sin(this.pitch);
+                return this;
+            }
+            // camera coords: X right, Y up, D toward the viewer
+            cam([x0, y0, z0]) {
+                const x = x0 - this.center[0], y = y0 - this.center[1], z = z0 - this.center[2];
+                const X = -x * this.sy_ + y * this.cy_, Y0 = x * this.cy_ + y * this.sy_;   // viewer azimuth = yaw
+                return [X, z * this.cp - Y0 * this.sp, z * this.sp + Y0 * this.cp];
+            }
+            P(p) { const [X, Y, D] = this.cam(p); return [this.w / 2 + X * this.s, this.h / 2 - Y * this.s, D]; }
+            line(a, b, color, width = 1.5, dash = null, alpha = 1) { const A = this.P(a), B = this.P(b); line(this.ctx, A[0], A[1], B[0], B[1], color, width, dash, alpha); }
+            poly(pts, color, width = 1.5, dash = null, alpha = 1, close = false, fill = null) {
+                const ctx = this.ctx; ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+                ctx.beginPath(); pts.forEach((p, i) => { const [x, y] = this.P(p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); if (close) ctx.closePath();
+                if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (color) ctx.stroke(); ctx.restore();
+            }
+            arrow(from, vec, color, width = 2.5, head = 11, alpha = 1, dash = null) {
+                const A = this.P(from), B = this.P(V3.add(from, vec));
+                arrow(this.ctx, A[0], A[1], B[0] - A[0], B[1] - A[1], color, alpha, width, head, dash);
+            }
+            dot(p, color, r = 5) { const [x, y] = this.P(p); dot(this.ctx, x, y, color, r); }
+            text(p, t, color, font = 'bold 13px Inter, sans-serif', dx = 0, dy = 0) { const [x, y] = this.P(p); label(this.ctx, t, x + dx, y + dy, color, font, 'center'); }
+            axes(L = 5, labels = ['x', 'y', 'z'], color = COL.slate) {
+                const dirs = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+                dirs.forEach((d, i) => { this.line(V3.mul(d, -L * 0.35), [0, 0, 0], color, 1, [3, 3], 0.6); this.arrow([0, 0, 0], V3.mul(d, L), color, 1.6, 9, 0.9); this.text(V3.mul(d, L * 1.08), labels[i], color, 'italic bold 14px Inter, sans-serif'); });
+            }
+            grid(L = 5, step = 1, z = 0, color = COL.grid) {
+                for (let v = -L; v <= L + 1e-9; v += step) { this.line([v, -L, z], [v, L, z], color, 1); this.line([-L, v, z], [L, v, z], color, 1); }
+            }
+            circle(c, r, n1, n2, color, width = 1.2, dash = null, alpha = 1, a0 = 0, a1 = 2 * Math.PI) {   // n1, n2: orthonormal in-plane axes
+                const pts = []; for (let k = 0; k <= 64; k++) { const t = a0 + (a1 - a0) * k / 64; pts.push(V3.add(c, V3.add(V3.mul(n1, r * Math.cos(t)), V3.mul(n2, r * Math.sin(t))))); }
+                this.poly(pts, color, width, dash, alpha);
+            }
+        }
+        function viewButtons(id, view) { const g = $(id); if (!g) return; g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => view.setView(b.dataset.v))); }
+
+        // =========================================================
+        // Coordinate systems and basis vectors (Ulaby conventions)
+        // =========================================================
+        const COORD = {
+            cart2cyl: ([x, y, z]) => [Math.hypot(x, y), Math.atan2(y, x), z],
+            cart2sph: ([x, y, z]) => { const R = Math.hypot(x, y, z); return [R, R ? Math.acos(clamp(z / R, -1, 1)) : 0, Math.atan2(y, x)]; },
+            cyl2cart: ([r, p, z]) => [r * Math.cos(p), r * Math.sin(p), z],
+            sph2cart: ([R, t, p]) => [R * Math.sin(t) * Math.cos(p), R * Math.sin(t) * Math.sin(p), R * Math.cos(t)],
+            basisCyl: p => [[Math.cos(p), Math.sin(p), 0], [-Math.sin(p), Math.cos(p), 0], [0, 0, 1]],
+            basisSph: (t, p) => [[Math.sin(t) * Math.cos(p), Math.sin(t) * Math.sin(p), Math.cos(t)], [Math.cos(t) * Math.cos(p), Math.cos(t) * Math.sin(p), -Math.sin(t)], [-Math.sin(p), Math.cos(p), 0]]
+        };
+        const toCartVec = (comp, basis) => V3.add(V3.add(V3.mul(basis[0], comp[0]), V3.mul(basis[1], comp[1])), V3.mul(basis[2], comp[2]));
+        const fromCartVec = (v, basis) => basis.map(b => V3.dot(v, b));
+
+        // =========================================================
+        // Magnetostatics toolkit (Topic 4)
+        // =========================================================
+        const MU0 = 4 * Math.PI * 1e-7;
+        // one-row sliders: fmts = { id: v => text }, onChange() called after every move
+        function bindSliders(fmts, onChange) {
+            Object.entries(fmts).forEach(([id, f]) => {
+                const el = $(id); if (!el) return;
+                const show = () => setText('val-' + id, f(+el.value));
+                el.addEventListener('input', () => { show(); onChange && onChange(id); });
+                show();
+            });
+        }
+        const val = id => +$(id).value;
+        // ⊙ (out of page) / ⊗ (into page) symbol
+        function currentDot(ctx, x, y, out, color = COL.amber, r = 9) {
+            ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = color;
+            if (out) { ctx.beginPath(); ctx.arc(x, y, r * 0.3, 0, 2 * Math.PI); ctx.fill(); }
+            else { const d = r * 0.55; ctx.beginPath(); ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d); ctx.moveTo(x + d, y - d); ctx.lineTo(x - d, y + d); ctx.stroke(); }
+            ctx.restore();
+        }
+        // complete elliptic integrals K(k), E(k) by the arithmetic-geometric mean (k = modulus)
+        function ellipKE(k) {
+            let a = 1, b = Math.sqrt(1 - k * k), c = k, sum = 0.5 * c * c, p = 1;
+            for (let i = 0; i < 30 && Math.abs(c) > 1e-15; i++) { const an = (a + b) / 2; c = (a - b) / 2; b = Math.sqrt(a * b); a = an; p *= 2; sum += 0.5 * p * c * c; }
+            const K = Math.PI / (2 * a); return [K, K * (1 - sum)];
+        }
+        // exact B of a circular loop (radius a, current I, in the z = 0 plane, axis z) at (r, z): [Br, Bz] in tesla
+        function loopB(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : r;
+            const q = (a + r) ** 2 + z * z, k2 = 4 * a * r / q, [K, E] = ellipKE(Math.sqrt(Math.min(k2, 1 - 1e-12)));
+            const d = (a - r) ** 2 + z * z, f = MU0 * I / (2 * Math.PI * Math.sqrt(q));
+            return [f * z / r * (-K + (a * a + r * r + z * z) / d * E), f * (K + (a * a - r * r - z * z) / d * E)];
+        }
+        // mutual inductance of two coaxial circular loops (Maxwell's formula)
+        function mutualLoops(a1, a2, d) {
+            const k = Math.sqrt(4 * a1 * a2 / ((a1 + a2) ** 2 + d * d)), [K, E] = ellipKE(Math.min(k, 1 - 1e-12));
+            return MU0 * Math.sqrt(a1 * a2) * ((2 / k - k) * K - 2 / k * E);
+        }
+        // trace a 2-D field line from (x, y) in world units; F(x, y) → [fx, fy]; returns array of points
+        function traceLine(F, x, y, dir, step, nmax, box) {
+            const pts = [[x, y]];
+            for (let i = 0; i < nmax; i++) {
+                const f1 = F(x, y), m1 = Math.hypot(...f1); if (!(m1 > 1e-30)) break;
+                const mx = x + dir * step / 2 * f1[0] / m1, my = y + dir * step / 2 * f1[1] / m1, f2 = F(mx, my), m2 = Math.hypot(...f2); if (!(m2 > 1e-30)) break;
+                x += dir * step * f2[0] / m2; y += dir * step * f2[1] / m2;
+                if (x < box[0] || x > box[1] || y < box[2] || y > box[3]) { pts.push([x, y]); break; }
+                pts.push([x, y]);
+                if (i > 20 && Math.hypot(x - pts[0][0], y - pts[0][1]) < step * 0.8) { pts.push(pts[0]); break; }   // closed loop
+            }
+            return pts;
+        }
+        function drawPath(ctx, pts, X, Y, color, width = 1.3, alpha = 0.8, arrowsEvery = 0) {
+            if (pts.length < 2) return;
+            ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+            if (arrowsEvery) for (let i = arrowsEvery; i < pts.length - 1; i += arrowsEvery) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; const dx = X(x1) - X(x0), dy = Y(y1) - Y(y0), m = Math.hypot(dx, dy) || 1; arrow(ctx, X(x0), Y(y0), dx / m * 8, dy / m * 8, color, alpha, width, 6); }
+        }
+        // world ↔ screen mapping helper for a rectangular view
+        function view2D(w, h, xmin, xmax, ymin, ymax, pad = 12) {
+            const s = Math.min((w - 2 * pad) / (xmax - xmin), (h - 2 * pad) / (ymax - ymin)), ox = (w - s * (xmax - xmin)) / 2, oy = (h - s * (ymax - ymin)) / 2;
+            return { s, X: x => ox + (x - xmin) * s, Y: y => h - oy - (y - ymin) * s, x: px => xmin + (px - ox) / s, y: py => ymin + (h - oy - py) / s };
+        }
+        const fmtE = (v, d = 3) => !isFinite(v) ? '—' : v === 0 ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-2 ? v.toExponential(d - 1) : (+v.toPrecision(d)).toString());
+        const redrawOnResize = (ids, fn) => { const f = () => requestAnimationFrame(fn); if ('ResizeObserver' in window) { const ro = new ResizeObserver(f); ids.forEach(id => $(id) && ro.observe($(id).parentElement)); } window.addEventListener('resize', f); };
+        // vector potential A_φ of a circular loop; field lines in the meridian plane are contours of ψ = r·A_φ
+        function loopAphi(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : Math.abs(r);
+            const k2 = 4 * a * r / ((a + r) ** 2 + z * z), k = Math.sqrt(Math.min(k2, 1 - 1e-12)), [K, E] = ellipKE(k);
+            return MU0 * I / (Math.PI * k) * Math.sqrt(a / r) * ((1 - k2 / 2) * K - E);
+        }
+
+        // =========================================================
+        // Biot–Savart page
+        // =========================================================
+        const fT = v => fmtSI(v, 'T'), fH = v => fmtE(v) + ' A/m';
+
+        // ---------- 1. finite straight wire ----------
+        const LIN = { elem: true, V: null };
+        function linState() { const I = val('lin-I'), l = val('lin-l'), r = val('lin-r'), zp = val('lin-z'); return { I, l, r, zp }; }
+        function linH({ I, l, r, zp }) {
+            const c1 = (zp + l / 2) / Math.hypot(r, zp + l / 2), c2 = (zp - l / 2) / Math.hypot(r, zp - l / 2);
+            return [I / (4 * Math.PI * r) * (c1 - c2), Math.acos(c1), Math.acos(c2)];
+        }
+        function linNumeric({ I, l, r, zp }, N = 200) {
+            let H = 0; const dz = l / N;
+            for (let k = 0; k < N; k++) { const z = -l / 2 + (k + 0.5) * dz, R = Math.hypot(r, zp - z); H += I * dz * (r / R) / (4 * Math.PI * R * R); }
+            return H;
+        }
+        function drawLin() {
+            const S = linState(), [H, t1, t2] = linH(S), Hn = linNumeric(S), Binf = MU0 * S.I / (2 * Math.PI * S.r);
+            setText('ro-th', `${(t1 * 180 / Math.PI).toFixed(1)}°, ${(t2 * 180 / Math.PI).toFixed(1)}°`);
+            setText('ro-H', fH(H)); setText('ro-Hn', fH(Hn)); setText('ro-B', fT(MU0 * H)); setText('ro-Binf', fT(Binf)); setText('ro-ratio', (MU0 * H / Binf).toFixed(3));
+            const c = setupCanvas('cv-lin'); if (!c) return; const { ctx, w, h } = c;
+            const zr = Math.max(S.l / 2 + 0.25, Math.abs(S.zp) + 0.25, 0.8), xr = Math.max(S.r + 0.9, 1.2), V = view2D(w, h, -0.45 * xr, xr, -zr, zr, 16); LIN.V = V;
+            line(ctx, V.X(-0.45 * xr), V.Y(0), V.X(xr), V.Y(0), COL.grid, 1, [4, 4]); label(ctx, 'z = 0', V.X(-0.43 * xr), V.Y(0) - 6, COL.muted, '12px Inter, sans-serif');
+            const zb = -S.l / 2, zt = S.l / 2, P = [S.r, S.zp];
+            // field circles hint: ⊗ above P side, ⊙ on the mirror side
+            ctx.save(); ctx.strokeStyle = COL.sky; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(V.X(0), V.Y(zb)); ctx.lineTo(V.X(0), V.Y(zt)); ctx.stroke(); ctx.restore();
+            arrow(ctx, V.X(0) - 16, V.Y(0) + 18, 0, -36, COL.amber, 1, 2.5, 9); label(ctx, 'I', V.X(0) - 28, V.Y(0) + 4, COL.amber, 'bold 15px Inter, sans-serif');
+            if (LIN.elem) for (let k = 0; k < 10; k++) { const z = zb + (k + 0.5) * S.l / 10; dot(ctx, V.X(0), V.Y(z), '#0369a1', 2.5); line(ctx, V.X(0), V.Y(z), V.X(P[0]), V.Y(P[1]), COL.sky, 0.8, null, 0.25); }
+            line(ctx, V.X(0), V.Y(zb), V.X(P[0]), V.Y(P[1]), COL.violet, 1.5, [5, 4]); line(ctx, V.X(0), V.Y(zt), V.X(P[0]), V.Y(P[1]), COL.violet, 1.5, [5, 4]);
+            line(ctx, V.X(0), V.Y(P[1]), V.X(P[0]), V.Y(P[1]), COL.emerald, 1.5); label(ctx, `r = ${S.r.toFixed(2)} m`, (V.X(0) + V.X(P[0])) / 2, V.Y(P[1]) + 18, COL.emerald, '600 12px Inter, sans-serif', 'center');
+            // θ arcs at the two ends (angle between +z and R)
+            [[zb, t1, 'θ₁'], [zt, t2, 'θ₂']].forEach(([z, t, lab]) => { const R0 = 26; ctx.save(); ctx.strokeStyle = COL.violet; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(V.X(0), V.Y(z), R0, -Math.PI / 2, -Math.PI / 2 + t); ctx.stroke(); ctx.restore(); label(ctx, lab, V.X(0) + (R0 + 12) * Math.sin(t / 2), V.Y(z) - (R0 + 12) * Math.cos(t / 2) + 4, COL.violet, 'bold 13px Inter, sans-serif', 'center'); });
+            currentDot(ctx, V.X(P[0]) + 26, V.Y(P[1]), false, COL.rose, 10); label(ctx, 'H (into page)', V.X(P[0]) + 42, V.Y(P[1]) + 4, COL.rose, '600 12px Inter, sans-serif');
+            dot(ctx, V.X(P[0]), V.Y(P[1]), COL.amber, 7); label(ctx, 'P', V.X(P[0]) - 4, V.Y(P[1]) - 12, COL.amber, 'bold 14px Inter, sans-serif', 'center');
+            label(ctx, 'drag P', 12, h - 12, COL.muted, '12px Inter, sans-serif');
+            drawLinPlot(S);
+        }
+        function drawLinPlot(S) {
+            const c = setupCanvas('cv-linplot'); if (!c) return; const { ctx, w, h } = c;
+            const lg = Math.log10, rs = [], fin = [], inf = [];
+            for (let k = 0; k <= 160; k++) { const r = Math.pow(10, -2 + 2.5 * k / 160); rs.push(r); fin.push(MU0 * linH({ ...S, r })[0]); inf.push(MU0 * S.I / (2 * Math.PI * r)); }
+            const ymax = lg(Math.max(...inf)), ymin = lg(Math.min(...fin.filter(v => v > 0))) - 0.2;
+            const F = plotFrame(ctx, w, h, -2, 0.5, ymin, ymax + 0.2, { left: 56, bottom: 36, xlabel: 'r (m), log scale', ylabel: 'B_φ (T), log scale' });
+            [-2, -1, 0].forEach(t => label(ctx, `10^${t}`, F.X(t), h - F.B + 15, COL.muted, '11px Inter, sans-serif', 'center'));
+            for (let t = Math.ceil(ymin); t <= ymax; t++) label(ctx, `10^${t}`, F.L - 6, F.Y(t) + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            curve(ctx, x => lg(MU0 * S.I / (2 * Math.PI * 10 ** x)), -2, 0.5, F.X, F.Y, COL.amber, 2, 200, [6, 4]);
+            curve(ctx, x => lg(MU0 * linH({ ...S, r: 10 ** x })[0]), -2, 0.5, F.X, F.Y, COL.sky, 2.4, 200);
+            const x0 = lg(S.r); dot(ctx, F.X(x0), F.Y(lg(MU0 * linH(S)[0])), COL.rose, 5); line(ctx, F.X(x0), F.T, F.X(x0), h - F.B, COL.rose, 1, [3, 3]);
+            label(ctx, '— finite l', w - 150, F.T + 6, COL.sky, '600 12px Inter, sans-serif'); label(ctx, '-- infinite', w - 80, F.T + 6, COL.amber, '600 12px Inter, sans-serif');
+        }
+        bindSliders({ 'lin-I': v => v.toFixed(1) + ' A', 'lin-l': v => v.toFixed(2) + ' m', 'lin-r': v => v.toFixed(2) + ' m', 'lin-z': v => v.toFixed(2) + ' m' }, drawLin);
+        $('tg-elem').addEventListener('click', e => { chipToggle(LIN, 'elem', e.currentTarget, 'on-amber'); drawLin(); });
+        draggable('cv-lin', (x, y) => { const V = LIN.V; if (!V) return null; return Math.hypot(x - V.X(val('lin-r')), y - V.Y(val('lin-z'))) < 22 ? 1 : null; },
+            (hd, x, y) => { const V = LIN.V; $('lin-r').value = clamp(V.x(x), 0.05, 1.5); $('lin-z').value = clamp(V.y(y), -2, 2); $('lin-r').dispatchEvent(new Event('input')); $('lin-z').dispatchEvent(new Event('input')); });
+
+        // ---------- 2. circular loop ----------
+        const LOOP = { dip: false, V: null };
+        const dipoleH = (m, x, z) => { const R = Math.hypot(x, z), c = z / R, s = x / R, HR = m * 2 * c / (4 * Math.PI * R ** 3), Ht = m * s / (4 * Math.PI * R ** 3); return [HR * s + Ht * c, HR * c - Ht * s]; };
+        function drawLoop() {
+            const a = val('loop-a'), I = val('loop-I'), px = val('loop-x'), pz = val('loop-z'), m = I * Math.PI * a * a;
+            const [Br, Bz] = loopB(a, I, Math.abs(px), pz), Hex = [Br / MU0 * Math.sign(px || 1), Bz / MU0], Hd = dipoleH(m, px, pz);
+            if (Math.abs(Hex[0]) < 1e-6 * Math.hypot(...Hex)) Hex[0] = 0;
+            setText('ro-m', fmtE(m) + ' A·m²'); setText('ro-Hex', `(${fmtE(Hex[0])}, ${fmtE(Hex[1])}) A/m`); setText('ro-Hdip', `(${fmtE(Hd[0])}, ${fmtE(Hd[1])}) A/m`);
+            setText('ro-Hax', fH(I * a * a / (2 * (a * a + pz * pz) ** 1.5)) + ` at z = ${pz.toFixed(2)}`);
+            const em = Math.hypot(Hex[0], Hex[1]); setText('ro-err', em > 0 && isFinite(Hd[0] + Hd[1]) ? (100 * Math.hypot(Hex[0] - Hd[0], Hex[1] - Hd[1]) / em).toFixed(1) + ' %' : '—');
+            const c = setupCanvas('cv-loop'); if (!c) return; const { ctx, w, h } = c;
+            const V = view2D(w, h, -2.5, 2.5, -2, 2, 10); LOOP.V = V;
+            line(ctx, V.X(-2.5), V.Y(0), V.X(2.5), V.Y(0), COL.grid, 1); line(ctx, V.X(0), V.Y(-2), V.X(0), V.Y(2), COL.grid, 1);
+            label(ctx, 'x', V.X(2.45), V.Y(0) - 6, COL.slate, 'italic 13px Inter, sans-serif', 'right'); label(ctx, 'z', V.X(0) + 6, V.Y(1.95) + 4, COL.slate, 'italic 13px Inter, sans-serif');
+            if (Math.abs(I) > 1e-9) {
+                const psi = (x, z) => Math.abs(x) * loopAphi(a, Math.abs(I), Math.abs(x), z), lv = [];
+                for (let i = 1; i <= 8; i++) lv.push(psi(a * i / 9, 0));
+                for (let i = 1; i <= 3; i++) lv.push(psi(a * (1 + 0.05 * i), 0) * 1.0);
+                contours(ctx, w, h, (sx, sy) => psi(V.x(sx), V.y(sy)), lv, () => 'rgba(5,150,105,0.75)', 4, 1.3);
+                if (LOOP.dip) { const md = Math.abs(I) * Math.PI * a * a, pd = (x, z) => MU0 * md * x * x / (4 * Math.PI * Math.hypot(x, z) ** 3); contours(ctx, w, h, (sx, sy) => pd(V.x(sx), V.y(sy)), lv, () => 'rgba(217,119,6,0.8)', 4, 1.2); }
+                // direction arrows
+                for (let gx = -2.25; gx <= 2.3; gx += 0.5) for (let gz = -1.75; gz <= 1.8; gz += 0.5) { const [br, bz] = loopB(a, I, Math.abs(gx), gz); dirArrow(ctx, V.X(gx), V.Y(gz), br * Math.sign(gx), -bz, 16, COL.slate, -8.5, 3); }
+            }
+            ctx.save(); ctx.strokeStyle = COL.muted; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.ellipse(V.X(0), V.Y(0), a * V.s, 10, 0, 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
+            currentDot(ctx, V.X(-a), V.Y(0), I >= 0, COL.amber, 10); currentDot(ctx, V.X(a), V.Y(0), I < 0, COL.amber, 10);
+            const hm = Math.hypot(...Hex); if (hm > 0) { const L = clamp(30 + 18 * Math.log10(hm / (Math.abs(I) / (2 * a) + 1e-12) + 3), 18, 90); arrow(ctx, V.X(px), V.Y(pz), Hex[0] / hm * L, -Hex[1] / hm * L, COL.rose, 1, 3, 11); }
+            if (LOOP.dip) { const dm = Math.hypot(...Hd); if (dm > 0) { const L = clamp(30 + 18 * Math.log10(dm / (Math.abs(I) / (2 * a) + 1e-12) + 3), 18, 90); arrow(ctx, V.X(px), V.Y(pz), Hd[0] / dm * L, -Hd[1] / dm * L, COL.amber, 0.9, 2, 9, [4, 3]); } }
+            dot(ctx, V.X(px), V.Y(pz), COL.amber, 6); label(ctx, 'P', V.X(px) - 12, V.Y(pz) - 10, COL.amber, 'bold 14px Inter, sans-serif');
+            label(ctx, 'drag P · rose arrow: H(P)', 10, h - 10, COL.muted, '12px Inter, sans-serif');
+            drawLoopPlot(a, I, m, pz);
+        }
+        function drawLoopPlot(a, I, m, pz) {
+            const c = setupCanvas('cv-loopplot'); if (!c) return; const { ctx, w, h } = c, H0 = I / (2 * a), top = Math.max(Math.abs(H0), 1e-9) * 1.15;
+            const F = plotFrame(ctx, w, h, -3, 3, I >= 0 ? -0.1 * top : -top, I >= 0 ? top : 0.1 * top, { left: 60, bottom: 36, xlabel: 'z (m)', ylabel: 'H_z (A/m)' });
+            [-3, -2, -1, 0, 1, 2, 3].forEach(t => label(ctx, String(t), F.X(t), h - F.B + 15, COL.muted, '11px Inter, sans-serif', 'center'));
+            label(ctx, fmtE(H0), F.L - 6, F.Y(H0) + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            ctx.save(); ctx.beginPath(); ctx.rect(F.L, F.T - 6, w - F.L - F.R, h - F.T - F.B + 6); ctx.clip();
+            curve(ctx, z => m / (2 * Math.PI * Math.abs(z) ** 3), -3, -0.02, F.X, F.Y, COL.amber, 1.8, 200, [6, 4]); curve(ctx, z => m / (2 * Math.PI * Math.abs(z) ** 3), 0.02, 3, F.X, F.Y, COL.amber, 1.8, 200, [6, 4]);
+            ctx.restore();
+            curve(ctx, z => I * a * a / (2 * (a * a + z * z) ** 1.5), -3, 3, F.X, F.Y, COL.emerald, 2.4, 300);
+            if (6 * a < 2.7) { line(ctx, F.X(-6 * a), F.T, F.X(-6 * a), h - F.B, COL.muted, 1, [2, 4]); line(ctx, F.X(6 * a), F.T, F.X(6 * a), h - F.B, COL.muted, 1, [2, 4]); label(ctx, '|z| = 6a', F.X(6 * a) + 4, F.T + 8, COL.muted, '11px Inter, sans-serif'); }
+            dot(ctx, F.X(pz), F.Y(I * a * a / (2 * (a * a + pz * pz) ** 1.5)), COL.rose, 5);
+        }
+        bindSliders({ 'loop-a': v => v.toFixed(2) + ' m', 'loop-I': v => (v >= 0 ? '+' : '') + v.toFixed(1) + ' A', 'loop-x': v => v.toFixed(2) + ' m', 'loop-z': v => v.toFixed(2) + ' m' }, drawLoop);
+        $('tg-dip').addEventListener('click', e => { chipToggle(LOOP, 'dip', e.currentTarget, 'on-amber'); drawLoop(); });
+        draggable('cv-loop', (x, y) => { const V = LOOP.V; return V && Math.hypot(x - V.X(val('loop-x')), y - V.Y(val('loop-z'))) < 22 ? 1 : null; },
+            (hd, x, y) => { const V = LOOP.V; $('loop-x').value = clamp(V.x(x), -2.4, 2.4); $('loop-z').value = clamp(V.y(y), -2, 2); ['loop-x', 'loop-z'].forEach(id => $(id).dispatchEvent(new Event('input'))); });
+
+        // ---------- 3. parallel wires ----------
+        function drawPar() {
+            const I1 = val('par-I1'), I2 = val('par-I2'), d = val('par-d'), B1 = MU0 * I1 / (2 * Math.PI * d), F = -I2 * B1;   // F'_2x
+            setText('ro-B1', fT(Math.abs(B1))); setText('ro-F', fmtSI(Math.abs(F), 'N/m'));
+            setText('ro-type', I1 * I2 > 0 ? 'attractive' : I1 * I2 < 0 ? 'repulsive' : 'no force');
+            const c = setupCanvas('cv-par'); if (!c) return; const { ctx, w, h } = c;
+            const xr = 2.2 * d, yr = 0.6 * xr, V = view2D(w, h, -xr, xr, -yr, yr, 10), w1 = [-d / 2, 0], w2 = [d / 2, 0];
+            const Az = (x, y) => -(I1 * Math.log(Math.hypot(x - w1[0], y) + 1e-9) + I2 * Math.log(Math.hypot(x - w2[0], y) + 1e-9));
+            const vals = []; for (let i = 0; i < 300; i++) { const v = Az(-xr + 2 * xr * Math.random(), -yr + 2 * yr * Math.random()); if (isFinite(v)) vals.push(v); } vals.sort((p, q) => p - q);
+            const lo = vals[Math.floor(vals.length * 0.02)], hi = vals[Math.floor(vals.length * 0.98)], lv = []; for (let k = 1; k < 22; k++) lv.push(lo + (hi - lo) * k / 22);
+            if (Math.abs(I1) + Math.abs(I2) > 0) contours(ctx, w, h, (sx, sy) => Az(V.x(sx), V.y(sy)), lv, () => 'rgba(2,132,199,0.55)', 4, 1.1);
+            for (let gx = -xr * 0.92; gx <= xr * 0.93; gx += xr / 6) for (let gy = -yr * 0.85; gy <= yr * 0.86; gy += xr / 6) {
+                let bx = 0, by = 0; [[w1, I1], [w2, I2]].forEach(([p, I]) => { const dx = gx - p[0], dy = gy - p[1], r2 = dx * dx + dy * dy + 1e-4 * d * d; bx += -I * dy / r2; by += I * dx / r2; });
+                dirArrow(ctx, V.X(gx), V.Y(gy), bx, -by, 14, COL.slate, 0, 3);
+            }
+            [[w1, I1, '1', COL.sky], [w2, I2, '2', COL.amber]].forEach(([p, I, n, cl]) => { if (I !== 0) currentDot(ctx, V.X(p[0]), V.Y(p[1]), I > 0, cl, 12); else dot(ctx, V.X(p[0]), V.Y(p[1]), COL.muted, 8); label(ctx, `I${n} = ${I.toFixed(0)} A`, V.X(p[0]), V.Y(p[1]) + (n === '1' ? 34 : -24), cl, 'bold 13px Inter, sans-serif', 'center'); });
+            if (F !== 0) { const s = Math.sign(F), gap = (V.X(w2[0]) - V.X(w1[0])) / 2 - 18, L = clamp(20 + 25 * Math.log10(Math.abs(F) / 1e-6 + 1), 20, s < 0 ? Math.max(gap, 16) : 110); arrow(ctx, V.X(w2[0]) + s * 14, V.Y(0), s * L, 0, COL.rose, 1, 3.2, 12); arrow(ctx, V.X(w1[0]) - s * 14, V.Y(0), -s * L, 0, COL.rose, 1, 3.2, 12);
+                label(ctx, "F'₂", V.X(w2[0]) + s * (14 + L / 2), V.Y(0) - 12, COL.rose, 'bold 13px Inter, sans-serif', 'center'); label(ctx, "F'₁", V.X(w1[0]) - s * (14 + L / 2), V.Y(0) - 12, COL.rose, 'bold 13px Inter, sans-serif', 'center'); }
+            line(ctx, V.X(w1[0]), V.Y(-0.6 * yr), V.X(w2[0]), V.Y(-0.6 * yr), COL.slate, 1, [3, 3]); label(ctx, `d = ${d.toFixed(2)} m`, (V.X(w1[0]) + V.X(w2[0])) / 2, V.Y(-0.6 * yr) + 16, COL.slate, '600 12px Inter, sans-serif', 'center');
+            label(ctx, '⊙ out of page (I > 0)   ⊗ into page (I < 0)', 10, h - 10, COL.muted, '12px Inter, sans-serif');
+        }
+        bindSliders({ 'par-I1': v => (v >= 0 ? '+' : '') + v.toFixed(0) + ' A', 'par-I2': v => (v >= 0 ? '+' : '') + v.toFixed(0) + ' A', 'par-d': v => v.toFixed(2) + ' m' }, drawPar);
+
+        // ---------- 3. Biot–Savart in 3D (same engine as the magnetostatics 3D lab) ----------
+        (() => {
+        const fmtV = (v, d = 2) => '(' + v.map(c => (Math.abs(c) < 5e-3 ? 0 : c).toFixed(d)).join(', ') + ')';
+        const BS = { geo: 'loop', slice: 'xz', res: 11, lines: true, cache: {} };
+        const bview = new View3D('cv-bs3', { range: 5, onChange: () => drawBS() });
+        chipGroup('b-view', v => bview.setView(v));
+        function ring(r, z, n = 96, cw = false) { const p = []; for (let k = 0; k <= n; k++) { const t = (cw ? -1 : 1) * k * 2 * Math.PI / n; p.push([r * Math.cos(t), r * Math.sin(t), z]); } return p; }
+        function paths(g) {
+            if (g === 'wire') return [[[0, 0, -8], [0, 0, 8]]];
+            if (g === 'same') return [[[-1, 0, -8], [-1, 0, 8]], [[1, 0, -8], [1, 0, 8]]];
+            if (g === 'opp') return [[[-1, 0, -8], [-1, 0, 8]], [[1, 0, 8], [1, 0, -8]]];
+            if (g === 'loop') return [ring(2, 0)];
+            if (g === 'helm') return [ring(2, -1), ring(2, 1)];
+            const p = [], N = 10 * 40; for (let k = 0; k <= N; k++) { const t = k * 2 * Math.PI / 40; p.push([1.2 * Math.cos(t), 1.2 * Math.sin(t), -3 + 6 * k / N]); } return [p];
+        }
+        function segs(g) { if (BS.cache['s' + g]) return BS.cache['s' + g]; const S = []; paths(g).forEach(pp => { for (let k = 0; k < pp.length - 1; k++) S.push([pp[k], pp[k + 1]]); }); return BS.cache['s' + g] = S; }
+        // exact field of straight segments A→B carrying I (tesla)
+        function Bsum(P, S, I) {
+            let bx = 0, by = 0, bz = 0; const k0 = MU0 * I / (4 * Math.PI);
+            for (const [A, B] of S) {
+                const dx = B[0] - A[0], dy = B[1] - A[1], dz = B[2] - A[2], r1x = P[0] - A[0], r1y = P[1] - A[1], r1z = P[2] - A[2], r2x = P[0] - B[0], r2y = P[1] - B[1], r2z = P[2] - B[2];
+                const cx = dy * r1z - dz * r1y, cy = dz * r1x - dx * r1z, cz = dx * r1y - dy * r1x, c2 = cx * cx + cy * cy + cz * cz; if (c2 < 1e-14) continue;
+                const f = k0 / c2 * ((dx * r1x + dy * r1y + dz * r1z) / Math.hypot(r1x, r1y, r1z) - (dx * r2x + dy * r2y + dz * r2z) / Math.hypot(r2x, r2y, r2z));
+                bx += f * cx; by += f * cy; bz += f * cz;
+            }
+            return [bx, by, bz];
+        }
+        function fieldLines(g) {
+            if (BS.cache['l' + g]) return BS.cache['l' + g];
+            const S = segs(g), seeds = { wire: [[0.8, 0, 0], [1.6, 0, 0], [2.6, 0, 0], [1.2, 0, 3], [1.2, 0, -3]], same: [[0, 0.4, 0], [-1.5, 0, 0], [-1.3, 0, 0], [0, 1.4, 0], [0, 2.4, 0], [0, 3.4, 0]], opp: [[0, 0, 0], [0, 0.8, 0], [0, 1.6, 0], [0, 2.8, 0], [0, -1.2, 0]],
+                loop: [[0.3, 0, 0], [0.9, 0, 0], [1.4, 0, 0], [1.75, 0, 0], [0, 0.6, 0], [0, 1.2, 0], [0, 1.6, 0]], helm: [[0.3, 0, 0], [0.9, 0, 0], [1.4, 0, 0], [0, 0.6, 0], [0, 1.2, 0], [0, 1.7, 0]], sol: [[0.2, 0, 0], [0.6, 0, 0], [0.95, 0, 0], [0, 0.5, 0], [0, -0.8, 0]] }[g];
+            const unit = p => { const b = Bsum(p, S, 1), m = Math.hypot(...b); return m > 0 ? [b[0] / m, b[1] / m, b[2] / m] : [0, 0, 0]; };
+            const L = seeds.map(s0 => { const out = [];
+                [1, -1].forEach(dir => { let p = [...s0]; const pts = [[...p]]; const h = 0.06 * dir;
+                    for (let i = 0; i < 700; i++) { const k1 = unit(p), k2 = unit(V3.add(p, V3.mul(k1, h / 2))), k3 = unit(V3.add(p, V3.mul(k2, h / 2))), k4 = unit(V3.add(p, V3.mul(k3, h)));
+                        p = V3.add(p, V3.mul(V3.add(V3.add(k1, V3.mul(k2, 2)), V3.add(V3.mul(k3, 2), k4)), h / 6)); pts.push([...p]);
+                        if (Math.max(...p.map(Math.abs)) > 6) break; if (i > 30 && V3.len(V3.sub(p, s0)) < 0.05) { pts.push([...s0]); dir = 0; break; } }
+                    out.push(pts); if (dir === 0) out.closed = true; });
+                return out.closed ? [out[0]] : out; }).flat();
+            return BS.cache['l' + g] = L;
+        }
+        function exact(P, g, I) {
+            const rho = Math.hypot(P[0], P[1]);
+            const wire = (x0, s) => { const dx = P[0] - x0, dy = P[1], r2 = dx * dx + dy * dy, k = s * MU0 * I / (2 * Math.PI * r2); return [-k * dy, k * dx, 0]; };
+            const loop = z0 => { const [br, bz] = loopB(2, I, rho, P[2] - z0); return rho < 1e-9 ? [0, 0, bz] : [br * P[0] / rho, br * P[1] / rho, bz]; };
+            if (g === 'wire') return ['μ₀I/2πr (infinite wire)', wire(0, 1)];
+            if (g === 'same') return ['Σ μ₀I/2πr (infinite wires)', V3.add(wire(-1, 1), wire(1, 1))];
+            if (g === 'opp') return ['Σ ±μ₀I/2πr (infinite wires)', V3.add(wire(-1, 1), wire(1, -1))];
+            if (g === 'loop') return ['exact loop field (elliptic integrals)', loop(0)];
+            if (g === 'helm') return ['exact field of two loops', V3.add(loop(-1), loop(1))];
+            const z = P[2], R = 1.2, cz = MU0 * 10 / 6 * I / 2 * ((z + 3) / Math.hypot(R, z + 3) - (z - 3) / Math.hypot(R, z - 3));
+            return rho < 1.2 ? ['½μ₀nI(cos α₁ − cos α₂) (finite solenoid, axis formula)', [0, 0, cz]] : ['outside: ideal solenoid gives 0', [0, 0, 0]];
+        }
+        function drawBS() {
+            const v = bview.begin(); if (!v) return; const g = BS.geo, I = val('b-I'), S = segs(g), n = BS.res;
+            v.axes(4.5);
+            if (BS.slice !== 'none') {
+                const pts = [], nn = BS.slice === '3d' ? Math.min(n, 7) : n, sp = 8 / (nn - 1);
+                for (let i = 0; i < nn; i++) for (let j = 0; j < nn; j++) { const a = -4 + i * sp, b = -4 + j * sp;
+                    if (BS.slice === 'xz') pts.push([a, 0, b]); else if (BS.slice === 'xy') pts.push([a, b, 0]); else for (let k = 0; k < nn; k++) pts.push([a, b, -4 + k * sp]); }
+                const F = pts.map(p => Bsum(p, S, I)), M = F.map(f => Math.log10(Math.hypot(...f) + 1e-30)), srt = [...M].sort((a, b) => a - b), lo = srt[Math.floor(srt.length * 0.05)], hi = srt[Math.floor(srt.length * 0.95)];
+                pts.forEach((p, k) => { const m = Math.hypot(...F[k]); if (!(m > 0)) return; const t = clamp((M[k] - lo) / (hi - lo || 1), 0, 1); v.arrow(V3.sub(p, V3.mul(F[k], 0.22 * sp / m)), V3.mul(F[k], 0.45 * sp / m), `hsl(${200 + 145 * t}, 80%, ${45 - 5 * t}%)`, 1.5, 6, 0.4 + 0.5 * t); });
+            }
+            if (BS.lines) fieldLines(g).forEach(pp => v.poly(pp, COL.violet, 1.3, null, 0.55));
+            paths(g).forEach(pp => { v.poly(pp, COL.amber, 3.2); const k = Math.floor(pp.length * 0.3); v.arrow(pp[k], V3.mul(V3.unit(V3.sub(pp[k + 1], pp[k])), 0.6), '#92400e', 2.6, 10); });
+            const P = [val('b-px'), val('b-py'), val('b-pz')], B = Bsum(P, S, I), Bm = Math.hypot(...B);
+            v.dot(P, COL.violet, 6); if (Bm > 0) v.arrow(P, V3.mul(B, 1.3 / Bm), COL.violet, 3, 11); v.text(V3.add(P, [0, 0, -0.45]), 'P', COL.violet);
+            label(v.ctx, `${S.length} segments · I = ${I} A · amber: conductor`, 10, 18, COL.slate, '600 12px Inter, sans-serif');
+            label(v.ctx, 'drag to rotate · wheel to zoom · double-click to reset', 10, v.h - 10, COL.muted, '12px Inter, sans-serif');
+            const [name, Be] = exact(P, g, I), Bem = Math.hypot(...Be);
+            setText('ro-bB', fmtSI(Bm, 'T')); setText('ro-bvec', fmtV(B.map(c => c * 1e6), 2) + ' µT'); setText('ro-bf', name); setText('ro-bex', fmtSI(Bem, 'T'));
+            setText('ro-bdiff', Bem > 0 ? (Math.hypot(B[0] - Be[0], B[1] - Be[1], B[2] - Be[2]) / Bem * 100).toFixed(2) + ' %' : '—'); setText('ro-bn', S.length);
+        }
+        chipGroup('b-geo', k => { BS.geo = k; drawBS(); });
+        chipGroup('b-slice', k => { BS.slice = k; drawBS(); });
+        chipGroup('b-res', k => { BS.res = +k; drawBS(); });
+        $('b-lines').addEventListener('click', e => { chipToggle(BS, 'lines', e.currentTarget); drawBS(); });
+        bindSliders({ 'b-I': v => v.toFixed(1) + ' A', 'b-px': v => v.toFixed(2), 'b-py': v => v.toFixed(2), 'b-pz': v => v.toFixed(2) }, drawBS);
+
+        redrawOnResize(['cv-bs3'], () => drawBS());
+        drawBS();
+        })();
+
+        const drawAll = () => { drawLin(); drawLoop(); drawPar(); };
+        redrawOnResize(['cv-lin', 'cv-loop', 'cv-par', 'cv-linplot', 'cv-loopplot'], drawAll);
+        drawAll();
+        renderQuiz([
+            { q: 'The direction of $d\\mathbf{H}$ produced by a current element $I\\,d\\mathbf{l}$ at point $P$ is', opts: ['along $d\\mathbf{l}$', 'along $\\hat{\\mathbf{R}}$ (from the element to $P$)', 'along $d\\mathbf{l}\\times\\hat{\\mathbf{R}}$, perpendicular to both', 'opposite to $\\hat{\\mathbf{R}}$'], ans: 2, why: 'The Biot–Savart law contains the cross product $d\\mathbf{l}\\times\\hat{\\mathbf{R}}$, so $d\\mathbf{H}$ circles around the current element. That is why the field of a straight wire is azimuthal ($\\hat{\\boldsymbol{\\phi}}$).' },
+            { q: 'For a straight segment of length $l$, when does $H = \\frac{I}{4\\pi r}(\\cos\\theta_1 - \\cos\\theta_2)$ reduce to $\\frac{I}{2\\pi r}$?', opts: ['When $r \\gg l$', 'When $l \\gg r$ with $P$ near the middle ($\\theta_1 \\to 0$, $\\theta_2 \\to \\pi$)', 'When $\\theta_1 = \\theta_2$', 'Never'], ans: 1, why: 'For a very long wire $\\cos\\theta_1 \\to 1$ and $\\cos\\theta_2 \\to -1$, giving $H = I/(2\\pi r)$. In the log–log plot the sky and amber curves overlap for $r \\ll l$.' },
+            { q: 'Far from a current loop ($R \\gg a$), the field on the axis decays as', opts: ['$1/R$', '$1/R^2$', '$1/R^3$', '$e^{-R}$'], ans: 2, why: 'The loop is a magnetic dipole: $H_z \\approx m/(2\\pi|z|^3)$ with $m = I\\pi a^2$, the same $1/R^3$ law as an electric dipole.' },
+            { q: 'Two long parallel wires carry currents in OPPOSITE directions. The force between them is', opts: ['attractive', 'repulsive', 'zero', 'along the wires'], ans: 1, why: 'Wire 2 feels $I_2\\hat{\\boldsymbol{\\ell}}_2\\times\\mathbf{B}_1$. Reversing $I_2$ reverses the force, so opposite currents repel with $F\' = \\mu_0 |I_1 I_2|/(2\\pi d)$.' },
+            { q: 'What is $B$ at the center of a loop of radius $a = 5$ cm carrying $I = 10$ A?', opts: ['$1.26\\times10^{-4}$ T', '$4\\times10^{-5}$ T', '$6.3\\times10^{-5}$ T', '$1.26\\times10^{-3}$ T'], ans: 0, why: '$B = \\mu_0 I/(2a) = 4\\pi\\times10^{-7}\\times10/(0.1) \\approx 1.26\\times10^{-4}$ T.' },
+            { q: 'A semi-infinite wire ends at point $O$. What is $H$ at distance $r$ from $O$, measured perpendicular to the wire?', opts: ['$I/(2\\pi r)$', '$I/(\\pi r)$', '0', '$I/(4\\pi r)$'], ans: 3, why: 'With $P$ abreast of the end, one factor is $\\cos 90° = 0$ and the other end is at infinity, contributing $1$, so $H = \\frac{I}{4\\pi r}(0 + 1)$: exactly half the infinite-wire value.' }
+        ]);
+
+    </script>
+</body>
+</html>

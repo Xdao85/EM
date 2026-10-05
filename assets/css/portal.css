@@ -36,3 +36,9 @@ kbd { font-family: inherit; font-size: .8125rem; padding: .05rem .4rem; border: 
 .-mt-6 { margin-top: -1.5rem; } .pt-4 { padding-top: 1rem; } .align-top { vertical-align: top; }
 .min-h-\[4rem\] { min-height: 4rem; } .min-w-\[56rem\] { min-width: 56rem; }
 .text-indigo-800 { color: rgb(55 48 163); }
+/* EN | VI switch in the top navigation */
+.lang-switch { display: inline-flex; align-items: center; gap: 2px; padding: 3px; margin-left: .25rem; border-radius: .6rem; background: #f1f5f9; border: 1px solid #e2e8f0; font-weight: 700; font-size: .8125rem; white-space: nowrap; }
+.lang-switch > * { padding: .3rem .6rem; border-radius: .45rem; color: #475569; text-decoration: none; }
+.lang-switch .on { background: #0f172a; color: #fff; }
+.lang-switch a:hover { background: #fff; color: #0f172a; }
+.lang-switch a:focus-visible { outline: 2px solid #0284c7; outline-offset: 1px; }

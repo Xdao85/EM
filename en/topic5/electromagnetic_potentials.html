@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electromagnetic Potentials and Phasors - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="waves" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Electromagnetic Potentials and Phasors</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Overview</button>
+<button onclick="scrollToSection('phasor-ops')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="function-square" class="w-3.5 h-3.5"></i><span>Phasor Operators</span></button>
+<button onclick="scrollToSection('retarded')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="radio" class="w-3.5 h-3.5"></i><span>Retarded Potentials</span></button>
+<button onclick="scrollToSection('phasor')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5"></i><span>Phasor Solution</span></button>
+<button onclick="scrollToSection('general')" class="px-3 py-1.5 rounded-lg text-indigo-700 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition flex items-center gap-1.5"><i data-lucide="box" class="w-3.5 h-3.5"></i><span>General Solution</span></button>
+<button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Time-Varying Fields · Electromagnetic Potentials</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Retarded Potentials and the Phasor Method</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">For time-varying fields, $\mathbf{E}$ and $\mathbf{H}$ can still be obtained from a scalar potential $V$ and a vector potential $\mathbf{A}$, but a change in the source reaches the observation point only after a delay $R'/u_{\mathrm{p}}$. For time-harmonic fields ($e^{j\omega t}$) that delay becomes a phase factor $e^{-jkR'}$, and every $\partial/\partial t$ becomes a multiplication by $j\omega$. Retardation means field information propagates at a finite speed. It does not mean charges or their influence are transported instantaneously; phase delay in a phasor is the sinusoidal representation of the same travel time.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">1. Retarded Potentials</span>
+                    <h3 class="text-base font-bold text-slate-900">Time domain</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$V(\mathbf{R}, t) = \frac{1}{4\pi\varepsilon}\int_{v'}\frac{\rho_{\mathrm{v}}(\mathbf{R}_i, t - R'/u_{\mathrm{p}})}{R'}\,dv'$$</div>
+                    <p class="text-sm text-slate-700">Likewise $\mathbf{A} = \frac{\mu}{4\pi}\int\mathbf{J}(t - R'/u_{\mathrm{p}})/R'\,dv'$, with $u_{\mathrm{p}} = 1/\sqrt{\mu\varepsilon}$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-500/10 px-2.5 py-1 rounded-md">2. Phasor Domain</span>
+                    <h3 class="text-base font-bold text-slate-900">Delay $\to$ phase</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\widetilde{V}(\mathbf{R}) = \frac{1}{4\pi\varepsilon}\int_{v'}\frac{\widetilde{\rho}_{\mathrm{v}}\,e^{-jkR'}}{R'}\,dv'$$</div>
+                    <p class="text-sm text-slate-700">Wavenumber $k = \omega/u_{\mathrm{p}} = \omega\sqrt{\mu\varepsilon}$. Then $\widetilde{\mathbf{H}} = \frac1\mu\nabla\times\widetilde{\mathbf{A}}$ and, where $\mathbf{J} = 0$, $\widetilde{\mathbf{E}} = \frac{1}{j\omega\varepsilon}\nabla\times\widetilde{\mathbf{H}}$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">3. Power Flow</span>
+                    <h3 class="text-base font-bold text-slate-900">Time-average Poynting vector</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\mathbf{S}_{\mathrm{av}} = \tfrac12\,\mathfrak{Re}\big[\widetilde{\mathbf{E}}\times\widetilde{\mathbf{H}}^*\big]$$</div>
+                    <p class="text-sm text-slate-700">For a plane wave in a lossless medium: $S_{\mathrm{av}} = |E_0|^2/2\eta = \eta|H_0|^2/2$, $\eta = \sqrt{\mu/\varepsilon}$.</p>
+                </div>
+            </div>
+        </section>
+        <section id="phasor-ops" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Time-Harmonic Fields and Phasor Differential Operators</h2>
+                <p class="text-sm text-slate-600 mt-1">A time-harmonic quantity is the real part of a rotating complex number: $F(t) = \mathfrak{Re}[\widetilde{F}e^{j\omega t}]$. Its time derivative is $\mathfrak{Re}[j\omega\widetilde{F}e^{j\omega t}]$, so in the phasor domain $\partial/\partial t$ is simply multiplication by $j\omega$: the phasor is scaled by $\omega$ and rotated by $90^\circ$. Maxwell's equations lose their time derivatives.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-indigo-700 uppercase tracking-wider bg-indigo-500/10 px-2.5 py-1 rounded-md">Rule</span>
+                    <h3 class="text-base font-bold text-slate-900">$\partial/\partial t \to j\omega$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-indigo-700 text-sm">$$\frac{\partial\mathbf{E}}{\partial t} \leftrightarrow j\omega\widetilde{\mathbf{E}},\qquad \frac{\partial^2\mathbf{E}}{\partial t^2} \leftrightarrow -\omega^2\widetilde{\mathbf{E}}$$</div>
+                    <p class="text-sm text-slate-700">Spatial operators $\nabla\cdot$ and $\nabla\times$ act on the phasor unchanged.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-500/10 px-2.5 py-1 rounded-md">Faraday's law</span>
+                    <h3 class="text-base font-bold text-slate-900">$\widetilde{\mathbf{E}} \to \widetilde{\mathbf{H}}$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\nabla\times\widetilde{\mathbf{E}} = -j\omega\mu\widetilde{\mathbf{H}}\ \Rightarrow\ \widetilde{\mathbf{H}} = -\frac{1}{j\omega\mu}\nabla\times\widetilde{\mathbf{E}}$$</div>
+                    <p class="text-sm text-slate-700">The curl of the electric phasor is set by the magnetic phasor.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">Ampère's law ($\mathbf{J} = 0$)</span>
+                    <h3 class="text-base font-bold text-slate-900">$\widetilde{\mathbf{H}} \to \widetilde{\mathbf{E}}$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\nabla\times\widetilde{\mathbf{H}} = j\omega\varepsilon\widetilde{\mathbf{E}}\ \Rightarrow\ \widetilde{\mathbf{E}} = \frac{1}{j\omega\varepsilon}\nabla\times\widetilde{\mathbf{H}}$$</div>
+                    <p class="text-sm text-slate-700">In a source-free region the displacement current is the only source of $\nabla\times\widetilde{\mathbf{H}}$.</p>
+                </div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">Potentials</span>
+                    <h3 class="text-base font-bold text-slate-900">$\widetilde{\mathbf{A}} \to \widetilde{\mathbf{H}}$, $\widetilde{\mathbf{E}}$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\widetilde{\mathbf{H}} = \frac1\mu\nabla\times\widetilde{\mathbf{A}},\qquad \widetilde{\mathbf{E}} = -\nabla\widetilde{V} - j\omega\widetilde{\mathbf{A}}$$</div>
+                    <p class="text-sm text-slate-700">With the Lorenz condition $\nabla\cdot\widetilde{\mathbf{A}} = -j\omega\mu\varepsilon\widetilde{V}$ both potentials obey Helmholtz equations $\nabla^2\widetilde{\mathbf{A}} + k^2\widetilde{\mathbf{A}} = -\mu\widetilde{\mathbf{J}}$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">Back to time</span>
+                    <h3 class="text-base font-bold text-slate-900">Instantaneous field</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\mathbf{E}(\mathbf{r}, t) = \mathfrak{Re}\big[\widetilde{\mathbf{E}}(\mathbf{r})\,e^{j\omega t}\big]$$</div>
+                    <p class="text-sm text-slate-700">For example $\widetilde{E} = E_0e^{j\varphi}e^{-jkz}$ gives $E = E_0\cos(\omega t - kz + \varphi)$.</p>
+                </div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[340px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-phz" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Amplitude $|\widetilde{F}|$</span><input type="range" id="z-A" min="0.2" max="1" step="0.05" value="0.8" class="flex-1 min-w-0 accent-sky-600"><span id="val-z-A" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Phase $\varphi$</span><input type="range" id="z-ph" min="-180" max="180" step="5" value="30" class="flex-1 min-w-0 accent-violet-600"><span id="val-z-ph" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">$\omega$ (display)</span><input type="range" id="z-w" min="0.5" max="2" step="0.05" value="1" class="flex-1 min-w-0 accent-rose-600"><span id="val-z-w" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\widetilde{F} = |\widetilde{F}|e^{j\varphi}$</span><span id="ro-zF" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$j\omega\widetilde{F}$</span><span id="ro-zdF" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$F(t) = \mathfrak{Re}[\widetilde{F}e^{j\omega t}]$</span><span id="ro-zt" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$dF/dt$ (numerical) vs. $\mathfrak{Re}[j\omega\widetilde{F}e^{j\omega t}]$</span><span id="ro-zchk" class="text-emerald-800 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">Left: the complex plane. The sky arrow is $\widetilde{F}e^{j\omega t}$, the rose arrow is $j\omega\widetilde{F}e^{j\omega t}$, always $90^\circ$ ahead. Their shadows on the real axis are $F(t)$ and $dF/dt$ (right). Increase angular frequency and compare the derivative arrow with the original. Its phase lead stays a quarter-turn while its relative amplitude grows; the real-axis projections give the measurable signals.</p></div>
+            </div>
+        </section>
+        <section id="retarded" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Retarded Potential of an Oscillating Source</h2>
+                <p class="text-sm text-slate-600 mt-1">A point charge $q(t) = q_0\cos\omega t$ oscillates at the origin (the picture is a cross-section through it). The potential at distance $R$ is $V(R, t) = q_0\cos[\omega(t - R/u_{\mathrm{p}})]/4\pi\varepsilon R$: the amplitude falls as $1/R$ and the signal arrives late by $\Delta t = R/u_{\mathrm{p}}$. Drag the observation point P to compare the signal at the source with the signal at P. This scalar-potential illustration isolates propagation delay. A physically varying charge must be accompanied by a charge-conserving current distribution and its vector potential; the illustration alone is not a complete isolated-source solution.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><button id="v-play" class="chip on">Pause</button></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6"><div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[400px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-ret" class="w-full h-full"></canvas></div></div><div class="lg:col-span-5 flex flex-col space-y-3"><div class="relative h-[240px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-retsc" class="w-full h-full"></canvas></div><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Frequency $f$</span><input type="range" id="v-f" min="50" max="1000" step="10" value="300" class="flex-1 min-w-0 accent-rose-600"><span id="val-v-f" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">$\varepsilon_{\mathrm{r}}$</span><input type="range" id="v-er" min="1" max="16" step="0.5" value="1" class="flex-1 min-w-0 accent-sky-600"><span id="val-v-er" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div></div></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Phase velocity $u_{\mathrm{p}} = c/\sqrt{\varepsilon_{\mathrm{r}}}$</span><span id="ro-up" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Wavelength $\lambda = u_{\mathrm{p}}/f$</span><span id="ro-lam" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Distance $R$ to P</span><span id="ro-R" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Delay $\Delta t = R/u_{\mathrm{p}}$</span><span id="ro-dt" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Phase lag $kR$</span><span id="ro-kR" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Amplitude at P relative to $R = 0.1$ m</span><span id="ro-amp" class="text-rose-700 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">Frequency in MHz. The animation is slowed down (one cycle takes 2 s); the readouts use the real values.</p>
+        </section>
+        <section id="phasor" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 3</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Detailed Solution by the Phasor Method (Example 6-8)</h2>
+                <p class="text-sm text-slate-600 mt-1">Lossless medium with $\mu = \mu_0$. Given $\widetilde{\mathbf{E}}(z) = \hat{\mathbf{x}}E_0e^{-jkz}$, Faraday's law gives $\widetilde{\mathbf{H}}$; given $\widetilde{\mathbf{H}}(z) = \hat{\mathbf{y}}H_0e^{-jkz}$, Ampère's law gives $\widetilde{\mathbf{E}}$. The plot shows the instantaneous fields $\mathfrak{Re}[\widetilde{\mathbf{E}}e^{j\omega t}]$ and $\eta\,\mathfrak{Re}[\widetilde{\mathbf{H}}e^{j\omega t}]$ along $z$. Vary relative permittivity and observe both wavelength and the electric-to-magnetic amplitude ratio. The plotted magnetic field is scaled for comparison, so equal displayed heights do not mean equal numerical SI field values.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Given:</span><div id="p-given" class="flex flex-wrap gap-1.5 "><button data-v="E" class="chip on">$\widetilde{\mathbf{E}}$, find $\widetilde{\mathbf{H}}$</button><button data-v="H" class="chip">$\widetilde{\mathbf{H}}$, find $\widetilde{\mathbf{E}}$</button></div><span class="mx-1 text-slate-600">|</span><button id="p-play" class="chip on">Pause</button></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[340px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-ph" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">$\log_{10}\omega$ (rad/s)</span><input type="range" id="p-lw" min="8" max="11" step="0.05" value="10" class="flex-1 min-w-0 accent-rose-600"><span id="val-p-lw" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">$\varepsilon_{\mathrm{r}}$</span><input type="range" id="p-er" min="1" max="81" step="1" value="16" class="flex-1 min-w-0 accent-sky-600"><span id="val-p-er" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div id="p-Ebox"><div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Amplitude $E_0$</span><input type="range" id="p-E0" min="1" max="50" step="0.5" value="10" class="flex-1 min-w-0 accent-sky-600"><span id="val-p-E0" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div></div>
+<div id="p-Hbox" class="hidden"><div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Amplitude $H_0$ (mA/m)</span><input type="range" id="p-H0" min="1" max="200" step="1" value="50" class="flex-1 min-w-0 accent-rose-600"><span id="val-p-H0" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$k = \omega\sqrt{\mu\varepsilon}$</span><span id="ro-k" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\lambda = 2\pi/k$</span><span id="ro-plam" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$\eta = \sqrt{\mu/\varepsilon}$</span><span id="ro-eta" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\widetilde{\mathbf{E}}$</span><span id="ro-pE" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\widetilde{\mathbf{H}}$</span><span id="ro-pH" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$\mathbf{S}_{\mathrm{av}} = \hat{\mathbf{z}}\,|E_0|^2/2\eta$</span><span id="ro-S" class="text-amber-800 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">Textbook values: $\omega = 10^{10}$ rad/s, $\varepsilon = 16\varepsilon_0$, $E_0 = 10$ V/m give $k = 133.3$ rad/m, $\eta = 94.2\ \Omega$, $S_{\mathrm{av}} = 0.53$ W/m².</p></div>
+            </div><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">Case 1</span>
+                    <h3 class="text-base font-bold text-slate-900">Given $\widetilde{\mathbf{E}} = \hat{\mathbf{x}}E_0e^{-jkz}$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\nabla\times\widetilde{\mathbf{E}} = \hat{\mathbf{y}}\frac{\partial\widetilde{E}_x}{\partial z} = -\hat{\mathbf{y}}\,jkE_0e^{-jkz}$$$$\widetilde{\mathbf{H}} = -\frac{1}{j\omega\mu}\left(-\hat{\mathbf{y}}\,jkE_0e^{-jkz}\right) = \hat{\mathbf{y}}\frac{k}{\omega\mu}E_0e^{-jkz} = \hat{\mathbf{y}}\frac{E_0}{\eta}e^{-jkz}$$</div>
+                    <p class="text-sm text-slate-700">Then $\mathbf{S}_{\mathrm{av}} = \tfrac12\mathfrak{Re}[\widetilde{\mathbf{E}}\times\widetilde{\mathbf{H}}^*] = \hat{\mathbf{z}}E_0^2/2\eta$ and $\mathbf{E}(z, t) = \hat{\mathbf{x}}E_0\cos(\omega t - kz)$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-500/10 px-2.5 py-1 rounded-md">Case 2</span>
+                    <h3 class="text-base font-bold text-slate-900">Given $\widetilde{\mathbf{H}} = \hat{\mathbf{y}}H_0e^{-jkz}$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\nabla\times\widetilde{\mathbf{H}} = -\hat{\mathbf{x}}\frac{\partial\widetilde{H}_y}{\partial z} = \hat{\mathbf{x}}\,jkH_0e^{-jkz}$$$$\widetilde{\mathbf{E}} = \frac{1}{j\omega\varepsilon}\left(\hat{\mathbf{x}}\,jkH_0e^{-jkz}\right) = \hat{\mathbf{x}}\frac{k}{\omega\varepsilon}H_0e^{-jkz} = \hat{\mathbf{x}}\,\eta H_0e^{-jkz}$$</div>
+                    <p class="text-sm text-slate-700">Then $\mathbf{S}_{\mathrm{av}} = \hat{\mathbf{z}}\,\eta H_0^2/2$. Both cases use $k/\omega\mu = 1/\eta$ and $k/\omega\varepsilon = \eta$, which follow from $k = \omega\sqrt{\mu\varepsilon}$.</p>
+                </div></div>
+        </section>
+        <section id="general" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-emerald-800 bg-emerald-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 4</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">General Solution for Fields of the Form $(a\hat{\mathbf{x}} + b\hat{\mathbf{y}} + c\hat{\mathbf{z}})\cos(\omega t + k_1x + k_2y + k_3z)$</h2>
+                <p class="text-sm text-slate-600 mt-1">For a plane wave travelling in an arbitrary direction there is no need to take the partial derivatives one by one: with a phasor $\mathbf{F}_0e^{j\mathbf{k}\cdot\mathbf{r}}$, every $\partial/\partial x$, $\partial/\partial y$, $\partial/\partial z$ is a multiplication by $jk_1$, $jk_2$, $jk_3$, so $\nabla \to j\mathbf{k}$ with $\mathbf{k} = k_1\hat{\mathbf{x}} + k_2\hat{\mathbf{y}} + k_3\hat{\mathbf{z}}$. The phase $\omega t + \mathbf{k}\cdot\mathbf{r}$ is constant on planes that move along $-\hat{\mathbf{k}}$; for $\cos(\omega t - \mathbf{k}\cdot\mathbf{r})$ replace $\mathbf{k}$ by $-\mathbf{k}$ everywhere.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">Step 1</span>
+                    <h3 class="text-base font-bold text-slate-900">To phasor form</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\mathbf{F}(\mathbf{r}, t) = \mathbf{F}_0\cos(\omega t + \mathbf{k}\cdot\mathbf{r})\ \Rightarrow\ \widetilde{\mathbf{F}}(\mathbf{r}) = \mathbf{F}_0\,e^{j\mathbf{k}\cdot\mathbf{r}}$$</div>
+                    <p class="text-sm text-slate-700">$\mathbf{F}_0 = (a, b, c)$ is real. An initial phase $\varphi$ just multiplies the phasor by $e^{j\varphi}$; nothing below changes.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-indigo-700 uppercase tracking-wider bg-indigo-500/10 px-2.5 py-1 rounded-md">Step 2</span>
+                    <h3 class="text-base font-bold text-slate-900">$\nabla \to j\mathbf{k}$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-indigo-700 text-sm">$$\nabla\times\widetilde{\mathbf{F}} = j\,\mathbf{k}\times\widetilde{\mathbf{F}},\qquad \nabla\cdot\widetilde{\mathbf{F}} = j\,\mathbf{k}\cdot\widetilde{\mathbf{F}}$$</div>
+                    <p class="text-sm text-slate-700">Because $\nabla e^{j\mathbf{k}\cdot\mathbf{r}} = j\mathbf{k}\,e^{j\mathbf{k}\cdot\mathbf{r}}$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-500/10 px-2.5 py-1 rounded-md">Given $\mathbf{E}$, find $\mathbf{H}$</span>
+                    <h3 class="text-base font-bold text-slate-900">Faraday's law</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\widetilde{\mathbf{H}} = -\frac{1}{j\omega\mu}\,j(\mathbf{k}\times\mathbf{E}_0)e^{j\mathbf{k}\cdot\mathbf{r}} = -\frac{\mathbf{k}\times\mathbf{E}_0}{\omega\mu}e^{j\mathbf{k}\cdot\mathbf{r}}\ \Leftrightarrow\ \mathbf{H} = -\frac1\eta\hat{\mathbf{k}}\times\mathbf{E}$$</div>
+                    <p class="text-sm text-slate-700">with $\mathbf{k}\times\mathbf{E}_0 = \hat{\mathbf{x}}(k_2c - k_3b) + \hat{\mathbf{y}}(k_3a - k_1c) + \hat{\mathbf{z}}(k_1b - k_2a)$; the coefficients are real, so the time form is the same vector times $\cos(\omega t + \mathbf{k}\cdot\mathbf{r})$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">Given $\mathbf{H}$, find $\mathbf{E}$</span>
+                    <h3 class="text-base font-bold text-slate-900">Ampère's law ($\mathbf{J} = 0$)</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\widetilde{\mathbf{E}} = \frac{1}{j\omega\varepsilon}\,j(\mathbf{k}\times\mathbf{H}_0)e^{j\mathbf{k}\cdot\mathbf{r}} = \frac{\mathbf{k}\times\mathbf{H}_0}{\omega\varepsilon}e^{j\mathbf{k}\cdot\mathbf{r}}\ \Leftrightarrow\ \mathbf{E} = \eta\,\hat{\mathbf{k}}\times\mathbf{H}$$</div>
+                    <p class="text-sm text-slate-700">Same cross product with $(a, b, c)$ now the components of $\mathbf{H}_0$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">Checks</span>
+                    <h3 class="text-base font-bold text-slate-900">Transverse + dispersion</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\mathbf{k}\cdot\mathbf{E}_0 = ak_1 + bk_2 + ck_3 = 0,\qquad k_1^2 + k_2^2 + k_3^2 = \omega^2\mu\varepsilon$$</div>
+                    <p class="text-sm text-slate-700">The first comes from $\nabla\cdot\mathbf{E} = 0$ (source-free), the second from the Helmholtz equation. If a given $(a, b, c)$ or $\mathbf{k}$ violates them, the data are inconsistent.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">Power</span>
+                    <h3 class="text-base font-bold text-slate-900">Poynting vector</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\mathbf{S}_{\mathrm{av}} = \tfrac12\mathbf{E}_0\times\mathbf{H}_0 = -\hat{\mathbf{k}}\,\frac{|\mathbf{E}_0|^2}{2\eta} = -\hat{\mathbf{k}}\,\frac{\eta|\mathbf{H}_0|^2}{2}$$</div>
+                    <p class="text-sm text-slate-700">Using $\mathbf{E}_0\times(\hat{\mathbf{k}}\times\mathbf{E}_0) = \hat{\mathbf{k}}|\mathbf{E}_0|^2$ for $\mathbf{k}\perp\mathbf{E}_0$: power flows along $-\hat{\mathbf{k}}$, with the phase fronts.</p>
+                </div></div><div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Given:</span><div id="g-given" class="flex flex-wrap gap-1.5 "><button data-v="E" class="chip on">$\mathbf{E}$, find $\mathbf{H}$</button><button data-v="H" class="chip">$\mathbf{H}$, find $\mathbf{E}$</button></div><span class="mx-1 text-slate-600">|</span><button id="g-fix" class="chip">Set ω from dispersion</button><button id="g-def" class="chip">Textbook example</button><button id="g-play" class="chip on">Pause</button><span class="mx-1 text-slate-600">|</span><div id="g-view" class="flex flex-wrap gap-1.5 "><button data-v="iso" class="chip on">3D</button><button data-v="k" class="chip">Look along k</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[460px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-gen" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="text-sm font-semibold text-slate-600">Amplitude $(a, b, c)$ of the given field</div>
+<div class="flex items-center gap-3"><span class="w-12 shrink-0 text-slate-700">$a$</span><input type="range" id="g-a" min="-5" max="5" step="0.1" value="2" class="flex-1 min-w-0 accent-sky-600"><span id="val-g-a" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-12 shrink-0 text-slate-700">$b$</span><input type="range" id="g-b" min="-5" max="5" step="0.1" value="1" class="flex-1 min-w-0 accent-sky-600"><span id="val-g-b" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-12 shrink-0 text-slate-700">$c$</span><input type="range" id="g-c" min="-5" max="5" step="0.1" value="-2" class="flex-1 min-w-0 accent-sky-600"><span id="val-g-c" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="text-sm font-semibold text-slate-600 pt-1">Wave vector $\mathbf{k}$ (rad/m)</div>
+<div class="flex items-center gap-3"><span class="w-12 shrink-0 text-slate-700">$k_1$</span><input type="range" id="g-k1" min="-40" max="40" step="1" value="10" class="flex-1 min-w-0 accent-violet-600"><span id="val-g-k1" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-12 shrink-0 text-slate-700">$k_2$</span><input type="range" id="g-k2" min="-40" max="40" step="1" value="20" class="flex-1 min-w-0 accent-violet-600"><span id="val-g-k2" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-12 shrink-0 text-slate-700">$k_3$</span><input type="range" id="g-k3" min="-40" max="40" step="1" value="20" class="flex-1 min-w-0 accent-violet-600"><span id="val-g-k3" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="text-sm font-semibold text-slate-600 pt-1">Medium and frequency</div>
+<div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">$\omega$ ($\times10^{9}$ rad/s)</span><input type="range" id="g-w" min="0.1" max="10" step="0.01" value="3" class="flex-1 min-w-0 accent-rose-600"><span id="val-g-w" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">$\varepsilon_{\mathrm{r}}$</span><input type="range" id="g-er" min="1" max="16" step="0.5" value="9" class="flex-1 min-w-0 accent-amber-600"><span id="val-g-er" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-24 shrink-0 text-slate-700">$\mu_{\mathrm{r}}$</span><input type="range" id="g-mr" min="1" max="4" step="0.5" value="1" class="flex-1 min-w-0 accent-amber-600"><span id="val-g-mr" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$|\mathbf{k}|$ vs. $\omega\sqrt{\mu\varepsilon}$</span><span id="ro-gk" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\mathbf{k}\cdot\mathbf{F}_0$ (must be 0)</span><span id="ro-gt" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$\eta$, $\lambda = 2\pi/|\mathbf{k}|$</span><span id="ro-geta" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Propagation direction $-\hat{\mathbf{k}}$</span><span id="ro-gdir" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Result amplitude</span><span id="ro-gres" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$|\mathbf{S}_{\mathrm{av}}|$ and direction</span><span id="ro-gS" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Status</span><span id="ro-gok" class="text-rose-700 font-bold text-right"></span></div></div></div>
+            </div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Electromagnetic Potentials</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Score: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // mini3d — dependency-free 3-D view on a 2-D canvas (z is up)
+        // drag to rotate, wheel to zoom, double-click to reset
+        // =========================================================
+        const V3 = {
+            add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+            sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+            mul: (a, s) => [a[0] * s, a[1] * s, a[2] * s],
+            dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+            cross: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+            len: a => Math.hypot(a[0], a[1], a[2]),
+            unit: a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+        };
+        class View3D {
+            constructor(id, opts = {}) {
+                this.id = id; this.yaw = opts.yaw ?? 0.5; this.pitch = opts.pitch ?? 0.4; this.zoom = opts.zoom ?? 1; this.range = opts.range ?? 6; this.center = opts.center || [0, 0, 0];
+                this.def = { yaw: this.yaw, pitch: this.pitch, zoom: this.zoom }; this.onChange = opts.onChange || (() => {});
+                const cv = $(id); let last = null;
+                cv.style.touchAction = 'none';
+                cv.addEventListener('pointerdown', e => { if (this.pick && this.pick(e)) return; last = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+                cv.addEventListener('pointermove', e => { if (!last) return; this.yaw -= (e.clientX - last[0]) * 0.01; this.pitch = clamp(this.pitch + (e.clientY - last[1]) * 0.01, -1.55, 1.55); last = [e.clientX, e.clientY]; this.onChange(); });
+                const up = () => { last = null; cv.style.cursor = 'grab'; };
+                cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+                cv.addEventListener('wheel', e => { e.preventDefault(); this.zoom = clamp(this.zoom * (e.deltaY > 0 ? 0.9 : 1.1), 0.4, 4); this.onChange(); }, { passive: false });
+                cv.addEventListener('dblclick', () => this.reset());
+                cv.style.cursor = 'grab';
+            }
+            reset() { Object.assign(this, this.def); this.onChange(); }
+            setView(v) {
+                const V = { iso: [0.5, 0.4], top: [-Math.PI / 2, 1.5499], front: [-Math.PI / 2, 0], side: [0, 0], low: [0.5, 0.12] }[v];
+                if (V) { this.yaw = V[0]; this.pitch = V[1]; this.onChange(); }
+            }
+            begin() {
+                const c = setupCanvas(this.id); if (!c) return null;
+                this.ctx = c.ctx; this.w = c.w; this.h = c.h; this.s = Math.min(c.w, c.h) / (2 * this.range) * this.zoom;
+                this.cy_ = Math.cos(this.yaw); this.sy_ = Math.sin(this.yaw); this.cp = Math.cos(this.pitch); this.sp = Math.sin(this.pitch);
+                return this;
+            }
+            // camera coords: X right, Y up, D toward the viewer
+            cam([x0, y0, z0]) {
+                const x = x0 - this.center[0], y = y0 - this.center[1], z = z0 - this.center[2];
+                const X = -x * this.sy_ + y * this.cy_, Y0 = x * this.cy_ + y * this.sy_;   // viewer azimuth = yaw
+                return [X, z * this.cp - Y0 * this.sp, z * this.sp + Y0 * this.cp];
+            }
+            P(p) { const [X, Y, D] = this.cam(p); return [this.w / 2 + X * this.s, this.h / 2 - Y * this.s, D]; }
+            line(a, b, color, width = 1.5, dash = null, alpha = 1) { const A = this.P(a), B = this.P(b); line(this.ctx, A[0], A[1], B[0], B[1], color, width, dash, alpha); }
+            poly(pts, color, width = 1.5, dash = null, alpha = 1, close = false, fill = null) {
+                const ctx = this.ctx; ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+                ctx.beginPath(); pts.forEach((p, i) => { const [x, y] = this.P(p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); if (close) ctx.closePath();
+                if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (color) ctx.stroke(); ctx.restore();
+            }
+            arrow(from, vec, color, width = 2.5, head = 11, alpha = 1, dash = null) {
+                const A = this.P(from), B = this.P(V3.add(from, vec));
+                arrow(this.ctx, A[0], A[1], B[0] - A[0], B[1] - A[1], color, alpha, width, head, dash);
+            }
+            dot(p, color, r = 5) { const [x, y] = this.P(p); dot(this.ctx, x, y, color, r); }
+            text(p, t, color, font = 'bold 13px Inter, sans-serif', dx = 0, dy = 0) { const [x, y] = this.P(p); label(this.ctx, t, x + dx, y + dy, color, font, 'center'); }
+            axes(L = 5, labels = ['x', 'y', 'z'], color = COL.slate) {
+                const dirs = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+                dirs.forEach((d, i) => { this.line(V3.mul(d, -L * 0.35), [0, 0, 0], color, 1, [3, 3], 0.6); this.arrow([0, 0, 0], V3.mul(d, L), color, 1.6, 9, 0.9); this.text(V3.mul(d, L * 1.08), labels[i], color, 'italic bold 14px Inter, sans-serif'); });
+            }
+            grid(L = 5, step = 1, z = 0, color = COL.grid) {
+                for (let v = -L; v <= L + 1e-9; v += step) { this.line([v, -L, z], [v, L, z], color, 1); this.line([-L, v, z], [L, v, z], color, 1); }
+            }
+            circle(c, r, n1, n2, color, width = 1.2, dash = null, alpha = 1, a0 = 0, a1 = 2 * Math.PI) {   // n1, n2: orthonormal in-plane axes
+                const pts = []; for (let k = 0; k <= 64; k++) { const t = a0 + (a1 - a0) * k / 64; pts.push(V3.add(c, V3.add(V3.mul(n1, r * Math.cos(t)), V3.mul(n2, r * Math.sin(t))))); }
+                this.poly(pts, color, width, dash, alpha);
+            }
+        }
+        function viewButtons(id, view) { const g = $(id); if (!g) return; g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => view.setView(b.dataset.v))); }
+
+        // =========================================================
+        // Coordinate systems and basis vectors (Ulaby conventions)
+        // =========================================================
+        const COORD = {
+            cart2cyl: ([x, y, z]) => [Math.hypot(x, y), Math.atan2(y, x), z],
+            cart2sph: ([x, y, z]) => { const R = Math.hypot(x, y, z); return [R, R ? Math.acos(clamp(z / R, -1, 1)) : 0, Math.atan2(y, x)]; },
+            cyl2cart: ([r, p, z]) => [r * Math.cos(p), r * Math.sin(p), z],
+            sph2cart: ([R, t, p]) => [R * Math.sin(t) * Math.cos(p), R * Math.sin(t) * Math.sin(p), R * Math.cos(t)],
+            basisCyl: p => [[Math.cos(p), Math.sin(p), 0], [-Math.sin(p), Math.cos(p), 0], [0, 0, 1]],
+            basisSph: (t, p) => [[Math.sin(t) * Math.cos(p), Math.sin(t) * Math.sin(p), Math.cos(t)], [Math.cos(t) * Math.cos(p), Math.cos(t) * Math.sin(p), -Math.sin(t)], [-Math.sin(p), Math.cos(p), 0]]
+        };
+        const toCartVec = (comp, basis) => V3.add(V3.add(V3.mul(basis[0], comp[0]), V3.mul(basis[1], comp[1])), V3.mul(basis[2], comp[2]));
+        const fromCartVec = (v, basis) => basis.map(b => V3.dot(v, b));
+
+        // =========================================================
+        // Magnetostatics toolkit (Topic 4)
+        // =========================================================
+        const MU0 = 4 * Math.PI * 1e-7;
+        // one-row sliders: fmts = { id: v => text }, onChange() called after every move
+        function bindSliders(fmts, onChange) {
+            Object.entries(fmts).forEach(([id, f]) => {
+                const el = $(id); if (!el) return;
+                const show = () => setText('val-' + id, f(+el.value));
+                el.addEventListener('input', () => { show(); onChange && onChange(id); });
+                show();
+            });
+        }
+        const val = id => +$(id).value;
+        // ⊙ (out of page) / ⊗ (into page) symbol
+        function currentDot(ctx, x, y, out, color = COL.amber, r = 9) {
+            ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = color;
+            if (out) { ctx.beginPath(); ctx.arc(x, y, r * 0.3, 0, 2 * Math.PI); ctx.fill(); }
+            else { const d = r * 0.55; ctx.beginPath(); ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d); ctx.moveTo(x + d, y - d); ctx.lineTo(x - d, y + d); ctx.stroke(); }
+            ctx.restore();
+        }
+        // complete elliptic integrals K(k), E(k) by the arithmetic-geometric mean (k = modulus)
+        function ellipKE(k) {
+            let a = 1, b = Math.sqrt(1 - k * k), c = k, sum = 0.5 * c * c, p = 1;
+            for (let i = 0; i < 30 && Math.abs(c) > 1e-15; i++) { const an = (a + b) / 2; c = (a - b) / 2; b = Math.sqrt(a * b); a = an; p *= 2; sum += 0.5 * p * c * c; }
+            const K = Math.PI / (2 * a); return [K, K * (1 - sum)];
+        }
+        // exact B of a circular loop (radius a, current I, in the z = 0 plane, axis z) at (r, z): [Br, Bz] in tesla
+        function loopB(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : r;
+            const q = (a + r) ** 2 + z * z, k2 = 4 * a * r / q, [K, E] = ellipKE(Math.sqrt(Math.min(k2, 1 - 1e-12)));
+            const d = (a - r) ** 2 + z * z, f = MU0 * I / (2 * Math.PI * Math.sqrt(q));
+            return [f * z / r * (-K + (a * a + r * r + z * z) / d * E), f * (K + (a * a - r * r - z * z) / d * E)];
+        }
+        // mutual inductance of two coaxial circular loops (Maxwell's formula)
+        function mutualLoops(a1, a2, d) {
+            const k = Math.sqrt(4 * a1 * a2 / ((a1 + a2) ** 2 + d * d)), [K, E] = ellipKE(Math.min(k, 1 - 1e-12));
+            return MU0 * Math.sqrt(a1 * a2) * ((2 / k - k) * K - 2 / k * E);
+        }
+        // trace a 2-D field line from (x, y) in world units; F(x, y) → [fx, fy]; returns array of points
+        function traceLine(F, x, y, dir, step, nmax, box) {
+            const pts = [[x, y]];
+            for (let i = 0; i < nmax; i++) {
+                const f1 = F(x, y), m1 = Math.hypot(...f1); if (!(m1 > 1e-30)) break;
+                const mx = x + dir * step / 2 * f1[0] / m1, my = y + dir * step / 2 * f1[1] / m1, f2 = F(mx, my), m2 = Math.hypot(...f2); if (!(m2 > 1e-30)) break;
+                x += dir * step * f2[0] / m2; y += dir * step * f2[1] / m2;
+                if (x < box[0] || x > box[1] || y < box[2] || y > box[3]) { pts.push([x, y]); break; }
+                pts.push([x, y]);
+                if (i > 20 && Math.hypot(x - pts[0][0], y - pts[0][1]) < step * 0.8) { pts.push(pts[0]); break; }   // closed loop
+            }
+            return pts;
+        }
+        function drawPath(ctx, pts, X, Y, color, width = 1.3, alpha = 0.8, arrowsEvery = 0) {
+            if (pts.length < 2) return;
+            ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+            if (arrowsEvery) for (let i = arrowsEvery; i < pts.length - 1; i += arrowsEvery) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; const dx = X(x1) - X(x0), dy = Y(y1) - Y(y0), m = Math.hypot(dx, dy) || 1; arrow(ctx, X(x0), Y(y0), dx / m * 8, dy / m * 8, color, alpha, width, 6); }
+        }
+        // world ↔ screen mapping helper for a rectangular view
+        function view2D(w, h, xmin, xmax, ymin, ymax, pad = 12) {
+            const s = Math.min((w - 2 * pad) / (xmax - xmin), (h - 2 * pad) / (ymax - ymin)), ox = (w - s * (xmax - xmin)) / 2, oy = (h - s * (ymax - ymin)) / 2;
+            return { s, X: x => ox + (x - xmin) * s, Y: y => h - oy - (y - ymin) * s, x: px => xmin + (px - ox) / s, y: py => ymin + (h - oy - py) / s };
+        }
+        const fmtE = (v, d = 3) => !isFinite(v) ? '—' : v === 0 ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-2 ? v.toExponential(d - 1) : (+v.toPrecision(d)).toString());
+        const redrawOnResize = (ids, fn) => { const f = () => requestAnimationFrame(fn); if ('ResizeObserver' in window) { const ro = new ResizeObserver(f); ids.forEach(id => $(id) && ro.observe($(id).parentElement)); } window.addEventListener('resize', f); };
+        // vector potential A_φ of a circular loop; field lines in the meridian plane are contours of ψ = r·A_φ
+        function loopAphi(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : Math.abs(r);
+            const k2 = 4 * a * r / ((a + r) ** 2 + z * z), k = Math.sqrt(Math.min(k2, 1 - 1e-12)), [K, E] = ellipKE(k);
+            return MU0 * I / (Math.PI * k) * Math.sqrt(a / r) * ((1 - k2 / 2) * K - E);
+        }
+        // =========================================================
+        // Time-varying fields toolkit (Topic 5)
+        // =========================================================
+        const C0 = 299792458;
+        // rolling history buffer
+        function Trace(n = 500) { return { d: [], n, push(v) { this.d.push(v); if (this.d.length > this.n) this.d.shift(); }, clear() { this.d = []; } }; }
+        // oscilloscope: series = [{ tr: Trace or array, color, label, dash, scale }], ymax symmetric range
+        function scope(id, series, ymax, opts = {}) {
+            const c = setupCanvas(id); if (!c) return null; const { ctx, w, h } = c, L = opts.left ?? 54, R = 12, T = 22, B = 22;
+            const X = i => L + i / ((opts.n ?? 500) - 1) * (w - L - R), Y = v => T + (h - T - B) / 2 * (1 - v / ymax);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            for (let k = 0; k <= 8; k++) { const x = L + k * (w - L - R) / 8; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, h - B); ctx.stroke(); }
+            [-1, -0.5, 0, 0.5, 1].forEach(f => { ctx.beginPath(); ctx.moveTo(L, Y(f * ymax)); ctx.lineTo(w - R, Y(f * ymax)); ctx.stroke(); });
+            ctx.strokeStyle = '#94a3b8'; ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); ctx.restore();
+            label(ctx, opts.ylab ? `${opts.ylab}` : fmtE(ymax), L - 6, T + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            label(ctx, opts.ylab0 ?? '0', L - 6, Y(0) + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            series.forEach(s => { const d = s.tr.d || s.tr, sc = s.scale ?? 1; if (d.length < 2) return; ctx.save(); ctx.strokeStyle = s.color; ctx.lineWidth = s.width ?? 2.2; if (s.dash) ctx.setLineDash(s.dash); ctx.beginPath();
+                const off = (opts.n ?? 500) - d.length; d.forEach((v, i) => { const y = Y(clamp(v * sc, -ymax * 1.05, ymax * 1.05)); i ? ctx.lineTo(X(i + off), y) : ctx.moveTo(X(i + off), y); }); ctx.stroke(); ctx.restore(); });
+            let lx = L + 8; series.forEach(s => { if (!s.label) return; ctx.save(); ctx.font = '600 12px Inter, sans-serif'; const tw = ctx.measureText(s.label).width; ctx.restore(); ctx.save(); ctx.strokeStyle = s.color; ctx.lineWidth = 2.5; if (s.dash) ctx.setLineDash(s.dash); ctx.beginPath(); ctx.moveTo(lx, 12); ctx.lineTo(lx + 16, 12); ctx.stroke(); ctx.restore(); label(ctx, s.label, lx + 20, 16, s.color, '600 12px Inter, sans-serif'); lx += tw + 36; });
+            if (opts.xlab) label(ctx, opts.xlab, w - R, h - 6, COL.muted, '11px Inter, sans-serif', 'right');
+            return { ctx, w, h, X, Y };
+        }
+        const deg = r => r * 180 / Math.PI;
+        // small play/pause helper bound to a chip button
+        function playButton(id, state, key = 'run') { const b = $(id); if (!b) return; b.addEventListener('click', () => { state[key] = !state[key]; b.textContent = state[key] ? 'Pause' : 'Play'; b.classList.toggle('on', state[key]); }); }
+        const fmtT = s => { const a = Math.abs(s); return a >= 86400 * 365 ? (s / (86400 * 365)).toPrecision(3) + ' yr' : a >= 86400 ? (s / 86400).toPrecision(3) + ' days' : a >= 3600 ? (s / 3600).toPrecision(3) + ' h' : a >= 60 ? (s / 60).toPrecision(3) + ' min' : fmtSI(s, 's'); };
+        // =========================================================
+        // Electromagnetic potentials and the phasor method
+        // =========================================================
+        // ---------- 1. phasor differential operator ----------
+        const PZ = { th: 0, run: true };
+        function drawPZ(dt) {
+            if (PZ.run) PZ.th += dt * Math.PI * val('z-w');
+            const A = val('z-A'), phi = val('z-ph') * Math.PI / 180, w = val('z-w'), a = PZ.th + phi, F = A * Math.cos(a), dF = -w * A * Math.sin(a), h = 1e-5, dnum = (A * Math.cos(a + w * h) - A * Math.cos(a - w * h)) / (2 * h);
+            setText('ro-zF', `${A.toFixed(2)} ∠ ${val('z-ph').toFixed(0)}°`); setText('ro-zdF', `${(w * A).toFixed(2)} ∠ ${(val('z-ph') + 90).toFixed(0)}°`); setText('ro-zt', F.toFixed(3)); setText('ro-zchk', `${dnum.toFixed(3)} = ${dF.toFixed(3)}`);
+            const c = setupCanvas('cv-phz'); if (!c) return; const { ctx, w: W, h: H } = c;
+            const cx = W * 0.22, cy = H / 2, R = Math.min(W * 0.18, H * 0.38) / 2;
+            line(ctx, cx - 2.2 * R, cy, cx + 2.2 * R, cy, COL.slate, 1.2); line(ctx, cx, cy - 2.2 * R, cx, cy + 2.2 * R, COL.slate, 1.2);
+            label(ctx, 'Re', cx + 2.2 * R - 4, cy - 6, COL.muted, '12px Inter, sans-serif', 'right'); label(ctx, 'Im', cx + 6, cy - 2.2 * R + 12, COL.muted, '12px Inter, sans-serif');
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.beginPath(); ctx.arc(cx, cy, 2 * R * A, 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
+            const fx = 2 * R * A * Math.cos(a), fy = 2 * R * A * Math.sin(a), gx = 2 * R * w * A * Math.cos(a + Math.PI / 2), gy = 2 * R * w * A * Math.sin(a + Math.PI / 2);
+            arrow(ctx, cx, cy, fx, -fy, COL.sky, 1, 3, 11); arrow(ctx, cx, cy, gx, -gy, COL.rose, 1, 3, 11);
+            line(ctx, cx + fx, cy - fy, cx + fx, cy, COL.sky, 1, [3, 3]); line(ctx, cx + gx, cy - gy, cx + gx, cy, COL.rose, 1, [3, 3]);
+            dot(ctx, cx + fx, cy, COL.sky, 4); dot(ctx, cx + gx, cy, COL.rose, 4);
+            label(ctx, 'F̃·e^(jωt)', cx + fx * 1.15, cy - fy * 1.15, COL.sky, 'bold 12px Inter, sans-serif', 'center'); label(ctx, 'jωF̃·e^(jωt)', cx + gx * 1.15, cy - gy * 1.15, COL.rose, 'bold 12px Inter, sans-serif', 'center');
+            const x0 = W * 0.47, pw = W - x0 - 12, X = t => x0 + t / (4 * Math.PI) * pw, Y = v => cy - v * R;
+            line(ctx, x0, cy, x0 + pw, cy, COL.slate, 1); line(ctx, x0, cy - 2.2 * R, x0, cy + 2.2 * R, COL.grid, 1);
+            [['sky', t => 2 * A * Math.cos(t + phi)], ['rose', t => -2 * w * A * Math.sin(t + phi)]].forEach(([col, f]) => { ctx.save(); ctx.strokeStyle = COL[col]; ctx.lineWidth = 2.2; ctx.beginPath(); for (let k = 0; k <= 300; k++) { const t = 4 * Math.PI * k / 300; k ? ctx.lineTo(X(t), Y(f(t))) : ctx.moveTo(X(t), Y(f(t))); } ctx.stroke(); ctx.restore(); });
+            const tc = PZ.th % (2 * Math.PI); line(ctx, X(tc), cy - 2.2 * R, X(tc), cy + 2.2 * R, COL.slate, 1, [3, 3]);
+            label(ctx, 'F(t)', x0 + 8, 16, COL.sky, 'bold 12px Inter, sans-serif'); label(ctx, 'dF/dt', x0 + 60, 16, COL.rose, 'bold 12px Inter, sans-serif'); label(ctx, 'ωt →', x0 + pw, cy + 2.2 * R + 14, COL.muted, '11px Inter, sans-serif', 'right');
+        }
+        bindSliders({ 'z-A': v => v.toFixed(2), 'z-ph': v => v.toFixed(0) + '°', 'z-w': v => v.toFixed(2) }, () => drawPZ(0));
+        animate('cv-phz', drawPZ);
+
+        // ---------- 2. retarded potential ----------
+        const RT = { ph: 0, run: true, P: [1.6, 0.8] };
+        let vr = null;
+        const upv = () => C0 / Math.sqrt(val('v-er')), kv = () => 2 * Math.PI * val('v-f') * 1e6 / upv();
+        function drawRet(dt) {
+            if (RT.run) RT.ph += dt * Math.PI;
+            const k = kv(), R = Math.hypot(...RT.P), up = upv(), lam = 2 * Math.PI / k;
+            setText('ro-up', `${(up / 1e8).toFixed(3)}×10⁸ m/s`); setText('ro-lam', lam.toFixed(3) + ' m'); setText('ro-R', R.toFixed(2) + ' m'); setText('ro-dt', fmtSI(R / up, 's'));
+            setText('ro-kR', `${(k * R).toFixed(2)} rad = ${(deg(k * R) % 360).toFixed(0)}° (+ ${Math.floor(k * R / (2 * Math.PI))} cycles)`); setText('ro-amp', (0.1 / Math.max(R, 0.1) * 100).toFixed(1) + ' %');
+            const c = setupCanvas('cv-ret'); if (!c) return; const { ctx, w, h } = c;
+            vr = view2D(w, h, -3, 3, -2.2, 2.2, 6); const V = vr, st = 4, gw = Math.ceil(w / st), gh = Math.ceil(h / st), off = document.createElement('canvas'); off.width = gw; off.height = gh; const oc = off.getContext('2d'), img = oc.createImageData(gw, gh);
+            for (let j = 0; j < gh; j++) for (let i = 0; i < gw; i++) { const x = V.x(i * st), y = V.y(j * st), r = Math.max(Math.hypot(x, y), 0.05), s = Math.cos(RT.ph - k * r) * 0.35 / r, a = Math.tanh(Math.abs(s)), q = 4 * (j * gw + i), col = s >= 0 ? [225, 29, 72] : [2, 132, 199]; img.data[q] = col[0]; img.data[q + 1] = col[1]; img.data[q + 2] = col[2]; img.data[q + 3] = 150 * a; }
+            oc.putImageData(img, 0, 0); ctx.save(); ctx.imageSmoothingEnabled = true; ctx.drawImage(off, 0, 0, gw * st, gh * st); ctx.restore();
+            chargeDisc(ctx, V.X(0), V.Y(0), Math.cos(RT.ph) >= 0 ? 1 : -1, 9);
+            ctx.save(); ctx.strokeStyle = COL.slate; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(V.X(0), V.Y(0), R * V.s, 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
+            dot(ctx, V.X(RT.P[0]), V.Y(RT.P[1]), COL.emerald, 8); label(ctx, 'P', V.X(RT.P[0]) + 10, V.Y(RT.P[1]) - 8, COL.emerald, 'bold 14px Inter, sans-serif');
+            label(ctx, 'colour: V(R, t) (rose > 0, sky < 0; amplitude compressed) · drag P', 10, 18, COL.slate, '600 12px Inter, sans-serif');
+            const c2 = setupCanvas('cv-retsc'); if (!c2) return; const g = c2.ctx, W = c2.w, H = c2.h;
+            const F = plotFrame(g, W, H, 0, 4 * Math.PI, -1.2, 1.2, { left: 14, bottom: 18, top: 30 });
+            curve(g, x => Math.cos(x), 0, 4 * Math.PI, F.X, F.Y, COL.amber, 2.2); curve(g, x => Math.cos(x - k * R), 0, 4 * Math.PI, F.X, F.Y, COL.emerald, 2.4, 200, [6, 4]);
+            const xc = RT.ph % (2 * Math.PI); line(g, F.X(xc), F.T, F.X(xc), H - F.B, COL.slate, 1, [3, 3]);
+            label(g, 'q(t) at the source', 20, 16, COL.amber, 'bold 12px Inter, sans-serif'); label(g, 'R·V(R, t) at P (normalized)', 150, 16, COL.emerald, 'bold 12px Inter, sans-serif');
+        }
+        draggable('cv-ret', (x, y) => vr && Math.hypot(vr.X(RT.P[0]) - x, vr.Y(RT.P[1]) - y) < 16 ? 1 : null, (hd, x, y) => { RT.P = [clamp(vr.x(x), -2.9, 2.9), clamp(vr.y(y), -2.1, 2.1)]; drawRet(0); });
+        bindSliders({ 'v-f': v => v.toFixed(0) + ' MHz', 'v-er': v => v.toFixed(1) }, () => drawRet(0));
+        playButton('v-play', RT);
+        animate('cv-ret', drawRet);
+
+        // ---------- 3. Example 6-8: E ↔ H ----------
+        const PH = { given: 'E', ph: 0, run: true };
+        function drawPh(dt) {
+            if (PH.run) PH.ph += dt * Math.PI;
+            const w = Math.pow(10, val('p-lw')), er = val('p-er'), k = w * Math.sqrt(MU0 * er * EPS0), eta = Math.sqrt(MU0 / (er * EPS0)), lam = 2 * Math.PI / k;
+            const E0 = PH.given === 'E' ? val('p-E0') : eta * val('p-H0') * 1e-3, H0 = E0 / eta, S = E0 * E0 / (2 * eta);
+            setText('ro-k', k.toFixed(2) + ' rad/m'); setText('ro-plam', fmtSI(lam, 'm')); setText('ro-eta', eta.toFixed(2) + ' Ω');
+            setText('ro-pE', `x̂ ${E0.toFixed(3)} e^(−j${k.toFixed(1)}z) V/m`); setText('ro-pH', `ŷ ${fmtSI(H0, 'A/m')} · e^(−j${k.toFixed(1)}z)`); setText('ro-S', fmtSI(S, 'W/m²'));
+            const c = setupCanvas('cv-ph'); if (!c) return; const { ctx, w: W, h: H } = c;
+            const F = plotFrame(ctx, W, H, 0, 2 * lam, -1.3, 1.3, { left: 20, bottom: 26, top: 30, xlabel: 'z' });
+            for (let m = 0; m <= 4; m++) label(ctx, m === 0 ? '0' : `${m / 2}λ`, F.X(m * lam / 2), H - F.B + 14, COL.muted, '11px Inter, sans-serif', 'center');
+            curve(ctx, z => Math.cos(PH.ph - k * z), 0, 2 * lam, F.X, F.Y, COL.sky, 2.6, 300); curve(ctx, z => Math.cos(PH.ph - k * z), 0, 2 * lam, F.X, F.Y, COL.rose, 2, 300, [7, 5]);
+            for (let m = 0; m < 16; m++) { const z = (m + 0.5) * lam / 8, s = Math.cos(PH.ph - k * z) ** 2; if (s > 0.02) arrow(ctx, F.X(z) - 12 * s, F.Y(-1.15), 24 * s, 0, COL.amber, 0.9, 2, 7); }
+            label(ctx, 'E_x(z, t) / E₀', 24, 16, COL.sky, 'bold 12px Inter, sans-serif'); label(ctx, 'η H_y(z, t) / E₀ (in phase)', 140, 16, COL.rose, 'bold 12px Inter, sans-serif'); label(ctx, 'S(z, t) → +ẑ', W - 14, 16, COL.amber, 'bold 12px Inter, sans-serif', 'right');
+        }
+        chipGroup('p-given', k => { PH.given = k; $('p-Ebox').classList.toggle('hidden', k !== 'E'); $('p-Hbox').classList.toggle('hidden', k !== 'H'); drawPh(0); });
+        bindSliders({ 'p-lw': v => '10^' + v.toFixed(2), 'p-er': v => v.toFixed(0), 'p-E0': v => v.toFixed(1) + ' V/m', 'p-H0': v => v.toFixed(0) }, () => drawPh(0));
+        playButton('p-play', PH);
+        animate('cv-ph', drawPh);
+
+        // ---------- 4. general plane wave (a, b, c) cos(ωt + k·r) ----------
+        const GS = { given: 'E', th: 0, run: true };
+        const gview = new View3D('cv-gen', { range: 2.6, yaw: 0.7, pitch: 0.35, onChange: () => drawGen(0) });
+        const vs = v => `(${v.map(c => (Math.abs(c) < 5e-4 ? 0 : c).toPrecision(3)).join(', ')})`;
+        function genSolve() {
+            const F0 = [val('g-a'), val('g-b'), val('g-c')], k = [val('g-k1'), val('g-k2'), val('g-k3')], w = val('g-w') * 1e9, mu = val('g-mr') * MU0, eps = val('g-er') * EPS0;
+            const kk = V3.len(k), kd = w * Math.sqrt(mu * eps), eta = Math.sqrt(mu / eps), kxF = V3.cross(k, F0);
+            const E0 = GS.given === 'E' ? F0 : V3.mul(kxF, 1 / (w * eps)), H0 = GS.given === 'E' ? V3.mul(kxF, -1 / (w * mu)) : F0;
+            return { F0, k, kk, kd, eta, w, E0, H0, S: V3.mul(V3.cross(E0, H0), 0.5), kF: V3.dot(k, F0) };
+        }
+        function drawGen(dt) {
+            if (GS.run) GS.th += dt * Math.PI;
+            const S = genSolve(), kh = S.kk > 0 ? V3.mul(S.k, 1 / S.kk) : [0, 0, 1], trans = Math.abs(S.kF) <= 1e-6 * (S.kk * V3.len(S.F0) + 1e-12), disp = Math.abs(S.kk - S.kd) / S.kd < 0.005;
+            setText('ro-gk', `${S.kk.toFixed(2)} vs. ${S.kd.toFixed(2)} rad/m`); setText('ro-gt', S.kF.toFixed(3)); setText('ro-geta', `${S.eta.toFixed(1)} Ω, ${S.kk > 0 ? fmtSI(2 * Math.PI / S.kk, 'm') : '∞'}`);
+            setText('ro-gdir', vs(V3.mul(kh, -1)));
+            setText('ro-gres', GS.given === 'E' ? `H₀ = ${vs(S.H0.map(c => c * 1e3))} mA/m` : `E₀ = ${vs(S.E0)} V/m`);
+            const Sm = V3.len(S.S); setText('ro-gS', `${fmtSI(Sm, 'W/m²')} along ${vs(V3.mul(S.S, 1 / (Sm || 1)))}`);
+            setText('ro-gok', trans && disp ? 'consistent: transverse and on the dispersion relation' : `${trans ? '' : 'not transverse (k·F₀ ≠ 0). '}${disp ? '' : '|k| ≠ ω√(με): use "Set ω from dispersion".'}`);
+            $('ro-gok').className = (trans && disp ? 'text-emerald-800' : 'text-rose-700') + ' font-bold text-right';
+            const v = gview.begin(); if (!v) return;
+            v.axes(2.1);
+            v.line(V3.mul(kh, -2.3), V3.mul(kh, 2.3), COL.violet, 1.3, [6, 5]); v.text(V3.mul(kh, 2.45), '+k̂', COL.violet, 'bold 13px Inter, sans-serif');
+            const Em = V3.len(S.E0) || 1, sc = 1.3 / Em, lamW = 2.0;   // two world units per wavelength along −k̂
+            for (let i = -12; i <= 12; i++) { const s = i / 12 * 2.2, r = V3.mul(kh, -s), phase = GS.th + S.kk * (-s * (2 * Math.PI / S.kk) / lamW) * 1, cs = Math.cos(GS.th - 2 * Math.PI * s / lamW);
+                v.line(r, V3.add(r, V3.mul(S.E0, sc * cs * 0.7)), COL.sky, 1.4, null, 0.6); v.line(r, V3.add(r, V3.mul(S.H0, S.eta * sc * cs * 0.7)), COL.rose, 1.4, null, 0.6); }
+            const c0 = Math.cos(GS.th);
+            v.arrow([0, 0, 0], V3.mul(S.E0, sc * c0), COL.sky, 3, 11); v.text(V3.mul(S.E0, sc * c0 * 1.15), 'E', COL.sky, 'bold 14px Inter, sans-serif');
+            v.arrow([0, 0, 0], V3.mul(S.H0, S.eta * sc * c0), COL.rose, 3, 11); v.text(V3.mul(S.H0, S.eta * sc * c0 * 1.15), 'ηH', COL.rose, 'bold 14px Inter, sans-serif');
+            if (Sm > 0) { const su = V3.mul(S.S, 1 / Sm); v.arrow(V3.mul(su, 0.3), V3.mul(su, 1.4), COL.emerald, 3.4, 12); v.text(V3.mul(su, 1.95), 'S_av', COL.emerald, 'bold 13px Inter, sans-serif'); }
+            label(v.ctx, 'sky: E · rose: ηH · green: S_av · dashed: k̂ · sticks: fields along the propagation line (−k̂)', 10, 18, COL.slate, '600 12px Inter, sans-serif');
+        }
+        chipGroup('g-given', k => { GS.given = k; drawGen(0); });
+        chipGroup('g-view', v => { if (v === 'k') { const S = genSolve(), kh = V3.mul(S.k, 1 / (S.kk || 1)); gview.yaw = Math.atan2(-kh[1], -kh[0]); gview.pitch = clamp(Math.asin(clamp(-kh[2], -1, 1)), -1.55, 1.55); } else { gview.yaw = 0.7; gview.pitch = 0.35; } gview.onChange(); });
+        const setG = (id, x) => { $(id).value = x; $(id).dispatchEvent(new Event('input')); };
+        $('g-fix').addEventListener('click', () => { const S = genSolve(); setG('g-w', clamp(S.kk / Math.sqrt(val('g-mr') * MU0 * val('g-er') * EPS0) / 1e9, 0.1, 10)); });
+        $('g-def').addEventListener('click', () => { [['g-a', 2], ['g-b', 1], ['g-c', -2], ['g-k1', 10], ['g-k2', 20], ['g-k3', 20], ['g-er', 9], ['g-mr', 1], ['g-w', 3]].forEach(([id, x]) => setG(id, x)); });
+        playButton('g-play', GS);
+        const f1 = v => v.toFixed(1);
+        bindSliders({ 'g-a': f1, 'g-b': f1, 'g-c': f1, 'g-k1': v => v.toFixed(0), 'g-k2': v => v.toFixed(0), 'g-k3': v => v.toFixed(0), 'g-w': v => v.toFixed(2), 'g-er': f1, 'g-mr': f1 }, () => drawGen(0));
+        animate('cv-gen', drawGen);
+
+        redrawOnResize(['cv-phz', 'cv-ret', 'cv-retsc', 'cv-ph', 'cv-gen'], () => { drawPZ(0); drawRet(0); drawPh(0); drawGen(0); });
+        drawPZ(0); drawRet(0); drawPh(0); drawGen(0); startLoop();
+        renderQuiz([
+            { q: 'Why are they called "retarded" potentials?', opts: ['Because the potentials decay with time', 'Because the potential at $\\mathbf{R}$ depends on the source at the earlier time $t - R\'/u_{\\mathrm{p}}$', 'Because the source oscillates slowly', 'Because $\\mathbf{A}$ always lags $V$'], ans: 1, why: 'The influence of the source travels at the finite speed $u_{\\mathrm{p}}$. Drag P away in Simulation 2 and watch the delay grow.' },
+            { q: 'In the phasor domain, $\\partial\\mathbf{E}/\\partial t$ becomes', opts: ['$\\omega\\widetilde{\\mathbf{E}}$', '$j\\omega\\widetilde{\\mathbf{E}}$', '$-j\\omega\\widetilde{\\mathbf{E}}$', '$\\widetilde{\\mathbf{E}}/j\\omega$'], ans: 1, why: '$\\frac{\\partial}{\\partial t}\\mathfrak{Re}[\\widetilde{\\mathbf{E}}e^{j\\omega t}] = \\mathfrak{Re}[j\\omega\\widetilde{\\mathbf{E}}e^{j\\omega t}]$: the phasor is scaled by $\\omega$ and rotated $90^\\circ$ ahead (Simulation 1).' },
+            { q: 'Given $\\widetilde{\\mathbf{E}} = \\hat{\\mathbf{x}}E_0e^{-jkz}$ in a lossless medium, $\\widetilde{\\mathbf{H}}$ is', opts: ['$\\hat{\\mathbf{y}}(E_0/\\eta)e^{-jkz}$', '$\\hat{\\mathbf{x}}(E_0/\\eta)e^{-jkz}$', '$\\hat{\\mathbf{y}}\\,\\eta E_0e^{-jkz}$', '$-\\hat{\\mathbf{y}}(E_0/\\eta)e^{+jkz}$'], ans: 0, why: '$\\widetilde{\\mathbf{H}} = -\\frac{1}{j\\omega\\mu}\\nabla\\times\\widetilde{\\mathbf{E}} = \\hat{\\mathbf{y}}\\frac{k}{\\omega\\mu}E_0e^{-jkz}$ and $k/\\omega\\mu = 1/\\eta$.' },
+            { q: 'For $\\mathbf{E} = \\mathbf{E}_0\\cos(\\omega t + \\mathbf{k}\\cdot\\mathbf{r})$, the magnetic field is', opts: ['$\\mathbf{H} = \\frac1\\eta\\hat{\\mathbf{k}}\\times\\mathbf{E}$', '$\\mathbf{H} = -\\frac1\\eta\\hat{\\mathbf{k}}\\times\\mathbf{E}$', '$\\mathbf{H} = \\eta\\,\\hat{\\mathbf{k}}\\times\\mathbf{E}$', '$\\mathbf{H} = \\mathbf{E}/\\eta$'], ans: 1, why: 'With $\\nabla \\to j\\mathbf{k}$: $\\widetilde{\\mathbf{H}} = -(\\mathbf{k}\\times\\mathbf{E}_0)/\\omega\\mu\\,e^{j\\mathbf{k}\\cdot\\mathbf{r}}$. The wave travels along $-\\hat{\\mathbf{k}}$, and $\\mathbf{S}_{\\mathrm{av}}$ points that way too.' },
+            { q: 'With $\\mathbf{k} = (10, 20, 20)$ rad/m and $\\varepsilon_{\\mathrm{r}} = 9$, $\\mu_{\\mathrm{r}} = 1$, the frequency must be', opts: ['$\\omega = 10^9$ rad/s', '$\\omega = 3\\times10^9$ rad/s', '$\\omega = 9\\times10^9$ rad/s', 'any value'], ans: 1, why: '$|\\mathbf{k}| = 30 = \\omega\\sqrt{\\mu\\varepsilon} = \\omega\\cdot3/c$, so $\\omega = 30c/3 = 3\\times10^9$ rad/s.' },
+            { q: 'For $\\widetilde{\\mathbf{E}} = \\hat{\\mathbf{x}}E_0e^{-jkz}$ in a lossless medium, the time-average Poynting vector is', opts: ['$\\hat{\\mathbf{z}}\\,E_0^2/\\eta$', '$-\\hat{\\mathbf{z}}\\,E_0^2/2\\eta$', '$\\hat{\\mathbf{x}}\\,E_0^2/2\\eta$', '$\\hat{\\mathbf{z}}\\,E_0^2/2\\eta$'], ans: 3, why: 'With $\\widetilde{\\mathbf{H}} = \\hat{\\mathbf{y}}(E_0/\\eta)e^{-jkz}$, $\\mathbf{S}_{\\mathrm{av}} = \\tfrac12\\mathfrak{Re}[\\widetilde{\\mathbf{E}}\\times\\widetilde{\\mathbf{H}}^*] = \\hat{\\mathbf{z}}E_0^2/2\\eta$: the factor $\\tfrac12$ comes from time-averaging, and power flows along $+\\hat{\\mathbf{z}}$.' }
+        ]);
+
+    </script>
+</body>
+</html>

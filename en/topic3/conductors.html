@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conductors - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="cable" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Conductors and Ohm's Law</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Conductivity</button>
+                <button onclick="scrollToSection('shielding')" class="px-3 py-1.5 rounded-lg text-emerald-800 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition flex items-center gap-1.5"><i data-lucide="shield" class="w-3.5 h-3.5"></i><span>E = 0 Inside</span></button>
+                <button onclick="scrollToSection('drift')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="move-right" class="w-3.5 h-3.5"></i><span>Drift</span></button>
+                <button onclick="scrollToSection('copper')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5"><i data-lucide="calculator" class="w-3.5 h-3.5"></i><span>Copper Wire</span></button>
+                <button onclick="scrollToSection('resistance')" class="px-3 py-1.5 rounded-lg text-indigo-700 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition flex items-center gap-1.5"><i data-lucide="zap-off" class="w-3.5 h-3.5"></i><span>Resistance</span></button>
+                <button onclick="scrollToSection('joule')" class="px-3 py-1.5 rounded-lg text-rose-700 hover:bg-rose-500/10 transition">Joule's Law</button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Section 1 -->
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Material Media</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Conductors and the Point Form of Ohm's Law</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">A material is described by three constitutive parameters: permittivity $\varepsilon$, permeability $\mu$ and conductivity $\sigma$. The conductivity decides how strongly an applied field drives a current. A good conductor supports substantial current with a small internal electric field, while an insulator supports very little conduction current. Zero internal field is an equilibrium result, not a rule for a resistive wire carrying steady current.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-400/10 px-2.5 py-1 rounded-md">Ohm's Law</span>
+                    <h3 class="text-base font-bold text-slate-900">Point Form</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\mathbf{J} = \sigma\mathbf{E} \quad (\mathrm{A}/\mathrm{m}^2)$$</div>
+                    <p class="text-sm text-slate-700">$\sigma$ in siemens per metre ($\mathrm{S}/\mathrm{m}$). A medium is homogeneous if $\sigma$ is the same everywhere and isotropic if it does not depend on direction.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">Perfect Conductor</span>
+                    <h3 class="text-base font-bold text-slate-900">$\sigma = \infty$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\mathbf{E} = \mathbf{J}/\sigma = 0$$</div>
+                    <p class="text-sm text-slate-700">A finite current needs no field, so $\mathbf{E} = 0$ inside. In electrostatics this also holds for any real conductor.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-400/10 px-2.5 py-1 rounded-md">Perfect Dielectric</span>
+                    <h3 class="text-base font-bold text-slate-900">$\sigma = 0$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\mathbf{J} = 0$$</div>
+                    <p class="text-sm text-slate-700">No conduction current flows regardless of $\mathbf{E}$. Real insulators have tiny but nonzero $\sigma$.</p>
+                </div>
+            </div>
+            <div class="relative mt-8 glass-card rounded-2xl p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h3 class="text-base font-bold text-slate-900">Conductivity Spans 25 Orders of Magnitude</h3>
+                    <span class="text-sm text-slate-600">Hover a marker for its value (room temperature)</span>
+                </div>
+                <div class="relative h-36 rounded-xl bg-white border border-slate-200 overflow-hidden"><canvas id="canvas-spectrum" class="w-full h-full"></canvas></div>
+                <p id="ro-spec" class="text-sm text-slate-700 font-mono">—</p>
+            </div>
+        </section>
+
+        <!-- Section 2: shielding / relaxation -->
+        <section id="shielding" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-emerald-800 bg-emerald-500/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Why $\mathbf{E} = 0$ Inside a Conductor</h2>
+                    <p class="text-sm text-slate-600 mt-1">Switch on an external field. Free electrons drift against it and pile up on one face, leaving positive ions exposed on the other. The induced surface charges create an opposing field that grows until the net interior field is zero. Watch the external and induced contributions separately: the final cancellation concerns the interior field, while the field outside generally remains nonzero. Charges stop redistributing when electrostatic equilibrium is reached.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-8 flex flex-col space-y-3">
+                    <div class="relative h-72 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-shield" class="w-full h-full"></canvas></div>
+                    <div class="flex flex-wrap items-center gap-3 text-sm">
+                        <button onclick="shieldStart()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold transition flex items-center gap-2"><i data-lucide="play" class="w-4 h-4"></i> Apply Field</button>
+                        <div class="flex items-center gap-2 flex-1 min-w-[200px]"><span class="text-slate-700">External $E_0$</span><input type="range" id="slider-e-ext" min="0.5" max="2" step="0.1" value="1" class="w-full accent-emerald-600"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-4 glass-card rounded-2xl p-5 space-y-3 text-sm text-slate-700">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">What the Animation Shows</h3>
+                    <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                        <div class="flex justify-between"><span class="text-slate-600 font-sans">External field</span><span id="ro-sh-e0" class="text-slate-900 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="text-slate-600 font-sans">Induced field</span><span id="ro-sh-ei" class="text-rose-700 font-bold"></span></div>
+                        <div class="flex justify-between border-t border-slate-200 pt-2"><span class="text-slate-800 font-sans font-semibold">Net field inside</span><span id="ro-sh-net" class="text-emerald-800 font-bold"></span></div>
+                    </div>
+                    <p>The approach to equilibrium is exponential with the relaxation time $\tau_{\mathrm{r}} = \varepsilon/\sigma$. For copper $\tau_{\mathrm{r}} \approx 1.5 \times 10^{-19}\ \mathrm{s}$: effectively instantaneous. The animation is slowed down enormously.</p>
+                    <p class="text-slate-600">Consequences: no net charge inside, all excess charge sits on the surface, and outside the surface $\mathbf{E}$ is normal to it.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: drift -->
+        <section id="drift" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Drift Velocity and Mobility</h2>
+                    <p class="text-sm text-slate-600 mt-1">Carriers move randomly at thermal speeds and collide constantly; the field adds a small net drift. Electrons drift against $\mathbf{E}$, holes along it: $\mathbf{u}_{\mathrm{e}} = -\mu_{\mathrm{e}}\mathbf{E}$, $\mathbf{u}_{\mathrm{h}} = \mu_{\mathrm{h}}\mathbf{E}$.</p>
+                </div>
+                <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sm text-sky-800 shrink-0">$$\mathbf{J} = (N_{\mathrm{e}}\mu_{\mathrm{e}} + N_{\mathrm{h}}\mu_{\mathrm{h}})\,e\,\mathbf{E} = \sigma\mathbf{E}$$</div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-64 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-drift" class="w-full h-full"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div class="space-y-1"><span class="text-slate-700 block">Medium</span>
+                            <select id="select-medium" class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-2 py-1.5">
+                                <option value="cu">Copper (electrons only)</option>
+                                <option value="si">Pure silicon (electrons + holes)</option>
+                            </select></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Applied field $E$</span><span id="val-drift-e" class="font-mono text-sky-800"></span></div><input type="range" id="slider-drift-e" min="0" max="100" step="5" value="20" class="w-full accent-sky-600"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-3 text-sm">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Carrier Data</h3>
+                    <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                        <div class="flex justify-between"><span class="text-slate-600 font-sans">$N_{\mathrm{e}}$, $\mu_{\mathrm{e}}$</span><span id="ro-dr-ne" class="text-sky-800 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="text-slate-600 font-sans">$N_{\mathrm{h}}$, $\mu_{\mathrm{h}}$</span><span id="ro-dr-nh" class="text-amber-800 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="text-slate-600 font-sans">$\sigma$</span><span id="ro-dr-sigma" class="text-slate-900 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="text-slate-600 font-sans">$|\mathbf{u}_{\mathrm{e}}|$</span><span id="ro-dr-ue" class="text-sky-800 font-bold"></span></div>
+                        <div class="flex justify-between border-t border-slate-200 pt-2"><span class="text-slate-800 font-sans font-semibold">$J = \sigma E$</span><span id="ro-dr-j" class="text-emerald-800 font-bold"></span></div>
+                    </div>
+                    <p class="text-slate-600">Drift speeds are millimetres per second or less, yet a signal travels along a wire near the speed of light: the field, not the individual electron, carries the signal. The animation exaggerates drift so it is visible.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: copper wire example -->
+        <section id="copper" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Worked Example</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Conduction Current in a Copper Wire</h2>
+                    <p class="text-sm text-slate-600 mt-1">A 2-mm-diameter copper wire with $\sigma = 5.8\times10^{7}\ \mathrm{S}/\mathrm{m}$ and $\mu_{\mathrm{e}} = 0.0032\ \mathrm{m^2/(V\cdot s)}$ carries $E = 20\ \mathrm{mV/m}$. Change any input to re-solve.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-4 text-sm">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Inputs</h3>
+                    <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Diameter $d$</span><span id="val-cu-d" class="font-mono text-amber-800"></span></div><input type="range" id="slider-cu-d" min="0.5" max="5" step="0.1" value="2" class="w-full accent-amber-600"></div>
+                    <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Conductivity $\sigma$</span><span id="val-cu-s" class="font-mono text-sky-800"></span></div><input type="range" id="slider-cu-s" min="1" max="6.5" step="0.1" value="5.8" class="w-full accent-sky-600"></div>
+                    <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Mobility $\mu_{\mathrm{e}}$</span><span id="val-cu-mu" class="font-mono text-indigo-700"></span></div><input type="range" id="slider-cu-mu" min="0.001" max="0.006" step="0.0001" value="0.0032" class="w-full accent-indigo-600"></div>
+                    <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Field $E$</span><span id="val-cu-e" class="font-mono text-rose-700"></span></div><input type="range" id="slider-cu-e" min="1" max="100" step="1" value="20" class="w-full accent-rose-600"></div>
+                    <div class="relative h-24 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-wire" class="w-full h-full"></canvas></div>
+                </div>
+                <div class="lg:col-span-7 glass-card rounded-2xl p-5 space-y-3 text-sm">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Step-by-Step Solution</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-slate-100/90 p-3 rounded-xl border border-slate-200 space-y-1"><div class="text-slate-600">(a) Charge density of free electrons</div><div class="text-sky-800">$$\rho_{\mathrm{ve}} = -\frac{\sigma}{\mu_{\mathrm{e}}}$$</div><div id="ro-cu-rho" class="font-mono font-bold text-slate-900 text-right"></div></div>
+                        <div class="bg-slate-100/90 p-3 rounded-xl border border-slate-200 space-y-1"><div class="text-slate-600">(b) Current density</div><div class="text-sky-800">$$J = \sigma E$$</div><div id="ro-cu-j" class="font-mono font-bold text-slate-900 text-right"></div></div>
+                        <div class="bg-slate-100/90 p-3 rounded-xl border border-slate-200 space-y-1"><div class="text-slate-600">(c) Current</div><div class="text-sky-800">$$I = J\,\frac{\pi d^2}{4}$$</div><div id="ro-cu-i" class="font-mono font-bold text-emerald-800 text-right"></div></div>
+                        <div class="bg-slate-100/90 p-3 rounded-xl border border-slate-200 space-y-1"><div class="text-slate-600">(d) Drift velocity</div><div class="text-sky-800">$$u_{\mathrm{e}} = -\mu_{\mathrm{e}} E$$</div><div id="ro-cu-u" class="font-mono font-bold text-slate-900 text-right"></div></div>
+                        <div class="bg-slate-100/90 p-3 rounded-xl border border-slate-200 space-y-1"><div class="text-slate-600">(e) Electron density</div><div class="text-sky-800">$$N_{\mathrm{e}} = -\frac{\rho_{\mathrm{ve}}}{e}$$</div><div id="ro-cu-n" class="font-mono font-bold text-slate-900 text-right"></div></div>
+                        <div class="bg-amber-500/10 p-3 rounded-xl border border-amber-500/30 space-y-1"><div class="text-amber-800 font-semibold">Perspective</div><div class="text-slate-700">Time for one electron to drift 1 m:</div><div id="ro-cu-t" class="font-mono font-bold text-amber-800 text-right"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: resistance -->
+        <section id="resistance" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 3</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Resistance and Conductance</h2>
+                    <p class="text-sm text-slate-600 mt-1">In general $R = V/I$ with $V = -\int_l \mathbf{E}\cdot d\mathbf{l}$ and $I = \int_S \sigma\mathbf{E}\cdot d\mathbf{s}$. Compare a uniform bar with the radial leakage through the insulation of a coaxial cable. For a uniform wire, increasing length raises resistance, while increasing cross-sectional area lowers it. In the coaxial geometry, the current spreads radially and the local conducting area varies with radius.</p>
+                </div>
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0" id="res-mode-group">
+                    <button data-v="bar" class="chip on">Uniform Bar</button>
+                    <button data-v="coax" class="chip ml-1">Coaxial Insulation</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-72 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-resistance" class="w-full h-full"></canvas></div>
+                    <div id="bar-controls" class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Length $l$</span><span id="val-bar-l" class="font-mono text-sky-800"></span></div><input type="range" id="slider-bar-l" min="0.1" max="5" step="0.1" value="1" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Area $A$</span><span id="val-bar-a" class="font-mono text-amber-800"></span></div><input type="range" id="slider-bar-a" min="0.5" max="10" step="0.5" value="2" class="w-full accent-amber-600"></div>
+                        <div class="space-y-1"><span class="text-slate-700 block">Material</span>
+                            <select id="select-bar-mat" class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-2 py-1.5">
+                                <option value="5.8e7">Copper (5.8 × 10⁷ S/m)</option><option value="3.5e7">Aluminum (3.5 × 10⁷ S/m)</option><option value="1e7">Iron (10⁷ S/m)</option><option value="1e6">Nichrome (10⁶ S/m)</option><option value="3e4">Graphite (3 × 10⁴ S/m)</option>
+                            </select></div>
+                    </div>
+                    <div id="coax-controls" class="hidden glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Inner radius $a$</span><span id="val-cx-a" class="font-mono text-sky-800"></span></div><input type="range" id="slider-cx-a" min="0.5" max="3" step="0.1" value="1" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Outer radius $b$</span><span id="val-cx-b" class="font-mono text-amber-800"></span></div><input type="range" id="slider-cx-b" min="3.5" max="8" step="0.1" value="4" class="w-full accent-amber-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Insulation $\sigma$</span><span id="val-cx-s" class="font-mono text-rose-700"></span></div><input type="range" id="slider-cx-s" min="-12" max="-3" step="1" value="-5" class="w-full accent-rose-600"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-3 text-sm text-slate-700">
+                    <div id="bar-theory" class="space-y-3">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Uniform Bar</h3>
+                        <p>$\mathbf{E}$ is uniform along the bar, so $V = El$ and $I = \sigma E A$:</p>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-indigo-700">$$R = \frac{V}{I} = \frac{l}{\sigma A}$$</div>
+                    </div>
+                    <div id="coax-theory" class="hidden space-y-3">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Coaxial Insulation (radial leakage)</h3>
+                        <p>Leakage current $I$ flows radially from the inner to the outer conductor: $\mathbf{J} = \hat{\mathbf{r}}\, I/(2\pi r l)$, so $\mathbf{E} = \mathbf{J}/\sigma$ and $V = \frac{I}{2\pi\sigma l}\ln(b/a)$:</p>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-indigo-700">$$G' = \frac{G}{l} = \frac{2\pi\sigma}{\ln(b/a)}\quad(\mathrm{S/m})$$</div>
+                    </div>
+                    <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                        <div class="flex justify-between"><span id="ro-res-l1" class="text-slate-600 font-sans"></span><span id="ro-res-v1" class="text-indigo-700 font-bold"></span></div>
+                        <div class="flex justify-between"><span id="ro-res-l2" class="text-slate-600 font-sans"></span><span id="ro-res-v2" class="text-emerald-800 font-bold"></span></div>
+                    </div>
+                    <p id="res-note" class="text-slate-600"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Joule -->
+        <section id="joule" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 4</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Joule's Law: Power Dissipated as Heat</h2>
+                    <p class="text-sm text-slate-600 mt-1">The field does work on drifting carriers; collisions pass that energy to the lattice as heat. For a wire of length $l$ and cross-section $A$:</p>
+                </div>
+                <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sm text-rose-700 shrink-0">$$P = \int_v \mathbf{E}\cdot\mathbf{J}\, dv = \int_v \sigma|\mathbf{E}|^2 dv = I^2 R$$</div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-56 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-joule" class="w-full h-full"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Current $I$</span><span id="val-j-i" class="font-mono text-rose-700"></span></div><input type="range" id="slider-j-i" min="0" max="20" step="0.5" value="5" class="w-full accent-rose-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Diameter $d$</span><span id="val-j-d" class="font-mono text-amber-800"></span></div><input type="range" id="slider-j-d" min="0.2" max="3" step="0.1" value="0.5" class="w-full accent-amber-600"></div>
+                        <div class="space-y-1"><span class="text-slate-700 block">Material ($l = 1$ m)</span>
+                            <select id="select-j-mat" class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-2 py-1.5">
+                                <option value="5.8e7">Copper</option><option value="1e6">Nichrome (heater wire)</option>
+                            </select></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-3 text-sm">
+                    <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                        <div class="flex justify-between"><span class="text-slate-600 font-sans">$R = l/(\sigma A)$</span><span id="ro-j-r" class="text-indigo-700 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="text-slate-600 font-sans">$E = J/\sigma$</span><span id="ro-j-e" class="text-sky-800 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="text-slate-600 font-sans">Power density $\sigma E^2$</span><span id="ro-j-w" class="text-amber-800 font-bold"></span></div>
+                        <div class="flex justify-between border-t border-slate-200 pt-2"><span class="text-slate-800 font-sans font-semibold">$P = I^2R$</span><span id="ro-j-p" class="text-rose-700 font-bold"></span></div>
+                    </div>
+                    <p class="text-slate-700">Same current, higher resistance: the thin nichrome wire of a toaster glows while a copper lead stays cool. Halving the diameter quadruples $R$ and therefore $P$.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Conductors</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Score: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        const E_CHARGE = 1.602e-19;
+
+        // =========================================================
+        // Section 1 — conductivity spectrum (log scale)
+        // =========================================================
+        const MATS = [
+            ['Silver', 6.2e7], ['Copper', 5.8e7], ['Gold', 4.1e7], ['Aluminum', 3.5e7], ['Iron', 1e7], ['Mercury', 1e6], ['Carbon', 3e4],
+            ['Sea water', 4], ['Germanium (pure)', 2.2], ['Wet soil', 1e-2], ['Fresh water', 1e-3], ['Silicon (pure)', 4.4e-4], ['Distilled water', 2e-4], ['Dry soil', 1e-4],
+            ['Glass', 1e-12], ['Hard rubber', 1e-15], ['Mica', 1e-15], ['Wax', 1e-17], ['Quartz (fused)', 1e-17]
+        ];
+        let specHover = -1;
+        function drawSpectrum() {
+            const c = setupCanvas('canvas-spectrum'); if (!c) return;
+            const { ctx, w, h } = c, L = 20, R = 20, lo = -18, hi = 9, X = v => L + (Math.log10(v) - lo) / (hi - lo) * (w - L - R), y0 = h / 2 + 6;
+            const band = (a, b, col, txt) => { ctx.fillStyle = col; ctx.fillRect(X(a), y0 - 14, X(b) - X(a), 28); label(ctx, txt, (X(a) + X(b)) / 2, y0 + 30, COL.slate, '600 12px Inter, sans-serif', 'center'); };
+            band(1e-18, 1e-8, 'rgba(217, 119, 6, 0.18)', 'Insulators');
+            band(1e-8, 1e4, 'rgba(124, 58, 237, 0.15)', 'Semiconductors & poor conductors');
+            band(1e4, 1e9, 'rgba(2, 132, 199, 0.18)', 'Conductors');
+            for (let e = lo; e <= hi; e += 3) { const x = X(Math.pow(10, e)); line(ctx, x, y0 - 18, x, y0 + 16, COL.grid, 1); label(ctx, '10' + (e < 0 ? '⁻' : '') + String(Math.abs(e)).split('').map(d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]).join(''), x, y0 + 46 > h - 6 ? h - 8 : y0 + 46, COL.muted, '12px Inter, sans-serif', 'center'); }
+            MATS.forEach(([n, s], i) => {
+                const x = X(s), hl = i === specHover, yy = y0 - 22 - (i % 3) * 10;
+                line(ctx, x, yy, x, y0 + 14, hl ? COL.rose : COL.slate, hl ? 2.5 : 1.2);
+                dot(ctx, x, yy, hl ? COL.rose : COL.slate, hl ? 5 : 3);
+            });
+            label(ctx, 'σ (S/m), log scale', w - R, 12, COL.slate, '600 12px Inter, sans-serif', 'right');
+            if (specHover >= 0) { const [n, s] = MATS[specHover]; setText('ro-spec', `${n}: σ ≈ ${s.toExponential(1).replace('e', ' × 10^')} S/m`); }
+        }
+        $('canvas-spectrum').addEventListener('pointermove', e => {
+            const r = e.target.getBoundingClientRect(), x = e.clientX - r.left, L = 20, R = 20, lo = -18, hi = 9;
+            const X = v => L + (Math.log10(v) - lo) / (hi - lo) * (r.width - L - R);
+            let best = -1, bd = 14; MATS.forEach(([, s], i) => { const d = Math.abs(X(s) - x); if (d < bd) { bd = d; best = i; } });
+            if (best !== specHover) { specHover = best; drawSpectrum(); }
+        });
+
+        // =========================================================
+        // Section 2 — E = 0 inside a conductor (relaxation, slowed down)
+        // =========================================================
+        const sh = { t: -1, electrons: [] };
+        function shieldStart() {
+            sh.t = 0;
+            sh.electrons = Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random() }));
+        }
+        function drawShield(dt) {
+            const E0 = num('slider-e-ext');
+            const c = setupCanvas('canvas-shield'); if (!c) return;
+            const { ctx, w, h } = c;
+            if (sh.t >= 0) sh.t += dt;
+            const f = sh.t < 0 ? 0 : 1 - Math.exp(-sh.t / 0.9);       // induced fraction
+            const on = sh.t >= 0;
+            const sx0 = w * 0.32, sx1 = w * 0.68, sy0 = 24, sy1 = h - 24;
+            // external field outside the slab
+            if (on) for (let y = 40; y < h - 20; y += 36) {
+                arrow(ctx, 12, y, sx0 - 30, 0, COL.slate, 0.8, 2, 8);
+                arrow(ctx, sx1 + 18, y, w - sx1 - 30, 0, COL.slate, 0.8, 2, 8);
+            }
+            // slab
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.22)'; ctx.fillRect(sx0, sy0, sx1 - sx0, sy1 - sy0);
+            ctx.strokeStyle = COL.slate; ctx.lineWidth = 1.5; ctx.strokeRect(sx0, sy0, sx1 - sx0, sy1 - sy0);
+            label(ctx, 'conductor', (sx0 + sx1) / 2, sy1 - 10, COL.slate, '600 12px Inter, sans-serif', 'center');
+            // interior net field
+            const net = on ? (1 - f) : 0;
+            if (on && net > 0.02) for (let y = 52; y < h - 40; y += 36) arrow(ctx, sx0 + 18, y, (sx1 - sx0 - 36) * net, 0, COL.emerald, 1, 2.4, 9);
+            // electrons drift left while a net field remains
+            if (on) sh.electrons.forEach(e => {
+                e.x = Math.max(0.01, e.x - net * dt * 0.9 * E0 + (Math.random() - 0.5) * 0.004);
+                e.y += (Math.random() - 0.5) * 0.004; e.y = clamp(e.y, 0.03, 0.97);
+            });
+            ctx.fillStyle = COL.sky;
+            (on ? sh.electrons : Array.from({ length: 70 }, (_, i) => ({ x: ((i * 37) % 70) / 70, y: ((i * 53) % 70) / 70 }))).forEach(e => {
+                ctx.beginPath(); ctx.arc(sx0 + 6 + e.x * (sx1 - sx0 - 12), sy0 + 6 + e.y * (sy1 - sy0 - 12), 2.5, 0, Math.PI * 2); ctx.fill();
+            });
+            // induced surface charges
+            const n = Math.round(f * 9 * E0);
+            for (let k = 0; k < n; k++) {
+                const y = sy0 + 14 + k * (sy1 - sy0 - 28) / Math.max(1, n - 1);
+                label(ctx, '−', sx0 - 9, y, COL.sky, 'bold 15px Inter, sans-serif', 'center');
+                label(ctx, '+', sx1 + 9, y, COL.rose, 'bold 15px Inter, sans-serif', 'center');
+            }
+            label(ctx, on ? (net < 0.02 ? 'Equilibrium: E = 0 inside' : 'Charges redistributing…') : 'Press “Apply Field”', w / 2, 12, on && net < 0.02 ? COL.emerald : COL.slate, '600 13px Inter, sans-serif', 'center');
+            setText('ro-sh-e0', on ? (E0).toFixed(1) + ' kV/m →' : '0');
+            setText('ro-sh-ei', on ? '−' + (f * E0).toFixed(2) + ' kV/m' : '0');
+            setText('ro-sh-net', on ? (net * E0).toFixed(2) + ' kV/m' : '0');
+        }
+
+        // =========================================================
+        // Section 3 — drift in copper vs silicon
+        // =========================================================
+        const MED = { cu: { Ne: 1.13e29, ue: 0.0032, Nh: 0, uh: 0 }, si: { Ne: 1.5e16, ue: 0.135, Nh: 1.5e16, uh: 0.048 } };
+        const carriers = [];
+        function resetCarriers(w, h) {
+            carriers.length = 0;
+            const m = $('select-medium').value;
+            for (let i = 0; i < 46; i++) carriers.push({ type: m === 'si' && i % 2 ? 'h' : 'e', x: Math.random() * w, y: 10 + Math.random() * (h - 20), vx: 0, vy: 0, trail: [] });
+        }
+        function drawDrift(dt) {
+            const m = MED[$('select-medium').value], E = num('slider-drift-e');
+            const c = setupCanvas('canvas-drift'); if (!c) return;
+            const { ctx, w, h } = c;
+            if (!carriers.length || carriers.w !== w) { resetCarriers(w, h); carriers.w = w; }
+            // lattice
+            for (let x = 22; x < w; x += 44) for (let y = 22; y < h; y += 40) { ctx.fillStyle = 'rgba(148, 163, 184, 0.35)'; ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill(); }
+            const vth = 120, tau = 0.12;
+            carriers.forEach((p, i) => {
+                const s = p.type === 'e' ? -1 : 1, mob = p.type === 'e' ? 1 : m.uh / m.ue;
+                p.vx += s * mob * E * 5 * dt / tau * 0.12;
+                if (Math.random() < dt / tau) { const a = Math.random() * 2 * Math.PI, v = vth * (0.5 + Math.random()); p.vx = v * Math.cos(a); p.vy = v * Math.sin(a); }
+                p.x += p.vx * dt; p.y += p.vy * dt;
+                if (p.y < 6 || p.y > h - 6) { p.vy *= -1; p.y = clamp(p.y, 6, h - 6); }
+                let wrap = false; if (p.x < 0) { p.x += w; wrap = true; } if (p.x > w) { p.x -= w; wrap = true; }
+                if (i < 2) { if (wrap) p.trail = []; p.trail.push([p.x, p.y]); if (p.trail.length > 200) p.trail.shift(); }
+            });
+            carriers.slice(0, 2).forEach(p => { ctx.save(); ctx.strokeStyle = p.type === 'e' ? 'rgba(2, 132, 199, 0.5)' : 'rgba(217, 119, 6, 0.6)'; ctx.lineWidth = 1.5; ctx.beginPath(); p.trail.forEach(([x, y], k) => k ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); ctx.restore(); });
+            carriers.forEach(p => { ctx.fillStyle = p.type === 'e' ? COL.sky : COL.amber; ctx.beginPath(); ctx.arc(p.x, p.y, 3.2, 0, Math.PI * 2); ctx.fill(); });
+            ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(w - 138, 6, 132, 42);
+            if (E > 0) { arrow(ctx, w - 110, 18, 70, 0, COL.slate, 1, 2, 8); label(ctx, 'E', w - 120, 18, COL.slate, 'bold 13px Inter, sans-serif', 'right'); arrow(ctx, w - 110, 38, 70, 0, COL.emerald, 1, 2, 8); label(ctx, 'J', w - 120, 38, COL.emerald, 'bold 13px Inter, sans-serif', 'right'); }
+            label(ctx, 'blue: electrons (drift ←)' + (m.Nh ? '   amber: holes (drift →)' : ''), 10, h - 10, COL.slate, '12px Inter, sans-serif');
+        }
+        function updateDrift() {
+            const m = MED[$('select-medium').value], E = num('slider-drift-e') * 1e-3;
+            setText('val-drift-e', num('slider-drift-e') + ' mV/m');
+            const sigma = (m.Ne * m.ue + m.Nh * m.uh) * E_CHARGE;
+            setText('ro-dr-ne', `${m.Ne.toExponential(2)} m⁻³, ${m.ue} m²/V·s`);
+            setText('ro-dr-nh', m.Nh ? `${m.Nh.toExponential(2)} m⁻³, ${m.uh} m²/V·s` : 'negligible');
+            setText('ro-dr-sigma', sigma.toExponential(2) + ' S/m');
+            setText('ro-dr-ue', fmtSI(m.ue * E, 'm/s'));
+            setText('ro-dr-j', fmtSI(sigma * E, 'A/m²'));
+        }
+        onInputs(['select-medium'], () => { carriers.length = 0; updateDrift(); });
+        onInputs(['slider-drift-e'], updateDrift);
+
+        // =========================================================
+        // Section 4 — copper wire worked example
+        // =========================================================
+        let wireOffset = 0;
+        function solveCopper() {
+            const d = num('slider-cu-d') * 1e-3, s = num('slider-cu-s') * 1e7, mu = num('slider-cu-mu'), E = num('slider-cu-e') * 1e-3;
+            setText('val-cu-d', (d * 1e3).toFixed(1) + ' mm'); setText('val-cu-s', (s / 1e7).toFixed(1) + ' × 10⁷ S/m');
+            setText('val-cu-mu', mu.toFixed(4) + ' m²/V·s'); setText('val-cu-e', (E * 1e3).toFixed(0) + ' mV/m');
+            const rho = -s / mu, J = s * E, I = J * Math.PI * d * d / 4, u = -mu * E, N = -rho / E_CHARGE;
+            setText('ro-cu-rho', rho.toExponential(2) + ' C/m³'); setText('ro-cu-j', J.toExponential(2) + ' A/m²');
+            setText('ro-cu-i', fmtSI(I, 'A')); setText('ro-cu-u', u.toExponential(2) + ' m/s'); setText('ro-cu-n', N.toExponential(2) + ' m⁻³');
+            const t = 1 / Math.abs(u);
+            setText('ro-cu-t', t > 3600 ? (t / 3600).toFixed(1) + ' hours' : (t / 60).toFixed(1) + ' min');
+        }
+        function drawWire(dt) {
+            const mu = num('slider-cu-mu'), E = num('slider-cu-e'), d = num('slider-cu-d');
+            const c = setupCanvas('canvas-wire'); if (!c) return;
+            const { ctx, w, h } = c, th = 10 + d * 8, cy = h / 2;
+            wireOffset -= mu * E * 60 * dt;
+            ctx.fillStyle = 'rgba(217, 119, 6, 0.25)'; ctx.fillRect(10, cy - th / 2, w - 20, th);
+            ctx.strokeStyle = COL.amber; ctx.lineWidth = 1.5; ctx.strokeRect(10, cy - th / 2, w - 20, th);
+            ctx.fillStyle = COL.sky;
+            for (let k = 0; k < 40; k++) { const x = 10 + (((k * 23 + wireOffset) % (w - 20)) + (w - 20)) % (w - 20), y = cy + ((k * 37) % 10 / 10 - 0.5) * (th - 6); ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill(); }
+            arrow(ctx, w - 90, 12, 60, 0, COL.slate, 1, 2, 7); label(ctx, 'E, I', w - 96, 12, COL.slate, '600 12px Inter, sans-serif', 'right');
+            label(ctx, 'e⁻ drift ←', 12, h - 10, COL.sky, '600 12px Inter, sans-serif');
+        }
+        onInputs(['slider-cu-d', 'slider-cu-s', 'slider-cu-mu', 'slider-cu-e'], solveCopper);
+
+        // =========================================================
+        // Section 5 — resistance: bar and coax
+        // =========================================================
+        let resMode = 'bar';
+        function updateRes() {
+            const bar = resMode === 'bar';
+            ['bar-controls', 'bar-theory'].forEach(id => $(id).classList.toggle('hidden', !bar));
+            ['coax-controls', 'coax-theory'].forEach(id => $(id).classList.toggle('hidden', bar));
+            const c = setupCanvas('canvas-resistance'); if (!c) return;
+            const { ctx, w, h } = c;
+            if (bar) {
+                const l = num('slider-bar-l'), A = num('slider-bar-a') * 1e-6, s = parseFloat($('select-bar-mat').value);
+                setText('val-bar-l', l.toFixed(1) + ' m'); setText('val-bar-a', (A * 1e6).toFixed(1) + ' mm²');
+                const R = l / (s * A);
+                setText('ro-res-l1', 'Resistance R'); setText('ro-res-v1', fmtSI(R, 'Ω'));
+                setText('ro-res-l2', 'Conductance G = 1/R'); setText('ro-res-v2', fmtSI(1 / R, 'S'));
+                setText('res-note', 'Double the length → double R. Double the area → half R.');
+                const bw = 80 + (w - 180) * l / 5, bh = 14 + 70 * Math.sqrt(A * 1e6 / 10), x0 = (w - bw) / 2, cy = h / 2;
+                ctx.fillStyle = 'rgba(217, 119, 6, 0.22)'; ctx.fillRect(x0, cy - bh / 2, bw, bh); ctx.strokeStyle = COL.amber; ctx.lineWidth = 2; ctx.strokeRect(x0, cy - bh / 2, bw, bh);
+                ctx.fillStyle = COL.slate; ctx.fillRect(x0 - 8, cy - bh / 2 - 6, 8, bh + 12); ctx.fillRect(x0 + bw, cy - bh / 2 - 6, 8, bh + 12);
+                for (let k = 0; k < Math.max(1, Math.round(bh / 18)); k++) { const y = cy - bh / 2 + (k + 0.5) * bh / Math.max(1, Math.round(bh / 18)); arrow(ctx, x0 + 10, y, Math.min(bw - 20, 60), 0, COL.emerald, 0.9, 2, 7); arrow(ctx, x0 + bw / 2, y, Math.min(bw / 2 - 12, 60), 0, COL.emerald, 0.9, 2, 7); }
+                label(ctx, '+V', x0 - 14, cy - bh / 2 - 16, COL.rose, 'bold 13px Inter, sans-serif', 'center');
+                label(ctx, '0', x0 + bw + 4, cy - bh / 2 - 16, COL.slate, 'bold 13px Inter, sans-serif', 'center');
+                line(ctx, x0, cy + bh / 2 + 20, x0 + bw, cy + bh / 2 + 20, COL.slate, 1, [3, 3]);
+                label(ctx, `l = ${l.toFixed(1)} m`, x0 + bw / 2, cy + bh / 2 + 32, COL.slate, '600 12px Inter, sans-serif', 'center');
+                label(ctx, 'J = σE (uniform)', x0 + bw / 2, cy - bh / 2 - 16, COL.emerald, '600 12px Inter, sans-serif', 'center');
+            } else {
+                const a = num('slider-cx-a'), b = num('slider-cx-b'), se = num('slider-cx-s'), s = Math.pow(10, se);
+                setText('val-cx-a', a.toFixed(1) + ' mm'); setText('val-cx-b', b.toFixed(1) + ' mm'); setText('val-cx-s', '10' + (se < 0 ? '⁻' : '') + String(Math.abs(se)).split('').map(d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]).join('') + ' S/m');
+                const G = 2 * Math.PI * s / Math.log(b / a);
+                setText('ro-res-l1', 'Leakage conductance G′'); setText('ro-res-v1', fmtSI(G, 'S/m'));
+                setText('ro-res-l2', 'Leakage resistance of 1 m'); setText('ro-res-v2', fmtSI(1 / G, 'Ω'));
+                setText('res-note', 'A good insulation has tiny σ, so G′ is tiny and almost no current leaks between the conductors.');
+                const cx = w * 0.38, cy = h / 2, S = (h / 2 - 16) / 8, ra = a * S, rb = b * S;
+                ctx.fillStyle = 'rgba(2, 132, 199, 0.08)'; ctx.beginPath(); ctx.arc(cx, cy, rb, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = COL.slate; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(cx, cy, rb + 3, 0, Math.PI * 2); ctx.stroke();
+                ctx.fillStyle = '#94a3b8'; ctx.beginPath(); ctx.arc(cx, cy, ra, 0, Math.PI * 2); ctx.fill();
+                for (let k = 0; k < 16; k++) { const t = 2 * Math.PI * k / 16; [1.15, 1.9].forEach(fr => { const r = ra + (rb - ra) * (fr - 1) / 1.2 + 4; if (r > rb - 8) return; const L = clamp(22 * ra / r, 6, 22); arrow(ctx, cx + r * Math.cos(t), cy + r * Math.sin(t), L * Math.cos(t), L * Math.sin(t), COL.emerald, 0.9, 1.6, 6); }); }
+                label(ctx, 'inner', cx, cy, '#ffffff', '600 12px Inter, sans-serif', 'center');
+                // J(r) plot
+                const gx0 = w * 0.7, gx1 = w - 12, gy0 = h - 30, gy1 = 30;
+                line(ctx, gx0, gy0, gx1, gy0, COL.grid, 1); line(ctx, gx0, gy0, gx0, gy1, COL.grid, 1);
+                ctx.save(); ctx.strokeStyle = COL.emerald; ctx.lineWidth = 2.2; ctx.beginPath();
+                for (let k = 0; k <= 60; k++) { const r = a + (b - a) * k / 60, x = gx0 + (gx1 - gx0) * k / 60, y = gy0 - (a / r) * (gy0 - gy1); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+                ctx.stroke(); ctx.restore();
+                label(ctx, 'J(r) ∝ 1/r', gx0 + 4, gy1 - 12, COL.emerald);
+                label(ctx, 'a', gx0, gy0 + 12, COL.slate, 'italic 600 12px Inter, sans-serif', 'center'); label(ctx, 'b', gx1, gy0 + 12, COL.slate, 'italic 600 12px Inter, sans-serif', 'center');
+            }
+        }
+        chipGroup('res-mode-group', v => { resMode = v; updateRes(); });
+        onInputs(['slider-bar-l', 'slider-bar-a', 'select-bar-mat', 'slider-cx-a', 'slider-cx-b', 'slider-cx-s'], updateRes);
+
+        // =========================================================
+        // Section 6 — Joule heating
+        // =========================================================
+        function joule() {
+            const I = num('slider-j-i'), d = num('slider-j-d') * 1e-3, s = parseFloat($('select-j-mat').value), A = Math.PI * d * d / 4;
+            setText('val-j-i', I.toFixed(1) + ' A'); setText('val-j-d', (d * 1e3).toFixed(1) + ' mm');
+            const R = 1 / (s * A), J = I / A, E = J / s, P = I * I * R;
+            setText('ro-j-r', fmtSI(R, 'Ω')); setText('ro-j-e', fmtSI(E, 'V/m')); setText('ro-j-w', fmtSI(s * E * E, 'W/m³')); setText('ro-j-p', fmtSI(P, 'W'));
+            return { P, d, psurf: P / (Math.PI * d * 1) };
+        }
+        function drawJoule(dt) {
+            const { P, d, psurf } = joule();
+            const c = setupCanvas('canvas-joule'); if (!c) return;
+            const { ctx, w, h } = c, cy = h / 2, th = 6 + d * 1e3 * 10;
+            const heat = clamp(Math.log10(Math.max(psurf, 1)) / 4.6, 0, 1), flick = 0.95 + 0.05 * Math.sin(performance.now() / 90);
+            if (heat > 0.25) { const g = ctx.createLinearGradient(0, cy - 60, 0, cy + 60); g.addColorStop(0, 'rgba(249, 115, 22, 0)'); g.addColorStop(0.5, `rgba(249, 115, 22, ${0.35 * heat * flick})`); g.addColorStop(1, 'rgba(249, 115, 22, 0)'); ctx.fillStyle = g; ctx.fillRect(30, cy - 60, w - 60, 120); }
+            const r = Math.round(180 + 75 * heat), gg = Math.round(120 - 40 * heat + 100 * Math.max(0, heat - 0.7)), b = Math.round(60 * (1 - heat));
+            ctx.fillStyle = `rgb(${r}, ${gg}, ${b})`; ctx.fillRect(30, cy - th / 2, w - 60, th);
+            ctx.fillStyle = COL.slate; ctx.fillRect(18, cy - th / 2 - 8, 12, th + 16); ctx.fillRect(w - 30, cy - th / 2 - 8, 12, th + 16);
+            label(ctx, `P = ${fmtSI(P, 'W')}`, w / 2, cy - th / 2 - 22, COL.rose, 'bold 14px Inter, sans-serif', 'center');
+            label(ctx, `surface heat flux ≈ ${fmtSI(psurf, 'W/m²')}`, w / 2, cy + th / 2 + 22, COL.slate, '12px Inter, sans-serif', 'center');
+            label(ctx, heat > 0.75 ? 'glowing hot' : heat > 0.45 ? 'hot' : 'barely warm', 12, 14, heat > 0.45 ? COL.rose : COL.slate, '600 12px Inter, sans-serif');
+        }
+
+        // =========================================================
+        // Quiz & start-up
+        // =========================================================
+        window.addEventListener('load', () => {
+            renderQuiz([
+                { q: 'Inside a perfect conductor carrying a finite current, the electric field is:', opts: ['zero', 'infinite', 'equal to $\\sigma\\mathbf{J}$'], ans: 0, why: '$\\mathbf{E} = \\mathbf{J}/\\sigma \\to 0$ as $\\sigma \\to \\infty$.' },
+                { q: 'Why is the electron drift velocity written $\\mathbf{u}_{\\mathrm{e}} = -\\mu_{\\mathrm{e}}\\mathbf{E}$?', opts: ['Because $\\mu_{\\mathrm{e}}$ is negative.', 'Because negative charges drift opposite to $\\mathbf{E}$ ($\\mu_{\\mathrm{e}} > 0$).', 'Because electrons have negative mass.'], ans: 1, why: 'Mobility is defined positive; the sign carries the direction.' },
+                { q: 'The leakage conductance per unit length of a coaxial cable\'s insulation is:', opts: ['$\\sigma\\pi(b^2 - a^2)$', '$2\\pi\\sigma/\\ln(b/a)$', '$\\ln(b/a)/(2\\pi\\sigma)$'], ans: 1, why: 'Radial current density falls as $1/r$; integrating $E$ from $a$ to $b$ gives $\\ln(b/a)$.' },
+                { q: 'The power density dissipated in a conductor with field $\\mathbf{E}$ is:', opts: ['$\\mathbf{E}\\cdot\\mathbf{J} = \\sigma|\\mathbf{E}|^2$', '$|\\mathbf{E}|/\\sigma$', '$\\sigma^2|\\mathbf{E}|$'], ans: 0, why: 'Joule\'s law in point form; integrating over the volume gives $I^2R$.' },
+                { q: 'A copper wire\'s diameter is halved while the current is kept fixed. The power dissipated:', opts: ['halves', 'doubles', 'quadruples'], ans: 2, why: '$R = l/(\\sigma A)$ with $A \\propto d^2$, so $R$ and $P = I^2R$ grow by 4.' },
+                { q: 'Pure silicon conducts with both electrons and holes. Its conductivity is:', opts: ['$\\sigma = N_{\\mathrm{e}}\\mu_{\\mathrm{e}}e$ only', '$\\sigma = (N_{\\mathrm{e}}\\mu_{\\mathrm{e}} - N_{\\mathrm{h}}\\mu_{\\mathrm{h}})\\,e$', '$\\sigma = (N_{\\mathrm{e}}\\mu_{\\mathrm{e}} + N_{\\mathrm{h}}\\mu_{\\mathrm{h}})\\,e$'], ans: 2, why: 'Electrons drift against $\\mathbf{E}$ and holes along it, but their charges are opposite, so both currents point along $\\mathbf{E}$ and add.' }
+            ]);
+            drawSpectrum(); updateDrift(); solveCopper(); updateRes();
+            animate('canvas-shield', drawShield); animate('canvas-drift', drawDrift); animate('canvas-wire', drawWire); animate('canvas-joule', drawJoule);
+            startLoop();
+            window.addEventListener('resize', () => { drawSpectrum(); updateRes(); });
+            typeset();
+        });
+
+    </script>
+</body>
+</html>

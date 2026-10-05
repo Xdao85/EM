@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inductance - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="magnet" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Inductance</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Overview</button>
+<button onclick="scrollToSection('solenoid')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5"></i><span>Solenoid</span></button>
+<button onclick="scrollToSection('coax')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="circle-dot" class="w-3.5 h-3.5"></i><span>Coaxial Line</span></button>
+<button onclick="scrollToSection('mutual')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5"><i data-lucide="link" class="w-3.5 h-3.5"></i><span>Mutual Inductance</span></button>
+<button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Magnetostatics · Inductance</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Inductance: Flux Linkage per Ampere</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">An inductor is the magnetic counterpart of a capacitor. A current $I$ produces magnetic flux $\Phi$; if the flux threads $N$ turns, the flux linkage is $\Lambda = N\Phi$. The ratio $L = \Lambda/I$ depends only on geometry and the permeability $\mu$, not on the current. Current independence assumes a linear magnetic material and fixed geometry. The quantity measures linked flux per ampere, and it determines how strongly a changing current induces voltage.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">1. Self-Inductance</span>
+                    <h3 class="text-base font-bold text-slate-900">Definition</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$L = \frac{\Lambda}{I} = \frac{N}{I}\int_S \mathbf{B}\cdot d\mathbf{s}\quad(\mathrm{H})$$</div>
+                    <p class="text-sm text-slate-700">Flux produced by a circuit and linked by the same circuit.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">2. Long Solenoid</span>
+                    <h3 class="text-base font-bold text-slate-900">Uniform interior field</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$B \approx \mu n I,\qquad L \approx \mu\frac{N^2}{l}S$$</div>
+                    <p class="text-sm text-slate-700">$n = N/l$ turns per meter; $S = \pi a^2$. Valid when $l \gg a$; the simulation shows the exact finite-length field.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-violet-700 uppercase tracking-wider bg-violet-500/10 px-2.5 py-1 rounded-md">3. Mutual Inductance</span>
+                    <h3 class="text-base font-bold text-slate-900">Coupled circuits</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-violet-700 text-sm">$$L_{12} = \frac{\Lambda_{12}}{I_1} = \frac{N_2}{I_1}\int_{S_2}\mathbf{B}_1\cdot d\mathbf{s}$$</div>
+                    <p class="text-sm text-slate-700">Flux of circuit 1 linked by circuit 2. In linear media $L_{12} = L_{21} = M$.</p>
+                </div>
+            </div>
+        </section>
+        <section id="solenoid" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Magnetic Field of a Finite Solenoid</h2>
+                <p class="text-sm text-slate-600 mt-1">Meridian cross-section of a solenoid ($\odot$ current out of the page on top, $\otimes$ into the page below). Field lines are computed by superposing the exact fields of the individual turns. Drag $P$ along the axis: at the center of a long solenoid $B \to \mu nI$; at either end it drops to about half. Increase the length-to-radius ratio and compare the nearly uniform central field with the weaker end field. Flux linkage uses the flux linked by each turn; in a short coil those fluxes need not be identical.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[400px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-sol" class="w-full h-full"></canvas></div><div class="relative h-48 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-solplot" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Turns $N$</span><input type="range" id="sol-N" min="10" max="400" step="10" value="100" class="flex-1 min-w-0 accent-sky-600"><span id="val-sol-N" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Length $l$</span><input type="range" id="sol-l" min="0.05" max="0.5" step="0.01" value="0.2" class="flex-1 min-w-0 accent-amber-600"><span id="val-sol-l" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Radius $a$</span><input type="range" id="sol-a" min="0.01" max="0.1" step="0.005" value="0.03" class="flex-1 min-w-0 accent-emerald-600"><span id="val-sol-a" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Current $I$</span><input type="range" id="sol-I" min="0.1" max="10" step="0.1" value="2" class="flex-1 min-w-0 accent-rose-600"><span id="val-sol-I" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">$P$ at $z$</span><input type="range" id="sol-z" min="-0.4" max="0.4" step="0.001" value="0" class="flex-1 min-w-0 accent-violet-600"><span id="val-sol-z" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Core $\mu_r$</span><input type="range" id="sol-mu" min="1" max="100" step="1" value="1" class="flex-1 min-w-0 accent-indigo-600"><span id="val-sol-mu" class="w-20 shrink-0 text-right font-mono text-indigo-700"></span></div></div><div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$B_z(z) = \frac{\mu n I}{2}\left(\sin\theta_2 - \sin\theta_1\right)$$</div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\theta_1$, $\theta_2$ seen from $P$</span><span id="ro-th" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$B_z(P)$</span><span id="ro-B" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Long-solenoid limit $\mu nI$</span><span id="ro-Blong" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$B$ at an end ($z = \pm l/2$)</span><span id="ro-Bend" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$L \approx \mu N^2 S/l$</span><span id="ro-L" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$l/a$</span><span id="ro-la" class="text-slate-700 font-bold text-right"></span></div></div></div>
+            </div>
+        </section>
+        <section id="coax" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Inductance per Unit Length of a Coaxial Line</h2>
+                <p class="text-sm text-slate-600 mt-1">Current $I$ flows along the inner conductor (radius $a$) and returns on the outer conductor (radius $b$). Between them $B = \mu I/(2\pi r)$; outside the cable the fields of the two currents cancel. The flux through the shaded strip of length $l$ between the conductors gives $L'$.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[380px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-coax" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Inner $a$</span><input type="range" id="cx-a" min="0.5" max="4.5" step="0.1" value="1.2" class="flex-1 min-w-0 accent-sky-600"><span id="val-cx-a" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Outer $b$</span><input type="range" id="cx-b" min="5" max="15" step="0.5" value="8" class="flex-1 min-w-0 accent-rose-600"><span id="val-cx-b" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Insulator $\mu_r$</span><input type="range" id="cx-mu" min="1" max="5" step="0.1" value="1" class="flex-1 min-w-0 accent-indigo-600"><span id="val-cx-mu" class="w-20 shrink-0 text-right font-mono text-indigo-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Current $I$</span><input type="range" id="cx-I" min="0.5" max="10" step="0.5" value="2" class="flex-1 min-w-0 accent-amber-600"><span id="val-cx-I" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div></div><div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\Phi = l\int_a^b \frac{\mu I}{2\pi r}\,dr = \frac{\mu I l}{2\pi}\ln\frac{b}{a},\qquad L' = \frac{\mu}{2\pi}\ln\frac{b}{a}$$</div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$L'$</span><span id="ro-Lp" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\Phi/l$</span><span id="ro-phi" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$B$ at $r = a$ and $r = b$</span><span id="ro-Bab" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Characteristic $Z_0$ (air, $\varepsilon_r = 1$)</span><span id="ro-Z0" class="text-emerald-800 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">Only the magnetic energy between the conductors is counted here (external inductance). For a thin inner conductor carrying current uniformly, an internal term $\mu/8\pi$ per unit length adds at low frequency.</p></div>
+            </div>
+        </section>
+        <section id="mutual" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-violet-700 bg-violet-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 3</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Mutual Inductance of Two Coaxial Loops</h2>
+                <p class="text-sm text-slate-600 mt-1">Loop 1 (radius $a_1$) carries $I_1$; loop 2 (radius $a_2$) sits a distance $d$ away on the same axis. The flux of $\mathbf{B}_1$ through loop 2 gives $M$, computed with Maxwell's exact formula. Drive $I_1$ with an AC current to see the induced voltage $v_2 = -M\,dI_1/dt$.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[380px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-mut" class="w-full h-full"></canvas></div><div class="relative h-48 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-mutplot" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Radius $a_1$</span><input type="range" id="m-a1" min="0.05" max="0.5" step="0.01" value="0.2" class="flex-1 min-w-0 accent-sky-600"><span id="val-m-a1" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Radius $a_2$</span><input type="range" id="m-a2" min="0.05" max="0.5" step="0.01" value="0.15" class="flex-1 min-w-0 accent-violet-600"><span id="val-m-a2" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Separation $d$</span><input type="range" id="m-d" min="0" max="1" step="0.01" value="0.15" class="flex-1 min-w-0 accent-amber-600"><span id="val-m-d" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">Turns $N_1 = N_2$</span><input type="range" id="m-N" min="1" max="50" step="1" value="10" class="flex-1 min-w-0 accent-emerald-600"><span id="val-m-N" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-28 shrink-0 text-slate-700">AC frequency $f$</span><input type="range" id="m-f" min="0" max="10000" step="100" value="1000" class="flex-1 min-w-0 accent-rose-600"><span id="val-m-f" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div></div><div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-violet-700 text-sm">$$M = \mu_0\sqrt{a_1a_2}\left[\left(\frac{2}{k}-k\right)K(k) - \frac{2}{k}E(k)\right]N_1N_2,\quad k^2 = \frac{4a_1a_2}{(a_1+a_2)^2+d^2}$$</div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$M$</span><span id="ro-M" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Small-loop estimate $\frac{\mu_0\pi a_1^2a_2^2N_1N_2}{2(a_>^2+d^2)^{3/2}}$, $a_> = \max(a_1, a_2)$</span><span id="ro-Mest" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Coupling $k = M/\sqrt{L_1L_2}$</span><span id="ro-k" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$|v_2|$ for $I_1 = 1$ A peak</span><span id="ro-v2" class="text-rose-700 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">$L_1$, $L_2$ use the thin-ring formula $L \approx \mu_0 N^2 a\left[\ln(8a/w) - 2\right]$ with wire radius $w = 1$ mm.</p></div>
+            </div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Inductance</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Score: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // Magnetostatics toolkit (Topic 4)
+        // =========================================================
+        const MU0 = 4 * Math.PI * 1e-7;
+        // one-row sliders: fmts = { id: v => text }, onChange() called after every move
+        function bindSliders(fmts, onChange) {
+            Object.entries(fmts).forEach(([id, f]) => {
+                const el = $(id); if (!el) return;
+                const show = () => setText('val-' + id, f(+el.value));
+                el.addEventListener('input', () => { show(); onChange && onChange(id); });
+                show();
+            });
+        }
+        const val = id => +$(id).value;
+        // ⊙ (out of page) / ⊗ (into page) symbol
+        function currentDot(ctx, x, y, out, color = COL.amber, r = 9) {
+            ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = color;
+            if (out) { ctx.beginPath(); ctx.arc(x, y, r * 0.3, 0, 2 * Math.PI); ctx.fill(); }
+            else { const d = r * 0.55; ctx.beginPath(); ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d); ctx.moveTo(x + d, y - d); ctx.lineTo(x - d, y + d); ctx.stroke(); }
+            ctx.restore();
+        }
+        // complete elliptic integrals K(k), E(k) by the arithmetic-geometric mean (k = modulus)
+        function ellipKE(k) {
+            let a = 1, b = Math.sqrt(1 - k * k), c = k, sum = 0.5 * c * c, p = 1;
+            for (let i = 0; i < 30 && Math.abs(c) > 1e-15; i++) { const an = (a + b) / 2; c = (a - b) / 2; b = Math.sqrt(a * b); a = an; p *= 2; sum += 0.5 * p * c * c; }
+            const K = Math.PI / (2 * a); return [K, K * (1 - sum)];
+        }
+        // exact B of a circular loop (radius a, current I, in the z = 0 plane, axis z) at (r, z): [Br, Bz] in tesla
+        function loopB(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : r;
+            const q = (a + r) ** 2 + z * z, k2 = 4 * a * r / q, [K, E] = ellipKE(Math.sqrt(Math.min(k2, 1 - 1e-12)));
+            const d = (a - r) ** 2 + z * z, f = MU0 * I / (2 * Math.PI * Math.sqrt(q));
+            return [f * z / r * (-K + (a * a + r * r + z * z) / d * E), f * (K + (a * a - r * r - z * z) / d * E)];
+        }
+        // mutual inductance of two coaxial circular loops (Maxwell's formula)
+        function mutualLoops(a1, a2, d) {
+            const k = Math.sqrt(4 * a1 * a2 / ((a1 + a2) ** 2 + d * d)), [K, E] = ellipKE(Math.min(k, 1 - 1e-12));
+            return MU0 * Math.sqrt(a1 * a2) * ((2 / k - k) * K - 2 / k * E);
+        }
+        // trace a 2-D field line from (x, y) in world units; F(x, y) → [fx, fy]; returns array of points
+        function traceLine(F, x, y, dir, step, nmax, box) {
+            const pts = [[x, y]];
+            for (let i = 0; i < nmax; i++) {
+                const f1 = F(x, y), m1 = Math.hypot(...f1); if (!(m1 > 1e-30)) break;
+                const mx = x + dir * step / 2 * f1[0] / m1, my = y + dir * step / 2 * f1[1] / m1, f2 = F(mx, my), m2 = Math.hypot(...f2); if (!(m2 > 1e-30)) break;
+                x += dir * step * f2[0] / m2; y += dir * step * f2[1] / m2;
+                if (x < box[0] || x > box[1] || y < box[2] || y > box[3]) { pts.push([x, y]); break; }
+                pts.push([x, y]);
+                if (i > 20 && Math.hypot(x - pts[0][0], y - pts[0][1]) < step * 0.8) { pts.push(pts[0]); break; }   // closed loop
+            }
+            return pts;
+        }
+        function drawPath(ctx, pts, X, Y, color, width = 1.3, alpha = 0.8, arrowsEvery = 0) {
+            if (pts.length < 2) return;
+            ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+            if (arrowsEvery) for (let i = arrowsEvery; i < pts.length - 1; i += arrowsEvery) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; const dx = X(x1) - X(x0), dy = Y(y1) - Y(y0), m = Math.hypot(dx, dy) || 1; arrow(ctx, X(x0), Y(y0), dx / m * 8, dy / m * 8, color, alpha, width, 6); }
+        }
+        // world ↔ screen mapping helper for a rectangular view
+        function view2D(w, h, xmin, xmax, ymin, ymax, pad = 12) {
+            const s = Math.min((w - 2 * pad) / (xmax - xmin), (h - 2 * pad) / (ymax - ymin)), ox = (w - s * (xmax - xmin)) / 2, oy = (h - s * (ymax - ymin)) / 2;
+            return { s, X: x => ox + (x - xmin) * s, Y: y => h - oy - (y - ymin) * s, x: px => xmin + (px - ox) / s, y: py => ymin + (h - oy - py) / s };
+        }
+        const fmtE = (v, d = 3) => !isFinite(v) ? '—' : v === 0 ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-2 ? v.toExponential(d - 1) : (+v.toPrecision(d)).toString());
+        const redrawOnResize = (ids, fn) => { const f = () => requestAnimationFrame(fn); if ('ResizeObserver' in window) { const ro = new ResizeObserver(f); ids.forEach(id => $(id) && ro.observe($(id).parentElement)); } window.addEventListener('resize', f); };
+        // vector potential A_φ of a circular loop; field lines in the meridian plane are contours of ψ = r·A_φ
+        function loopAphi(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : Math.abs(r);
+            const k2 = 4 * a * r / ((a + r) ** 2 + z * z), k = Math.sqrt(Math.min(k2, 1 - 1e-12)), [K, E] = ellipKE(k);
+            return MU0 * I / (Math.PI * k) * Math.sqrt(a / r) * ((1 - k2 / 2) * K - E);
+        }
+
+        // =========================================================
+        // Inductance page
+        // =========================================================
+        const fT = v => fmtSI(v, 'T'), fHn = v => fmtSI(v, 'H');
+
+        // ---------- 1. solenoid ----------
+        const SOL = { V: null, key: '', layer: null };
+        const solP = () => ({ N: val('sol-N'), l: val('sol-l'), a: val('sol-a'), I: val('sol-I'), z: val('sol-z'), mu: val('sol-mu') * MU0 });
+        function solBz(S, z) { const s2 = (S.l / 2 - z) / Math.hypot(S.a, S.l / 2 - z), s1 = (-S.l / 2 - z) / Math.hypot(S.a, -S.l / 2 - z); return [S.mu * S.N / S.l * S.I / 2 * (s2 - s1), Math.asin(s1), Math.asin(s2)]; }
+        function drawSol() {
+            const S = solP(); $('sol-z').min = -S.l; $('sol-z').max = S.l; if (Math.abs(S.z) > S.l) { $('sol-z').value = clamp(S.z, -S.l, S.l); S.z = val('sol-z'); setText('val-sol-z', S.z.toFixed(3) + ' m'); }
+            const [B, t1, t2] = solBz(S, S.z), Blong = S.mu * S.N / S.l * S.I;
+            setText('ro-th', `${(t1 * 180 / Math.PI).toFixed(1)}°, ${(t2 * 180 / Math.PI).toFixed(1)}°`); setText('ro-B', fT(B)); setText('ro-Blong', fT(Blong));
+            setText('ro-Bend', `${fT(solBz(S, S.l / 2)[0])} (${(100 * solBz(S, S.l / 2)[0] / Blong).toFixed(1)} %)`);
+            setText('ro-L', fHn(S.mu * S.N * S.N * Math.PI * S.a * S.a / S.l)); setText('ro-la', (S.l / S.a).toFixed(1));
+            const c = setupCanvas('cv-sol'); if (!c) return; const { ctx, w, h } = c;
+            const zr = S.l / 2 + Math.max(4 * S.a, 0.35 * S.l), rr = zr * h / w, V = view2D(w, h, -zr, zr, -rr, rr, 6); SOL.V = V;
+            // field lines = contours of ψ = Σ r A_φ over the turns (current magnitude only affects scale)
+            const key = [S.N, S.l, S.a, w, h].join('|');
+            if (key !== SOL.key) {
+                SOL.key = key; const Nd = Math.min(S.N, 40), zs = []; for (let k = 0; k < Nd; k++) zs.push(-S.l / 2 + (k + 0.5) * S.l / Nd);
+                const psi = (z, r) => { r = Math.abs(r); let s = 0; zs.forEach(zk => s += r * loopAphi(S.a, 1, r, z - zk)); return s; };
+                const lv = []; for (let i = 1; i <= 7; i++) lv.push(psi(0, S.a * i / 8)); lv.push(psi(0, S.a * 0.97));
+                const dpr = window.devicePixelRatio || 1, off = document.createElement('canvas'); off.width = w * dpr; off.height = h * dpr; const o = off.getContext('2d'); o.setTransform(dpr, 0, 0, dpr, 0, 0);
+                contours(o, w, h, (sx, sy) => psi(V.x(sx), V.y(sy)), lv, () => 'rgba(2,132,199,0.7)', 5, 1.3);
+                SOL.layer = off;
+            }
+            ctx.drawImage(SOL.layer, 0, 0, w, h);
+            line(ctx, V.X(-zr), V.Y(0), V.X(zr), V.Y(0), COL.muted, 1, [4, 4]);
+            ctx.save(); ctx.fillStyle = 'rgba(79,70,229,' + (0.05 + 0.1 * Math.min(1, Math.log10(val('sol-mu')) / 2)) + ')'; ctx.fillRect(V.X(-S.l / 2), V.Y(S.a), S.l * V.s, 2 * S.a * V.s); ctx.restore();
+            const Nd = Math.min(S.N, 30), rad = clamp(0.45 * S.l / Nd * V.s, 2.5, 8);
+            for (let k = 0; k < Nd; k++) { const z = -S.l / 2 + (k + 0.5) * S.l / Nd; currentDot(ctx, V.X(z), V.Y(S.a), true, COL.amber, rad); currentDot(ctx, V.X(z), V.Y(-S.a), false, COL.amber, rad); }
+            const Bp = B, L = clamp(20 + 30 * Bp / (Blong || 1), 16, 70); arrow(ctx, V.X(S.z), V.Y(0), L, 0, COL.rose, 1, 3, 11);
+            dot(ctx, V.X(S.z), V.Y(0), COL.violet, 6); label(ctx, 'P', V.X(S.z), V.Y(0) - 12, COL.violet, 'bold 14px Inter, sans-serif', 'center');
+            [[-S.l / 2, t1], [S.l / 2, t2]].forEach(([ze]) => line(ctx, V.X(S.z), V.Y(0), V.X(ze), V.Y(S.a), COL.violet, 1, [3, 3], 0.7));
+            label(ctx, 'drag P along the axis · lines: B field', 10, h - 10, COL.muted, '12px Inter, sans-serif');
+            drawSolPlot(S, Blong);
+        }
+        function drawSolPlot(S, Blong) {
+            const c = setupCanvas('cv-solplot'); if (!c) return; const { ctx, w, h } = c, zr = S.l;
+            const F = plotFrame(ctx, w, h, -zr, zr, 0, Blong * 1.15, { left: 64, bottom: 34, xlabel: 'z (m)', ylabel: 'B_z (T)' });
+            [-zr, -zr / 2, 0, zr / 2, zr].forEach(t => label(ctx, t.toFixed(2), F.X(t), h - F.B + 15, COL.muted, '11px Inter, sans-serif', 'center'));
+            line(ctx, F.L, F.Y(Blong), w - F.R, F.Y(Blong), COL.amber, 1.2, [6, 4]); label(ctx, 'μnI', F.L + 4, F.Y(Blong) - 5, COL.amber, '600 12px Inter, sans-serif');
+            line(ctx, F.L, F.Y(Blong / 2), w - F.R, F.Y(Blong / 2), COL.muted, 1, [2, 4]); label(ctx, 'μnI/2', F.L + 4, F.Y(Blong / 2) - 5, COL.muted, '11px Inter, sans-serif');
+            [-S.l / 2, S.l / 2].forEach(z => line(ctx, F.X(z), F.T, F.X(z), h - F.B, COL.emerald, 1, [3, 3]));
+            curve(ctx, z => solBz(S, z)[0], -zr, zr, F.X, F.Y, COL.sky, 2.4, 300);
+            dot(ctx, F.X(S.z), F.Y(solBz(S, S.z)[0]), COL.violet, 5);
+        }
+        bindSliders({ 'sol-N': v => v.toFixed(0), 'sol-l': v => v.toFixed(2) + ' m', 'sol-a': v => (v * 100).toFixed(1) + ' cm', 'sol-I': v => v.toFixed(1) + ' A', 'sol-z': v => v.toFixed(3) + ' m', 'sol-mu': v => v.toFixed(0) }, drawSol);
+        draggable('cv-sol', (x, y) => SOL.V && Math.hypot(x - SOL.V.X(val('sol-z')), y - SOL.V.Y(0)) < 24 ? 1 : null, (hd, x) => { $('sol-z').value = SOL.V.x(x); $('sol-z').dispatchEvent(new Event('input')); });
+
+        // ---------- 2. coaxial line ----------
+        function drawCoax() {
+            const a = val('cx-a') * 1e-3, b = val('cx-b') * 1e-3, mu = val('cx-mu') * MU0, I = val('cx-I');
+            const Lp = mu / (2 * Math.PI) * Math.log(b / a);
+            setText('ro-Lp', fmtSI(Lp, 'H/m')); setText('ro-phi', fmtSI(Lp * I, 'Wb/m')); setText('ro-Bab', `${fT(mu * I / (2 * Math.PI * a))}, ${fT(mu * I / (2 * Math.PI * b))}`);
+            setText('ro-Z0', (60 * Math.log(b / a) * Math.sqrt(val('cx-mu'))).toFixed(1) + ' Ω');
+            const c = setupCanvas('cv-coax'); if (!c) return; const { ctx, w, h } = c;
+            const cx = w * 0.3, cy = h / 2, sc = (h / 2 - 24) / 15e-3, ra = a * sc, rb = b * sc;
+            ctx.save(); ctx.fillStyle = 'rgba(100,116,139,0.18)'; ctx.beginPath(); ctx.arc(cx, cy, rb + 7, 0, 2 * Math.PI); ctx.arc(cx, cy, rb, 0, 2 * Math.PI, true); ctx.fill();
+            ctx.fillStyle = 'rgba(79,70,229,' + (0.04 + 0.05 * (val('cx-mu') - 1)) + ')'; ctx.beginPath(); ctx.arc(cx, cy, rb, 0, 2 * Math.PI); ctx.arc(cx, cy, ra, 0, 2 * Math.PI, true); ctx.fill();
+            ctx.fillStyle = 'rgba(217,119,6,0.35)'; ctx.beginPath(); ctx.arc(cx, cy, ra, 0, 2 * Math.PI); ctx.fill(); ctx.restore();
+            // field circles: spacing ∝ r (equal flux between circles → density ∝ 1/r)
+            const n = 9; for (let k = 0; k <= n; k++) { const r = ra * Math.pow(rb / ra, k / n); ctx.save(); ctx.strokeStyle = COL.sky; ctx.globalAlpha = 0.7; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
+                if (k > 0 && k < n) { const ang = -Math.PI / 2 - 0.5; arrow(ctx, cx + r * Math.cos(ang), cy + r * Math.sin(ang), 7 * Math.sin(ang), -7 * Math.cos(ang), COL.sky, 1, 1.5, 6); } }
+            currentDot(ctx, cx, cy, true, COL.amber, 9);
+            [0, Math.PI / 2, Math.PI, 1.5 * Math.PI].forEach(t => currentDot(ctx, cx + (rb + 3.5) * Math.cos(t), cy + (rb + 3.5) * Math.sin(t), false, COL.slate, 6));
+            line(ctx, cx + ra, cy, cx + rb, cy, COL.rose, 5, null, 0.5); label(ctx, 'strip S (length l into page)', cx + (ra + rb) / 2, cy + 18, COL.rose, '600 12px Inter, sans-serif', 'center');
+            label(ctx, 'a', cx + ra / 2, cy - 6, COL.amber, 'bold 13px Inter, sans-serif', 'center'); label(ctx, 'b', cx + rb * 0.72, cy - rb * 0.72, COL.slate, 'bold 13px Inter, sans-serif');
+            // B(r) plot on the right
+            const x0 = w * 0.58, x1 = w - 16, y0 = h - 40, y1 = 30, rmax = 17e-3, Bmax = mu * I / (2 * Math.PI * a) * 1.1;
+            const X = r => x0 + r / rmax * (x1 - x0), Y = B => y0 - B / Bmax * (y0 - y1);
+            line(ctx, x0, y0, x1, y0, COL.grid, 1); line(ctx, x0, y0, x0, y1, COL.grid, 1);
+            label(ctx, 'B(r)', x0 + 4, y1 - 8, COL.slate, '600 12px Inter, sans-serif'); label(ctx, 'r (mm)', x1, y0 + 26, COL.slate, '12px Inter, sans-serif', 'right');
+            [0, 5, 10, 15].forEach(t => label(ctx, String(t), X(t * 1e-3), y0 + 14, COL.muted, '11px Inter, sans-serif', 'center'));
+            ctx.save(); ctx.strokeStyle = COL.sky; ctx.lineWidth = 2.4; ctx.beginPath();
+            for (let k = 0; k <= 200; k++) { const r = rmax * k / 200, B = r < a ? mu * I * r / (2 * Math.PI * a * a) : r <= b ? mu * I / (2 * Math.PI * r) : 0; k ? ctx.lineTo(X(r), Y(B)) : ctx.moveTo(X(r), Y(B)); } ctx.stroke(); ctx.restore();
+            ctx.save(); ctx.fillStyle = 'rgba(225,29,72,0.12)'; ctx.beginPath(); ctx.moveTo(X(a), y0); for (let k = 0; k <= 60; k++) { const r = a + (b - a) * k / 60; ctx.lineTo(X(r), Y(mu * I / (2 * Math.PI * r))); } ctx.lineTo(X(b), y0); ctx.fill(); ctx.restore();
+            label(ctx, 'shaded area = Φ/l', X((a + b) / 2), y0 - 8, COL.rose, '600 12px Inter, sans-serif', 'center');
+        }
+        bindSliders({ 'cx-a': v => v.toFixed(1) + ' mm', 'cx-b': v => v.toFixed(1) + ' mm', 'cx-mu': v => v.toFixed(1), 'cx-I': v => v.toFixed(1) + ' A' }, drawCoax);
+
+        // ---------- 3. mutual inductance ----------
+        const selfL = (a, N, w = 1e-3) => MU0 * N * N * a * (Math.log(8 * a / w) - 2);
+        function drawMut() {
+            const a1 = val('m-a1'), a2 = val('m-a2'), d = val('m-d'), N = val('m-N'), f = val('m-f');
+            const M = mutualLoops(a1, a2, Math.max(d, 2e-3)) * N * N, aL = Math.max(a1, a2), Mest = MU0 * Math.PI * a1 * a1 * a2 * a2 * N * N / (2 * (aL * aL + d * d) ** 1.5);   // small loop in the axial field of the larger one
+            setText('ro-M', fHn(M)); setText('ro-Mest', fHn(Mest)); setText('ro-k', (M / Math.sqrt(selfL(a1, N) * selfL(a2, N))).toFixed(3)); setText('ro-v2', fmtSI(2 * Math.PI * f * M, 'V'));
+            const c = setupCanvas('cv-mut'); if (!c) return; const { ctx, w, h } = c;
+            const zr = 1.1, rr = zr * h / w, V = view2D(w, h, -0.35, 1.3, -0.62, 0.62, 8);
+            const psi = (z, r) => Math.abs(r) * loopAphi(a1, 1, Math.abs(r), z), lv = []; for (let i = 1; i <= 8; i++) lv.push(psi(0, a1 * i / 9));
+            contours(ctx, w, h, (sx, sy) => psi(V.x(sx), V.y(sy)), lv, () => 'rgba(2,132,199,0.6)', 4, 1.2);
+            ctx.save(); ctx.fillStyle = 'rgba(124,58,237,0.15)'; ctx.fillRect(V.X(d) - 3, V.Y(a2), 6, 2 * a2 * V.s); ctx.restore();
+            line(ctx, V.X(-0.35), V.Y(0), V.X(1.3), V.Y(0), COL.muted, 1, [4, 4]);
+            currentDot(ctx, V.X(0), V.Y(a1), true, COL.sky, 8); currentDot(ctx, V.X(0), V.Y(-a1), false, COL.sky, 8); label(ctx, 'loop 1', V.X(0), V.Y(a1) - 16, COL.sky, 'bold 13px Inter, sans-serif', 'center');
+            currentDot(ctx, V.X(d), V.Y(a2), true, COL.violet, 8); currentDot(ctx, V.X(d), V.Y(-a2), false, COL.violet, 8); label(ctx, 'loop 2', V.X(d), V.Y(-a2) + 24, COL.violet, 'bold 13px Inter, sans-serif', 'center');
+            label(ctx, 'shaded: surface S₂ of loop 2 · lines: B₁', 10, h - 10, COL.muted, '12px Inter, sans-serif');
+            // M vs d
+            const c2 = setupCanvas('cv-mutplot'); if (!c2) return; const g = c2.ctx, W = c2.w, H = c2.h, M0 = mutualLoops(a1, a2, 2e-3) * N * N;
+            const F = plotFrame(g, W, H, 0, 1, 0, M0 * 1.1, { left: 64, bottom: 34, xlabel: 'separation d (m)', ylabel: 'M (H)' });
+            [0, 0.25, 0.5, 0.75, 1].forEach(t => label(g, String(t), F.X(t), H - F.B + 15, COL.muted, '11px Inter, sans-serif', 'center'));
+            label(g, fmtSI(M0, 'H'), F.L - 6, F.Y(M0) + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            curve(g, x => MU0 * Math.PI * a1 * a1 * a2 * a2 * N * N / (2 * (aL * aL + x * x) ** 1.5), 0, 1, F.X, F.Y, COL.muted, 1.5, 200, [5, 4]);
+            curve(g, x => mutualLoops(a1, a2, Math.max(x, 2e-3)) * N * N, 0, 1, F.X, F.Y, COL.violet, 2.4, 200);
+            dot(g, F.X(d), F.Y(M), COL.rose, 5); label(g, '— exact   -- small-loop estimate', W - 12, F.T + 6, COL.slate, '12px Inter, sans-serif', 'right');
+        }
+        bindSliders({ 'm-a1': v => (v * 100).toFixed(0) + ' cm', 'm-a2': v => (v * 100).toFixed(0) + ' cm', 'm-d': v => (v * 100).toFixed(0) + ' cm', 'm-N': v => v.toFixed(0), 'm-f': v => v.toFixed(0) + ' Hz' }, drawMut);
+
+        const drawAll = () => { SOL.key = ''; drawSol(); drawCoax(); drawMut(); };
+        redrawOnResize(['cv-sol', 'cv-solplot', 'cv-coax', 'cv-mut', 'cv-mutplot'], drawAll);
+        drawAll();
+        renderQuiz([
+            { q: 'Deep inside a very long solenoid ($l \\gg a$) the magnetic flux density is', opts: ['zero', 'uniform and axial, $B = \\mu nI$', 'radial, decreasing as $1/r$', 'largest near the windings'], ans: 1, why: 'With $\\theta_1 \\to -90°$ and $\\theta_2 \\to 90°$, $B = \\frac{\\mu nI}{2}(1 + 1) = \\mu nI$, independent of position inside.' },
+            { q: 'At either end of a long solenoid, $B$ on the axis is', opts: ['equal to the center value', 'half the center value', 'zero', 'twice the center value'], ans: 1, why: 'At an end one angle is 0 and the other is about $90°$, so $B \\approx \\mu nI/2$. The plot shows the field falling to the dotted $\\mu nI/2$ line at $z = \\pm l/2$.' },
+            { q: 'If the number of turns of a solenoid doubles (same length and area), $L$', opts: ['doubles', 'quadruples', 'halves', 'is unchanged'], ans: 1, why: 'Doubling $N$ doubles $B$ (hence $\\Phi$) and doubles the number of turns linking it: $L = \\mu N^2 S/l \\propto N^2$.' },
+            { q: "For a coaxial line with $b/a = e \\approx 2.718$ and $\\mu = \\mu_0$, $L'$ equals", opts: ['$0.1\\ \\mu$H/m', '$0.2\\ \\mu$H/m', '$2\\ \\mu$H/m', '$0.4\\pi\\ \\mu$H/m'], ans: 1, why: "$L' = \\frac{\\mu_0}{2\\pi}\\ln e = 2\\times10^{-7}$ H/m $= 0.2\\ \\mu$H/m." },
+            { q: 'Two coaxial loops are moved apart ($d \\gg a_1, a_2$). Their mutual inductance', opts: ['stays constant', 'falls off as $1/d$', 'falls off as $1/d^3$', 'grows'], ans: 2, why: 'Far away loop 1 is a dipole whose field falls as $1/d^3$, so the flux through loop 2 and hence $M$ fall as $1/d^3$ (the dashed small-loop curve).' },
+            { q: 'An air-core solenoid has $N = 1000$ turns, length $l = 0.5$ m and cross-section $S = 10$ cm². Its inductance is about', opts: ['$1.26$ mH', '$25.1$ mH', '$2.51\\ \\mu$H', '$2.51$ mH'], ans: 3, why: '$L = \\mu_0N^2S/l = 4\\pi\\times10^{-7}\\times10^6\\times10^{-3}/0.5 \\approx 2.51\\times10^{-3}$ H. The long-solenoid formula applies because $l$ is much larger than the radius (about 1.8 cm).' }
+        ]);
+        startLoop();
+
+    </script>
+</body>
+</html>

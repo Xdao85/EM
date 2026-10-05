@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dòng điện dịch - Học phần Trường điện từ</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="arrow-right-left" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Dòng điện dịch</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Tổng quan</button>
+<button onclick="scrollToSection('capacitor')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5"></i><span>Nghịch lý tụ điện</span></button>
+<button onclick="scrollToSection('materials')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5"></i><span>Vật dẫn hay điện môi</span></button>
+<button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Kiểm tra</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Trường biến thiên · Hiệu chỉnh của Maxwell</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Dòng điện dịch</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">Định luật Ampère $\nabla\times\mathbf{H} = \mathbf{J}$ đúng với dòng điện không đổi nhưng mâu thuẫn với định luật bảo toàn điện tích khi trường biến thiên: độ phân kỳ (divergence) của một độ xoáy (curl) luôn bằng 0, trong khi $\nabla\cdot\mathbf{J} = -\partial\rho_{\mathrm{v}}/\partial t$ không nhất thiết bằng 0. Maxwell đã thêm mật độ dòng điện dịch (displacement current density) $\partial\mathbf{D}/\partial t$, khôi phục tính nhất quán và tiên đoán sự tồn tại của sóng điện từ. Dòng điện dịch là số hạng của trường, không phải dòng điện tích tự do qua khe cách điện. Nó góp vào tuần hoàn từ ngay cả trong chân không, giúp định luật cho cùng đường biên nhất quán với các mặt khác nhau.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">1. Dạng vi phân</span>
+                    <h3 class="text-base font-bold text-slate-900">Định luật Ampère–Maxwell</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\nabla\times\mathbf{H} = \mathbf{J} + \frac{\partial\mathbf{D}}{\partial t}$$</div>
+                    <p class="text-sm text-slate-700">Lấy độ phân kỳ hai vế: $0 = \nabla\cdot\mathbf{J} + \partial(\nabla\cdot\mathbf{D})/\partial t = \nabla\cdot\mathbf{J} + \partial\rho_{\mathrm{v}}/\partial t$, đúng là phương trình liên tục của điện tích.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-500/10 px-2.5 py-1 rounded-md">2. Dạng tích phân</span>
+                    <h3 class="text-base font-bold text-slate-900">Định lý Stokes</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\oint_C\mathbf{H}\cdot d\mathbf{l} = I_{\mathrm{c}} + \int_S\frac{\partial\mathbf{D}}{\partial t}\cdot d\mathbf{s} = I_{\mathrm{c}} + I_{\mathrm{d}}$$</div>
+                    <p class="text-sm text-slate-700">Vế phải không được phụ thuộc vào việc chọn mặt $S$ nào tựa trên đường cong kín $C$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">3. Độ lớn</span>
+                    <h3 class="text-base font-bold text-slate-900">Vật dẫn và chất cách điện</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\frac{|J_{\mathrm{d}}|}{|J_{\mathrm{c}}|} = \frac{\omega\varepsilon}{\sigma}$$</div>
+                    <p class="text-sm text-slate-700">Trong kim loại dẫn tốt ở tần số mạch thông thường, dòng dẫn thường chiếm ưu thế. Trong chất cách điện lý tưởng có trường biến thiên, dòng dịch vẫn tồn tại khi dòng dẫn bằng không. Tỉ số biên độ, không phải một ngưỡng tần số chung, quyết định dòng nào có thể bỏ qua.</p>
+                </div>
+            </div>
+        </section>
+        <section id="capacitor" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 1</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Nghịch lý tụ điện</h2>
+                <p class="text-sm text-slate-600 mt-1">Một nguồn xoay chiều $V_{\mathrm{s}} = V_0\cos\omega t$ nạp điện cho tụ điện phẳng. Lấy đường cong kín $C$ bao quanh dây dẫn. Mặt $S_1$ bị dây xuyên qua và hứng dòng điện dẫn. Mặt $S_2$ phồng ra đi vào khe giữa hai bản tụ, nơi không có điện tích nào đi qua; nếu không có số hạng của Maxwell, nó sẽ cho $\oint\mathbf{H}\cdot d\mathbf{l} = 0$. Khi có số hạng đó, dòng điện dịch qua $S_2$ bằng đúng dòng điện dẫn tại mọi thời điểm. So sánh mặt qua dây và mặt qua khe suốt chu kỳ, nhất là khi điện áp đạt cực trị: dòng nạp lúc ấy bằng không dù điện trường lớn.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Mặt tựa trên $C$:</span><div id="d-surf" class="flex flex-wrap gap-1.5 "><button data-v="S1" class="chip on">$S_1$ (phẳng, qua dây dẫn)</button><button data-v="S2" class="chip">$S_2$ (phồng, qua khe tụ)</button></div><span class="mx-1 text-slate-600">|</span><button id="d-maxwell" class="chip on">Có ∂D/∂t</button><button id="d-play" class="chip on">Tạm dừng</button></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6"><div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[360px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-cap" class="w-full h-full"></canvas></div></div><div class="lg:col-span-5 flex flex-col space-y-3"><div class="relative h-[360px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-dsc" class="w-full h-full"></canvas></div></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-6 flex flex-col space-y-3"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Biên độ $V_0$</span><input type="range" id="d-V0" min="1" max="100" step="1" value="10" class="flex-1 min-w-0 accent-amber-600"><span id="val-d-V0" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Tần số $f$</span><input type="range" id="d-f" min="1" max="1000" step="1" value="50" class="flex-1 min-w-0 accent-rose-600"><span id="val-d-f" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Diện tích bản $A$</span><input type="range" id="d-A" min="1" max="500" step="1" value="100" class="flex-1 min-w-0 accent-sky-600"><span id="val-d-A" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Khe hở $d$</span><input type="range" id="d-d" min="0.1" max="5" step="0.1" value="1" class="flex-1 min-w-0 accent-indigo-600"><span id="val-d-d" class="w-20 shrink-0 text-right font-mono text-indigo-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">$\varepsilon_{\mathrm{r}}$</span><input type="range" id="d-er" min="1" max="10" step="0.5" value="1" class="flex-1 min-w-0 accent-emerald-600"><span id="val-d-er" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-32 shrink-0 text-slate-700">Bán kính vòng $r$</span><input type="range" id="d-r" min="0.5" max="5" step="0.1" value="2" class="flex-1 min-w-0 accent-violet-600"><span id="val-d-r" class="w-20 shrink-0 text-right font-mono text-violet-700"></span></div></div></div>
+                <div class="lg:col-span-6 space-y-4"><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$C = \varepsilon A/d$</span><span id="ro-C" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Biên độ $I_{1\mathrm{c}}$: $CV_0\omega$</span><span id="ro-Ic" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Biên độ $I_{2\mathrm{d}}$: $\varepsilon A\,\omega V_0/d$</span><span id="ro-Id" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$\oint_C\mathbf{H}\cdot d\mathbf{l}$ qua mặt đã chọn (hiện tại)</span><span id="ro-circ" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$H$ trên đường cong $= I/2\pi r$ (hiện tại)</span><span id="ro-H" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Nhất quán với mặt còn lại?</span><span id="ro-ok" class="text-slate-700 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">Diện tích bản tính bằng cm², khe hở bằng mm, bán kính vòng bằng cm. Hoạt ảnh luôn chạy ở 0.5 Hz bất kể $f$; các giá trị hiển thị dùng $f$ thực.</p></div>
+            </div>
+        </section>
+        <section id="materials" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 2</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Vật dẫn hay điện môi? So sánh $J_{\mathrm{d}}$ với $J_{\mathrm{c}}$</h2>
+                <p class="text-sm text-slate-600 mt-1">Trong vật liệu có độ dẫn điện (conductivity) $\sigma$ và độ điện thẩm (permittivity) $\varepsilon$, trường $E_0\cos\omega t$ tạo ra $J_{\mathrm{c}} = \sigma E$ và $J_{\mathrm{d}} = \varepsilon\,\partial E/\partial t$, lệch pha nhau 90°. Tỉ số $\omega\varepsilon/\sigma$ tăng theo tần số và bằng 1 tại $f_{\mathrm{c}} = \sigma/2\pi\varepsilon$: dưới tần số này vật liệu hoạt động như vật dẫn, trên tần số này như điện môi. So sánh biên độ thay vì giá trị tức thời, vì hai dòng qua không ở các thời điểm khác nhau. Cách phân loại này giả thiết môi trường tuyến tính với tham số cố định tại tần số đang xét.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Mẫu có sẵn:</span><div id="m-pre" class="flex flex-wrap gap-1.5 "><button data-v="cu" class="chip">Đồng</button><button data-v="ex" class="chip on">Dây ở Ví dụ 6-7</button><button data-v="sea" class="chip">Nước biển</button><button data-v="soil" class="chip">Đất ẩm</button><button data-v="si" class="chip">Silic (thuần)</button><button data-v="glass" class="chip">Thủy tinh</button></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3"><div class="relative h-[340px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-mat" class="w-full h-full"></canvas></div></div>
+                <div class="lg:col-span-5 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="flex items-center gap-3"><span class="w-36 shrink-0 text-slate-700">$\log_{10}\sigma$ (S/m)</span><input type="range" id="m-ls" min="-12" max="8" step="0.001" value="7.301" class="flex-1 min-w-0 accent-amber-600"><span id="val-m-ls" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-36 shrink-0 text-slate-700">$\varepsilon_{\mathrm{r}}$</span><input type="range" id="m-er" min="1" max="81" step="1" value="1" class="flex-1 min-w-0 accent-emerald-600"><span id="val-m-er" class="w-20 shrink-0 text-right font-mono text-emerald-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-36 shrink-0 text-slate-700">$\log_{10}\omega$ (rad/s)</span><input type="range" id="m-lw" min="0" max="12" step="0.1" value="9" class="flex-1 min-w-0 accent-rose-600"><span id="val-m-lw" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-36 shrink-0 text-slate-700">Biên độ $I_{\mathrm{c}}$ (mA)</span><input type="range" id="m-Ic" min="0.1" max="10" step="0.1" value="2" class="flex-1 min-w-0 accent-sky-600"><span id="val-m-Ic" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div></div><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$\omega\varepsilon/\sigma = |I_{\mathrm{d}}|/|I_{\mathrm{c}}|$</span><span id="ro-ratio" class="text-violet-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Biên độ $I_{\mathrm{d}}$</span><span id="ro-mId" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Tần số chuyển tiếp $f_{\mathrm{c}} = \sigma/2\pi\varepsilon$</span><span id="ro-fc" class="text-amber-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Hoạt động như</span><span id="ro-beh" class="text-slate-700 font-bold text-right"></span></div></div><p class="text-sm text-slate-600">Ví dụ 6-7: $\sigma = 2\times10^7$ S/m, $\varepsilon_{\mathrm{r}} = 1$, $\omega = 10^9$ rad/s, $I_{\mathrm{c}} = 2\sin\omega t$ mA cho $I_{\mathrm{d}} = 0.885\cos\omega t$ pA.</p></div>
+            </div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Câu hỏi tự kiểm tra</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Làm lại</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Điểm: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Học phần Trường điện từ — Dòng điện dịch</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Câu ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Điểm: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Đúng. ' : '✗ Sai — đáp án đúng là ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Điểm: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // Magnetostatics toolkit (Topic 4)
+        // =========================================================
+        const MU0 = 4 * Math.PI * 1e-7;
+        // one-row sliders: fmts = { id: v => text }, onChange() called after every move
+        function bindSliders(fmts, onChange) {
+            Object.entries(fmts).forEach(([id, f]) => {
+                const el = $(id); if (!el) return;
+                const show = () => setText('val-' + id, f(+el.value));
+                el.addEventListener('input', () => { show(); onChange && onChange(id); });
+                show();
+            });
+        }
+        const val = id => +$(id).value;
+        // ⊙ (out of page) / ⊗ (into page) symbol
+        function currentDot(ctx, x, y, out, color = COL.amber, r = 9) {
+            ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = color;
+            if (out) { ctx.beginPath(); ctx.arc(x, y, r * 0.3, 0, 2 * Math.PI); ctx.fill(); }
+            else { const d = r * 0.55; ctx.beginPath(); ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d); ctx.moveTo(x + d, y - d); ctx.lineTo(x - d, y + d); ctx.stroke(); }
+            ctx.restore();
+        }
+        // complete elliptic integrals K(k), E(k) by the arithmetic-geometric mean (k = modulus)
+        function ellipKE(k) {
+            let a = 1, b = Math.sqrt(1 - k * k), c = k, sum = 0.5 * c * c, p = 1;
+            for (let i = 0; i < 30 && Math.abs(c) > 1e-15; i++) { const an = (a + b) / 2; c = (a - b) / 2; b = Math.sqrt(a * b); a = an; p *= 2; sum += 0.5 * p * c * c; }
+            const K = Math.PI / (2 * a); return [K, K * (1 - sum)];
+        }
+        // exact B of a circular loop (radius a, current I, in the z = 0 plane, axis z) at (r, z): [Br, Bz] in tesla
+        function loopB(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : r;
+            const q = (a + r) ** 2 + z * z, k2 = 4 * a * r / q, [K, E] = ellipKE(Math.sqrt(Math.min(k2, 1 - 1e-12)));
+            const d = (a - r) ** 2 + z * z, f = MU0 * I / (2 * Math.PI * Math.sqrt(q));
+            return [f * z / r * (-K + (a * a + r * r + z * z) / d * E), f * (K + (a * a - r * r - z * z) / d * E)];
+        }
+        // mutual inductance of two coaxial circular loops (Maxwell's formula)
+        function mutualLoops(a1, a2, d) {
+            const k = Math.sqrt(4 * a1 * a2 / ((a1 + a2) ** 2 + d * d)), [K, E] = ellipKE(Math.min(k, 1 - 1e-12));
+            return MU0 * Math.sqrt(a1 * a2) * ((2 / k - k) * K - 2 / k * E);
+        }
+        // trace a 2-D field line from (x, y) in world units; F(x, y) → [fx, fy]; returns array of points
+        function traceLine(F, x, y, dir, step, nmax, box) {
+            const pts = [[x, y]];
+            for (let i = 0; i < nmax; i++) {
+                const f1 = F(x, y), m1 = Math.hypot(...f1); if (!(m1 > 1e-30)) break;
+                const mx = x + dir * step / 2 * f1[0] / m1, my = y + dir * step / 2 * f1[1] / m1, f2 = F(mx, my), m2 = Math.hypot(...f2); if (!(m2 > 1e-30)) break;
+                x += dir * step * f2[0] / m2; y += dir * step * f2[1] / m2;
+                if (x < box[0] || x > box[1] || y < box[2] || y > box[3]) { pts.push([x, y]); break; }
+                pts.push([x, y]);
+                if (i > 20 && Math.hypot(x - pts[0][0], y - pts[0][1]) < step * 0.8) { pts.push(pts[0]); break; }   // closed loop
+            }
+            return pts;
+        }
+        function drawPath(ctx, pts, X, Y, color, width = 1.3, alpha = 0.8, arrowsEvery = 0) {
+            if (pts.length < 2) return;
+            ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+            if (arrowsEvery) for (let i = arrowsEvery; i < pts.length - 1; i += arrowsEvery) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; const dx = X(x1) - X(x0), dy = Y(y1) - Y(y0), m = Math.hypot(dx, dy) || 1; arrow(ctx, X(x0), Y(y0), dx / m * 8, dy / m * 8, color, alpha, width, 6); }
+        }
+        // world ↔ screen mapping helper for a rectangular view
+        function view2D(w, h, xmin, xmax, ymin, ymax, pad = 12) {
+            const s = Math.min((w - 2 * pad) / (xmax - xmin), (h - 2 * pad) / (ymax - ymin)), ox = (w - s * (xmax - xmin)) / 2, oy = (h - s * (ymax - ymin)) / 2;
+            return { s, X: x => ox + (x - xmin) * s, Y: y => h - oy - (y - ymin) * s, x: px => xmin + (px - ox) / s, y: py => ymin + (h - oy - py) / s };
+        }
+        const fmtE = (v, d = 3) => !isFinite(v) ? '—' : v === 0 ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-2 ? v.toExponential(d - 1) : (+v.toPrecision(d)).toString());
+        const redrawOnResize = (ids, fn) => { const f = () => requestAnimationFrame(fn); if ('ResizeObserver' in window) { const ro = new ResizeObserver(f); ids.forEach(id => $(id) && ro.observe($(id).parentElement)); } window.addEventListener('resize', f); };
+        // vector potential A_φ of a circular loop; field lines in the meridian plane are contours of ψ = r·A_φ
+        function loopAphi(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : Math.abs(r);
+            const k2 = 4 * a * r / ((a + r) ** 2 + z * z), k = Math.sqrt(Math.min(k2, 1 - 1e-12)), [K, E] = ellipKE(k);
+            return MU0 * I / (Math.PI * k) * Math.sqrt(a / r) * ((1 - k2 / 2) * K - E);
+        }
+        // =========================================================
+        // Time-varying fields toolkit (Topic 5)
+        // =========================================================
+        const C0 = 299792458;
+        // rolling history buffer
+        function Trace(n = 500) { return { d: [], n, push(v) { this.d.push(v); if (this.d.length > this.n) this.d.shift(); }, clear() { this.d = []; } }; }
+        // oscilloscope: series = [{ tr: Trace or array, color, label, dash, scale }], ymax symmetric range
+        function scope(id, series, ymax, opts = {}) {
+            const c = setupCanvas(id); if (!c) return null; const { ctx, w, h } = c, L = opts.left ?? 54, R = 12, T = 22, B = 22;
+            const X = i => L + i / ((opts.n ?? 500) - 1) * (w - L - R), Y = v => T + (h - T - B) / 2 * (1 - v / ymax);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            for (let k = 0; k <= 8; k++) { const x = L + k * (w - L - R) / 8; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, h - B); ctx.stroke(); }
+            [-1, -0.5, 0, 0.5, 1].forEach(f => { ctx.beginPath(); ctx.moveTo(L, Y(f * ymax)); ctx.lineTo(w - R, Y(f * ymax)); ctx.stroke(); });
+            ctx.strokeStyle = '#94a3b8'; ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); ctx.restore();
+            label(ctx, opts.ylab ? `${opts.ylab}` : fmtE(ymax), L - 6, T + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            label(ctx, opts.ylab0 ?? '0', L - 6, Y(0) + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            series.forEach(s => { const d = s.tr.d || s.tr, sc = s.scale ?? 1; if (d.length < 2) return; ctx.save(); ctx.strokeStyle = s.color; ctx.lineWidth = s.width ?? 2.2; if (s.dash) ctx.setLineDash(s.dash); ctx.beginPath();
+                const off = (opts.n ?? 500) - d.length; d.forEach((v, i) => { const y = Y(clamp(v * sc, -ymax * 1.05, ymax * 1.05)); i ? ctx.lineTo(X(i + off), y) : ctx.moveTo(X(i + off), y); }); ctx.stroke(); ctx.restore(); });
+            let lx = L + 8; series.forEach(s => { if (!s.label) return; ctx.save(); ctx.font = '600 12px Inter, sans-serif'; const tw = ctx.measureText(s.label).width; ctx.restore(); ctx.save(); ctx.strokeStyle = s.color; ctx.lineWidth = 2.5; if (s.dash) ctx.setLineDash(s.dash); ctx.beginPath(); ctx.moveTo(lx, 12); ctx.lineTo(lx + 16, 12); ctx.stroke(); ctx.restore(); label(ctx, s.label, lx + 20, 16, s.color, '600 12px Inter, sans-serif'); lx += tw + 36; });
+            if (opts.xlab) label(ctx, opts.xlab, w - R, h - 6, COL.muted, '11px Inter, sans-serif', 'right');
+            return { ctx, w, h, X, Y };
+        }
+        const deg = r => r * 180 / Math.PI;
+        // small play/pause helper bound to a chip button
+        function playButton(id, state, key = 'run') { const b = $(id); if (!b) return; b.addEventListener('click', () => { state[key] = !state[key]; b.textContent = state[key] ? 'Tạm dừng' : 'Chạy'; b.classList.toggle('on', state[key]); }); }
+        const fmtT = s => { const a = Math.abs(s); return a >= 86400 * 365 ? (s / (86400 * 365)).toPrecision(3) + ' năm' : a >= 86400 ? (s / 86400).toPrecision(3) + ' ngày' : a >= 3600 ? (s / 3600).toPrecision(3) + ' h' : a >= 60 ? (s / 60).toPrecision(3) + ' phút' : fmtSI(s, 's'); };
+        // =========================================================
+        // Displacement current
+        // =========================================================
+        const DC = { surf: 'S1', maxwell: true, run: true, ph: 0 };
+        const capP = () => { const A = val('d-A') * 1e-4, d = val('d-d') * 1e-3, eps = val('d-er') * EPS0, C = eps * A / d, w = 2 * Math.PI * val('d-f'); return { A, d, eps, C, w, V0: val('d-V0'), r: val('d-r') / 100 }; };
+        function drawCap(dt) {
+            if (DC.run) DC.ph += dt * Math.PI;
+            const P = capP(), v = P.V0 * Math.cos(DC.ph), i = -P.C * P.V0 * P.w * Math.sin(DC.ph), Id = P.eps * P.A * (-P.V0 * P.w * Math.sin(DC.ph)) / P.d;
+            const circ = DC.surf === 'S1' ? i : (DC.maxwell ? Id : 0);
+            setText('ro-C', fmtSI(P.C, 'F')); setText('ro-Ic', fmtSI(P.C * P.V0 * P.w, 'A')); setText('ro-Id', fmtSI(P.eps * P.A * P.w * P.V0 / P.d, 'A'));
+            setText('ro-circ', fmtSI(circ, 'A')); setText('ro-H', fmtSI(circ / (2 * Math.PI * P.r), 'A/m'));
+            setText('ro-ok', !DC.maxwell ? (DC.surf === 'S2' ? 'Không: S₁ cho I_c ≠ 0 (nghịch lý)' : 'Không: S₂ cho 0 ≠ I_c (nghịch lý)') : 'Có: I_c qua S₁ = I_d qua S₂');
+            const c = setupCanvas('cv-cap'); if (!c) return; const { ctx, w, h } = c;
+            const yT = h * 0.3, yB = h * 0.82, xs = w * 0.1, xp = w * 0.62, gap = 16 + 30 * clamp(val('d-d') / 5, 0, 1), ph = 70 + 50 * Math.sqrt(val('d-A') / 500);
+            // circuit
+            ctx.save(); ctx.strokeStyle = COL.slate; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(xs, yT + 40); ctx.lineTo(xs, yT); ctx.lineTo(xp, yT); ctx.moveTo(xs, yB - 40); ctx.lineTo(xs, yB); ctx.lineTo(xp + gap + 60, yB); ctx.lineTo(xp + gap + 60, yT); ctx.lineTo(xp + gap, yT); ctx.stroke(); ctx.restore();
+            ctx.save(); ctx.strokeStyle = COL.amber; ctx.lineWidth = 2.5; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(xs, (yT + yB) / 2, 38, 0, 2 * Math.PI); ctx.fill(); ctx.stroke(); ctx.restore(); label(ctx, '~', xs, (yT + yB) / 2 + 7, COL.amber, 'bold 24px Inter, sans-serif', 'center');
+            line(ctx, xs, yT, xs, (yT + yB) / 2 - 38, COL.slate, 3); line(ctx, xs, yB, xs, (yT + yB) / 2 + 38, COL.slate, 3);
+            // plates and charges
+            const q = v / P.V0;
+            [[xp, 1], [xp + gap, -1]].forEach(([x, s]) => { ctx.save(); ctx.fillStyle = COL.slate; ctx.fillRect(x - 3, yT - ph / 2, 6, ph); ctx.restore(); const nq = Math.round(Math.abs(q) * 6); for (let k = 0; k < nq; k++) label(ctx, (q * s > 0 ? '+' : '−'), x - 12 * s, yT - ph / 2 + (k + 0.5) * ph / 6 + 5, q * s > 0 ? COL.rose : COL.sky, 'bold 14px Inter, sans-serif', 'center'); });
+            // E field in the gap and displacement current
+            if (Math.abs(q) > 0.05) for (let k = 0; k < 5; k++) { const y = yT - ph / 2 + (k + 0.5) * ph / 5; arrow(ctx, q > 0 ? xp + 4 : xp + gap - 4, y, (q > 0 ? 1 : -1) * (gap - 8), 0, COL.sky, Math.abs(q), 1.6, 6); }
+            const di = i / (P.C * P.V0 * P.w);   // normalized dD/dt
+            if (DC.maxwell && Math.abs(di) > 0.05) arrow(ctx, xp + gap / 2 - 14 * Math.sign(di), yT - ph / 2 - 16, 28 * Math.sign(di), 0, COL.rose, 1, 2.6, 9);
+            // conduction current dots in the wire
+            for (let k = 0; k < 10; k++) { const s = ((k / 10 + DC.ph * 0.0) % 1), x = xs + 10 + (xp - xs - 20) * ((k / 10 + 0.08 * Math.cos(DC.ph)) % 1); dot(ctx, x, yT, `rgba(217,119,6,${0.3 + 0.7 * Math.abs(di)})`, 3.5); }
+            if (Math.abs(di) > 0.05) arrow(ctx, xs + (xp - xs) * 0.3 - 16 * Math.sign(di), yT - 16, 32 * Math.sign(di), 0, COL.amber, 1, 2.6, 9);
+            // contour C around the wire and the chosen surface
+            const xc = xs + (xp - xs) * 0.55, ry = 20 + 25 * val('d-r') / 5, rx = ry * 0.35;
+            if (DC.surf === 'S1') { ctx.save(); ctx.fillStyle = 'rgba(5,150,105,0.18)'; ctx.beginPath(); ctx.ellipse(xc, yT, rx, ry, 0, 0, 2 * Math.PI); ctx.fill(); ctx.restore(); }
+            else { ctx.save(); ctx.fillStyle = 'rgba(225,29,72,0.10)'; ctx.strokeStyle = 'rgba(225,29,72,0.6)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(xc, yT - ry); ctx.bezierCurveTo(xp - 10, yT - ph * 0.9, xp + gap / 2 + 10, yT - ph * 0.6, xp + gap / 2, yT); ctx.bezierCurveTo(xp + gap / 2 + 10, yT + ph * 0.6, xp - 10, yT + ph * 0.9, xc, yT + ry); ctx.fill(); ctx.stroke(); ctx.restore(); }
+            ctx.save(); ctx.strokeStyle = COL.emerald; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.ellipse(xc, yT, rx, ry, 0, 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
+            label(ctx, 'C', xc - rx - 12, yT - ry + 4, COL.emerald, 'bold 14px Inter, sans-serif'); label(ctx, DC.surf, DC.surf === 'S1' ? xc + rx + 4 : xp - 20, DC.surf === 'S1' ? yT + ry + 14 : yT + ph * 0.75, DC.surf === 'S1' ? COL.emerald : COL.rose, 'bold 14px Inter, sans-serif');
+            label(ctx, 'cam: dòng điện dẫn · xanh: E trong khe · hồng: dòng điện dịch', 10, 18, COL.slate, '600 12px Inter, sans-serif');
+            // waveforms
+            const c2 = setupCanvas('cv-dsc'); if (!c2) return; const g = c2.ctx, W = c2.w, H = c2.h;
+            const F = plotFrame(g, W, H, 0, 4 * Math.PI, -1.15, 1.15, { left: 14, bottom: 18, top: 30 });
+            curve(g, x => Math.cos(x), 0, 4 * Math.PI, F.X, F.Y, COL.amber, 2.2); curve(g, x => -Math.sin(x), 0, 4 * Math.PI, F.X, F.Y, COL.sky, 2.6);
+            if (DC.maxwell) curve(g, x => -Math.sin(x), 0, 4 * Math.PI, F.X, F.Y, COL.rose, 2, 200, [6, 5]); else line(g, F.X(0), F.Y(0), F.X(4 * Math.PI), F.Y(0), COL.rose, 2, [6, 5]);
+            const xcur = DC.ph % (2 * Math.PI); line(g, F.X(xcur), F.T, F.X(xcur), H - F.B, COL.slate, 1, [3, 3]);
+            [['v(t)', COL.amber], ['I_c (dây)', COL.sky], ['I_d (khe)', COL.rose]].forEach(([t, col], k) => label(g, t, 20 + k * 90, 16, col, 'bold 12px Inter, sans-serif'));
+        }
+        chipGroup('d-surf', k => { DC.surf = k; drawCap(0); });
+        $('d-maxwell').addEventListener('click', e => { chipToggle(DC, 'maxwell', e.currentTarget); drawCap(0); });
+        playButton('d-play', DC);
+        bindSliders({ 'd-V0': v => v.toFixed(0) + ' V', 'd-f': v => v.toFixed(0) + ' Hz', 'd-A': v => v.toFixed(0) + ' cm²', 'd-d': v => v.toFixed(1) + ' mm', 'd-er': v => v.toFixed(1), 'd-r': v => v.toFixed(1) + ' cm' }, () => drawCap(0));
+        animate('cv-cap', drawCap);
+
+        // ---------- 2. conductor or dielectric ----------
+        const MP = { cu: [5.8e7, 1, 9, 2], ex: [2e7, 1, 9, 2], sea: [4, 81, 9, 2], soil: [1e-2, 20, 7, 2], si: [4.4e-4, 12, 7, 2], glass: [1e-12, 5, 3, 2] };
+        const LINES = [['Đồng', 5.8e7, 1], ['Nước biển', 4, 81], ['Đất ẩm', 1e-2, 20], ['Silic', 4.4e-4, 12], ['Thủy tinh', 1e-12, 5]];
+        chipGroup('m-pre', k => { const [s, e, lw, I] = MP[k]; $('m-ls').value = Math.log10(s); $('m-er').value = e; $('m-lw').value = lw; $('m-Ic').value = I; ['m-ls', 'm-er', 'm-lw', 'm-Ic'].forEach(id => $(id).dispatchEvent(new Event('input'))); });
+        function drawMat() {
+            const sig = Math.pow(10, val('m-ls')), eps = val('m-er') * EPS0, w = Math.pow(10, val('m-lw')), r = w * eps / sig, Ic = val('m-Ic') * 1e-3, fc = sig / (2 * Math.PI * eps);
+            setText('ro-ratio', r.toExponential(3)); setText('ro-mId', fmtSI(Ic * r, 'A')); setText('ro-fc', fc >= 1e12 ? fc.toExponential(2) + ' Hz' : fmtSI(fc, 'Hz')); setText('ro-beh', r < 0.01 ? 'vật dẫn tốt (J_c ≫ J_d)' : r > 100 ? 'điện môi tốt (J_d ≫ J_c)' : 'chất chuẩn dẫn (cả hai đều đáng kể)');
+            const c = setupCanvas('cv-mat'); if (!c) return; const { ctx, w: W, h: H } = c;
+            const F = plotFrame(ctx, W, H, 0, 12, -20, 14, { left: 56, bottom: 30, xlabel: 'log₁₀ ω (rad/s)', ylabel: 'log₁₀ (ωε/σ)' });
+            for (let x = 0; x <= 12; x += 2) label(ctx, x, F.X(x), H - F.B + 14, COL.muted, '11px Inter, sans-serif', 'center');
+            [-20, -10, 0, 10].forEach(y => label(ctx, y, F.L - 6, F.Y(y) + 4, COL.muted, '11px Inter, sans-serif', 'right'));
+            ctx.save(); ctx.fillStyle = 'rgba(217,119,6,0.06)'; ctx.fillRect(F.L, F.Y(-2), W - F.L - F.R, F.Y(-20) - F.Y(-2)); ctx.fillStyle = 'rgba(5,150,105,0.06)'; ctx.fillRect(F.L, F.Y(14), W - F.L - F.R, F.Y(2) - F.Y(14)); ctx.restore();
+            label(ctx, 'vật dẫn', W - F.R - 6, F.Y(-18), COL.amber, 'bold 12px Inter, sans-serif', 'right'); label(ctx, 'điện môi', W - F.R - 6, F.Y(12), COL.emerald, 'bold 12px Inter, sans-serif', 'right');
+            line(ctx, F.L, F.Y(0), W - F.R, F.Y(0), COL.slate, 1.2, [4, 4]);
+            LINES.forEach(([nm, s, e]) => { curve(ctx, x => x + Math.log10(e * EPS0 / s), 0, 12, F.X, F.Y, COL.muted, 1, 50); const x = 0.5, y = x + Math.log10(e * EPS0 / s); if (y > -20 && y < 14) label(ctx, nm, F.X(x), F.Y(y) - 5, COL.muted, '11px Inter, sans-serif'); });
+            curve(ctx, x => x + Math.log10(eps / sig), 0, 12, F.X, F.Y, COL.violet, 2.6, 50); dot(ctx, F.X(val('m-lw')), F.Y(Math.log10(r)), COL.rose, 6);
+        }
+        bindSliders({ 'm-ls': v => (Math.pow(10, v)).toExponential(1) + ' S/m', 'm-er': v => v.toFixed(0), 'm-lw': v => '10^' + v.toFixed(1), 'm-Ic': v => v.toFixed(1) + ' mA' }, drawMat);
+
+        redrawOnResize(['cv-cap', 'cv-dsc', 'cv-mat'], () => { drawCap(0); drawMat(); });
+        drawCap(0); drawMat(); startLoop();
+        renderQuiz([
+            { q: 'Điều gì tạo ra mật độ dòng điện dịch?', opts: ['Một từ trường tĩnh', 'Mật độ điện thông biến thiên theo thời gian $\\partial\\mathbf{D}/\\partial t$', 'Các electron đi qua khe tụ điện', 'Điện tích mặt tĩnh'], ans: 1, why: '$\\mathbf{J}_{\\mathrm{d}} = \\partial\\mathbf{D}/\\partial t$ tồn tại ở bất cứ đâu $\\mathbf{D}$ thay đổi, kể cả trong chân không.' },
+            { q: 'Giữa hai bản của một tụ điện lý tưởng được cấp nguồn $V_0\\cos\\omega t$,', opts: ['$I_{\\mathrm{c}} = 0$ và $I_{\\mathrm{d}} = -CV_0\\omega\\sin\\omega t$', 'cả hai đều bằng 0', '$I_{\\mathrm{c}} = -CV_0\\omega\\sin\\omega t$ và $I_{\\mathrm{d}} = 0$', 'cả hai đều bằng $CV_0$'], ans: 0, why: 'Không có điện tích nào đi qua khe, nhưng $\\mathbf{D}$ thay đổi: $I_{\\mathrm{d}} = \\varepsilon A\\,\\frac{d}{dt}\\frac{V}{d} = C\\,dV/dt$.' },
+            { q: 'Nếu không có số hạng của Maxwell, mặt $S_2$ sẽ cho $\\oint\\mathbf{H}\\cdot d\\mathbf{l} = 0$ trong khi $S_1$ cho $I_{\\mathrm{c}}$. Điều này cho thấy', opts: ['$\\mathbf{H}$ bằng 0', 'định luật Ampère ban đầu không nhất quán với dòng điện biến thiên', 'tụ điện bị ngắn mạch', 'định lý Stokes không đúng'], ans: 1, why: 'Một tích phân đường không thể có hai giá trị. Tắt "Có ∂D/∂t" trong Mô phỏng 1 để thấy mâu thuẫn.' },
+            { q: 'Trong Ví dụ 6-7 (dây tương tự đồng, $\\omega = 10^9$ rad/s), $I_{\\mathrm{d}}/I_{\\mathrm{c}}$ xấp xỉ bằng', opts: ['1', '$4.4\\times10^{-10}$', '$10^{9}$', '$10^{-3}$'], ans: 1, why: '$\\omega\\varepsilon_0/\\sigma = 10^9\\times8.85\\times10^{-12}/(2\\times10^7) = 4.4\\times10^{-10}$.' },
+            { q: 'Trên tần số chuyển tiếp $f_{\\mathrm{c}} = \\sigma/2\\pi\\varepsilon$, vật liệu chủ yếu hoạt động như', opts: ['vật dẫn', 'điện môi', 'nam châm', 'chất siêu dẫn'], ans: 1, why: 'Khi đó $\\omega\\varepsilon > \\sigma$: dòng điện dịch chiếm ưu thế. Với nước biển $f_{\\mathrm{c}} \\approx 890$ MHz.' },
+            { q: 'Một tụ điện $C = 1\\ \\mu$F được cấp điện áp $V = 10\\cos(1000t)$ V. Biên độ dòng điện dịch trong khe tụ là', opts: ['10 $\\mu$A', '1 mA', '10 mA', '10 A'], ans: 2, why: '$I_{\\mathrm{d}} = C\\,dV/dt = -CV_0\\omega\\sin\\omega t$, nên $|I_{\\mathrm{d}}| = 10^{-6}\\times10\\times1000 = 10$ mA, bằng đúng dòng điện dẫn trong dây.' }
+        ]);
+
+    </script>
+</body>
+</html>

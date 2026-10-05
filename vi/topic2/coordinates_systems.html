@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Các hệ tọa độ trực giao - Học phần Trường điện từ</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/vendor/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/fontawesome/css/solid.min.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="axis-3d" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Các hệ tọa độ trực giao</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Tổng quan</button>
+                <button onclick="scrollToSection('explorer')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="box" class="w-4 h-4"></i><span>Khám phá hệ tọa độ 3D</span></button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Kiểm tra</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Giải tích vectơ · Các hệ tọa độ trực giao</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Tọa độ Descartes, tọa độ trụ và tọa độ cầu</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">Một điểm là giao của ba mặt tọa độ. Trong một hệ tọa độ (coordinate system) trực giao, các mặt này cắt nhau theo góc vuông, nên ba vectơ cơ sở (base vector) tại mỗi điểm vuông góc từng đôi một và tuân theo quy tắc bàn tay phải. Cái giá phải trả để khớp với tính đối xứng của bài toán (một sợi dây, một quả cầu) là các vectơ cơ sở trong hệ trụ và hệ cầu đổi hướng từ điểm này sang điểm khác. Dùng hệ Descartes cho hình học phẳng, hệ trụ cho dây dài và hệ cầu cho nguồn điểm. Chọn hệ phù hợp đối xứng thường giảm số biến cần dùng trong phương trình.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">Descartes</span>
+                    <h3 class="text-base font-bold text-slate-900">Ba mặt phẳng</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\hat{\mathbf{x}}\times\hat{\mathbf{y}} = \hat{\mathbf{z}},\quad dv = dx\,dy\,dz$$</div>
+                    <p class="text-sm text-slate-700">Các mặt $x = x_1$, $y = y_1$, $z = z_1$. Các vectơ cơ sở như nhau tại mọi điểm.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">Trụ</span>
+                    <h3 class="text-base font-bold text-slate-900">Mặt trụ, nửa mặt phẳng, mặt phẳng</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\hat{\mathbf{r}}\times\boldsymbol{\hat{\phi}} = \hat{\mathbf{z}},\quad dv = r\,dr\,d\phi\,dz$$</div>
+                    <p class="text-sm text-slate-700">$0 \le r < \infty$, $0 \le \phi < 2\pi$. $\hat{\mathbf{r}}$ và $\boldsymbol{\hat{\phi}}$ phụ thuộc vào $\phi$.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-500/10 px-2.5 py-1 rounded-md">Cầu</span>
+                    <h3 class="text-base font-bold text-slate-900">Mặt cầu, mặt nón, nửa mặt phẳng</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\hat{\mathbf{R}}\times\boldsymbol{\hat{\theta}} = \boldsymbol{\hat{\phi}},\quad dv = R^2\sin\theta\,dR\,d\theta\,d\phi$$</div>
+                    <p class="text-sm text-slate-700">$0 \le \theta \le \pi$ đo từ trục $+z$; cả ba vectơ cơ sở đều phụ thuộc vào $\theta$ và $\phi$.</p>
+                </div>
+            </div>
+        </section>
+
+
+
+
+        <section id="explorer" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Khám phá hệ tọa độ 3D</h2>
+                    <p class="text-sm text-slate-700 mt-1 leading-relaxed">Đặt một điểm theo tọa độ Descartes, trụ hoặc cầu — hai hệ còn lại tự cập nhật theo. Khung cảnh hiển thị các thành phần, các mặt tọa độ, các vectơ cơ sở tại điểm đó và phần tử vi phân $d\mathbf{l}$, $d\mathbf{s}$, $dv$ của hệ đang chọn. Kéo chuột để xoay, cuộn để phóng to/thu nhỏ. Đổi từng tọa độ để nhận diện mặt tọa độ tương ứng. Cùng một góc nhỏ tạo khoảng cách vật lý lớn hơn khi ở xa trục hoặc gốc; đó là nguồn gốc các hệ số trong phần tử đường, diện tích và thể tích.</p>
+                </div>
+                <button id="explorer-fs" class="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="maximize" class="w-4 h-4"></i><span>Toàn màn hình</span></button>
+            </div>
+            <div>
+                <iframe id="explorer-frame" title="Khám phá hệ tọa độ 3D" class="w-full block" style="border:0;height:1500px" allowfullscreen src="coordinates_explorer.html" loading="lazy"></iframe>
+            </div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Câu hỏi tự kiểm tra</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="quiz-reset" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Làm lại</button>
+                    <span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Điểm: 0 / 5</span>
+                </div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Học phần Trường điện từ — Các hệ tọa độ trực giao</footer>
+
+    <script>
+        if (window.lucide) lucide.createIcons();
+        const $ = id => document.getElementById(id);
+        function scrollToSection(id) { const el = $(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        function typeset(els) { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); }
+
+        // Full-screen view of the embedded 3D explorer
+        window.addEventListener('message', e => { const h = e.data && e.data.csExplorerHeight; if (h && !document.fullscreenElement) $('explorer-frame').style.height = Math.ceil(h) + 'px'; });
+        $('explorer-fs').addEventListener('click', () => { const f = $('explorer-frame'); (f.requestFullscreen || f.webkitRequestFullscreen || (() => {})).call(f); });
+
+        // ---------- Quiz (same format as the other course modules) ----------
+        const QUIZ = [
+            { q: 'Điểm $P$ có tọa độ Descartes $(-1, 1, 2)$. Tọa độ trụ $(r, \\phi, z)$ của nó là', o: ['$(\\sqrt{2}, -45^\\circ, 2)$', '$(\\sqrt{2}, 135^\\circ, 2)$', '$(\\sqrt{6}, 135^\\circ, 2)$', '$(2, 45^\\circ, \\sqrt{2})$'], a: 1,
+              e: '$r = \\sqrt{1 + 1} = \\sqrt{2}$. Với $x < 0$, $y > 0$ điểm nằm ở góc phần tư thứ hai, nên $\\phi = 135^\\circ$, chứ không phải giá trị máy tính cho là $-45^\\circ$. Mẫu có sẵn $(-4, 3, 2)$ trong trình khám phá minh họa cùng phép hiệu chỉnh góc phần tư này.' },
+            { q: 'Vectơ cơ sở nào KHÔNG đổi hướng khi $P$ di chuyển trong hệ tọa độ trụ?', o: ['$\\hat{\\mathbf{r}}$', '$\\boldsymbol{\\hat{\\phi}}$', '$\\hat{\\mathbf{z}}$', 'Không vectơ nào đổi hướng'], a: 2,
+              e: '$\\hat{\\mathbf{r}}$ và $\\boldsymbol{\\hat{\\phi}}$ phụ thuộc vào $\\phi$; $\\hat{\\mathbf{z}}$ như nhau tại mọi điểm. Kéo thanh trượt $\\phi$ trong trình khám phá và quan sát các mũi tên cơ sở xoay. Đó là lý do không thể tính $\\int\\hat{\\mathbf{r}}\\,d\\phi$ bằng cách đưa $\\hat{\\mathbf{r}}$ ra ngoài dấu tích phân.' },
+            { q: 'Vi phân thể tích trong hệ tọa độ cầu là', o: ['$dR\\,d\\theta\\,d\\phi$', '$R\\,dR\\,d\\theta\\,d\\phi$', '$R^2\\sin\\theta\\,dR\\,d\\theta\\,d\\phi$', '$R^2\\cos\\theta\\,dR\\,d\\theta\\,d\\phi$'], a: 2,
+              e: 'Các cạnh là $dR$, $R\\,d\\theta$ và $R\\sin\\theta\\,d\\phi$, nên $dv = R^2\\sin\\theta\\,dR\\,d\\theta\\,d\\phi$. Tích phân trên toàn bộ quả cầu cho $\\tfrac43\\pi R^3$.' },
+            { q: 'Mặt $\\theta = \\theta_1$ (với $0 < \\theta_1 < \\pi/2$) trong hệ tọa độ cầu là', o: ['Một mặt cầu', 'Một mặt nón có đỉnh tại gốc tọa độ', 'Một nửa mặt phẳng', 'Một mặt trụ'], a: 1,
+              e: 'Tập hợp các điểm hợp với trục $+z$ một góc cố định $\\theta_1$ tạo thành một mặt nón. $R$ cố định cho một mặt cầu (lớp vỏ lưới trong lớp phủ hệ cầu) và $\\phi$ cố định cho một nửa mặt phẳng.' },
+            { q: 'Trong hệ tọa độ trụ, hệ thức hoán vị vòng theo quy tắc bàn tay phải nào là đúng?', o: ['$\\hat{\\mathbf{r}}\\times\\hat{\\mathbf{z}} = \\boldsymbol{\\hat{\\phi}}$', '$\\boldsymbol{\\hat{\\phi}}\\times\\hat{\\mathbf{r}} = \\hat{\\mathbf{z}}$', '$\\hat{\\mathbf{z}}\\times\\hat{\\mathbf{r}} = \\boldsymbol{\\hat{\\phi}}$', '$\\hat{\\mathbf{r}}\\times\\boldsymbol{\\hat{\\phi}} = -\\hat{\\mathbf{z}}$'], a: 2,
+              e: 'Thứ tự hoán vị vòng là $(\\hat{\\mathbf{r}}, \\boldsymbol{\\hat{\\phi}}, \\hat{\\mathbf{z}})$: $\\hat{\\mathbf{r}}\\times\\boldsymbol{\\hat{\\phi}} = \\hat{\\mathbf{z}}$, $\\boldsymbol{\\hat{\\phi}}\\times\\hat{\\mathbf{z}} = \\hat{\\mathbf{r}}$, $\\hat{\\mathbf{z}}\\times\\hat{\\mathbf{r}} = \\boldsymbol{\\hat{\\phi}}$.' },
+            { q: 'Điểm $P$ có tọa độ Descartes $(1, 1, \\sqrt{2})$. Tọa độ cầu $(R, \\theta, \\phi)$ của nó là', o: ['$(2, 45^\\circ, 45^\\circ)$', '$(\\sqrt{2}, 45^\\circ, 45^\\circ)$', '$(2, 135^\\circ, 45^\\circ)$', '$(4, 45^\\circ, 45^\\circ)$'], a: 0,
+              e: '$R = \\sqrt{1 + 1 + 2} = 2$, $\\theta = \\cos^{-1}(z/R) = \\cos^{-1}(\\sqrt{2}/2) = 45^\\circ$ và $\\phi = \\tan^{-1}(y/x) = 45^\\circ$.' }
+        ];
+        function renderQuiz() {
+            const box = $('quiz-container'), n = QUIZ.length, odd = n % 2 === 1;
+            let score = 0, done = 0; const answered = {};
+            box.innerHTML = QUIZ.map((q, i) => {
+                const wide = odd && i === n - 1;
+                return `<div class="glass-card rounded-2xl p-5 space-y-3 ${wide ? 'md:col-span-2' : ''}">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Câu ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium leading-relaxed">${q.q}</p>
+                    <div class="grid grid-cols-1 ${wide ? 'md:grid-cols-2' : ''} gap-2 text-sm">${q.o.map((o, j) => `<button class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition text-slate-800 flex items-start gap-2" data-i="${i}" data-j="${j}"><span class="font-semibold text-slate-600 shrink-0">${String.fromCharCode(65 + j)}.</span><span>${o}</span></button>`).join('')}</div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`; }).join('');
+            $('quiz-score').textContent = `Điểm: 0 / ${n}`;
+            $('quiz-reset').classList.add('hidden');
+            box.querySelectorAll('button[data-j]').forEach(b => b.addEventListener('click', () => {
+                const i = +b.dataset.i, j = +b.dataset.j, q = QUIZ[i];
+                if (answered[i]) return; answered[i] = true; done++;
+                const ok = j === q.a; if (ok) score++;
+                box.querySelectorAll(`.q${i}-btn`).forEach(x => { const k = +x.dataset.j; x.disabled = true; x.classList.remove('hover:border-slate-300', 'bg-slate-100');
+                    if (k === q.a) x.classList.add('bg-emerald-500/10', 'border-emerald-500/40', 'text-emerald-800');
+                    else if (k === j) x.classList.add('bg-rose-500/10', 'border-rose-500/40', 'text-rose-800');
+                    else x.classList.add('bg-slate-100', 'opacity-60'); });
+                const fb = $(`q${i}-feedback`);
+                fb.className = 'text-sm p-2.5 rounded-xl font-medium leading-relaxed border ' + (ok ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800' : 'bg-rose-500/10 border-rose-500/30 text-rose-700');
+                fb.innerHTML = `${ok ? '✓ Đúng.' : '✗ Sai — đáp án đúng là ' + String.fromCharCode(65 + q.a) + '.'} <span class="font-normal text-slate-700">${q.e}</span>`;
+                $('quiz-score').textContent = `Điểm: ${score} / ${n}`;
+                if (done === n) $('quiz-reset').classList.remove('hidden');
+                typeset([fb]);
+            }));
+            typeset([box]);
+        }
+        $('quiz-reset').addEventListener('click', renderQuiz);
+        renderQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maxwell's Equations - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Three.js + OrbitControls -->
+    <script src="../../assets/vendor/three/three.min.js"></script>
+    <script src="../../assets/vendor/three/OrbitControls.js"></script>
+    <!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20">
+                    <i data-lucide="zap" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">
+                        Maxwell's Equations
+                    </h1>
+                </div>
+            </div>
+
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Overview</button>
+                <button onclick="scrollToSection('equations')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="sigma" class="w-3.5 h-3.5"></i>
+                    <span>The Four Laws</span>
+                </button>
+                <button onclick="scrollToSection('wave-sim')" class="px-3 py-1.5 rounded-lg text-indigo-700 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="box" class="w-3.5 h-3.5"></i>
+                    <span>3D Wave</span>
+                </button>
+                <button onclick="scrollToSection('calculator')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+                    <span>Constants</span>
+                </button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition flex items-center gap-1.5">
+                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                    <span>Quiz</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Classical Electrodynamics
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                    Unifying Electricity, Magnetism, and Light
+                </h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                    Four coupled equations, assembled by James Clerk Maxwell in 1865, describe how charges produce electric fields, why magnetic field lines never end, how a changing magnetic field induces an electric field, and how currents and changing electric fields produce magnetic fields. Together they predict electromagnetic waves travelling at $c = 1/\sqrt{\mu_0 \varepsilon_0}$. Read the equations as two source laws and two circulation laws. Sources set where flux originates; circulation laws connect currents and time variation to how fields circulate.</p>
+            </div>
+
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-400/10 px-2.5 py-1 rounded-md">Sources</span>
+                    <h3 class="text-base font-bold text-slate-900">Charge and Current Densities</h3>
+                    <p class="text-sm text-slate-700">
+                        Fields are generated by the volume charge density $\rho_{\mathrm{v}}$ ($\mathrm{C}/\mathrm{m}^3$) and the current density $\mathbf{J}$ ($\mathrm{A}/\mathrm{m}^2$).
+                    </p>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">
+                        $$\nabla \cdot \mathbf{J} = -\frac{\partial \rho_{\mathrm{v}}}{\partial t}$$
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-400/10 px-2.5 py-1 rounded-md">Constitutive Relations</span>
+                    <h3 class="text-base font-bold text-slate-900">Linking the Four Field Vectors</h3>
+                    <p class="text-sm text-slate-700">
+                        In a linear, isotropic medium the flux densities are proportional to the field intensities.
+                    </p>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">
+                        $$\mathbf{D} = \varepsilon \mathbf{E}, \qquad \mathbf{B} = \mu \mathbf{H}$$
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-400/10 px-2.5 py-1 rounded-md">Lorentz Force</span>
+                    <h3 class="text-base font-bold text-slate-900">How Fields Act on Charges</h3>
+                    <p class="text-sm text-slate-700">
+                        A charge $q$ moving with velocity $\mathbf{u}$ feels the combined electric and magnetic force.
+                    </p>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">
+                        $$\mathbf{F} = q\mathbf{E} + q\mathbf{u} \times \mathbf{B}$$
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Four Laws -->
+        <section id="equations" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">The Four Fundamental Laws</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        Each law has its own live simulation. Hover a field map to probe it; click to move the Gaussian surface. Simulation values are in normalized units ($\varepsilon_0 = \mu_0 = 1$). Test one law at a time and predict the sign of the result before moving a surface or changing a source. The normalized values support comparison of patterns, rather than direct numerical comparison with SI constants.</p>
+                </div>
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+                    <button id="btn-diff" onclick="toggleForm('diff')" class="px-3 py-1.5 text-sm font-semibold rounded-lg bg-sky-700 text-white shadow">Differential Form</button>
+                    <button id="btn-int" onclick="toggleForm('int')" class="px-3 py-1.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition">Integral Form</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- LAW 1: Gauss (E) -->
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Law 1</span>
+                        <span class="text-sm text-slate-600">Electric Field &amp; Charge</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Gauss's Law</h3>
+                    <p class="text-sm text-slate-700">
+                        The net outward electric flux through any closed surface equals the enclosed charge. Flux lines begin on positive charges and end on negative charges.
+                    </p>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">
+                        <div class="form-diff">$$\nabla \cdot \mathbf{D} = \rho_{\mathrm{v}}$$</div>
+                        <div class="form-int hidden">$$\oint_S \mathbf{D} \cdot d\mathbf{s} = Q$$</div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5">
+                        <button id="chip-e-grid" onclick="toggleChip('eGrid', this)" class="chip on">Field Vectors</button>
+                        <button id="chip-e-contour" onclick="toggleChip('eContour', this)" class="chip on">Equipotentials</button>
+                        <button id="chip-e-particles" onclick="toggleChip('eParticles', this)" class="chip on">Flow Particles</button>
+                        <button id="chip-e-gauss" onclick="toggleChip('eGauss', this, 'on-emerald')" class="chip on-emerald">Gaussian Surface</button>
+                        <button id="chip-dipole" onclick="toggleChip('dipole', this, 'on-rose')" class="chip">Two Charges</button>
+                    </div>
+
+                    <div class="relative rounded-xl overflow-hidden bg-slate-50 border border-slate-200 h-64 cursor-crosshair">
+                        <canvas id="canvas-gauss-e" class="w-full h-full"></canvas>
+                        <div id="probe-hud-e" class="absolute top-2 left-2 pointer-events-none bg-white/90 border border-sky-500/40 rounded-lg px-2.5 py-1 text-sm font-mono text-sky-800 hidden">
+                            <span id="probe-txt-e"></span>
+                        </div>
+                    </div>
+
+                    <div id="gauss-e-readout" class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm font-mono">
+                        <div><span class="text-slate-600 block">$Q_{\mathrm{enc}}$</span><span id="ro-e-qenc" class="text-slate-900 font-bold">+1.00</span></div>
+                        <div><span class="text-slate-600 block">Out / In flux</span><span id="ro-e-inout" class="text-sky-800 font-bold">—</span></div>
+                        <div><span class="text-slate-600 block">$\oint \mathbf{D}\cdot d\mathbf{s}$</span><span id="ro-e-flux" class="text-emerald-800 font-bold">—</span></div>
+                    </div>
+
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-24 text-slate-700">Charge $q_1$</span>
+                            <input type="range" id="slider-charge" min="-2" max="2" step="0.1" value="1" class="w-full accent-sky-600">
+                            <span id="lbl-q1" class="w-12 text-right font-mono text-sky-800">+1.0</span>
+                        </div>
+                        <div id="charge2-row" class="flex items-center gap-3 hidden">
+                            <span class="w-24 text-slate-700">Charge $q_2$</span>
+                            <input type="range" id="slider-charge2" min="-2" max="2" step="0.1" value="-1" class="w-full accent-rose-600">
+                            <span id="lbl-q2" class="w-12 text-right font-mono text-rose-700">−1.0</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="w-24 text-slate-700">Surface $R$</span>
+                            <input type="range" id="slider-gauss-r" min="0.4" max="3" step="0.05" value="1.4" class="w-full accent-emerald-600">
+                            <span id="lbl-gauss-r" class="w-12 text-right font-mono text-emerald-800">1.40</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LAW 2: Gauss (B) -->
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Law 2</span>
+                        <span class="text-sm text-slate-600">No Magnetic Monopoles</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Gauss's Law for Magnetism</h3>
+                    <p class="text-sm text-slate-700">
+                        Magnetic flux has no isolated sources or sinks. The total outward flux through a closed surface equals the total inward flux, so the net is zero; field lines may close or extend to infinity.
+                    </p>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">
+                        <div class="form-diff">$$\nabla \cdot \mathbf{B} = 0$$</div>
+                        <div class="form-int hidden">$$\oint_S \mathbf{B} \cdot d\mathbf{s} = 0$$</div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="toggleChip('bGrid', this, 'on-rose')" class="chip on-rose">Field Vectors</button>
+                        <button onclick="toggleChip('bLines', this, 'on-rose')" class="chip on-rose">Flux Lines</button>
+                        <button onclick="toggleChip('bParticles', this, 'on-rose')" class="chip on-rose">Flow Particles</button>
+                        <button onclick="toggleChip('bGauss', this, 'on-emerald')" class="chip on-emerald">Gaussian Surface</button>
+                    </div>
+
+                    <div class="relative rounded-xl overflow-hidden bg-slate-50 border border-slate-200 h-64 cursor-crosshair">
+                        <canvas id="canvas-gauss-b" class="w-full h-full"></canvas>
+                        <div id="probe-hud-b" class="absolute top-2 left-2 pointer-events-none bg-white/90 border border-rose-500/40 rounded-lg px-2.5 py-1 text-sm font-mono text-rose-700 hidden">
+                            <span id="probe-txt-b"></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm font-mono">
+                        <div><span class="text-slate-600 block">Flux out</span><span id="ro-b-out" class="text-emerald-800 font-bold">—</span></div>
+                        <div><span class="text-slate-600 block">Flux in</span><span id="ro-b-in" class="text-amber-800 font-bold">—</span></div>
+                        <div><span class="text-slate-600 block">$\oint \mathbf{B}\cdot d\mathbf{s}$</span><span id="ro-b-net" class="text-slate-900 font-bold">—</span></div>
+                    </div>
+
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-24 text-slate-700">Rotation</span>
+                            <input type="range" id="slider-mag-rot" min="0" max="360" step="1" value="0" class="w-full accent-rose-600">
+                            <span id="lbl-rot" class="w-12 text-right font-mono text-rose-700">0°</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="w-24 text-slate-700">Surface $R$</span>
+                            <input type="range" id="slider-gauss-rb" min="0.4" max="3" step="0.05" value="1.6" class="w-full accent-emerald-600">
+                            <span id="lbl-gauss-rb" class="w-12 text-right font-mono text-emerald-800">1.60</span>
+                        </div>
+                        <p id="b-note" class="text-sm text-slate-600">Move the surface anywhere: out-flux and in-flux always cancel.</p>
+                    </div>
+                </div>
+
+                <!-- LAW 3: Faraday -->
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Law 3</span>
+                        <span class="text-sm text-slate-600">Electromagnetic Induction</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Faraday's Law</h3>
+                    <p class="text-sm text-slate-700">
+                        A time-varying magnetic flux through a loop induces an electromotive force $V_{\mathrm{emf}} = -d\Phi/dt$. The minus sign is Lenz's law: the induced current opposes the change in flux.
+                    </p>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">
+                        <div class="form-diff">$$\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}$$</div>
+                        <div class="form-int hidden">$$\oint_C \mathbf{E} \cdot d\mathbf{l} = -\frac{d}{dt}\int_S \mathbf{B} \cdot d\mathbf{s}$$</div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5">
+                        <button id="chip-f-auto" onclick="toggleFaradayAuto(this)" class="chip">Auto Oscillate</button>
+                        <button onclick="toggleChip('fLines', this, 'on-rose')" class="chip on-rose">Magnet Field Lines</button>
+                        <button onclick="toggleChip('fEField', this)" class="chip on">Induced $\mathbf{E}$</button>
+                    </div>
+
+                    <div class="relative rounded-xl overflow-hidden bg-slate-50 border border-slate-200 h-64">
+                        <canvas id="canvas-faraday" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="relative rounded-xl overflow-hidden bg-white border border-slate-200 h-24">
+                        <canvas id="chart-faraday" class="w-full h-full"></canvas>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm font-mono">
+                        <div><span class="text-slate-600 block">Flux $\Phi$</span><span id="ro-f-flux" class="text-rose-700 font-bold">0.00</span></div>
+                        <div><span class="text-slate-600 block">$V_{\mathrm{emf}}$</span><span id="ro-f-emf" class="text-amber-800 font-bold">0.00</span></div>
+                        <div><span class="text-slate-600 block">Lenz</span><span id="ro-f-lenz" class="text-slate-700 font-bold">steady</span></div>
+                    </div>
+
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-24 text-slate-700">Magnet $x$</span>
+                            <input type="range" id="slider-faraday" min="-100" max="100" step="1" value="60" class="w-full accent-amber-600">
+                            <span id="lbl-fpos" class="w-12 text-right font-mono text-amber-800">60</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="w-24 text-slate-700">Speed</span>
+                            <input type="range" id="slider-fspeed" min="0.2" max="2" step="0.1" value="0.8" class="w-full accent-amber-600">
+                            <span id="lbl-fspeed" class="w-12 text-right font-mono text-amber-800">0.8</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LAW 4: Ampère-Maxwell -->
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Law 4</span>
+                        <span class="text-sm text-slate-600">Current &amp; Displacement Current</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Ampère's Law with Maxwell's Correction</h3>
+                    <p class="text-sm text-slate-700">
+                        A charging capacitor: no charge crosses the gap, yet the changing $\mathbf{E}$ between the plates acts as a displacement current $I_{\mathrm{d}} = I$, producing the same $\mathbf{H}$ as the wire. Displacement current represents a changing electric flux, rather than charges crossing an ideal dielectric gap. Both surfaces spanning the same contour must give the same magnetic circulation.</p>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-indigo-700 text-sm">
+                        <div class="form-diff">$$\nabla \times \mathbf{H} = \mathbf{J} + \frac{\partial \mathbf{D}}{\partial t}$$</div>
+                        <div class="form-int hidden">$$\oint_C \mathbf{H} \cdot d\mathbf{l} = I + \int_S \frac{\partial \mathbf{D}}{\partial t} \cdot d\mathbf{s}$$</div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="toggleChip('aB', this, 'on-rose')" class="chip on-rose">$\mathbf{H}$ Field (⊙ / ⊗)</button>
+                        <button onclick="toggleChip('aE', this)" class="chip on">$\mathbf{E}$ in Gap</button>
+                        <button onclick="toggleChip('aLoop', this, 'on-emerald')" class="chip on-emerald">Amperian Loop</button>
+                        <button id="chip-a-pause" onclick="toggleAmperePause(this)" class="chip">Pause</button>
+                    </div>
+
+                    <div class="relative rounded-xl overflow-hidden bg-slate-50 border border-slate-200 h-64">
+                        <canvas id="canvas-ampere" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="relative rounded-xl overflow-hidden bg-white border border-slate-200 h-24">
+                        <canvas id="chart-ampere" class="w-full h-full"></canvas>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 text-sm font-mono">
+                        <div><span class="text-slate-600 block">Conduction $I$</span><span id="ro-a-ic" class="text-indigo-700 font-bold">0.00</span></div>
+                        <div><span class="text-slate-600 block">Displacement $I_{\mathrm{d}}$</span><span id="ro-a-id" class="text-sky-800 font-bold">0.00</span></div>
+                        <div><span class="text-slate-600 block">$\oint \mathbf{H}\cdot d\mathbf{l}$</span><span id="ro-a-circ" class="text-emerald-800 font-bold">0.00</span></div>
+                    </div>
+
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-24 text-slate-700">Amplitude $I_0$</span>
+                            <input type="range" id="slider-ampere" min="0" max="5" step="0.1" value="2.5" class="w-full accent-indigo-600">
+                            <span id="lbl-i0" class="w-12 text-right font-mono text-indigo-700">2.5</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="w-24 text-slate-700">Loop position</span>
+                            <input type="range" id="slider-loop" min="0.05" max="0.95" step="0.01" value="0.5" class="w-full accent-emerald-600">
+                            <span id="lbl-loop" class="w-12 text-right font-mono text-emerald-800">gap</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 3: 3D Electromagnetic Wave -->
+        <section id="wave-sim" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div class="min-w-0">
+                    <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Electromagnetic Plane-Wave Propagation</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        In a source-free region Maxwell's equations give a wave in which $\mathbf{E}$, $\mathbf{H}$ and the direction of travel $\hat{\mathbf{k}}$ are mutually perpendicular, with $\hat{\mathbf{k}} = \hat{\mathbf{E}} \times \hat{\mathbf{H}} = \hat{\mathbf{z}}$. Drag to orbit, scroll to zoom.
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button id="btn-play-pause" onclick="toggleWaveAnimation()" class="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white rounded-xl text-sm font-bold transition flex items-center gap-2">
+                        <i data-lucide="pause" id="play-pause-icon" class="w-4 h-4"></i>
+                        <span id="play-pause-text">Pause</span>
+                    </button>
+                    <button onclick="resetWaveCamera()" class="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 rounded-xl text-sm font-semibold border border-slate-300 transition">Reset Camera</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-6 items-stretch">
+                <div class="min-w-0 h-[440px] rounded-2xl bg-slate-50 border border-slate-200 relative overflow-hidden">
+                    <div id="threejs-container" class="w-full h-full"></div>
+                    <div id="three-fallback" class="hidden absolute inset-0 flex items-center justify-center text-sm text-slate-600 p-6 text-center">3D view unavailable (WebGL or Three.js failed to load).</div>
+                    <div class="absolute bottom-3 left-3 bg-white/90 border border-slate-200 px-3 py-2 rounded-xl text-sm flex flex-wrap items-center gap-x-4 gap-y-1 pointer-events-none">
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-sky-600 inline-block"></span><span class="text-slate-800">$\mathbf{E}$ field</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-600 inline-block"></span><span class="text-slate-800">$\mathbf{H}$ field</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span><span class="text-slate-800">$\hat{\mathbf{k}}$ propagation</span></div>
+                    </div>
+                </div>
+
+                <div class="min-w-0 glass-card rounded-2xl p-5 flex flex-col justify-between space-y-5">
+                    <div class="space-y-4 text-sm">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-sky-800"></i> Wave Parameters
+                        </h3>
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-slate-700"><span>Frequency (animation)</span><span id="val-freq" class="font-mono text-sky-800">1.0</span></div>
+                            <input type="range" id="slider-freq" min="0.2" max="2.5" step="0.1" value="1.0" class="w-full accent-sky-600">
+                        </div>
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-slate-700"><span>Amplitude $E_0$</span><span id="val-amp" class="font-mono text-sky-800">1.2 V/m</span></div>
+                            <input type="range" id="slider-amp" min="0.4" max="2.0" step="0.1" value="1.2" class="w-full accent-sky-600">
+                        </div>
+                        <div class="space-y-1.5">
+                            <span class="text-slate-700 block">Polarization State</span>
+                            <select id="select-polarization" class="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 focus:outline-none focus:border-sky-500">
+                                <option value="linear">Linear (along y)</option>
+                                <option value="circular">Circular</option>
+                                <option value="elliptical">Elliptical</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-slate-700"><span>Field vector count</span><span id="val-density" class="font-mono text-sky-800">32</span></div>
+                            <input type="range" id="slider-density" min="16" max="64" step="8" value="32" class="w-full accent-sky-600">
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button onclick="toggleWaveLayer('E', this)" class="chip on">$\mathbf{E}$</button>
+                            <button onclick="toggleWaveLayer('H', this)" class="chip on-rose">$\mathbf{H}$</button>
+                            <button onclick="toggleWaveLayer('curve', this)" class="chip on-indigo">Envelope Curves</button>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-100/90 rounded-xl border border-slate-200 text-sm space-y-2">
+                        <p class="font-semibold text-slate-800">Live Values (free space)</p>
+                        <div class="flex justify-between"><span class="text-slate-600">$H_0 = E_0/\eta_0$</span><span id="ro-h0" class="font-mono text-rose-700">3.19 mA/m</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">$B_0 = E_0/c$</span><span id="ro-b0" class="font-mono text-rose-700">4.00 nT</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">Power density $S_{\mathrm{av}}$</span><span id="ro-sav" class="font-mono text-amber-800">1.91 mW/m²</span></div>
+                        <div class="text-amber-800 text-center pt-1 border-t border-slate-200">
+                            $$\mathbf{S} = \mathbf{E} \times \mathbf{H}$$
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Constants & Calculator -->
+        <section id="calculator" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 glass-panel rounded-3xl p-6 sm:p-8 space-y-5">
+                <div class="border-b border-slate-200 pb-4">
+                    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Reference</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Fundamental Electromagnetic Constants</h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-slate-100/90 p-4 rounded-2xl border border-slate-200 space-y-1">
+                        <span class="text-sm text-slate-600 font-medium">Permittivity of free space $\varepsilon_0$</span>
+                        <div class="text-lg font-bold font-mono text-sky-800">$8.854\times10^{-12}$ F/m</div>
+                        <p class="text-sm text-slate-700">$\approx \dfrac{1}{36\pi} \times 10^{-9}\ \mathrm{F}/\mathrm{m}$</p>
+                    </div>
+                    <div class="bg-slate-100/90 p-4 rounded-2xl border border-slate-200 space-y-1">
+                        <span class="text-sm text-slate-600 font-medium">Permeability of free space $\mu_0$</span>
+                        <div class="text-lg font-bold font-mono text-rose-700">$4\pi\times10^{-7}$ H/m</div>
+                        <p class="text-sm text-slate-700">$\approx 1.2566 \times 10^{-6}\ \mathrm{H}/\mathrm{m}$</p>
+                    </div>
+                    <div class="bg-slate-100/90 p-4 rounded-2xl border border-slate-200 space-y-1">
+                        <span class="text-sm text-slate-600 font-medium">Speed of light in vacuum $c$</span>
+                        <div class="text-lg font-bold font-mono text-amber-800">299,792,458 m/s</div>
+                        <p class="text-sm text-slate-700">$c = 1/\sqrt{\mu_0 \varepsilon_0} \approx 3 \times 10^{8}\ \mathrm{m}/\mathrm{s}$</p>
+                    </div>
+                    <div class="bg-slate-100/90 p-4 rounded-2xl border border-slate-200 space-y-1">
+                        <span class="text-sm text-slate-600 font-medium">Intrinsic impedance of free space $\eta_0$</span>
+                        <div class="text-lg font-bold font-mono text-indigo-700">≈ 376.73 Ω</div>
+                        <p class="text-sm text-slate-700">$\eta_0 = \sqrt{\mu_0/\varepsilon_0} \approx 120\pi\ \Omega = E/H$</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-6 flex flex-col justify-between space-y-4">
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Wave Speed in a Medium</h3>
+                        <p class="text-sm text-slate-600 mt-1">$u_{\mathrm{p}} = 1/\sqrt{\mu\varepsilon} = c/n$, $\ \eta = \eta_0/n$ (non-magnetic, optical frequencies)</p>
+                    </div>
+                    <div class="text-sm">
+                        <label class="text-slate-700 font-medium block mb-1">Material</label>
+                        <select id="select-material" onchange="calculateMaterialSpeed()" class="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2.5 focus:outline-none focus:border-sky-500">
+                            <option value="1.000">Vacuum / Air (n = 1.00)</option>
+                            <option value="1.333">Water (n = 1.33)</option>
+                            <option value="1.520">Crown glass (n = 1.52)</option>
+                            <option value="2.417">Diamond (n = 2.42)</option>
+                            <option value="3.480">Silicon, λ = 1.55 µm (n = 3.48)</option>
+                        </select>
+                    </div>
+                    <div class="p-3 bg-slate-100/90 rounded-xl border border-slate-200 space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-600">Refractive index $n$</span><span id="calc-n" class="font-mono text-slate-900">1.000</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">$\varepsilon_{\mathrm{r}} \approx n^2$</span><span id="calc-er" class="font-mono text-slate-900">1.000</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">Phase velocity $u_{\mathrm{p}}$</span><span id="calc-v" class="font-mono text-sky-800 font-bold">2.998 × 10⁸ m/s</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">Fraction of $c$</span><span id="calc-pct" class="font-mono text-amber-800 font-bold">100.0%</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">Impedance $\eta$</span><span id="calc-eta" class="font-mono text-indigo-700 font-bold">376.7 Ω</span></div>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 italic">$n = \sqrt{\varepsilon_{\mathrm{r}}\mu_{\mathrm{r}}} \approx \sqrt{\varepsilon_{\mathrm{r}}}$ for non-magnetic media.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Quiz -->
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 5</span></div>
+            </div>
+
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Maxwell's Electrostatic Equations</footer>
+
+    <script>
+        // =========================================================
+        // Utilities
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        const COL = {
+            sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5',
+            emerald: '#059669', slate: '#475569', grid: '#e2e8f0', text: '#334155'
+        };
+        const PX_PER_UNIT = 50;               // world scale for the field maps
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const fmtSigned = (v, d = 2) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(d);
+
+        // Differential / integral toggle
+        function toggleForm(type) {
+            const isDiff = type === 'diff';
+            document.querySelectorAll('.form-diff').forEach(el => el.classList.toggle('hidden', !isDiff));
+            document.querySelectorAll('.form-int').forEach(el => el.classList.toggle('hidden', isDiff));
+            const on = 'px-3 py-1.5 text-sm font-semibold rounded-lg bg-sky-700 text-white shadow';
+            const off = 'px-3 py-1.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition';
+            document.getElementById('btn-diff').className = isDiff ? on : off;
+            document.getElementById('btn-int').className = isDiff ? off : on;
+            if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+        }
+
+        // Chip toggles (shared UI state)
+        const ui = {
+            eGrid: true, eContour: true, eParticles: true, eGauss: true, dipole: false,
+            bGrid: true, bLines: true, bParticles: true, bGauss: true,
+            fLines: true, fEField: true,
+            aB: true, aE: true, aLoop: true
+        };
+        function toggleChip(key, el, onClass = 'on') {
+            ui[key] = !ui[key];
+            el.classList.toggle(onClass, ui[key]);
+            if (key === 'dipole') document.getElementById('charge2-row').classList.toggle('hidden', !ui.dipole);
+            if (key === 'eGauss') document.getElementById('gauss-e-readout').classList.toggle('opacity-40', !ui.eGauss);
+        }
+
+        // HiDPI canvas sizing
+        function setupCanvas(id) {
+            const canvas = document.getElementById(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+
+        // Arrow with fixed-size head
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 1.6, head = 5) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx, y + dy); ctx.stroke();
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.6);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.45), y + dy - hl * Math.sin(a - 0.45));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.45), y + dy - hl * Math.sin(a + 0.45));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+
+        // Direction-map arrow: fixed length, opacity encodes |F| on a log scale
+        function fieldArrow(ctx, x, y, fx, fy, spacing, color) {
+            const mag = Math.hypot(fx, fy);
+            if (mag < 1e-9) return;
+            const alpha = clamp((Math.log10(mag) + 2.4) / 2.0, 0.12, 1);
+            const L = spacing * 0.72;
+            arrow(ctx, x - fx / mag * L / 2, y - fy / mag * L / 2, fx / mag * L, fy / mag * L, color, alpha, 1.3, 4);
+        }
+
+        // Numerical surface integral of a 3-D field over a sphere (center cx, cy, 0; radius R)
+        function sphereFlux(field, cx, cy, R, nT = 36, nP = 72) {
+            let out = 0, inn = 0;
+            const dT = Math.PI / nT, dP = 2 * Math.PI / nP;
+            for (let i = 0; i < nT; i++) {
+                const t = (i + 0.5) * dT, st = Math.sin(t), ct = Math.cos(t);
+                for (let j = 0; j < nP; j++) {
+                    const p = (j + 0.5) * dP;
+                    const nx = st * Math.cos(p), ny = st * Math.sin(p), nz = ct;
+                    const F = field(cx + R * nx, cy + R * ny, R * nz);
+                    const d = (F[0] * nx + F[1] * ny + F[2] * nz) * R * R * st * dT * dP;
+                    if (d > 0) out += d; else inn += d;
+                }
+            }
+            return { out, inn, net: out + inn };
+        }
+
+        // Draw a Gaussian surface (circle cross-section) with normal-flux arrows
+        function drawGaussianSurface(ctx, gx, gy, Rpx, normalFn) {
+            ctx.save();
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.06)';
+            ctx.strokeStyle = COL.emerald; ctx.lineWidth = 1.8; ctx.setLineDash([6, 5]);
+            ctx.beginPath(); ctx.arc(gx, gy, Rpx, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+            const N = 20;
+            for (let k = 0; k < N; k++) {
+                const a = (2 * Math.PI * k) / N;
+                const nx = Math.cos(a), ny = Math.sin(a);
+                const px = gx + Rpx * nx, py = gy + Rpx * ny;
+                const Fn = normalFn(px, py, nx, ny);
+                const L = clamp(Math.sign(Fn) * Math.sqrt(Math.abs(Fn)) * 60, -20, 20);
+                if (Math.abs(L) < 2) continue;
+                arrow(ctx, px, py, nx * L, ny * L, L > 0 ? COL.emerald : COL.amber, 0.9, 1.8, 5);
+            }
+        }
+
+        // Marching-squares contour lines of a scalar potential
+        function drawContours(ctx, w, h, potential, levels, colorFn) {
+            const step = 6;
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2;
+            const g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = potential(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = 1;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val);
+                ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) {
+                    for (let c = 0; c < cols - 1; c++) {
+                        const i = r * cols + c;
+                        const v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                        let s = 0;
+                        if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                        if (s === 0 || s === 15) continue;
+                        const x = c * step, y = r * step;
+                        const T = [x + step * ((val - v0) / (v1 - v0 || 1e-9)), y];
+                        const Rr = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-9))];
+                        const B = [x + step * ((val - v3) / (v2 - v3 || 1e-9)), y + step];
+                        const Lf = [x, y + step * ((val - v0) / (v3 - v0 || 1e-9))];
+                        switch (s) {
+                            case 1: case 14: seg(T, Lf); break;
+                            case 2: case 13: seg(T, Rr); break;
+                            case 3: case 12: seg(Lf, Rr); break;
+                            case 4: case 11: seg(Rr, B); break;
+                            case 5: seg(T, Lf); seg(Rr, B); break;
+                            case 6: case 9: seg(T, B); break;
+                            case 7: case 8: seg(Lf, B); break;
+                            case 10: seg(T, Rr); seg(Lf, B); break;
+                        }
+                    }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+
+        // Pointer helper: hover probe + click/drag to move a Gaussian surface
+        function attachProbe(canvasId, state, hudId) {
+            const cv = document.getElementById(canvasId);
+            if (!cv) return;
+            const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+            cv.addEventListener('pointerdown', e => { state.drag = true; state.center = pos(e); cv.setPointerCapture(e.pointerId); });
+            cv.addEventListener('pointermove', e => { const p = pos(e); state.mouse = p; if (state.drag) state.center = p; });
+            cv.addEventListener('pointerup', () => { state.drag = false; });
+            cv.addEventListener('pointerleave', () => { state.mouse = null; document.getElementById(hudId).classList.add('hidden'); });
+        }
+
+        // Small strip chart (two traces, symmetric y-axis unless positive-only)
+        function drawChart(id, series) {
+            const c = setupCanvas(id);
+            if (!c) return;
+            const { ctx, w, h } = c;
+            ctx.clearRect(0, 0, w, h);
+            const pad = 6, mid = h / 2;
+            ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(w, mid); ctx.stroke();
+            series.forEach(s => {
+                const data = s.data;
+                if (data.length < 2) return;
+                const scale = s.scale || Math.max(1e-6, ...data.map(Math.abs));
+                ctx.strokeStyle = s.color; ctx.lineWidth = 2;
+                ctx.beginPath();
+                data.forEach((v, i) => {
+                    const x = (i / (s.len - 1)) * w;
+                    const y = mid - (v / scale) * (mid - pad);
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+            });
+            ctx.font = '600 12px Inter, sans-serif';
+            let lx = 8;
+            series.forEach(s => {
+                ctx.fillStyle = s.color;
+                ctx.fillText(s.label, lx, 16);
+                lx += ctx.measureText(s.label).width + 16;
+            });
+            ctx.fillStyle = '#94a3b8';
+            ctx.textAlign = 'right';
+            ctx.fillText('time →', w - 8, h - 8);
+            ctx.textAlign = 'left';
+        }
+        function pushHist(arr, v, n) { arr.push(v); if (arr.length > n) arr.shift(); }
+
+        // =========================================================
+        // LAW 1 — Gauss's law (electric)
+        // =========================================================
+        const gE = { center: null, mouse: null, drag: false };
+        const eParticles = Array.from({ length: 70 }, () => ({ x: -1, y: -1, age: 999 }));
+
+        function drawGaussE() {
+            const c = setupCanvas('canvas-gauss-e');
+            if (!c) return;
+            const { ctx, w, h } = c;
+            const S = PX_PER_UNIT, cx = w / 2, cy = h / 2;
+            if (!gE.center) gE.center = { x: cx, y: cy };
+
+            const q1 = parseFloat(document.getElementById('slider-charge').value);
+            const q2 = parseFloat(document.getElementById('slider-charge2').value);
+            const Rg = parseFloat(document.getElementById('slider-gauss-r').value);
+            document.getElementById('lbl-q1').innerText = fmtSigned(q1, 1);
+            document.getElementById('lbl-q2').innerText = fmtSigned(q2, 1);
+            document.getElementById('lbl-gauss-r').innerText = Rg.toFixed(2);
+
+            const charges = ui.dipole
+                ? [{ x: cx - 45, y: cy, q: q1 }, { x: cx + 45, y: cy, q: q2 }]
+                : [{ x: cx, y: cy, q: q1 }];
+
+            // Field in normalized units: E = q r̂ / (4π r²)  (ε0 = 1, so D = E)
+            const E2 = (x, y) => {
+                let ex = 0, ey = 0;
+                for (const ch of charges) {
+                    const dx = (x - ch.x) / S, dy = (y - ch.y) / S;
+                    const r2 = dx * dx + dy * dy + 1e-4, r = Math.sqrt(r2);
+                    const k = ch.q / (4 * Math.PI * r2 * r);
+                    ex += k * dx; ey += k * dy;
+                }
+                return [ex, ey];
+            };
+            const E3 = (X, Y, Z) => {       // X, Y, Z in world units
+                let ex = 0, ey = 0, ez = 0;
+                for (const ch of charges) {
+                    const dx = X - ch.x / S, dy = Y - ch.y / S, dz = Z;
+                    const r2 = dx * dx + dy * dy + dz * dz + 1e-6, r = Math.sqrt(r2);
+                    const k = ch.q / (4 * Math.PI * r2 * r);
+                    ex += k * dx; ey += k * dy; ez += k * dz;
+                }
+                return [ex, ey, ez];
+            };
+
+            ctx.clearRect(0, 0, w, h);
+
+            if (ui.eContour) {
+                const V = (x, y) => {
+                    let v = 0;
+                    for (const ch of charges) {
+                        const r = Math.hypot((x - ch.x) / S, (y - ch.y) / S);
+                        v += ch.q / (4 * Math.PI * Math.sqrt(r * r + 0.01));
+                    }
+                    return v;
+                };
+                const lv = [0.03, 0.05, 0.08, 0.13, 0.2, 0.3];
+                drawContours(ctx, w, h, V, [...lv, ...lv.map(v => -v)],
+                    v => v > 0 ? 'rgba(2, 132, 199, 0.45)' : 'rgba(225, 29, 72, 0.45)');
+            }
+
+            if (ui.eGrid) {
+                const sp = 22;
+                for (let x = sp / 2; x < w; x += sp) for (let y = sp / 2; y < h; y += sp) {
+                    if (charges.some(ch => Math.hypot(x - ch.x, y - ch.y) < 16)) continue;
+                    const [ex, ey] = E2(x, y);
+                    fieldArrow(ctx, x, y, ex, ey, sp, COL.sky);
+                }
+            }
+
+            if (ui.eParticles) {
+                const pos = charges.filter(ch => ch.q > 0.05), neg = charges.filter(ch => ch.q < -0.05);
+                ctx.fillStyle = COL.sky;
+                eParticles.forEach(p => {
+                    const nearNeg = neg.some(ch => Math.hypot(p.x - ch.x, p.y - ch.y) < 12);
+                    if (p.age > 170 || nearNeg || p.x < 0 || p.x > w || p.y < 0 || p.y > h) {
+                        if (pos.length && Math.random() < 0.8) {
+                            const ch = pos[Math.floor(Math.random() * pos.length)], a = Math.random() * Math.PI * 2;
+                            p.x = ch.x + 15 * Math.cos(a); p.y = ch.y + 15 * Math.sin(a);
+                        } else { p.x = Math.random() * w; p.y = Math.random() * h; }
+                        p.age = 0;
+                    }
+                    const [ex, ey] = E2(p.x, p.y), m = Math.hypot(ex, ey);
+                    if (m > 1e-6) { p.x += ex / m * 1.6; p.y += ey / m * 1.6; }
+                    p.age++;
+                    ctx.globalAlpha = Math.min(1, p.age / 15) * 0.85;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2); ctx.fill();
+                });
+                ctx.globalAlpha = 1;
+            }
+
+            // Gaussian surface + numerical flux
+            const gx = gE.center.x, gy = gE.center.y, Rpx = Rg * S;
+            if (ui.eGauss) {
+                drawGaussianSurface(ctx, gx, gy, Rpx, (px, py, nx, ny) => { const [ex, ey] = E2(px, py); return ex * nx + ey * ny; });
+                const gapMin = Math.min(...charges.map(ch => Math.abs(Math.hypot(ch.x - gx, ch.y - gy) - Rpx))) / S;
+                const onSurface = gapMin < 0.12;
+                const qenc = charges.reduce((s, ch) => s + (Math.hypot(ch.x - gx, ch.y - gy) < Rpx ? ch.q : 0), 0);
+                document.getElementById('ro-e-qenc').innerText = fmtSigned(qenc);
+                if (onSurface) {
+                    document.getElementById('ro-e-inout').innerText = 'on surface';
+                    document.getElementById('ro-e-flux').innerText = '—';
+                } else {
+                    const F = gapMin < 0.5 ? sphereFlux(E3, gx / S, gy / S, Rg, 90, 180) : sphereFlux(E3, gx / S, gy / S, Rg);
+                    document.getElementById('ro-e-inout').innerText = '+' + F.out.toFixed(2) + ' / −' + Math.abs(F.inn).toFixed(2);
+                    document.getElementById('ro-e-flux').innerText = fmtSigned(Math.abs(F.net) < 5e-3 ? 0 : F.net);
+                }
+            }
+
+            // Probe
+            if (gE.mouse && !gE.drag) {
+                const [ex, ey] = E2(gE.mouse.x, gE.mouse.y), m = Math.hypot(ex, ey);
+                ctx.strokeStyle = COL.amber; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(gE.mouse.x, gE.mouse.y, 5, 0, Math.PI * 2); ctx.stroke();
+                if (m > 1e-9) arrow(ctx, gE.mouse.x, gE.mouse.y, ex / m * 30, ey / m * 30, COL.amber, 1, 2.2, 7);
+                const ang = ((Math.atan2(-ey, ex) * 180 / Math.PI) + 360) % 360;
+                document.getElementById('probe-txt-e').innerText = '|E| = ' + m.toFixed(3) + '  ∠ ' + ang.toFixed(0) + '°';
+                document.getElementById('probe-hud-e').classList.remove('hidden');
+            }
+
+            // Charges
+            charges.forEach(ch => {
+                ctx.beginPath(); ctx.arc(ch.x, ch.y, 11, 0, Math.PI * 2);
+                ctx.fillStyle = ch.q > 0.05 ? COL.sky : ch.q < -0.05 ? COL.rose : '#94a3b8';
+                ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 14px Inter, sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(ch.q > 0.05 ? '+' : ch.q < -0.05 ? '−' : '0', ch.x, ch.y + 0.5);
+            });
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        }
+
+        // =========================================================
+        // LAW 2 — Gauss's law for magnetism (bar magnet = magnetic dipole)
+        // =========================================================
+        const gB = { center: null, mouse: null, drag: false };
+        const bParticles = Array.from({ length: 60 }, () => ({ x: -1, y: -1, age: 999 }));
+
+        function drawGaussB() {
+            const c = setupCanvas('canvas-gauss-b');
+            if (!c) return;
+            const { ctx, w, h } = c;
+            const S = PX_PER_UNIT, cx = w / 2, cy = h / 2;
+            if (!gB.center) gB.center = { x: cx + 40, y: cy };
+
+            const deg = parseFloat(document.getElementById('slider-mag-rot').value);
+            const Rg = parseFloat(document.getElementById('slider-gauss-rb').value);
+            document.getElementById('lbl-rot').innerText = deg.toFixed(0) + '°';
+            document.getElementById('lbl-gauss-rb').innerText = Rg.toFixed(2);
+
+            const th = deg * Math.PI / 180;
+            const mx = Math.cos(th), my = -Math.sin(th);      // screen coords (y down)
+            const nxp = -my, nyp = mx;                          // perpendicular
+
+            // Dipole field  B = [3(m·r̂)r̂ − m] / (4π r³)
+            const B2 = (x, y) => {
+                const dx = (x - cx) / S, dy = (y - cy) / S;
+                const r2 = dx * dx + dy * dy + 1e-4, r = Math.sqrt(r2);
+                const mr = (mx * dx + my * dy) / r;
+                const k = 1 / (4 * Math.PI * r2 * r);
+                return [k * (3 * mr * dx / r - mx), k * (3 * mr * dy / r - my)];
+            };
+            const B3 = (X, Y, Z) => {
+                const dx = X - cx / S, dy = Y - cy / S, dz = Z;
+                const r2 = dx * dx + dy * dy + dz * dz + 1e-8, r = Math.sqrt(r2);
+                const mr = (mx * dx + my * dy) / r;
+                const k = 1 / (4 * Math.PI * r2 * r);
+                return [k * (3 * mr * dx / r - mx), k * (3 * mr * dy / r - my), k * (3 * mr * dz / r)];
+            };
+            const inMagnet = (x, y) => {
+                const dx = x - cx, dy = y - cy;
+                return Math.abs(dx * mx + dy * my) < 34 && Math.abs(dx * nxp + dy * nyp) < 12;
+            };
+
+            ctx.clearRect(0, 0, w, h);
+
+            if (ui.bLines) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(225, 29, 72, 0.45)'; ctx.lineWidth = 1.3;
+                [0.7, 1.1, 1.6, 2.3, 3.2, 4.5].forEach(L => {
+                    [1, -1].forEach(side => {
+                        ctx.beginPath();
+                        for (let i = 0; i <= 160; i++) {
+                            const psi = 0.001 + (Math.PI - 0.002) * i / 160;
+                            const r = L * Math.sin(psi) ** 2 * S;       // dipole field line: r = L sin²ψ
+                            const x = cx + r * (Math.cos(psi) * mx + side * Math.sin(psi) * nxp);
+                            const y = cy + r * (Math.cos(psi) * my + side * Math.sin(psi) * nyp);
+                            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                        }
+                        ctx.stroke();
+                        // arrowhead at the equator (field points along −m there)
+                        const ex = cx + L * S * side * nxp, ey = cy + L * S * side * nyp;
+                        if (ex > 0 && ex < w && ey > 0 && ey < h) arrow(ctx, ex + 5 * mx, ey + 5 * my, -10 * mx, -10 * my, COL.rose, 0.8, 1.5, 6);
+                    });
+                });
+                ctx.restore();
+            }
+
+            if (ui.bGrid) {
+                const sp = 22;
+                for (let x = sp / 2; x < w; x += sp) for (let y = sp / 2; y < h; y += sp) {
+                    if (Math.hypot(x - cx, y - cy) < 38) continue;
+                    const [bx, by] = B2(x, y);
+                    fieldArrow(ctx, x, y, bx, by, sp, COL.rose);
+                }
+            }
+
+            if (ui.bParticles) {
+                ctx.fillStyle = COL.rose;
+                bParticles.forEach(p => {
+                    if (p.age > 240 || inMagnet(p.x, p.y) || p.x < 0 || p.x > w || p.y < 0 || p.y > h) {
+                        if (Math.random() < 0.75) {   // emerge from the N pole face
+                            const s = (Math.random() - 0.5) * 20;
+                            p.x = cx + 36 * mx + s * nxp; p.y = cy + 36 * my + s * nyp;
+                        } else { p.x = Math.random() * w; p.y = Math.random() * h; }
+                        p.age = 0;
+                    }
+                    const [bx, by] = B2(p.x, p.y), m = Math.hypot(bx, by);
+                    if (m > 1e-9) { p.x += bx / m * 1.6; p.y += by / m * 1.6; }
+                    p.age++;
+                    ctx.globalAlpha = Math.min(1, p.age / 15) * 0.85;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2); ctx.fill();
+                });
+                ctx.globalAlpha = 1;
+            }
+
+            // Gaussian surface + numerical flux (always ≈ 0)
+            const gx = gB.center.x, gy = gB.center.y, Rpx = Rg * S;
+            const note = document.getElementById('b-note');
+            if (ui.bGauss) {
+                drawGaussianSurface(ctx, gx, gy, Rpx, (px, py, nx, ny) => { const [bx, by] = B2(px, py); return (bx * nx + by * ny) * 2.5; });
+                const dC = Math.hypot(cx - gx, cy - gy);
+                const gapB = Math.abs(dC - Rpx) / S;
+                if (gapB < 0.15) {
+                    ['ro-b-out', 'ro-b-in', 'ro-b-net'].forEach(id => document.getElementById(id).innerText = '—');
+                    note.innerText = 'The surface passes through the magnet centre; move it slightly.';
+                } else {
+                    const F = gapB < 0.5 ? sphereFlux(B3, gx / S, gy / S, Rg, 90, 180) : sphereFlux(B3, gx / S, gy / S, Rg);
+                    const scale = 100;   // display scale for readability
+                    document.getElementById('ro-b-out').innerText = '+' + (F.out * scale).toFixed(2);
+                    document.getElementById('ro-b-in').innerText = '−' + Math.abs(F.inn * scale).toFixed(2);
+                    const net = F.net * scale;
+                    document.getElementById('ro-b-net').innerText = (Math.abs(net) < 0.05 ? 0 : net).toFixed(2);
+                    note.innerText = dC < Rpx
+                        ? 'Magnet enclosed: both poles are inside, so every line that leaves returns — net flux 0.'
+                        : 'Every flux line that enters the surface also leaves it — net flux 0 (values ×100).';
+                }
+            }
+
+            // Probe
+            if (gB.mouse && !gB.drag) {
+                const [bx, by] = B2(gB.mouse.x, gB.mouse.y), m = Math.hypot(bx, by);
+                ctx.strokeStyle = COL.amber; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(gB.mouse.x, gB.mouse.y, 5, 0, Math.PI * 2); ctx.stroke();
+                if (m > 1e-9) arrow(ctx, gB.mouse.x, gB.mouse.y, bx / m * 30, by / m * 30, COL.amber, 1, 2.2, 7);
+                const ang = ((Math.atan2(-by, bx) * 180 / Math.PI) + 360) % 360;
+                document.getElementById('probe-txt-b').innerText = '|B| = ' + m.toFixed(3) + '  ∠ ' + ang.toFixed(0) + '°';
+                document.getElementById('probe-hud-b').classList.remove('hidden');
+            }
+
+            // Bar magnet (N on the +m side), with internal S→N field arrow
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(Math.atan2(my, mx));
+            ctx.fillStyle = COL.rose; ctx.fillRect(0, -11, 34, 22);
+            ctx.fillStyle = COL.sky; ctx.fillRect(-34, -11, 34, 22);
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.strokeRect(-34, -11, 68, 22);
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 12px Inter, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('N', 24, 0.5); ctx.fillText('S', -24, 0.5);
+            ctx.restore();
+            arrow(ctx, cx - 12 * mx, cy - 12 * my, 24 * mx, 24 * my, '#ffffff', 0.95, 1.6, 5);
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        }
+
+        // =========================================================
+        // LAW 3 — Faraday's law (magnet moving through a coil)
+        // =========================================================
+        const fd = { pos: 60, auto: false, t: 0, lastFlux: null, emf: 0, histF: [], histE: [], electrons: 0 };
+        const HIST_N = 260;
+
+        function toggleFaradayAuto(el) {
+            fd.auto = !fd.auto;
+            el.classList.toggle('on-amber', fd.auto);
+            el.innerText = fd.auto ? 'Stop Oscillation' : 'Auto Oscillate';
+        }
+
+        function drawFaraday(dt) {
+            const c = setupCanvas('canvas-faraday');
+            if (!c) return;
+            const { ctx, w, h } = c;
+            const coilX = w / 2, cy = h / 2 + 14, a = 48;     // coil radius (px)
+            const slider = document.getElementById('slider-faraday');
+            const speed = parseFloat(document.getElementById('slider-fspeed').value);
+            document.getElementById('lbl-fspeed').innerText = speed.toFixed(1);
+
+            if (fd.auto) {
+                fd.t += dt;
+                slider.value = (100 * Math.sin(1.6 * speed * fd.t)).toFixed(0);
+            }
+            const target = parseFloat(slider.value);
+            document.getElementById('lbl-fpos').innerText = target.toFixed(0);
+            fd.pos += (target - fd.pos) * Math.min(1, dt * 8 * speed);
+
+            const range = w * 0.32;
+            const magX = coilX + fd.pos / 100 * range;
+            const d = magX - coilX;
+
+            // On-axis dipole flux through a loop of radius a:  Φ ∝ a² / (a² + d²)^{3/2}  (normalized to 1)
+            const flux = 1 / Math.pow(1 + (d / a) ** 2, 1.5);
+            if (fd.lastFlux === null) fd.lastFlux = flux;
+            const raw = dt > 0 ? -(flux - fd.lastFlux) / dt : 0;
+            fd.lastFlux = flux;
+            fd.emf += (raw - fd.emf) * Math.min(1, dt * 18);
+            const emf = Math.abs(fd.emf) < 1e-3 ? 0 : fd.emf;
+
+            pushHist(fd.histF, flux, HIST_N);
+            pushHist(fd.histE, emf, HIST_N);
+
+            document.getElementById('ro-f-flux').innerText = flux.toFixed(2);
+            document.getElementById('ro-f-emf').innerText = fmtSigned(emf);
+            document.getElementById('ro-f-lenz').innerText =
+                emf < -0.02 ? 'Φ ↑ : opposes' : emf > 0.02 ? 'Φ ↓ : sustains' : 'steady';
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Magnet field lines (dipole centred on the magnet, m pointing −x → N on the left)
+            if (ui.fLines) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(225, 29, 72, 0.3)'; ctx.lineWidth = 1.2;
+                [38, 62, 95, 140].forEach(L => {
+                    [1, -1].forEach(side => {
+                        ctx.beginPath();
+                        for (let i = 0; i <= 120; i++) {
+                            const psi = 0.001 + (Math.PI - 0.002) * i / 120;
+                            const r = L * Math.sin(psi) ** 2;
+                            const x = magX - r * Math.cos(psi), y = cy + side * r * Math.sin(psi);
+                            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                        }
+                        ctx.stroke();
+                        const ey = cy + side * L;
+                        if (ey > 0 && ey < h) arrow(ctx, magX - 5, ey, 10, 0, COL.rose, 0.6, 1.3, 5);
+                    });
+                });
+                ctx.restore();
+            }
+
+            // Flux shading inside the coil
+            ctx.fillStyle = `rgba(225, 29, 72, ${0.05 + 0.25 * flux})`;
+            ctx.beginPath(); ctx.ellipse(coilX, cy, 13, a, 0, 0, Math.PI * 2); ctx.fill();
+
+            // Coil: back halves
+            ctx.lineWidth = 2.5;
+            for (let i = -2; i <= 2; i++) {
+                ctx.beginPath(); ctx.ellipse(coilX + i * 7, cy, 13, a, 0, Math.PI / 2, 3 * Math.PI / 2);
+                ctx.strokeStyle = 'rgba(217, 119, 6, 0.35)'; ctx.stroke();
+            }
+
+            // Magnet (drawn between back and front of the coil so it passes "through")
+            ctx.fillStyle = COL.rose; ctx.fillRect(magX - 32, cy - 10, 32, 20);
+            ctx.fillStyle = COL.sky; ctx.fillRect(magX, cy - 10, 32, 20);
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.strokeRect(magX - 32, cy - 10, 64, 20);
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 12px Inter, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('N', magX - 16, cy + 0.5); ctx.fillText('S', magX + 16, cy + 0.5);
+
+            // Coil: front halves
+            for (let i = -2; i <= 2; i++) {
+                ctx.beginPath(); ctx.ellipse(coilX + i * 7, cy, 13, a, 0, -Math.PI / 2, Math.PI / 2);
+                ctx.strokeStyle = COL.amber; ctx.lineWidth = 2.5; ctx.stroke();
+            }
+
+            // Charge carriers circulating with the induced current
+            fd.electrons += fd.emf * dt * 3;
+            ctx.fillStyle = COL.indigo;
+            for (let k = 0; k < 12; k++) {
+                const ang = fd.electrons + (2 * Math.PI * k) / 12;
+                const px = coilX + 13 * Math.cos(ang), py = cy + a * Math.sin(ang);
+                if (Math.cos(ang) < 0) continue;       // only on the visible front half
+                ctx.beginPath(); ctx.arc(px, py, 2.6, 0, Math.PI * 2); ctx.fill();
+            }
+
+            // Induced (curling) E field around the coil
+            const eS = clamp(fd.emf / 2, -1, 1);
+            if (ui.fEField && Math.abs(eS) > 0.03) {
+                for (let k = 0; k < 8; k++) {
+                    const ang = (2 * Math.PI * k) / 8;
+                    const px = coilX + 30 * Math.cos(ang), py = cy + (a + 16) * Math.sin(ang);
+                    let tx = -30 * Math.sin(ang), ty = (a + 16) * Math.cos(ang);
+                    const tl = Math.hypot(tx, ty) || 1;
+                    arrow(ctx, px, py, tx / tl * 16 * eS, ty / tl * 16 * eS, COL.sky, Math.min(1, Math.abs(eS) + 0.35), 2, 6);
+                }
+            }
+
+            // Galvanometer
+            const gy = 30;
+            ctx.beginPath(); ctx.arc(coilX, gy, 22, Math.PI, 0); ctx.closePath();
+            ctx.fillStyle = '#ffffff'; ctx.fill();
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5; ctx.stroke();
+            for (let k = -3; k <= 3; k++) {
+                const an = -Math.PI / 2 + k * Math.PI / 9;
+                ctx.beginPath();
+                ctx.moveTo(coilX + 17 * Math.cos(an), gy + 17 * Math.sin(an));
+                ctx.lineTo(coilX + 21 * Math.cos(an), gy + 21 * Math.sin(an));
+                ctx.stroke();
+            }
+            const needle = -Math.PI / 2 + clamp(fd.emf / 2.5, -1, 1) * Math.PI / 3;
+            ctx.beginPath(); ctx.moveTo(coilX, gy); ctx.lineTo(coilX + 19 * Math.cos(needle), gy + 19 * Math.sin(needle));
+            ctx.strokeStyle = COL.rose; ctx.lineWidth = 2; ctx.stroke();
+            ctx.beginPath(); ctx.arc(coilX, gy, 2.5, 0, Math.PI * 2); ctx.fillStyle = COL.slate; ctx.fill();
+            ctx.fillStyle = COL.text; ctx.font = '600 12px Inter, sans-serif';
+            ctx.fillText('V', coilX, gy + 9);
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+
+            drawChart('chart-faraday', [
+                { data: fd.histF, len: HIST_N, color: COL.rose, label: 'Φ(t)', scale: 1 },
+                { data: fd.histE, len: HIST_N, color: COL.amber, label: 'Vemf(t) = −dΦ/dt' }
+            ]);
+        }
+
+        // =========================================================
+        // LAW 4 — Ampère–Maxwell (AC current charging a capacitor)
+        // =========================================================
+        const am = { t: 0, paused: false, flow: 0, histI: [], histE: [] };
+        function toggleAmperePause(el) {
+            am.paused = !am.paused;
+            el.classList.toggle('on-amber', am.paused);
+            el.innerText = am.paused ? 'Resume' : 'Pause';
+        }
+
+        function drawDotCross(ctx, x, y, r, out, alpha) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.strokeStyle = COL.rose; ctx.fillStyle = COL.rose; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+            if (out) {
+                ctx.beginPath(); ctx.arc(x, y, Math.max(1.2, r * 0.3), 0, Math.PI * 2); ctx.fill();
+            } else {
+                const k = r * 0.65;
+                ctx.beginPath(); ctx.moveTo(x - k, y - k); ctx.lineTo(x + k, y + k); ctx.moveTo(x + k, y - k); ctx.lineTo(x - k, y + k); ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function drawAmpere(dt) {
+            const c = setupCanvas('canvas-ampere');
+            if (!c) return;
+            const { ctx, w, h } = c;
+            const cx = w / 2, cy = h / 2;
+            const I0 = parseFloat(document.getElementById('slider-ampere').value);
+            const loopF = parseFloat(document.getElementById('slider-loop').value);
+            document.getElementById('lbl-i0').innerText = I0.toFixed(1);
+
+            const omega = 2 * Math.PI * 0.3;
+            if (!am.paused) am.t += dt;
+            const I = I0 * Math.sin(omega * am.t);                 // conduction current
+            const Qn = -Math.cos(omega * am.t) * (I0 / 5);          // plate charge (∝ E), since dQ/dt = I
+
+            if (!am.paused) { pushHist(am.histI, I, HIST_N); pushHist(am.histE, Qn, HIST_N); am.flow += I * dt * 18; }
+
+            const gap = 56, Rp = 50;
+            const x0 = cx - gap / 2, x1 = cx + gap / 2;
+            ctx.clearRect(0, 0, w, h);
+
+            // Wire
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(12, cy); ctx.lineTo(x0, cy); ctx.moveTo(x1, cy); ctx.lineTo(w - 12, cy); ctx.stroke();
+
+            // Moving charge carriers (conventional current)
+            ctx.fillStyle = COL.indigo;
+            const spacing = 22;
+            for (let x = 12 + ((am.flow % spacing) + spacing) % spacing; x < w - 12; x += spacing) {
+                if (x > x0 - 3 && x < x1 + 3) continue;
+                ctx.beginPath(); ctx.arc(x, cy, 2.6, 0, Math.PI * 2); ctx.fill();
+            }
+            if (Math.abs(I) > 0.05) {
+                const dir = Math.sign(I);
+                arrow(ctx, x0 / 2 - 14 * dir, cy - 12, 28 * dir, 0, COL.indigo, 1, 2, 6);
+                arrow(ctx, (x1 + w) / 2 - 14 * dir, cy - 12, 28 * dir, 0, COL.indigo, 1, 2, 6);
+            }
+
+            // Plates coloured by charge
+            const plateCol = q => q > 0.02 ? COL.sky : q < -0.02 ? COL.rose : '#64748b';
+            ctx.fillStyle = plateCol(Qn); ctx.fillRect(x0 - 5, cy - Rp, 5, 2 * Rp);
+            ctx.fillStyle = plateCol(-Qn); ctx.fillRect(x1, cy - Rp, 5, 2 * Rp);
+            ctx.font = 'bold 12px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            const nSigns = Math.round(Math.abs(Qn) / (I0 / 5 || 1) * 4);
+            for (let k = 0; k < nSigns; k++) {
+                const y = cy - Rp + 10 + k * (2 * Rp - 20) / Math.max(1, nSigns - 1);
+                ctx.fillStyle = plateCol(Qn); ctx.fillText(Qn > 0 ? '+' : '−', x0 - 13, y);
+                ctx.fillStyle = plateCol(-Qn); ctx.fillText(Qn > 0 ? '−' : '+', x1 + 13, y);
+            }
+
+            // E field in the gap (∝ plate charge)
+            if (ui.aE && Math.abs(Qn) > 0.01) {
+                const L = clamp(Qn / 1, -1, 1) * (gap - 14);
+                for (let y = cy - Rp + 10; y <= cy + Rp - 10; y += 16) {
+                    arrow(ctx, cx - L / 2, y, L, 0, COL.sky, 0.85, 1.6, 5);
+                }
+            }
+
+            // H field: ⊙ above / ⊗ below for current in +x (right-hand rule)
+            if (ui.aB && Math.abs(I) > 0.02) {
+                const Hmax = 5 / 28;
+                for (let x = 30; x < w - 20; x += 34) {
+                    [28, 62].forEach(r => {
+                        const inGap = x > x0 && x < x1;
+                        const H = inGap ? (r < Rp ? Math.abs(I) * r / (Rp * Rp) : Math.abs(I) / r) : Math.abs(I) / r;
+                        const f = clamp(H / Hmax, 0, 1);
+                        if (f < 0.03) return;
+                        const rad = 2.5 + 5.5 * f;
+                        drawDotCross(ctx, x, cy - r, rad, I > 0, 0.35 + 0.65 * f);
+                        drawDotCross(ctx, x, cy + r, rad, I < 0, 0.35 + 0.65 * f);
+                    });
+                }
+            }
+
+            // Amperian loop (edge-on circle of radius 70 px, larger than the plates)
+            const lx = loopF * w;
+            const inGapLoop = lx > x0 && lx < x1;
+            document.getElementById('lbl-loop').innerText = inGapLoop ? 'gap' : 'wire';
+            if (ui.aLoop) {
+                ctx.save();
+                ctx.strokeStyle = COL.emerald; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+                ctx.beginPath(); ctx.ellipse(lx, cy, 11, 70, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.restore();
+                ctx.fillStyle = COL.emerald; ctx.font = '600 12px Inter, sans-serif';
+                ctx.fillText('C', lx + 18, cy - 62);
+            }
+            const Ic = inGapLoop ? 0 : I, Id = inGapLoop ? I : 0;
+            document.getElementById('ro-a-ic').innerText = fmtSigned(Ic);
+            document.getElementById('ro-a-id').innerText = fmtSigned(Id);
+            document.getElementById('ro-a-circ').innerText = fmtSigned(Ic + Id);
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+
+            drawChart('chart-ampere', [
+                { data: am.histI, len: HIST_N, color: COL.indigo, label: 'I(t)', scale: 5 },
+                { data: am.histE, len: HIST_N, color: COL.sky, label: 'E(t) in gap (lags 90°)', scale: 1 }
+            ]);
+        }
+
+        // =========================================================
+        // 3-D plane wave (Three.js)
+        // =========================================================
+        let scene, camera, renderer, controls, eGroup, hGroup, eCurve, hCurve;
+        let isAnimating = true, animTime = 0;
+        const waveLayers = { E: true, H: true, curve: true };
+
+        function makeLabel(text, color) {
+            const cv = document.createElement('canvas');
+            cv.width = 128; cv.height = 128;
+            const g = cv.getContext('2d');
+            g.font = 'italic bold 80px Times New Roman, serif';
+            g.fillStyle = color; g.textAlign = 'center'; g.textBaseline = 'middle';
+            g.fillText(text, 64, 64);
+            const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), depthTest: false }));
+            sp.scale.set(0.9, 0.9, 0.9);
+            return sp;
+        }
+
+        function initThreeJS() {
+            const container = document.getElementById('threejs-container');
+            if (!container) return;
+            if (!window.THREE || !THREE.OrbitControls) { document.getElementById('three-fallback').classList.remove('hidden'); return; }
+            try {
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0xf8fafc);
+                camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+                camera.position.set(9, 5, 11);
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                container.appendChild(renderer.domElement);
+            } catch (err) {
+                document.getElementById('three-fallback').classList.remove('hidden');
+                renderer = null; return;
+            }
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; controls.dampingFactor = 0.06;
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+
+            const grid = new THREE.GridHelper(16, 16, 0xcbd5e1, 0xe2e8f0);
+            grid.position.y = -2.6;
+            scene.add(grid);
+
+            // Propagation axis (z) and a small x / y triad at the start
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -8), 16.5, 0xd97706, 0.6, 0.3));
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, -8), 2.6, 0x94a3b8, 0.3, 0.16));
+            scene.add(new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, -8), 2.6, 0x94a3b8, 0.3, 0.16));
+            const lx = makeLabel('x', '#475569'); lx.position.set(3.0, 0, -8); scene.add(lx);
+            const ly = makeLabel('y', '#475569'); ly.position.set(0, 3.0, -8); scene.add(ly);
+            const lz = makeLabel('z', '#b45309'); lz.position.set(0, 0.5, 8.9); scene.add(lz);
+
+            eGroup = new THREE.Group(); hGroup = new THREE.Group();
+            scene.add(eGroup); scene.add(hGroup);
+            rebuildWaveVectors();
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function clearGroup(g) {
+            while (g.children.length) {
+                const o = g.children.pop();
+                // ArrowHelper geometries are shared in r128 — dispose materials only
+                if (o.line) o.line.material.dispose();
+                if (o.cone) o.cone.material.dispose();
+                if (o.isLine && !o.line) { o.geometry.dispose(); o.material.dispose(); }
+            }
+        }
+
+        function rebuildWaveVectors() {
+            if (!eGroup) return;
+            clearGroup(eGroup); clearGroup(hGroup);
+            const n = parseInt(document.getElementById('slider-density').value, 10);
+            for (let i = 0; i <= n; i++) {
+                const z = -7 + (i / n) * 14;
+                eGroup.add(new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, z), 1, 0x0284c7, 0.25, 0.14));
+                hGroup.add(new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, z), 1, 0xe11d48, 0.25, 0.14));
+            }
+            const mkCurve = color => {
+                const geo = new THREE.BufferGeometry();
+                geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array((n + 1) * 3), 3));
+                return new THREE.Line(geo, new THREE.LineBasicMaterial({ color }));
+            };
+            eCurve = mkCurve(0x0369a1); hCurve = mkCurve(0xbe123c);
+            eGroup.add(eCurve); hGroup.add(hCurve);
+        }
+
+        function setArrow(arrowObj, vx, vy) {
+            const len = Math.hypot(vx, vy);
+            if (len < 1e-3) { arrowObj.visible = false; return; }
+            arrowObj.visible = true;
+            arrowObj.setDirection(new THREE.Vector3(vx / len, vy / len, 0));
+            arrowObj.setLength(len, 0.25 * Math.min(1, len), 0.12 * Math.min(1, len));
+        }
+
+        function updateWave(dt) {
+            if (!renderer) return;
+            if (isAnimating) animTime += dt;
+            const freq = parseFloat(document.getElementById('slider-freq').value);
+            const amp = parseFloat(document.getElementById('slider-amp').value);
+            const pol = document.getElementById('select-polarization').value;
+            const k = 0.8, omega = 2.4 * freq;                // wave moves toward +z
+            const arrowsE = eGroup.children.filter(o => o !== eCurve);
+            const arrowsH = hGroup.children.filter(o => o !== hCurve);
+            const pe = eCurve.geometry.attributes.position, ph = hCurve.geometry.attributes.position;
+
+            arrowsE.forEach((ea, i) => {
+                const z = ea.position.z;
+                const ph0 = omega * animTime - k * z;          // phase of cos(ωt − kz)
+                let ex, ey;
+                if (pol === 'circular') { ex = amp * Math.cos(ph0); ey = amp * Math.sin(ph0); }
+                else if (pol === 'elliptical') { ex = amp * Math.cos(ph0); ey = 0.5 * amp * Math.sin(ph0); }
+                else { ex = 0; ey = amp * Math.cos(ph0); }
+                // H = (ẑ × E)/η  →  (Hx, Hy) ∝ (−Ey, Ex)   (drawn at the same visual scale)
+                const hx = -ey, hy = ex;
+                setArrow(ea, ex, ey);
+                setArrow(arrowsH[i], hx, hy);
+                pe.setXYZ(i, ex, ey, z); ph.setXYZ(i, hx, hy, z);
+            });
+            pe.needsUpdate = true; ph.needsUpdate = true;
+
+            eGroup.visible = waveLayers.E; hGroup.visible = waveLayers.H;
+            eCurve.visible = waveLayers.curve; hCurve.visible = waveLayers.curve;
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function updateWaveReadouts() {
+            const E0 = parseFloat(document.getElementById('slider-amp').value);
+            const pol = document.getElementById('select-polarization').value;
+            const eta0 = 376.73, c0 = 299792458;
+            const e2 = pol === 'circular' ? 2 * E0 * E0 : pol === 'elliptical' ? 1.25 * E0 * E0 : E0 * E0;
+            document.getElementById('val-freq').innerText = parseFloat(document.getElementById('slider-freq').value).toFixed(1);
+            document.getElementById('val-amp').innerText = E0.toFixed(1) + ' V/m';
+            document.getElementById('ro-h0').innerText = (E0 / eta0 * 1000).toFixed(2) + ' mA/m';
+            document.getElementById('ro-b0').innerText = (E0 / c0 * 1e9).toFixed(2) + ' nT';
+            document.getElementById('ro-sav').innerText = (e2 / (2 * eta0) * 1000).toFixed(2) + ' mW/m²';
+        }
+
+        function toggleWaveLayer(key, el) {
+            waveLayers[key] = !waveLayers[key];
+            const cls = key === 'E' ? 'on' : key === 'H' ? 'on-rose' : 'on-indigo';
+            el.classList.toggle(cls, waveLayers[key]);
+        }
+
+        function toggleWaveAnimation() {
+            isAnimating = !isAnimating;
+            document.getElementById('play-pause-text').innerText = isAnimating ? 'Pause' : 'Play';
+            const btn = document.getElementById('btn-play-pause');
+            const old = btn.querySelector('svg, i');
+            const icon = document.createElement('i');
+            icon.setAttribute('data-lucide', isAnimating ? 'pause' : 'play');
+            icon.className = 'w-4 h-4';
+            if (old) old.replaceWith(icon);
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function resetWaveCamera() {
+            if (!camera || !controls) return;
+            camera.position.set(9, 5, 11);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('threejs-container');
+            if (!container || !renderer) return;
+            const W = container.clientWidth, H = container.clientHeight;
+            if (W <= 0 || H <= 0) return;
+            camera.aspect = W / H;
+            camera.updateProjectionMatrix();
+            renderer.setSize(W, H);
+        }
+
+        // =========================================================
+        // Material calculator
+        // =========================================================
+        function calculateMaterialSpeed() {
+            const n = parseFloat(document.getElementById('select-material').value);
+            const c0 = 299792458;
+            document.getElementById('calc-n').innerText = n.toFixed(3);
+            document.getElementById('calc-er').innerText = (n * n).toFixed(3);
+            document.getElementById('calc-v').innerText = (c0 / n / 1e8).toFixed(3) + ' × 10⁸ m/s';
+            document.getElementById('calc-pct').innerText = (100 / n).toFixed(1) + '%';
+            document.getElementById('calc-eta').innerText = (376.73 / n).toFixed(1) + ' Ω';
+        }
+
+        // =========================================================
+        // Quiz
+        // =========================================================
+        const QUIZ = [
+            { q: 'Why can isolated magnetic monopoles NOT exist according to Maxwell\'s equations?',
+              opts: ['Electric charge cancels magnetic poles.', 'Gauss\'s law for magnetism requires $\\nabla \\cdot \\mathbf{B} = 0$.', 'Faraday\'s law prevents magnetic field lines from closing.'], ans: 1,
+              why: 'Zero divergence means every flux line that leaves a closed surface must re-enter it.' },
+            { q: 'Which term did Maxwell add to Ampère\'s law, making electromagnetic waves possible?',
+              opts: ['The conduction current density $\\mathbf{J}$', 'The potential gradient $\\nabla V$', 'The displacement current density $\\partial \\mathbf{D}/\\partial t$'], ans: 2,
+              why: 'A changing electric field produces a magnetic field, just as a changing magnetic field produces an electric field.' },
+            { q: 'In a plane electromagnetic wave in free space, what is the angle between $\\mathbf{E}$ and $\\mathbf{H}$?',
+              opts: ['$90^\\circ$ (perpendicular)', '$0^\\circ$ (parallel)', '$180^\\circ$ (antiparallel)'], ans: 0,
+              why: '$\\mathbf{E}$, $\\mathbf{H}$ and $\\hat{\\mathbf{k}}$ form a right-handed orthogonal set.' },
+            { q: 'A closed surface encloses charges $+2\\ \\mathrm{nC}$ and $-2\\ \\mathrm{nC}$. The net flux $\\oint_S \\mathbf{D}\\cdot d\\mathbf{s}$ is:',
+              opts: ['$+4\\ \\mathrm{nC}$', '$0$', 'It depends on the shape of the surface'], ans: 1,
+              why: 'Only the net enclosed charge matters: $Q = +2 - 2 = 0$.' },
+            { q: 'A bar magnet rests motionless inside a coil. The induced emf in the coil is:',
+              opts: ['Maximum, because the flux is maximum', 'Zero, because the flux is not changing', 'Equal to the flux $\\Phi$'], ans: 1,
+              why: '$V_{\\mathrm{emf}} = -d\\Phi/dt$: a large but constant flux induces nothing.' },
+            { q: 'A plane wave travels in a non-magnetic medium with $\\varepsilon_{\\mathrm{r}} = 4$. Its phase velocity is about:',
+              opts: ['$1.5 \\times 10^8\\ \\mathrm{m/s}$', '$7.5 \\times 10^7\\ \\mathrm{m/s}$', '$1.2 \\times 10^9\\ \\mathrm{m/s}$'], ans: 0,
+              why: '$u_{\\mathrm{p}} = c/\\sqrt{\\varepsilon_{\\mathrm{r}}\\mu_{\\mathrm{r}}} = c/2$: the refractive index $n = 2$ halves the speed.' }
+        ];
+        let quizScore = 0;
+        const quizAnswered = {};
+
+        function renderQuiz() {
+            const box = document.getElementById('quiz-container');
+            box.innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            document.getElementById('quiz-score').innerText = `Score: 0 / ${QUIZ.length}`;
+        }
+
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true;
+                b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = document.getElementById(`q${i}-feedback`);
+            fb.className = ok
+                ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([fb]);
+            document.getElementById('quiz-score').innerText = `Score: ${quizScore} / ${QUIZ.length}`;
+            if (Object.keys(quizAnswered).length === QUIZ.length) document.getElementById('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(); if (window.EM && EM.typeset) EM.typeset(document.getElementById('quiz-container')); else typeset([document.getElementById('quiz-container')]); document.getElementById('quiz-reset').classList.add('hidden');
+        }
+
+        // =========================================================
+        // Main loop — only simulations that are on screen are drawn
+        // =========================================================
+        const visible = {};
+        function observeVisibility(ids) {
+            if (!('IntersectionObserver' in window)) { ids.forEach(id => visible[id] = true); return; }
+            const io = new IntersectionObserver(entries => {
+                entries.forEach(e => { visible[e.target.id] = e.isIntersecting; });
+            }, { rootMargin: '100px' });
+            ids.forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
+        }
+
+        let lastT = null;
+        function loop(now) {
+            const dt = lastT === null ? 1 / 60 : Math.min((now - lastT) / 1000, 0.05);
+            lastT = now;
+            if (visible['canvas-gauss-e']) drawGaussE();
+            if (visible['canvas-gauss-b']) drawGaussB();
+            if (visible['canvas-faraday']) drawFaraday(dt);
+            if (visible['canvas-ampere']) drawAmpere(dt);
+            if (visible['threejs-container']) updateWave(dt);
+            requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('load', () => {
+            renderQuiz();
+            calculateMaterialSpeed();
+            updateWaveReadouts();
+            attachProbe('canvas-gauss-e', gE, 'probe-hud-e');
+            attachProbe('canvas-gauss-b', gB, 'probe-hud-b');
+
+            ['slider-freq', 'slider-amp', 'select-polarization'].forEach(id =>
+                document.getElementById(id).addEventListener('input', updateWaveReadouts));
+            document.getElementById('select-polarization').addEventListener('change', updateWaveReadouts);
+            document.getElementById('slider-density').addEventListener('input', e => {
+                document.getElementById('val-density').innerText = e.target.value;
+                rebuildWaveVectors();
+            });
+            // Manual drag of the Faraday slider stops auto-oscillation
+            document.getElementById('slider-faraday').addEventListener('pointerdown', () => {
+                if (fd.auto) toggleFaradayAuto(document.getElementById('chip-f-auto'));
+            });
+
+            initThreeJS();
+            observeVisibility(['canvas-gauss-e', 'canvas-gauss-b', 'canvas-faraday', 'canvas-ampere', 'threejs-container']);
+            requestAnimationFrame(loop);
+
+            if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+        });
+    </script>
+</body>
+</html>

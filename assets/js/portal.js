@@ -85,6 +85,13 @@ const PAGES = [
   {file: "portal/guide.html",     title: "Study & teaching",   icon: "graduation-cap"},
   {file: "portal/reference.html", title: "Quick reference",    icon: "book-marked"}
 ];
+/* language: English data above; Vietnamese pages load portal.vi.js first (window.EM_VI) */
+const LANG = /^vi/i.test(document.documentElement.getAttribute("lang") || "") ? "vi" : "en";
+if (LANG === "vi" && window.EM_VI) {
+  const V = window.EM_VI;
+  COURSE.forEach(t => { Object.assign(t, V.topics[t.id] || {}); t.sections.forEach(s => Object.assign(s, V.sections[s.file] || {})); });
+  PAGES.forEach(p => { if (V.pages[p.file]) p.title = V.pages[p.file]; });
+}
 const STORE_KEY = "em-course-state-v2", TOPIC_KEY = "em-portal-topic";
 const ROOT = /\/portal\/[^\/]*$/.test(location.pathname.replace(/\\/g, "/")) ? "../" : "";
 const HERE = ROOT ? "portal/" + decodeURIComponent(location.pathname.split("/").pop()) : "welcome.html";
@@ -156,4 +163,22 @@ function portalReady(){
 function topNav(){
   const el = document.getElementById("top-nav"); if (!el) return;
   el.innerHTML = PAGES.map(p => `<a href="${href(p.file)}" data-file="${p.file}" class="nav whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-white border-slate-200 text-slate-700 hover:bg-slate-50"><i data-lucide="${p.icon}" class="w-4 h-4"></i>${p.title}</a>`).join("");
+  langSwitch(el);
+}
+/* EN | VI switch: same page in the other language (the whole portal when inside index.html) */
+function langUrl(lang){
+  if (inShell) {
+    const root = new URL(ROOT ? "../" : "./", location.href).href;     // .../en/ or .../vi/
+    return (window.EM && EM.langUrl ? EM.langUrl(lang, root) : root) + "index.html#/" + HERE;
+  }
+  return window.EM && EM.langUrl ? EM.langUrl(lang) : null;
+}
+function langSwitch(parentEl){
+  const box = document.createElement("span");
+  box.className = "lang-switch"; box.setAttribute("role", "group"); box.setAttribute("aria-label", LANG === "vi" ? "Ngôn ngữ" : "Language");
+  box.innerHTML = ["en", "vi"].map(l => l === LANG
+    ? `<span class="on" aria-current="true" lang="${l}">${l.toUpperCase()}</span>`
+    : `<a href="${langUrl(l) || "#"}" lang="${l}" target="${inShell ? "_top" : "_self"}" title="${l === "vi" ? "Xem bằng tiếng Việt" : "View in English"}">${l.toUpperCase()}</a>`).join("");
+  box.querySelectorAll("a").forEach(a => a.addEventListener("click", () => { try { localStorage.setItem("em-lang", a.getAttribute("lang")); } catch (_) {} }));
+  parentEl.appendChild(box);
 }

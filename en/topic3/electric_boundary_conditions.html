@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electric Boundary Conditions - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="split-square-vertical" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Electric Boundary Conditions</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Setup</button>
+                <button onclick="scrollToSection('tangential')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition">Tangential $E$</button>
+                <button onclick="scrollToSection('normal')" class="px-3 py-1.5 rounded-lg text-emerald-800 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition">Normal $D$</button>
+                <button onclick="scrollToSection('refraction')" class="px-3 py-1.5 rounded-lg text-indigo-700 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition">Refraction</button>
+                <button onclick="scrollToSection('example')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition">Vector Example</button>
+                <button onclick="scrollToSection('conductor')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition">Conductor</button>
+                <button onclick="scrollToSection('cc')" class="px-3 py-1.5 rounded-lg text-violet-700 hover:bg-violet-500/10 transition">Conductor–Conductor</button>
+                <button onclick="scrollToSection('summary')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:bg-slate-200 transition">Summary</button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Section 1 -->
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-3">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Electrostatics</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">What Happens to $\mathbf{E}$ and $\mathbf{D}$ at an Interface?</h2>
+                    <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                        Medium 1 ($\varepsilon_1$) lies above the boundary and medium 2 ($\varepsilon_2$) below. Split every field into a <strong>tangential</strong> part (parallel to the surface) and a <strong>normal</strong> part along $\hat{\mathbf{n}}_2$, the unit normal pointing from medium 2 into medium 1. Two integral laws, applied to vanishingly thin shapes straddling the boundary, give all the rules. The field may change across an interface even when there is no free surface charge. Apply the conditions to the appropriate components and field quantities; continuity of one component does not imply continuity of the whole vector.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div class="glass-card rounded-2xl p-4 space-y-2">
+                            <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-400/10 px-2.5 py-1 rounded-md">Loop</span>
+                            <div class="bg-slate-100/90 p-2 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\oint_C \mathbf{E}\cdot d\mathbf{l} = 0 \Rightarrow E_{1\mathrm{t}} = E_{2\mathrm{t}}$$</div>
+                        </div>
+                        <div class="glass-card rounded-2xl p-4 space-y-2">
+                            <span class="text-sm font-bold text-emerald-800 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-md">Pillbox</span>
+                            <div class="bg-slate-100/90 p-2 rounded-xl border border-slate-200 text-center text-emerald-800 text-sm">$$\oint_S \mathbf{D}\cdot d\mathbf{s} = Q \Rightarrow D_{1\mathrm{n}} - D_{2\mathrm{n}} = \rho_{\mathrm{s}}$$</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5">
+                    <div class="relative h-64 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-setup" class="w-full h-full"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: tangential -->
+        <section id="tangential" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 1</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Tangential $\mathbf{E}$: the Closed Loop $abcda$</h2>
+                    <p class="text-sm text-slate-600 mt-1">A rectangle of width $\Delta w$ and height $\Delta h$ straddles the boundary. Each segment's contribution to $\oint \mathbf{E}\cdot d\mathbf{l}$ is computed live. Try the "violate" switch to see why a jump in $E_{\mathrm{t}}$ is impossible. Shrink the loop height while keeping its width fixed. A tangential jump would leave a finite circulation in an electrostatic field, contradicting the conservative-field law.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-80 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-loop" class="w-full h-full"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Loop height $\Delta h$</span><span id="val-dh" class="font-mono text-sky-800"></span></div><input type="range" id="slider-dh" min="0.02" max="1" step="0.01" value="0.7" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Angle $\theta_1$</span><span id="val-lt" class="font-mono text-amber-800"></span></div><input type="range" id="slider-lt" min="0" max="80" step="1" value="45" class="w-full accent-amber-600"></div>
+                        <div class="space-y-1"><span class="text-slate-700 block">Condition</span><button id="chip-violate" onclick="loopViolate(this)" class="chip">Violate: $E_{2\mathrm{t}} = 0.5E_{1\mathrm{t}}$</button></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-3 text-sm text-slate-700">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Segment by Segment ($\varepsilon_{\mathrm{r1}} = 1$, $\varepsilon_{\mathrm{r2}} = 3$, $\Delta w = 1$)</h3>
+                    <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-1.5 font-mono">
+                        <div class="flex justify-between"><span class="font-sans">$a\to b$ (in medium 1): $+E_{1\mathrm{t}}\Delta w$</span><span id="ro-lp-ab" class="text-sky-800 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans">$b\to c$ (down): $-\tfrac{\Delta h}{2}(E_{1\mathrm{n}}+E_{2\mathrm{n}})$</span><span id="ro-lp-bc" class="text-slate-700 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans">$c\to d$ (in medium 2): $-E_{2\mathrm{t}}\Delta w$</span><span id="ro-lp-cd" class="text-rose-700 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans">$d\to a$ (up): $+\tfrac{\Delta h}{2}(E_{1\mathrm{n}}+E_{2\mathrm{n}})$</span><span id="ro-lp-da" class="text-slate-700 font-bold"></span></div>
+                        <div class="flex justify-between border-t border-slate-200 pt-2"><span class="font-sans font-semibold text-slate-900">$\oint_C \mathbf{E}\cdot d\mathbf{l}$</span><span id="ro-lp-sum" class="font-bold"></span></div>
+                    </div>
+                    <p>The two short sides cancel and shrink to zero as $\Delta h \to 0$. What remains is $(E_{1\mathrm{t}} - E_{2\mathrm{t}})\,\Delta w = 0$, hence</p>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sky-800">$$\mathbf{E}_{1\mathrm{t}} = \mathbf{E}_{2\mathrm{t}},\qquad \frac{\mathbf{D}_{1\mathrm{t}}}{\varepsilon_1} = \frac{\mathbf{D}_{2\mathrm{t}}}{\varepsilon_2}$$</div>
+                    <p id="lp-note" class="text-slate-600"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: normal -->
+        <section id="normal" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-emerald-800 bg-emerald-500/10 px-2.5 py-1 rounded-md">Interactive Simulation 2</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Normal $\mathbf{D}$: the Gaussian Pillbox</h2>
+                    <p class="text-sm text-slate-600 mt-1">A flat cylinder with caps of area $\Delta s$ encloses the free charge $\rho_{\mathrm{s}}\Delta s$ on the boundary. As its height shrinks, only the two caps carry flux: $(D_{1\mathrm{n}} - D_{2\mathrm{n}})\Delta s = \rho_{\mathrm{s}}\Delta s$.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-80 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-pillbox" class="w-full h-full"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-4 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\rho_{\mathrm{s}}$</span><span id="val-pb-rho" class="font-mono text-amber-800"></span></div><input type="range" id="slider-pb-rho" min="-10" max="10" step="0.5" value="2.5" class="w-full accent-amber-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$D_{2\mathrm{n}}$</span><span id="val-pb-d2" class="font-mono text-rose-700"></span></div><input type="range" id="slider-pb-d2" min="-10" max="10" step="0.5" value="5" class="w-full accent-rose-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\varepsilon_{\mathrm{r1}}$</span><span id="val-pb-e1" class="font-mono text-sky-800"></span></div><input type="range" id="slider-pb-e1" min="1" max="10" step="0.5" value="1" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\varepsilon_{\mathrm{r2}}$</span><span id="val-pb-e2" class="font-mono text-indigo-700"></span></div><input type="range" id="slider-pb-e2" min="1" max="10" step="0.5" value="4" class="w-full accent-indigo-600"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-3 text-sm text-slate-700">
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-emerald-800">$$D_{1\mathrm{n}} - D_{2\mathrm{n}} = \rho_{\mathrm{s}},\qquad \varepsilon_1 E_{1\mathrm{n}} - \varepsilon_2 E_{2\mathrm{n}} = \rho_{\mathrm{s}}$$</div>
+                    <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                        <div class="flex justify-between"><span class="font-sans">Flux out of top cap $D_{1\mathrm{n}}$</span><span id="ro-pb-d1" class="text-sky-800 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans">Flux out of bottom cap $-D_{2\mathrm{n}}$</span><span id="ro-pb-bot" class="text-rose-700 font-bold"></span></div>
+                        <div class="flex justify-between border-t border-slate-200 pt-2"><span class="font-sans font-semibold text-slate-900">Net = enclosed $\rho_{\mathrm{s}}$</span><span id="ro-pb-net" class="text-emerald-800 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans">$E_{1\mathrm{n}} = D_{1\mathrm{n}}/\varepsilon_1$</span><span id="ro-pb-e1" class="text-sky-800 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans">$E_{2\mathrm{n}} = D_{2\mathrm{n}}/\varepsilon_2$</span><span id="ro-pb-e2" class="text-rose-700 font-bold"></span></div>
+                    </div>
+                    <p>With no free surface charge ($\rho_{\mathrm{s}} = 0$), normal $\mathbf{D}$ is continuous but normal $\mathbf{E}$ jumps by the factor $\varepsilon_1/\varepsilon_2$. Bound (polarization) charge on the interface is <em>not</em> included in $\rho_{\mathrm{s}}$.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: refraction -->
+        <section id="refraction" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 3</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Refraction of Field Lines at a Charge-Free Dielectric Boundary</h2>
+                    <p class="text-sm text-slate-600 mt-1">With $\rho_{\mathrm{s}} = 0$: $E_{1\mathrm{t}} = E_{2\mathrm{t}}$ and $\varepsilon_1 E_{1\mathrm{n}} = \varepsilon_2 E_{2\mathrm{n}}$. Dividing gives the refraction law, with $\theta$ measured from the normal:</p>
+                </div>
+                <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sm text-indigo-700 shrink-0">$$\frac{\tan\theta_2}{\tan\theta_1} = \frac{\varepsilon_2}{\varepsilon_1}$$</div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="chipToggle(rf, 'lines', this, 'on-indigo'); drawRefraction()" class="chip on-indigo">Field Lines</button>
+                        <button onclick="chipToggle(rf, 'E', this); drawRefraction()" class="chip on">$\mathbf{E}$ Vectors</button>
+                        <button onclick="chipToggle(rf, 'D', this, 'on-emerald'); drawRefraction()" class="chip">$\mathbf{D}$ Vectors</button>
+                        <button onclick="chipToggle(rf, 'comp', this, 'on-amber'); drawRefraction()" class="chip on-amber">Components</button>
+                    </div>
+                    <div class="relative h-[420px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-refraction" class="w-full h-full"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\varepsilon_{\mathrm{r1}}$ (top)</span><span id="val-rf-e1" class="font-mono text-sky-800"></span></div><input type="range" id="slider-rf-e1" min="1" max="10" step="0.1" value="1" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\varepsilon_{\mathrm{r2}}$ (bottom)</span><span id="val-rf-e2" class="font-mono text-indigo-700"></span></div><input type="range" id="slider-rf-e2" min="1" max="10" step="0.1" value="4" class="w-full accent-indigo-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Angle $\theta_1$ of $\mathbf{E}_1$ from the normal</span><span id="val-rf-t1" class="font-mono text-amber-800"></span></div><input type="range" id="slider-rf-t1" min="0" max="85" step="1" value="30" class="w-full accent-amber-600"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 space-y-3 text-sm text-slate-700">
+                    <div class="glass-card rounded-2xl p-5 space-y-3">
+                        <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                            <div class="flex justify-between"><span class="font-sans">$\theta_2 = \tan^{-1}\!\left(\frac{\varepsilon_2}{\varepsilon_1}\tan\theta_1\right)$</span><span id="ro-rf-t2" class="text-indigo-700 font-bold"></span></div>
+                            <div class="flex justify-between"><span class="font-sans">$E_{\mathrm{t}}$ (both media)</span><span id="ro-rf-et" class="text-slate-900 font-bold"></span></div>
+                            <div class="flex justify-between"><span class="font-sans">$E_{1\mathrm{n}}$ / $E_{2\mathrm{n}}$</span><span id="ro-rf-en" class="text-slate-900 font-bold"></span></div>
+                            <div class="flex justify-between"><span class="font-sans">$|\mathbf{E}_1|$ / $|\mathbf{E}_2|$ ($|\mathbf{E}_1| = 1$)</span><span id="ro-rf-mag" class="text-slate-900 font-bold"></span></div>
+                            <div class="flex justify-between"><span class="font-sans">$D_{\mathrm{n}}$ (both media)</span><span id="ro-rf-dn" class="text-emerald-800 font-bold"></span></div>
+                        </div>
+                        <p id="rf-note" class="font-semibold text-indigo-700"></p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 space-y-1">
+                        <span class="font-semibold text-slate-900">$\theta_2$ versus $\theta_1$</span>
+                        <div class="h-40 bg-white border border-slate-200 rounded-xl overflow-hidden relative"><canvas id="canvas-rf-graph" class="w-full h-full"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: vector example -->
+        <section id="example" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Worked Example</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Applying the Conditions to a Vector Field</h2>
+                    <p class="text-sm text-slate-600 mt-1">The $x$–$y$ plane is a charge-free boundary; medium 1 ($z > 0$) has $\varepsilon_{\mathrm{r1}}$, medium 2 ($z < 0$) has $\varepsilon_{\mathrm{r2}}$. Given $\mathbf{E}_1$, find $\mathbf{E}_2$ and the angles $\theta_1$, $\theta_2$ that the fields make with the $z$-axis. Solve tangential and normal components separately before recombining the vector. Changing permittivity alters the normal electric field; it does not alter the tangential continuity condition.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-4 glass-card rounded-2xl p-5 space-y-3 text-sm">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Given</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="space-y-1"><span class="text-slate-700 block">$E_{1x}$</span><input type="number" id="in-ex" value="2" step="0.5" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <label class="space-y-1"><span class="text-slate-700 block">$E_{1y}$</span><input type="number" id="in-ey" value="-3" step="0.5" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <label class="space-y-1"><span class="text-slate-700 block">$E_{1z}$</span><input type="number" id="in-ez" value="3" step="0.5" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <label class="space-y-1"><span class="text-slate-700 block">$\varepsilon_{\mathrm{r1}}$</span><input type="number" id="in-e1" value="2" step="0.5" min="1" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <label class="space-y-1"><span class="text-slate-700 block">$\varepsilon_{\mathrm{r2}}$</span><input type="number" id="in-e2" value="8" step="0.5" min="1" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 font-mono"></label>
+                        <div class="space-y-1"><span class="text-slate-700 block">units</span><span class="font-mono text-slate-600">V/m</span></div>
+                    </div>
+                    <div class="relative h-44 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-example" class="w-full h-full"></canvas></div>
+                </div>
+                <div class="lg:col-span-8 glass-card rounded-2xl p-5 space-y-3 text-sm text-slate-700">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Solution</h3>
+                    <p><strong>Step 1.</strong> Tangential components ($x$ and $y$) carry straight across:</p>
+                    <div id="ex-step1" class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sky-800"></div>
+                    <p><strong>Step 2.</strong> Normal component from $\varepsilon_1 E_{1z} = \varepsilon_2 E_{2z}$:</p>
+                    <div id="ex-step2" class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-emerald-800"></div>
+                    <p><strong>Step 3.</strong> Angles with the normal:</p>
+                    <div id="ex-step3" class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-indigo-700"></div>
+                    <div id="ex-result" class="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-800"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: conductor -->
+        <section id="conductor" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Interactive Simulation 4</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Dielectric–Conductor Boundary</h2>
+                    <p class="text-sm text-slate-600 mt-1">A long conducting cylinder of radius $a$ in a uniform field $\mathbf{E}_0$ (exact 2-D solution). Inside the conductor $\mathbf{E} = 0$, so outside $E_{\mathrm{t}} = 0$: every field line meets the surface at 90°, ending on induced surface charge $\rho_{\mathrm{s}} = \varepsilon_0 E_{\mathrm{n}}$.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="chipToggle(cd, 'lines', this, 'on-indigo'); drawConductor()" class="chip on-indigo">Field Lines</button>
+                        <button onclick="chipToggle(cd, 'equi', this); drawConductor()" class="chip on">Equipotentials</button>
+                        <button onclick="chipToggle(cd, 'charge', this, 'on-rose'); drawConductor()" class="chip on-rose">Surface Charge</button>
+                    </div>
+                    <div class="relative h-[380px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-conductor" class="w-full h-full cursor-crosshair"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Applied field $E_0$</span><span id="val-cd-e0" class="font-mono text-sky-800"></span></div><input type="range" id="slider-cd-e0" min="1" max="10" step="0.5" value="5" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Radius $a$</span><span id="val-cd-a" class="font-mono text-amber-800"></span></div><input type="range" id="slider-cd-a" min="0.5" max="2" step="0.1" value="1.2" class="w-full accent-amber-600"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 space-y-3 text-sm text-slate-700">
+                    <div class="glass-card rounded-2xl p-5 space-y-3">
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-rose-700">$$E_{1\mathrm{t}} = 0,\qquad D_{1\mathrm{n}} = \varepsilon_1 E_{1\mathrm{n}} = \rho_{\mathrm{s}}$$</div>
+                        <p>For this cylinder, $\rho_{\mathrm{s}}(\phi) = 2\varepsilon_0 E_0\cos\phi$: positive on the side the field leaves, negative where it arrives, and the surface field reaches twice $E_0$.</p>
+                        <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                            <div class="flex justify-between"><span class="font-sans">Peak $|\rho_{\mathrm{s}}|$</span><span id="ro-cd-rho" class="text-rose-700 font-bold"></span></div>
+                            <div class="flex justify-between"><span class="font-sans">Peak surface field</span><span id="ro-cd-emax" class="text-sky-800 font-bold"></span></div>
+                            <div class="flex justify-between"><span class="font-sans">Probe: $\angle$ between $\mathbf{E}$ and surface</span><span id="ro-cd-probe" class="text-emerald-800 font-bold">hover near the surface</span></div>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4"><span class="font-semibold text-slate-900">Why:</span> any tangential field on the surface would push free charges along it; they keep moving until $E_{\mathrm{t}} = 0$. The whole conductor is one equipotential.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: conductor–conductor -->
+        <section id="cc" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-violet-700 bg-violet-500/10 px-2.5 py-1 rounded-md">Interactive Simulation 5</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Conductor–Conductor Boundary</h2>
+                    <p class="text-sm text-slate-600 mt-1">Steady current crosses from $(\varepsilon_1, \sigma_1)$ into $(\varepsilon_2, \sigma_2)$. $E_{\mathrm{t}}$ is still continuous and, for steady current, $J_{1\mathrm{n}} = J_{2\mathrm{n}}$. The current lines refract, and a surface charge appears unless $\varepsilon_1/\sigma_1 = \varepsilon_2/\sigma_2$.</p>
+                </div>
+                <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sm text-violet-700 shrink-0">$$\rho_{\mathrm{s}} = J_{\mathrm{n}}\left(\frac{\varepsilon_1}{\sigma_1} - \frac{\varepsilon_2}{\sigma_2}\right)$$</div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-80 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="canvas-cc" class="w-full h-full"></canvas></div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\sigma_1$</span><span id="val-cc-s1" class="font-mono text-sky-800"></span></div><input type="range" id="slider-cc-s1" min="0.5" max="10" step="0.5" value="2" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\sigma_2$</span><span id="val-cc-s2" class="font-mono text-indigo-700"></span></div><input type="range" id="slider-cc-s2" min="0.5" max="10" step="0.5" value="5" class="w-full accent-indigo-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$|\mathbf{J}_1|$</span><span id="val-cc-j" class="font-mono text-emerald-800"></span></div><input type="range" id="slider-cc-j" min="0.5" max="10" step="0.5" value="3" class="w-full accent-emerald-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\varepsilon_{\mathrm{r1}}$</span><span id="val-cc-e1" class="font-mono text-sky-800"></span></div><input type="range" id="slider-cc-e1" min="1" max="10" step="0.5" value="2" class="w-full accent-sky-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">$\varepsilon_{\mathrm{r2}}$</span><span id="val-cc-e2" class="font-mono text-indigo-700"></span></div><input type="range" id="slider-cc-e2" min="1" max="10" step="0.5" value="4" class="w-full accent-indigo-600"></div>
+                        <div class="space-y-1"><div class="flex justify-between"><span class="text-slate-700">Angle $\theta_1$</span><span id="val-cc-t" class="font-mono text-amber-800"></span></div><input type="range" id="slider-cc-t" min="0" max="80" step="1" value="30" class="w-full accent-amber-600"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-3 text-sm text-slate-700">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">Derivation</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-violet-700">$$\frac{J_{1\mathrm{t}}}{\sigma_1} = \frac{J_{2\mathrm{t}}}{\sigma_2},\quad J_{1\mathrm{n}} = J_{2\mathrm{n}} \ \Rightarrow\ \frac{\tan\theta_2}{\tan\theta_1} = \frac{\sigma_2}{\sigma_1}$$</div>
+                    <div class="bg-white/80 p-3 rounded-xl border border-slate-200 space-y-2 font-mono">
+                        <div class="flex justify-between"><span class="font-sans">$J_{\mathrm{n}}$ (continuous)</span><span id="ro-cc-jn" class="text-emerald-800 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans">$\theta_2$</span><span id="ro-cc-t2" class="text-indigo-700 font-bold"></span></div>
+                        <div class="flex justify-between"><span class="font-sans">$\varepsilon_1/\sigma_1$ vs $\varepsilon_2/\sigma_2$</span><span id="ro-cc-tau" class="text-slate-900 font-bold"></span></div>
+                        <div class="flex justify-between border-t border-slate-200 pt-2"><span class="font-sans font-semibold text-slate-900">Surface charge $\rho_{\mathrm{s}}$</span><span id="ro-cc-rho" class="text-rose-700 font-bold"></span></div>
+                    </div>
+                    <p class="text-slate-600">Units: $\sigma$ in S/m, $J$ in A/m². The ratio $\varepsilon/\sigma$ is each material's relaxation time.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: summary -->
+        <section id="summary" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-slate-700 bg-slate-400/10 px-2.5 py-1 rounded-md">Reference</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Boundary Conditions for Electric Fields</h2>
+                <p class="text-sm text-slate-600 mt-1">$\rho_{\mathrm{s}}$ is the free surface charge on the boundary; normal components are along $\hat{\mathbf{n}}_2$, pointing from medium 2 into medium 1.</p>
+            </div>
+            <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-100/50">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-100 text-slate-700 uppercase tracking-wider text-sm border-b border-slate-200">
+                        <tr><th class="px-6 py-3.5 font-bold text-slate-800">Field component</th><th class="px-6 py-3.5 font-bold text-sky-800">Any two media</th><th class="px-6 py-3.5 font-bold text-rose-700">Medium 1 dielectric, medium 2 conductor</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-slate-700">
+                        <tr class="hover:bg-slate-200/50 transition"><td class="px-6 py-3 font-medium text-slate-900">Tangential $\mathbf{E}$</td><td class="px-6 py-3">$\mathbf{E}_{1\mathrm{t}} = \mathbf{E}_{2\mathrm{t}}$</td><td class="px-6 py-3">$\mathbf{E}_{1\mathrm{t}} = \mathbf{E}_{2\mathrm{t}} = 0$</td></tr>
+                        <tr class="hover:bg-slate-200/50 transition"><td class="px-6 py-3 font-medium text-slate-900">Tangential $\mathbf{D}$</td><td class="px-6 py-3">$\mathbf{D}_{1\mathrm{t}}/\varepsilon_1 = \mathbf{D}_{2\mathrm{t}}/\varepsilon_2$</td><td class="px-6 py-3">$\mathbf{D}_{1\mathrm{t}} = \mathbf{D}_{2\mathrm{t}} = 0$</td></tr>
+                        <tr class="hover:bg-slate-200/50 transition"><td class="px-6 py-3 font-medium text-slate-900">Normal $\mathbf{E}$</td><td class="px-6 py-3">$\varepsilon_1 E_{1\mathrm{n}} - \varepsilon_2 E_{2\mathrm{n}} = \rho_{\mathrm{s}}$</td><td class="px-6 py-3">$E_{1\mathrm{n}} = \rho_{\mathrm{s}}/\varepsilon_1$, $\ E_{2\mathrm{n}} = 0$</td></tr>
+                        <tr class="hover:bg-slate-200/50 transition"><td class="px-6 py-3 font-medium text-slate-900">Normal $\mathbf{D}$</td><td class="px-6 py-3">$D_{1\mathrm{n}} - D_{2\mathrm{n}} = \rho_{\mathrm{s}}$</td><td class="px-6 py-3">$D_{1\mathrm{n}} = \rho_{\mathrm{s}}$, $\ D_{2\mathrm{n}} = 0$</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Electric Boundary Conditions</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Score: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // shared: two media split by a horizontal boundary
+        function media(ctx, w, h, by, er1, er2, labels = true) {
+            const a1 = clamp(0.05 + 0.03 * er1, 0.05, 0.4), a2 = clamp(0.05 + 0.03 * er2, 0.05, 0.4);
+            ctx.fillStyle = `rgba(14, 165, 233, ${a1})`; ctx.fillRect(0, 0, w, by);
+            ctx.fillStyle = `rgba(79, 70, 229, ${a2})`; ctx.fillRect(0, by, w, h - by);
+            line(ctx, 0, by, w, by, COL.slate, 2);
+            if (labels) {
+                label(ctx, `Medium 1  (εr1 = ${er1.toFixed(1)})`, 10, 14, COL.sky, '600 12px Inter, sans-serif');
+                label(ctx, `Medium 2  (εr2 = ${er2.toFixed(1)})`, 10, h - 12, COL.indigo, '600 12px Inter, sans-serif');
+            }
+        }
+        function angleArc(ctx, x, y, r, a0, a1, color) { ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(x, y, r, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke(); ctx.restore(); }
+
+        // =========================================================
+        // Section 1 — setup sketch
+        // =========================================================
+        function drawSetup() {
+            const c = setupCanvas('canvas-setup'); if (!c) return;
+            const { ctx, w, h } = c, by = h / 2;
+            media(ctx, w, h, by, 2, 5);
+            const cx = w / 2;
+            arrow(ctx, cx, by, 0, -60, COL.emerald, 1, 2.6, 10); label(ctx, 'n̂₂', cx + 8, by - 58, COL.emerald, 'bold 14px Inter, sans-serif');
+            arrow(ctx, cx, by, 70, 0, COL.amber, 1, 2.6, 10); label(ctx, 't̂', cx + 74, by - 10, COL.amber, 'bold 14px Inter, sans-serif');
+            ctx.save(); ctx.strokeStyle = COL.sky; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.8; ctx.strokeRect(cx - 160, by - 26, 90, 52); ctx.restore();
+            label(ctx, 'loop', cx - 115, by - 36, COL.sky, '600 12px Inter, sans-serif', 'center');
+            ctx.save(); ctx.strokeStyle = COL.emerald; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.8;
+            ctx.beginPath(); ctx.ellipse(cx + 125, by - 22, 34, 9, 0, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(cx + 125, by + 22, 34, 9, 0, 0, Math.PI); ctx.stroke();
+            line(ctx, cx + 91, by - 22, cx + 91, by + 22, COL.emerald, 1.8); line(ctx, cx + 159, by - 22, cx + 159, by + 22, COL.emerald, 1.8); ctx.restore();
+            label(ctx, 'pillbox', cx + 125, by - 42, COL.emerald, '600 12px Inter, sans-serif', 'center');
+        }
+
+        // =========================================================
+        // Section 2 — tangential E via loop
+        // =========================================================
+        let violate = false;
+        function loopViolate(el) { violate = !violate; el.classList.toggle('on-rose', violate); drawLoop(); }
+        function drawLoop() {
+            const dh = num('slider-dh'), th = num('slider-lt') * Math.PI / 180, e1 = 1, e2 = 3;
+            setText('val-dh', dh.toFixed(2)); setText('val-lt', num('slider-lt') + '°');
+            // Field points upward (medium 2 → boundary → medium 1), consistent with n̂₂ and the other drawings
+            const E1x = Math.sin(th), E1y = Math.cos(th), E2x = violate ? 0.5 * E1x : E1x, E2y = E1y * e1 / e2;
+            const ab = E1x, bc = -(E1y + E2y) * dh / 2, cd = -E2x, da = (E1y + E2y) * dh / 2, sum = ab + bc + cd + da;
+            const f = v => sgn(v) + Math.abs(v).toFixed(3);
+            setText('ro-lp-ab', f(ab)); setText('ro-lp-bc', f(bc)); setText('ro-lp-cd', f(cd)); setText('ro-lp-da', f(da));
+            const s = $('ro-lp-sum'); s.innerText = (Math.abs(sum) < 5e-4 ? '0.000' : f(sum)) + ' V'; s.className = 'font-bold ' + (Math.abs(sum) < 5e-4 ? 'text-emerald-800' : 'text-rose-700');
+            setText('lp-note', violate ? 'With a jump in Et the loop integral is not zero: a charge carried around the loop would gain energy for free, which is impossible for an electrostatic field.' : 'Et is continuous, so the loop integral is exactly zero for any Δh.');
+            const c = setupCanvas('canvas-loop'); if (!c) return;
+            const { ctx, w, h } = c, by = h / 2;
+            media(ctx, w, h, by, e1, e2);
+            const L = 34;
+            for (let x = 30; x < w; x += 70) {
+                for (let y = 34; y < by - 10; y += 44) arrow(ctx, x, y, E1x * L, -E1y * L, COL.sky, 0.55, 1.8, 7);
+                for (let y = by + 30; y < h - 20; y += 44) arrow(ctx, x, y, E2x * L, -E2y * L, COL.indigo, 0.55, 1.8, 7);
+            }
+            const W = Math.min(260, w * 0.5), H = dh * (h / 2 - 30) * 2, x0 = w / 2 - W / 2, y0 = by - H / 2;
+            ctx.save(); ctx.strokeStyle = COL.amber; ctx.lineWidth = 3; ctx.strokeRect(x0, y0, W, H); ctx.restore();
+            arrow(ctx, x0 + W * 0.35, y0, W * 0.3, 0, COL.amber, 1, 3, 10);
+            arrow(ctx, x0 + W * 0.65, y0 + H, -W * 0.3, 0, COL.amber, 1, 3, 10);
+            if (H > 30) { arrow(ctx, x0 + W, y0 + H * 0.3, 0, H * 0.4, COL.amber, 1, 3, 9); arrow(ctx, x0, y0 + H * 0.7, 0, -H * 0.4, COL.amber, 1, 3, 9); }
+            [['a', x0, y0], ['b', x0 + W, y0], ['c', x0 + W, y0 + H], ['d', x0, y0 + H]].forEach(([n, x, y]) => label(ctx, n, x + (x > w / 2 ? 10 : -10), y + (y < by ? -10 : 10), COL.amber, 'bold 14px Inter, sans-serif', 'center'));
+            label(ctx, 'Δw', w / 2, y0 - 22 < 26 ? y0 + 16 : y0 - 22, COL.amber, 'bold 13px Inter, sans-serif', 'center');
+            label(ctx, 'Δh', x0 - 26, by, COL.amber, 'bold 13px Inter, sans-serif', 'center');
+        }
+        onInputs(['slider-dh', 'slider-lt'], drawLoop);
+
+        // =========================================================
+        // Section 3 — pillbox
+        // =========================================================
+        function drawPillbox() {
+            const rho = num('slider-pb-rho'), D2 = num('slider-pb-d2'), e1 = num('slider-pb-e1'), e2 = num('slider-pb-e2'), D1 = D2 + rho;
+            setText('val-pb-rho', rho.toFixed(1) + ' nC/m²'); setText('val-pb-d2', D2.toFixed(1) + ' nC/m²'); setText('val-pb-e1', e1.toFixed(1)); setText('val-pb-e2', e2.toFixed(1));
+            setText('ro-pb-d1', sgn(D1) + Math.abs(D1).toFixed(2) + ' nC/m²'); setText('ro-pb-bot', sgn(-D2) + Math.abs(D2).toFixed(2) + ' nC/m²');
+            setText('ro-pb-net', sgn(rho) + Math.abs(rho).toFixed(2) + ' nC/m²');
+            setText('ro-pb-e1', sgn(D1) + fmtSI(Math.abs(D1) * 1e-9 / (e1 * EPS0), 'V/m')); setText('ro-pb-e2', sgn(D2) + fmtSI(Math.abs(D2) * 1e-9 / (e2 * EPS0), 'V/m'));
+            const c = setupCanvas('canvas-pillbox'); if (!c) return;
+            const { ctx, w, h } = c, by = h / 2, cx = w / 2, R = Math.min(120, w * 0.22), hh = 46, ry = 18;
+            media(ctx, w, h, by, e1, e2);
+            // surface charge on boundary
+            const n = Math.round(Math.abs(rho) * 1.6);
+            for (let k = 0; k < n; k++) label(ctx, rho > 0 ? '+' : '−', cx - R + 10 + k * (2 * R - 20) / Math.max(1, n - 1), by + 1, rho > 0 ? COL.sky : COL.rose, 'bold 14px Inter, sans-serif', 'center');
+            // pillbox
+            ctx.save(); ctx.strokeStyle = COL.emerald; ctx.lineWidth = 2; ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
+            ctx.beginPath(); ctx.ellipse(cx, by + hh, R, ry, 0, 0, Math.PI); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx - R, by - hh); ctx.lineTo(cx - R, by + hh); ctx.moveTo(cx + R, by - hh); ctx.lineTo(cx + R, by + hh); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(cx, by - hh, R, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.ellipse(cx, by + hh, R, ry, 0, Math.PI, 2 * Math.PI); ctx.stroke(); ctx.restore();
+            label(ctx, 'Δs', cx + R + 12, by - hh, COL.emerald, 'bold 13px Inter, sans-serif');
+            // D vectors (along n̂2 = up)
+            const sc = 7;
+            [-0.5, 0, 0.5].forEach(fx => {
+                const x = cx + fx * R;
+                if (Math.abs(D1) > 0.05) arrow(ctx, x, D1 > 0 ? by - hh - 4 : by - hh - 4 - Math.abs(D1) * sc, 0, -D1 * sc, COL.sky, 1, 2.6, 9);
+                if (Math.abs(D2) > 0.05) arrow(ctx, x, D2 > 0 ? by + hh + 4 + Math.abs(D2) * sc : by + hh + 4, 0, -D2 * sc, COL.rose, 1, 2.6, 9);
+            });
+            label(ctx, 'D₁ₙ', cx + R * 0.5 + 10, by - hh - 20, COL.sky, 'bold 13px Inter, sans-serif');
+            label(ctx, 'D₂ₙ', cx + R * 0.5 + 10, by + hh + 24, COL.rose, 'bold 13px Inter, sans-serif');
+            arrow(ctx, w - 30, by + 20, 0, -40, COL.emerald, 1, 2, 8); label(ctx, 'n̂₂', w - 26, by - 26, COL.emerald, 'bold 12px Inter, sans-serif');
+        }
+        onInputs(['slider-pb-rho', 'slider-pb-d2', 'slider-pb-e1', 'slider-pb-e2'], drawPillbox);
+
+        // =========================================================
+        // Section 4 — refraction
+        // =========================================================
+        const rf = { lines: true, E: true, D: false, comp: true };
+        function refr(th1, e1, e2) { return Math.atan(e2 / e1 * Math.tan(th1)); }
+        function drawRefraction() {
+            const e1 = num('slider-rf-e1'), e2 = num('slider-rf-e2'), t1d = num('slider-rf-t1'), t1 = t1d * Math.PI / 180, t2 = refr(t1, e1, e2);
+            setText('val-rf-e1', e1.toFixed(1)); setText('val-rf-e2', e2.toFixed(1)); setText('val-rf-t1', t1d + '°');
+            const Et = Math.sin(t1), E1n = Math.cos(t1), E2n = E1n * e1 / e2, E2 = Math.hypot(Et, E2n);
+            setText('ro-rf-t2', (t2 * 180 / Math.PI).toFixed(1) + '°'); setText('ro-rf-et', Et.toFixed(3) + ' V/m');
+            setText('ro-rf-en', `${E1n.toFixed(3)} / ${E2n.toFixed(3)}`); setText('ro-rf-mag', `1.000 / ${E2.toFixed(3)}`);
+            setText('ro-rf-dn', (e1 * E1n).toFixed(3) + ' ε₀ C/m²');
+            setText('rf-note', Math.abs(e2 - e1) < 0.05 ? 'Equal permittivities: no refraction.' : e2 > e1 ? 'ε₂ > ε₁: the field bends away from the normal (θ₂ > θ₁) and |E| drops.' : 'ε₂ < ε₁: the field bends toward the normal (θ₂ < θ₁) and |E| grows.');
+            const c = setupCanvas('canvas-refraction'); if (!c) return;
+            const { ctx, w, h } = c, by = h / 2, cx = w / 2;
+            media(ctx, w, h, by, e1, e2);
+            line(ctx, cx, 20, cx, h - 20, COL.muted, 1, [4, 4]);
+            if (rf.lines) {
+                const sp = 56, H1 = by, H2 = h - by;
+                for (let x = -w; x < 2 * w; x += sp) {
+                    // Field points upward (medium 2 → boundary → medium 1), leaning to +x
+                    const xa = x + Math.tan(t1) * H1, xb = x - Math.tan(t2) * H2;
+                    line(ctx, xa, 0, x, by, 'rgba(79, 70, 229, 0.45)', 1.6);
+                    if (Math.tan(t2) * H2 < 4 * w) line(ctx, x, by, xb, h, 'rgba(79, 70, 229, 0.45)', 1.6);
+                    const mx = (xa + x) / 2; if (mx > 10 && mx < w - 10) arrow(ctx, mx - Math.sin(t1) * 7, by / 2 + Math.cos(t1) * 7, Math.sin(t1) * 14, -Math.cos(t1) * 14, 'rgba(79, 70, 229, 0.8)', 1, 1.8, 7);
+                    const mx2 = (x + xb) / 2; if (mx2 > 10 && mx2 < w - 10) arrow(ctx, mx2 - Math.sin(t2) * 7, (by + h) / 2 + Math.cos(t2) * 7, Math.sin(t2) * 14, -Math.cos(t2) * 14, 'rgba(79, 70, 229, 0.8)', 1, 1.8, 7);
+                }
+            }
+            const L = Math.min(150, by - 30);
+            // Field direction is upward: E₂ runs from medium 2 (bottom) up to the boundary,
+            // E₁ continues from the boundary up into medium 1 (top). (vx, vy) = (tangential, normal) magnitudes.
+            const drawVec = (vx, vy, col, name, below) => {
+                const x0 = below ? cx - vx * L : cx, y0 = below ? by + vy * L : by;   // tail
+                const tip = [x0 + vx * L, y0 - vy * L];                                  // head
+                arrow(ctx, x0, y0, vx * L, -vy * L, col, 1, 3.4, 12);
+                if (below) label(ctx, name, x0 - 30, y0 + 6, col, 'bold 15px Inter, sans-serif');
+                else label(ctx, name, tip[0] + 8, tip[1] + 4, col, 'bold 15px Inter, sans-serif');
+                if (rf.comp) {   // amber: tangential part, green: normal part
+                    line(ctx, x0, y0, tip[0], y0, COL.amber, 1.8, [5, 4]);
+                    line(ctx, tip[0], y0, tip[0], tip[1], COL.emerald, 1.8, [5, 4]);
+                }
+            };
+            if (rf.E) { drawVec(Et, E1n, COL.sky, 'E₁', false); drawVec(Et, E2n, COL.rose, 'E₂', true); }
+            if (rf.D) { const m = Math.max(e1, e2 * E2) || 1; drawVec(e1 * Et / m, e1 * E1n / m, COL.emerald, 'D₁', false); drawVec(e2 * Et / m, e2 * E2n / m, '#0d9488', 'D₂', true); }
+            angleArc(ctx, cx, by, 52, -Math.PI / 2, -Math.PI / 2 + t1, COL.slate);   // θ₁: normal → E₁ (upper right)
+            angleArc(ctx, cx, by, 52, Math.PI / 2, Math.PI / 2 + t2, COL.slate);     // θ₂: normal → E₂ tail (lower left)
+            label(ctx, 'θ₁', cx + 64 * Math.sin(t1 / 2) + 6, by - 64 * Math.cos(t1 / 2), COL.slate, 'italic bold 13px Inter, sans-serif', 'center');
+            label(ctx, 'θ₂', cx - 64 * Math.sin(t2 / 2) - 6, by + 64 * Math.cos(t2 / 2), COL.slate, 'italic bold 13px Inter, sans-serif', 'center');
+            if (rf.comp) label(ctx, 'amber: tangential   green: normal', w - 10, 14, COL.slate, '12px Inter, sans-serif', 'right');
+            // θ2 vs θ1 graph
+            const g = setupCanvas('canvas-rf-graph'); if (!g) return;
+            const F = plotFrame(g.ctx, g.w, g.h, 0, 90, 0, 90, { xlabel: 'θ₁ (°)', ylabel: 'θ₂ (°)' });
+            curve(g.ctx, x => x, 0, 90, F.X, F.Y, COL.muted, 1, 10, [4, 4]);
+            curve(g.ctx, x => refr(x * Math.PI / 180, e1, e2) * 180 / Math.PI, 0, 89.5, F.X, F.Y, COL.indigo);
+            dot(g.ctx, F.X(t1d), F.Y(t2 * 180 / Math.PI));
+        }
+        onInputs(['slider-rf-e1', 'slider-rf-e2', 'slider-rf-t1'], drawRefraction);
+
+        // =========================================================
+        // Section 5 — vector example
+        // =========================================================
+        function solveExample() {
+            const Ex = parseFloat($('in-ex').value) || 0, Ey = parseFloat($('in-ey').value) || 0, Ez = parseFloat($('in-ez').value) || 0;
+            const e1 = Math.max(1, parseFloat($('in-e1').value) || 1), e2 = Math.max(1, parseFloat($('in-e2').value) || 1);
+            const E2z = Ez * e1 / e2, Et = Math.hypot(Ex, Ey);
+            const th1 = Math.atan2(Et, Math.abs(Ez)) * 180 / Math.PI, th2 = Math.atan2(Et, Math.abs(E2z)) * 180 / Math.PI;
+            const n = v => (Math.round(v * 1000) / 1000).toString();
+            const vecTeX = (a, b, cc) => `\\hat{\\mathbf{x}}\\,${n(a)} ${b < 0 ? '-' : '+'} \\hat{\\mathbf{y}}\\,${n(Math.abs(b))} ${cc < 0 ? '-' : '+'} \\hat{\\mathbf{z}}\\,${n(Math.abs(cc))}`;
+            $('ex-step1').innerHTML = `$$E_{2x} = E_{1x} = ${n(Ex)},\\qquad E_{2y} = E_{1y} = ${n(Ey)}$$`;
+            $('ex-step2').innerHTML = `$$E_{2z} = \\frac{\\varepsilon_{\\mathrm{r1}}}{\\varepsilon_{\\mathrm{r2}}}E_{1z} = \\frac{${n(e1)}}{${n(e2)}}(${n(Ez)}) = ${n(E2z)}$$`;
+            $('ex-step3').innerHTML = `$$\\theta_1 = \\tan^{-1}\\frac{\\sqrt{E_{1x}^2+E_{1y}^2}}{|E_{1z}|} = ${th1.toFixed(1)}^\\circ,\\qquad \\theta_2 = \\tan^{-1}\\frac{\\sqrt{E_{2x}^2+E_{2y}^2}}{|E_{2z}|} = ${th2.toFixed(1)}^\\circ$$`;
+            $('ex-result').innerHTML = `$$\\mathbf{E}_2 = ${vecTeX(Ex, Ey, E2z)}\\ \\ \\mathrm{V/m}$$ <span class="text-sm">Check: $\\tan\\theta_2/\\tan\\theta_1 = ${(Math.tan(th2 * Math.PI / 180) / Math.tan(th1 * Math.PI / 180) || 0).toFixed(3)}$ and $\\varepsilon_2/\\varepsilon_1 = ${(e2 / e1).toFixed(3)}$.</span>`;
+            typeset([$('ex-step1'), $('ex-step2'), $('ex-step3'), $('ex-result')]);
+            const c = setupCanvas('canvas-example'); if (!c) return;
+            const { ctx, w, h } = c, by = h / 2, cx = w / 2;
+            media(ctx, w, h, by, e1, e2, false);
+            const m = Math.max(Et, Math.abs(Ez), Math.abs(E2z)) || 1, L = Math.min(by - 14, w / 2 - 14) / m;
+            if (Ez <= 0) {   // field points down: E1 arrives at the boundary, E2 leaves it
+                arrow(ctx, cx - Et * L, by - Math.abs(Ez) * L, Et * L, Math.abs(Ez) * L, COL.sky, 1, 3, 10);
+                arrow(ctx, cx, by, Et * L, Math.abs(E2z) * L, COL.rose, 1, 3, 10);
+            } else {         // field points up: E2 arrives from below, E1 leaves upward
+                arrow(ctx, cx - Et * L, by + Math.abs(E2z) * L, Et * L, -Math.abs(E2z) * L, COL.rose, 1, 3, 10);
+                arrow(ctx, cx, by, Et * L, -Math.abs(Ez) * L, COL.sky, 1, 3, 10);
+            }
+            label(ctx, 'E₁', 8, 14, COL.sky, 'bold 13px Inter, sans-serif'); label(ctx, 'E₂', 8, h - 12, COL.rose, 'bold 13px Inter, sans-serif');
+            label(ctx, 'horizontal: |Et|, vertical: Ez', w - 6, 14, COL.slate, '12px Inter, sans-serif', 'right');
+        }
+        onInputs(['in-ex', 'in-ey', 'in-ez', 'in-e1', 'in-e2'], solveExample);
+
+        // =========================================================
+        // Section 6 — conducting cylinder in a uniform field
+        // =========================================================
+        const cd = { lines: true, equi: true, charge: true, probe: null };
+        function cylField(x, y, a, E0) {        // world coords, E0 along +x
+            const r2 = x * x + y * y, r = Math.sqrt(r2);
+            if (r < a) return [0, 0];
+            const c = x / r, s = y / r, Er = E0 * (1 + a * a / r2) * c, Ep = -E0 * (1 - a * a / r2) * s;
+            return [Er * c - Ep * s, Er * s + Ep * c];
+        }
+        function drawConductor() {
+            const E0 = num('slider-cd-e0'), a = num('slider-cd-a');
+            setText('val-cd-e0', E0.toFixed(1) + ' kV/m'); setText('val-cd-a', a.toFixed(1) + ' cm');
+            setText('ro-cd-rho', fmtSI(2 * EPS0 * E0 * 1e3, 'C/m²')); setText('ro-cd-emax', fmtSI(2 * E0 * 1e3, 'V/m') + ' (= 2E₀)');
+            const c = setupCanvas('canvas-conductor'); if (!c) return;
+            const { ctx, w, h } = c, S = Math.min(w, h) / 6.4, ox = w / 2, oy = h / 2;
+            const wx = px => (px - ox) / S, wy = py => (oy - py) / S;
+            const inside = (px, py) => Math.hypot(wx(px), wy(py)) < a;
+            if (cd.equi) contours(ctx, w, h, (px, py) => { const x = wx(px), y = wy(py), r = Math.hypot(x, y); return r < a ? 0 : -(r - a * a / r) * x / r; },
+                [-3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5, 3].map(v => v), () => 'rgba(71, 85, 105, 0.35)', 5, 1);
+            if (cd.lines) contours(ctx, w, h, (px, py) => { const x = wx(px), y = wy(py), r = Math.hypot(x, y); return r < a ? NaN : (r + a * a / r) * y / r; },   // field-line function Im(z − a²/z): lines end on the surface
+                [-2.6, -2.2, -1.8, -1.4, -1.0, -0.6, -0.3, 0.3, 0.6, 1.0, 1.4, 1.8, 2.2, 2.6], () => 'rgba(79, 70, 229, 0.75)', 4, 1.6);
+            if (cd.lines) for (let yv = -2.6; yv <= 2.61; yv += 0.8) arrow(ctx, 12, oy - yv * S, 16, 0, COL.indigo, 0.8, 1.6, 6);
+            // conductor
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.55)'; ctx.beginPath(); ctx.arc(ox, oy, a * S, 0, Math.PI * 2); ctx.fill();
+            label(ctx, 'E = 0', ox, oy, COL.slate, 'bold 13px Inter, sans-serif', 'center');
+            if (cd.charge) for (let k = 0; k < 36; k++) {
+                const p = 2 * Math.PI * k / 36, cs = Math.cos(p), x = ox + (a * S + 7) * cs, y = oy - (a * S + 7) * Math.sin(p);
+                if (Math.abs(cs) < 0.12) continue;
+                label(ctx, cs > 0 ? '+' : '−', x, y, cs > 0 ? COL.sky : COL.rose, `bold ${Math.round(9 + 6 * Math.abs(cs))}px Inter, sans-serif`, 'center');
+            }
+            label(ctx, 'E₀ →', 10, 14, COL.indigo, 'bold 13px Inter, sans-serif');
+            if (cd.probe) {
+                const [px, py] = cd.probe, x = wx(px), y = wy(py), r = Math.hypot(x, y);
+                if (r > a) {
+                    const [ex, ey] = cylField(x, y, a, E0), m = Math.hypot(ex, ey);
+                    arrow(ctx, px, py, ex / m * 36, -ey / m * 36, COL.amber, 1, 2.6, 10);
+                    const tx = -y / r, ty = x / r, cosang = Math.abs(ex * tx + ey * ty) / m, ang = Math.acos(clamp(cosang, 0, 1)) * 180 / Math.PI;
+                    setText('ro-cd-probe', r - a < 0.35 ? ang.toFixed(1) + '° (r − a = ' + (r - a).toFixed(2) + ')' : 'move closer to the surface');
+                    dot(ctx, px, py, COL.amber, 4);
+                }
+            }
+        }
+        $('canvas-conductor').addEventListener('pointermove', e => { const r = e.target.getBoundingClientRect(); cd.probe = [e.clientX - r.left, e.clientY - r.top]; drawConductor(); });
+        $('canvas-conductor').addEventListener('pointerleave', () => { cd.probe = null; setText('ro-cd-probe', 'hover near the surface'); drawConductor(); });
+        onInputs(['slider-cd-e0', 'slider-cd-a'], drawConductor);
+
+        // =========================================================
+        // Section 7 — conductor–conductor
+        // =========================================================
+        function drawCC() {
+            const s1 = num('slider-cc-s1'), s2 = num('slider-cc-s2'), J = num('slider-cc-j'), e1 = num('slider-cc-e1'), e2 = num('slider-cc-e2'), t1d = num('slider-cc-t'), t1 = t1d * Math.PI / 180;
+            setText('val-cc-s1', s1.toFixed(1)); setText('val-cc-s2', s2.toFixed(1)); setText('val-cc-j', J.toFixed(1)); setText('val-cc-e1', e1.toFixed(1)); setText('val-cc-e2', e2.toFixed(1)); setText('val-cc-t', t1d + '°');
+            const t2 = Math.atan(s2 / s1 * Math.tan(t1));
+            const Jn = -J * Math.cos(t1);                 // component along n̂2 (up); current flows downward
+            const rho = Jn * (e1 / s1 - e2 / s2) * EPS0;
+            setText('ro-cc-jn', Jn.toFixed(2) + ' A/m² (along n̂₂)'); setText('ro-cc-t2', (t2 * 180 / Math.PI).toFixed(1) + '°');
+            setText('ro-cc-tau', `${(e1 / s1).toFixed(2)} vs ${(e2 / s2).toFixed(2)} (×ε₀)`);
+            setText('ro-cc-rho', Math.abs(rho) < 1e-16 ? '0 (ratios equal)' : sgn(rho) + fmtSI(Math.abs(rho), 'C/m²'));
+            const c = setupCanvas('canvas-cc'); if (!c) return;
+            const { ctx, w, h } = c, by = h / 2;
+            ctx.fillStyle = `rgba(14, 165, 233, ${0.05 + 0.03 * s1})`; ctx.fillRect(0, 0, w, by);
+            ctx.fillStyle = `rgba(79, 70, 229, ${0.05 + 0.03 * s2})`; ctx.fillRect(0, by, w, h - by);
+            line(ctx, 0, by, w, by, COL.slate, 2);
+            label(ctx, `Medium 1: σ₁ = ${s1}, εr1 = ${e1}`, 10, 14, COL.sky, '600 12px Inter, sans-serif');
+            label(ctx, `Medium 2: σ₂ = ${s2}, εr2 = ${e2}`, 10, h - 12, COL.indigo, '600 12px Inter, sans-serif');
+            const sp = 60;
+            for (let x = -w; x < 2 * w; x += sp) {
+                const xa = x - Math.tan(t1) * by, xb = x + Math.tan(t2) * (h - by);
+                line(ctx, xa, 0, x, by, 'rgba(5, 150, 105, 0.6)', 1.8);
+                if (Math.tan(t2) * (h - by) < 4 * w) line(ctx, x, by, xb, h, 'rgba(5, 150, 105, 0.6)', 1.8);
+                const mx = (xa + x) / 2; if (mx > 20 && mx < w - 20) arrow(ctx, mx - Math.sin(t1) * 8, by / 2 - Math.cos(t1) * 8, Math.sin(t1) * 16, Math.cos(t1) * 16, COL.emerald, 1, 2, 8);
+                const mx2 = (x + xb) / 2; if (mx2 > 20 && mx2 < w - 20) arrow(ctx, mx2 - Math.sin(t2) * 8, (by + h) / 2 - Math.cos(t2) * 8, Math.sin(t2) * 16, Math.cos(t2) * 16, COL.emerald, 1, 2, 8);
+            }
+            const n = Math.min(24, Math.round(Math.abs(rho) / 1e-12 * 1.5));
+            for (let k = 0; k < n; k++) { const x = 20 + k * (w - 40) / Math.max(1, n - 1); dot(ctx, x, by, '#ffffff', 7); label(ctx, rho > 0 ? '+' : '−', x, by, rho > 0 ? COL.sky : COL.rose, 'bold 15px Inter, sans-serif', 'center'); }
+            label(ctx, 'J lines (current flows downward)', w - 10, 14, COL.emerald, '600 12px Inter, sans-serif', 'right');
+        }
+        onInputs(['slider-cc-s1', 'slider-cc-s2', 'slider-cc-j', 'slider-cc-e1', 'slider-cc-e2', 'slider-cc-t'], drawCC);
+
+        // =========================================================
+        // Quiz & start-up
+        // =========================================================
+        window.addEventListener('load', () => {
+            renderQuiz([
+                { q: 'Which principle proves that tangential $\\mathbf{E}$ is continuous across a boundary?', opts: ['Gauss\'s law $\\oint_S \\mathbf{D}\\cdot d\\mathbf{s} = Q$', 'The conservative property $\\oint_C \\mathbf{E}\\cdot d\\mathbf{l} = 0$', 'Ampère\'s law'], ans: 1, why: 'Applied to a thin loop straddling the boundary, it gives $E_{1\\mathrm{t}} = E_{2\\mathrm{t}}$.' },
+                { q: 'With $\\varepsilon_{\\mathrm{r1}} = 2$, $\\varepsilon_{\\mathrm{r2}} = 6$ and $\\rho_{\\mathrm{s}} = 0$, the ratio $E_{1\\mathrm{n}}/E_{2\\mathrm{n}}$ is:', opts: ['$1/3$', '$3$', '$1$'], ans: 1, why: '$\\varepsilon_1 E_{1\\mathrm{n}} = \\varepsilon_2 E_{2\\mathrm{n}}$, so $E_{1\\mathrm{n}}/E_{2\\mathrm{n}} = \\varepsilon_2/\\varepsilon_1 = 3$.' },
+                { q: 'A field line hits a charge-free boundary at $\\theta_1 = 45^\\circ$ with $\\varepsilon_1 = \\varepsilon_0$ and $\\varepsilon_2 = 3\\varepsilon_0$. Then:', opts: ['$\\theta_2 > 45^\\circ$ (bends away from the normal)', '$\\theta_2 < 45^\\circ$ (bends toward the normal)', '$\\theta_2 = 45^\\circ$'], ans: 0, why: '$\\tan\\theta_2 = (\\varepsilon_2/\\varepsilon_1)\\tan\\theta_1 = 3$, so $\\theta_2 \\approx 71.6^\\circ$.' },
+                { q: 'Why is $E_{\\mathrm{t}} = 0$ just outside the surface of a conductor in electrostatic equilibrium?', opts: ['Conductors absorb all flux.', 'Free charges move until no tangential field remains.', 'A conductor has $\\varepsilon_{\\mathrm{r}} = 0$.'], ans: 1, why: 'Any tangential field would drive surface charges along the surface; equilibrium requires it to vanish.' },
+                { q: 'Normal $\\mathbf{D}$ is continuous across a boundary when:', opts: ['$\\varepsilon_1 = \\varepsilon_2$', 'there is no free surface charge, $\\rho_{\\mathrm{s}} = 0$', 'the boundary is a conductor'], ans: 1, why: '$D_{1\\mathrm{n}} - D_{2\\mathrm{n}} = \\rho_{\\mathrm{s}}$.' },
+                { q: 'Steady current crosses from one conductor into another. No surface charge accumulates if:', opts: ['$\\sigma_1 = \\sigma_2$ only', '$\\varepsilon_1/\\sigma_1 = \\varepsilon_2/\\sigma_2$', '$\\varepsilon_1 = \\varepsilon_2$ only'], ans: 1, why: '$\\rho_{\\mathrm{s}} = J_{\\mathrm{n}}(\\varepsilon_1/\\sigma_1 - \\varepsilon_2/\\sigma_2)$.' }
+            ]);
+            drawSetup(); drawLoop(); drawPillbox(); drawRefraction(); solveExample(); drawConductor(); drawCC();
+            window.addEventListener('resize', () => { drawSetup(); drawLoop(); drawPillbox(); drawRefraction(); solveExample(); drawConductor(); drawCC(); });
+            typeset();
+        });
+
+    </script>
+</body>
+</html>

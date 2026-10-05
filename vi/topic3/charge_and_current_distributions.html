@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân bố điện tích và dòng điện - Học phần Trường điện từ</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20">
+                    <i data-lucide="layers" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">
+                        Phân bố điện tích và dòng điện
+                    </h1>
+                </div>
+            </div>
+
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('theory')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Mật độ điện tích</button>
+                <button onclick="scrollToSection('line-charge')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="minus" class="w-3.5 h-3.5"></i><span>Điện tích dài</span>
+                </button>
+                <button onclick="scrollToSection('surface-charge')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="disc" class="w-3.5 h-3.5"></i><span>Đĩa tích điện mặt</span>
+                </button>
+                <button onclick="scrollToSection('current-density')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="arrow-right-left" class="w-3.5 h-3.5"></i><span>Mật độ dòng</span>
+                </button>
+                <button onclick="scrollToSection('transport')" class="px-3 py-1.5 rounded-lg text-indigo-700 hover:bg-indigo-500/10 transition">Đối lưu và dẫn</button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Kiểm tra</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Section 1: Charge densities -->
+        <section id="theory" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20">
+                    <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Cơ sở tĩnh điện
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                    Mật độ điện tích liên tục và điện tích tổng
+                </h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                    Ở thang vĩ mô, điện tích (charge) được xem là phân bố liên tục trong một thể tích $v$, trên một mặt $s$ hoặc dọc theo một đường $l$. Mật độ cho biết lượng điện tích nằm trong mỗi phần tử rất nhỏ; tích phân mật độ trên miền đang xét cho điện tích tổng $Q$. Chọn mô hình đường, mặt hoặc khối theo các kích thước có thể bỏ qua ở thang quan sát. Mật độ nhân phần tử tương ứng phải có đơn vị điện tích; dùng sai phần tử sẽ cho sai đơn vị.</p>
+            </div>
+
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="glass-card rounded-2xl p-5 space-y-3 flex flex-col">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-400/10 px-2.5 py-1 rounded-md">Khối</span>
+                        <span class="text-sm font-mono text-slate-600">$\mathrm{C}/\mathrm{m}^3$</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Mật độ điện tích khối (volume charge density) $\rho_{\mathrm{v}}$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">
+                        $$\rho_{\mathrm{v}} = \lim_{\Delta v \to 0} \frac{\Delta q}{\Delta v} = \frac{dq}{dv}$$
+                    </div>
+                    <p class="text-sm text-slate-700">Điện tích trên một đơn vị thể tích; tổng quát là một hàm $\rho_{\mathrm{v}}(x, y, z, t)$.</p>
+                    <div class="text-center text-sky-800 text-sm pt-2 border-t border-slate-200 mt-auto">$$Q = \int_v \rho_{\mathrm{v}} \, dv$$</div>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3 flex flex-col">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-400/10 px-2.5 py-1 rounded-md">Mặt</span>
+                        <span class="text-sm font-mono text-slate-600">$\mathrm{C}/\mathrm{m}^2$</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Mật độ điện tích mặt (surface charge density) $\rho_{\mathrm{s}}$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">
+                        $$\rho_{\mathrm{s}} = \lim_{\Delta s \to 0} \frac{\Delta q}{\Delta s} = \frac{dq}{ds}$$
+                    </div>
+                    <p class="text-sm text-slate-700">Điện tích trên một đơn vị diện tích của một lớp mỏng, chẳng hạn bề mặt vật dẫn (conductor) hoặc một đĩa tích điện.</p>
+                    <div class="text-center text-amber-800 text-sm pt-2 border-t border-slate-200 mt-auto">$$Q = \int_s \rho_{\mathrm{s}} \, ds$$</div>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3 flex flex-col">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-400/10 px-2.5 py-1 rounded-md">Dài</span>
+                        <span class="text-sm font-mono text-slate-600">$\mathrm{C}/\mathrm{m}$</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Mật độ điện tích dài (line charge density) $\rho_{\ell}$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">
+                        $$\rho_{\ell} = \lim_{\Delta l \to 0} \frac{\Delta q}{\Delta l} = \frac{dq}{dl}$$
+                    </div>
+                    <p class="text-sm text-slate-700">Điện tích trên một đơn vị chiều dài dọc theo một dây mảnh hoặc sợi có tiết diện không đáng kể.</p>
+                    <div class="text-center text-rose-700 text-sm pt-2 border-t border-slate-200 mt-auto">$$Q = \int_l \rho_{\ell} \, dl$$</div>
+                </div>
+            </div>
+
+            <!-- Three density visualizers -->
+            <div class="relative mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card rounded-2xl p-4 space-y-2">
+                    <div class="flex justify-between items-center text-sm font-semibold text-rose-700">
+                        <span>Dài: phần tử $dl$</span><span class="font-mono text-slate-600">$dq = \rho_{\ell}\, dl$</span>
+                    </div>
+                    <div class="relative h-44 rounded-xl overflow-hidden bg-slate-50 border border-slate-200"><canvas id="canvas-demo-1d" class="w-full h-full"></canvas></div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 space-y-2">
+                    <div class="flex justify-between items-center text-sm font-semibold text-amber-800">
+                        <span>Mặt: phần tử $ds$</span><span class="font-mono text-slate-600">$dq = \rho_{\mathrm{s}}\, ds$</span>
+                    </div>
+                    <div class="relative h-44 rounded-xl overflow-hidden bg-slate-50 border border-slate-200"><canvas id="canvas-demo-2d" class="w-full h-full"></canvas></div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 space-y-2">
+                    <div class="flex justify-between items-center text-sm font-semibold text-sky-800">
+                        <span>Khối: phần tử $dv$</span><span class="font-mono text-slate-600">$dq = \rho_{\mathrm{v}}\, dv$</span>
+                    </div>
+                    <div class="relative h-44 rounded-xl overflow-hidden bg-slate-50 border border-slate-200"><canvas id="canvas-demo-3d" class="w-full h-full"></canvas></div>
+                </div>
+            </div>
+            <p class="relative text-sm text-slate-600 mt-3">Mật độ chấm tỉ lệ với mật độ điện tích; phần tử được tô sáng là $dl$, $ds$ hoặc $dv$ đang được tích phân cộng dồn.</p>
+        </section>
+
+        <!-- Section 2: Line charge -->
+        <section id="line-charge" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Ví dụ 1</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Điện tích dài trong một ống trụ</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        Một ống mảnh dọc trục $z$ từ $z = 0$ đến $z = L$ mang mật độ $\rho_{\ell} = a z^n$. Tích phân $Q = \int_0^L \rho_{\ell}\, dz$ là giới hạn của tổng $N$ phần tử nhỏ $\rho_{\ell}(z_i)\,\Delta z$.
+                    </p>
+                </div>
+                <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sm font-mono text-sky-800 shrink-0">
+                    Trường hợp trong sách: $\rho_{\ell} = 2z$, $L = 10\ \mathrm{cm}$
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-72 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                        <canvas id="canvas-line-charge" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Chiều dài ống $L$</span><span id="val-line-L" class="font-mono text-sky-800">10 cm</span></div>
+                            <input type="range" id="slider-line-L" min="2" max="25" step="1" value="10" class="w-full accent-sky-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Hệ số $a$</span><span id="val-line-a" class="font-mono text-amber-800">2.0</span></div>
+                            <input type="range" id="slider-line-a" min="0.5" max="5" step="0.5" value="2" class="w-full accent-amber-600">
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-slate-700 block">Dạng phân bố $\rho_{\ell} = a z^n$</span>
+                            <div class="flex gap-1.5" id="line-n-group">
+                                <button data-n="0" class="chip">$n = 0$ (đều)</button>
+                                <button data-n="1" class="chip on">$n = 1$</button>
+                                <button data-n="2" class="chip">$n = 2$</button>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Số phần tử $N$ (tổng Riemann)</span><span id="val-line-N" class="font-mono text-indigo-700">8</span></div>
+                            <input type="range" id="slider-line-N" min="1" max="60" step="1" value="8" class="w-full accent-indigo-600">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3 text-sm text-slate-700">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                            <i data-lucide="calculator" class="w-4 h-4 text-sky-800"></i> Tính tích phân từng bước
+                        </h3>
+                        <div id="math-line-step1" class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sky-800"></div>
+                        <div id="math-line-step2" class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-slate-800"></div>
+                        <div class="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                            <span class="text-emerald-800 font-semibold block text-sm uppercase tracking-wider">Kết quả</span>
+                            <div id="math-line-result" class="text-emerald-800"></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 font-mono">
+                            <div><span class="text-slate-600 block">$Q$ chính xác</span><span id="ro-line-exact" class="text-emerald-800 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">Tổng $N$ phần tử</span><span id="ro-line-sum" class="text-indigo-700 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">Sai số</span><span id="ro-line-err" class="text-rose-700 font-bold"></span></div>
+                        </div>
+                    </div>
+                    <div class="text-sm text-slate-700 bg-slate-100/90 p-2.5 rounded-lg border border-slate-200">
+                        <span class="font-semibold text-slate-900">Nhận xét:</span> tổng lấy theo đầu mút trái cho giá trị nhỏ hơn thực tế khi mật độ tăng dần; khi $N \to \infty$ sai số tiến về 0 và tổng trở thành tích phân.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Surface charge disk -->
+        <section id="surface-charge" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Ví dụ 2</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Đĩa tích điện đối xứng theo góc phương vị</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        Một đĩa bán kính $R$ mang mật độ $\rho_{\mathrm{s}}(r) = \rho_0 (r/R)^n$. Vì $\rho_{\mathrm{s}}$ không phụ thuộc $\phi$, có thể chia đĩa thành các vành mỏng có diện tích $ds = 2\pi r\, dr$. Các vành ngoài có diện tích lớn hơn vành trong cùng bề dày. Vì vậy mật độ mặt không đổi không có nghĩa điện tích bằng nhau trên mỗi khoảng bán kính; hệ số bán kính trong phần tử diện tích tính đến điều đó.</p>
+                </div>
+                <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sm font-mono text-amber-800 shrink-0">
+                    Trường hợp trong sách: $R = 3\ \mathrm{cm}$, $\rho_0 = 6\ \mathrm{C}/\mathrm{m}^2$, $n = 1$
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-72 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                        <canvas id="canvas-surface-disk" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Bán kính đĩa $R$</span><span id="val-disk-R" class="font-mono text-amber-800">3.0 cm</span></div>
+                            <input type="range" id="slider-disk-R" min="1" max="6" step="0.5" value="3" class="w-full accent-amber-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Mật độ ở mép $\rho_0$</span><span id="val-disk-rho0" class="font-mono text-sky-800">6.0 C/m²</span></div>
+                            <input type="range" id="slider-disk-rho0" min="1" max="12" step="1" value="6" class="w-full accent-sky-600">
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-slate-700 block">Dạng phân bố $(r/R)^n$</span>
+                            <div class="flex gap-1.5" id="disk-n-group">
+                                <button data-n="0" class="chip">$n = 0$ (đều)</button>
+                                <button data-n="1" class="chip on">$n = 1$</button>
+                                <button data-n="2" class="chip">$n = 2$</button>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Vị trí vành $r/R$</span><span id="val-disk-ring" class="font-mono text-indigo-700">0.60</span></div>
+                            <input type="range" id="slider-disk-ring" min="0.05" max="0.95" step="0.01" value="0.6" class="w-full accent-indigo-600">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3 text-sm text-slate-700">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                            <i data-lucide="sigma" class="w-4 h-4 text-amber-800"></i> Tích phân kép trong tọa độ cực
+                        </h3>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-amber-800">
+                            $$Q = \int_{\phi=0}^{2\pi}\int_{r=0}^{R} \rho_{\mathrm{s}}(r)\, r\, dr\, d\phi$$
+                        </div>
+                        <div id="math-disk-step" class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-slate-800"></div>
+                        <div class="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                            <span class="text-emerald-800 font-semibold block text-sm uppercase tracking-wider">Kết quả</span>
+                            <div id="math-disk-result" class="text-emerald-800"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 font-mono">
+                            <div><span class="text-slate-600 block">Vành $dQ$ ($dr = R/20$)</span><span id="ro-disk-dq" class="text-indigo-700 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">Điện tích bên trong vành</span><span id="ro-disk-qin" class="text-emerald-800 font-bold"></span></div>
+                        </div>
+                    </div>
+                    <div class="text-sm text-slate-700 bg-slate-100/90 p-2.5 rounded-lg border border-slate-200">
+                        <span class="font-semibold text-slate-900">Nhận xét:</span> tích phân theo $\phi$ chỉ cho $2\pi$. Các vành ngoài có diện tích lớn hơn ($2\pi r\,dr$), nên ngay cả đĩa tích điện đều cũng chứa phần lớn điện tích gần mép.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Current density -->
+        <section id="current-density" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 1</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Mật độ dòng $\mathbf{J}$ và dòng điện $I$</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        Điện tích mật độ $\rho_{\mathrm{v}}$ chuyển động với vận tốc $\mathbf{u}$ tạo thành mật độ dòng (current density) $\mathbf{J} = \rho_{\mathrm{v}}\mathbf{u}$ ($\mathrm{A}/\mathrm{m}^2$). Dòng điện qua một mặt là thông lượng (flux) của $\mathbf{J}$: $I = \int_S \mathbf{J}\cdot d\mathbf{s}$.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-72 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                        <canvas id="canvas-current-density" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">$\rho_{\mathrm{v}}$</span><span id="val-cd-rhov" class="font-mono text-sky-800">2.0 C/m³</span></div>
+                            <input type="range" id="slider-cd-rhov" min="0.5" max="5" step="0.5" value="2" class="w-full accent-sky-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Tốc độ $u$</span><span id="val-cd-u" class="font-mono text-amber-800">2.0 m/s</span></div>
+                            <input type="range" id="slider-cd-u" min="0.5" max="5" step="0.5" value="2" class="w-full accent-amber-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Góc nghiêng $\theta$</span><span id="val-cd-angle" class="font-mono text-rose-700">0°</span></div>
+                            <input type="range" id="slider-cd-angle" min="0" max="90" step="5" value="0" class="w-full accent-rose-600">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3 text-sm text-slate-700">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                            <i data-lucide="zap" class="w-4 h-4 text-rose-700"></i> Từ điện tích chuyển động đến dòng điện
+                        </h3>
+                        <p>Trong thời gian $\Delta t$ các điện tích tiến được $\Delta l = u\,\Delta t$, nên điện tích đi qua phần tử $\Delta\mathbf{s}$ là</p>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-rose-700">
+                            $$\Delta q = \rho_{\mathrm{v}}\, \mathbf{u}\cdot\Delta\mathbf{s}\, \Delta t \;\Rightarrow\; \Delta I = \frac{\Delta q}{\Delta t} = \mathbf{J}\cdot\Delta\mathbf{s}$$
+                        </div>
+                        <p>Với $\mathbf{J}$ đều và một đĩa phẳng diện tích $A = \pi\ \mathrm{m}^2$ (bán kính $1\ \mathrm{m}$) có pháp tuyến hợp với $\mathbf{J}$ góc $\theta$: Xoay mặt để so sánh dòng điện cực đại với dòng bằng không. Chỉ thành phần vuông góc đi qua mặt; đảo pháp tuyến đã chọn sẽ đổi dấu dòng điện được tính.</p>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sky-800">$$I = J A \cos\theta$$</div>
+                        <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 font-mono">
+                            <div><span class="text-slate-600 block">$|\mathbf{J}|$</span><span id="ro-cd-J" class="text-rose-700 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">$A\cos\theta$</span><span id="ro-cd-Aeff" class="text-amber-800 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">$I$</span><span id="ro-cd-I" class="text-emerald-800 font-bold"></span></div>
+                        </div>
+                    </div>
+                    <div class="text-sm text-slate-700 bg-slate-100/90 p-2.5 rounded-lg border border-slate-200">
+                        <span class="font-semibold text-slate-900">Quan sát:</span> chỉ các điện tích nằm trong ống tô màu mới đi qua mặt. Nghiêng mặt làm ống thu hẹp còn $A\cos\theta$; tại $\theta = 90^\circ$ không có điện tích nào đi qua và $I = 0$.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Convection vs conduction -->
+        <section id="transport" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-indigo-700 bg-indigo-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 2</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Dòng điện đối lưu và dòng điện dẫn</h2>
+                    <p class="text-sm text-slate-600 mt-1">Hạt được tô sáng để lại vệt quỹ đạo để bạn so sánh cách điện tích thực sự chuyển động trong mỗi trường hợp.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-5 space-y-3 border-l-4 border-l-sky-500">
+                    <div class="flex justify-between items-center gap-2">
+                        <h3 class="text-base font-bold text-slate-900">Dòng điện đối lưu (convection current)</h3>
+                        <span class="text-sm px-2.5 py-1 bg-sky-400/10 text-sky-800 rounded-md font-semibold">Vật chất mang điện chuyển động</span>
+                    </div>
+                    <p class="text-sm text-slate-700 leading-relaxed">
+                        Chính vật chất mang điện di chuyển trong không gian, ví dụ chùm electron trong ống chân không hoặc các giọt nước tích điện trong đám mây. Trực tiếp có $\mathbf{J} = \rho_{\mathrm{v}}\mathbf{u}$.
+                    </p>
+                    <div class="h-40 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden relative"><canvas id="canvas-convection" class="w-full h-full"></canvas></div>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-700">Tốc độ chùm $u$</span><span id="val-conv-u" class="font-mono text-sky-800">1.0</span></div>
+                        <input type="range" id="slider-conv-u" min="0.2" max="2" step="0.1" value="1" class="w-full accent-sky-600">
+                    </div>
+                    <ul class="text-sm space-y-1 text-slate-700 list-disc list-inside">
+                        <li>Không cần vật dẫn hay mạng tinh thể nguyên tử.</li>
+                        <li>Không tuân theo định luật Ohm $\mathbf{J} = \sigma\mathbf{E}$.</li>
+                        <li>Mỗi hạt chuyển động đều đặn theo đường thẳng.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-card rounded-2xl p-5 space-y-3 border-l-4 border-l-rose-500">
+                    <div class="flex justify-between items-center gap-2">
+                        <h3 class="text-base font-bold text-slate-900">Dòng điện dẫn (conduction current)</h3>
+                        <span class="text-sm px-2.5 py-1 bg-rose-400/10 text-rose-700 rounded-md font-semibold">Electron trôi trong mạng tinh thể</span>
+                    </div>
+                    <p class="text-sm text-slate-700 leading-relaxed">
+                        Trong vật dẫn, các electron tự do chuyển động hỗn loạn với tốc độ nhiệt lớn và liên tục va chạm với các ion cố định. Điện trường $\mathbf{E}$ đặt vào thêm một chuyển động trôi tổng thể chậm ngược chiều $\mathbf{E}$, cho $\mathbf{J} = \sigma\mathbf{E}$.
+                    </p>
+                    <div class="h-40 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden relative"><canvas id="canvas-conduction" class="w-full h-full"></canvas></div>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-700">Điện trường đặt vào $E$</span><span id="val-cond-E" class="font-mono text-rose-700">1.0</span></div>
+                        <input type="range" id="slider-cond-E" min="0" max="3" step="0.1" value="1" class="w-full accent-rose-600">
+                    </div>
+                    <ul class="text-sm space-y-1 text-slate-700 list-disc list-inside">
+                        <li>Quỹ đạo zig-zag: chuyển động nhiệt hỗn loạn cộng với một vận tốc trôi nhỏ.</li>
+                        <li>Đặt $E = 0$: electron vẫn chuyển động nhưng dòng điện tổng bằng không.</li>
+                        <li>Electron trôi ngược chiều $\mathbf{E}$, nhưng $\mathbf{J}$ lại cùng chiều $\mathbf{E}$.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Quiz -->
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Câu hỏi tự kiểm tra</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Làm lại</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Điểm: 0 / 5</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Học phần Trường điện từ — Phân bố điện tích và dòng điện</footer>
+
+    <script>
+        if (window.lucide) lucide.createIcons();
+
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+        function setupCanvas(id) {
+            const canvas = document.getElementById(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 1.8, head = 7) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx, y + dy); ctx.stroke();
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.6);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.45), y + dy - hl * Math.sin(a - 0.45));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.45), y + dy - hl * Math.sin(a + 0.45));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y);
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        }
+
+        // Deterministic pseudo-random numbers (stable dot patterns — no flicker)
+        function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+
+        // Format a charge in C with a sensible SI prefix
+        function fmtQ(q) {
+            const a = Math.abs(q);
+            if (a >= 1) return q.toFixed(3) + ' C';
+            if (a >= 1e-3) return (q * 1e3).toFixed(2) + ' mC';
+            if (a >= 1e-6) return (q * 1e6).toFixed(2) + ' µC';
+            return (q * 1e9).toFixed(2) + ' nC';
+        }
+        function texQ(q) {
+            const a = Math.abs(q);
+            if (a >= 1) return q.toFixed(3) + '\\ \\mathrm{C}';
+            if (a >= 1e-3) return (q * 1e3).toFixed(2) + '\\ \\mathrm{mC}';
+            if (a >= 1e-6) return (q * 1e6).toFixed(2) + '\\ \\mu\\mathrm{C}';
+            return (q * 1e9).toFixed(2) + '\\ \\mathrm{nC}';
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+
+        // Chip-group helper
+        function chipGroup(id, onChange) {
+            const g = document.getElementById(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on');
+                onChange(parseInt(b.dataset.n, 10));
+            }));
+        }
+
+        // =========================================================
+        // Section 1 — density visualizers
+        // =========================================================
+        let tGlobal = 0;
+        const dots1D = (() => { const r = rng(7), a = []; for (let i = 0; i < 140; i++) a.push({ u: Math.sqrt(r()), j: r() - 0.5, p: r() * 6.28 }); return a; })();
+        const dots2D = (() => { const r = rng(11), a = []; for (let i = 0; i < 260; i++) a.push({ rr: Math.cbrt(r()), ph: r() * 6.28 }); return a; })();
+        const dots3D = (() => { const r = rng(19), a = []; for (let i = 0; i < 320; i++) a.push({ rr: Math.sqrt(r()), ph: r() * 6.28, z: r() - 0.5 }); return a; })();
+
+        function drawDemo1D() {
+            const c = setupCanvas('canvas-demo-1d'); if (!c) return;
+            const { ctx, w, h } = c, cy = h / 2, x0 = w * 0.1, x1 = w * 0.9;
+            ctx.clearRect(0, 0, w, h);
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 10; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(x0, cy); ctx.lineTo(x1, cy); ctx.stroke(); ctx.lineCap = 'butt';
+            dots1D.forEach(d => {
+                const x = x0 + d.u * (x1 - x0), y = cy + d.j * 6 + Math.sin(tGlobal * 2 + d.p) * 0.8;
+                ctx.fillStyle = COL.rose; ctx.globalAlpha = 0.75;
+                ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            // moving element dl
+            const ex = x0 + (0.5 + 0.35 * Math.sin(tGlobal * 0.6)) * (x1 - x0);
+            ctx.strokeStyle = COL.indigo; ctx.lineWidth = 2;
+            ctx.strokeRect(ex - 9, cy - 12, 18, 24);
+            label(ctx, 'dl', ex, cy - 22, COL.indigo, '600 13px Inter, sans-serif', 'center');
+            label(ctx, 'ρℓ tăng dần →', x1, h - 16, COL.muted, '12px Inter, sans-serif', 'right');
+        }
+
+        function drawDemo2D() {
+            const c = setupCanvas('canvas-demo-2d'); if (!c) return;
+            const { ctx, w, h } = c, cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.4;
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = 'rgba(245, 158, 11, 0.12)'; ctx.strokeStyle = 'rgba(217, 119, 6, 0.6)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            // dots with density ∝ r (radius sampled as cbrt → ρs ∝ r)
+            ctx.fillStyle = COL.amber;
+            dots2D.forEach(d => {
+                const a = d.ph + tGlobal * 0.15;
+                ctx.beginPath(); ctx.arc(cx + d.rr * R * Math.cos(a), cy + d.rr * R * Math.sin(a), 1.7, 0, Math.PI * 2); ctx.fill();
+            });
+            // area element ds = r dr dφ
+            const r0 = R * 0.62, dr = R * 0.14, a0 = tGlobal * 0.3, da = 0.35;
+            ctx.fillStyle = 'rgba(79, 70, 229, 0.25)'; ctx.strokeStyle = COL.indigo; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(cx, cy, r0 + dr, a0, a0 + da); ctx.arc(cx, cy, r0, a0 + da, a0, true); ctx.closePath(); ctx.fill(); ctx.stroke();
+            label(ctx, 'ds', cx + (r0 + dr + 12) * Math.cos(a0 + da / 2), cy + (r0 + dr + 12) * Math.sin(a0 + da / 2), COL.indigo, '600 13px Inter, sans-serif', 'center');
+        }
+
+        function drawDemo3D() {
+            const c = setupCanvas('canvas-demo-3d'); if (!c) return;
+            const { ctx, w, h } = c, cx = w / 2, cy = h / 2, rx = w * 0.26, ry = h * 0.12, H = h * 0.5;
+            ctx.clearRect(0, 0, w, h);
+            const pts = dots3D.map(d => {
+                const a = d.ph + tGlobal * 0.4, r = d.rr;
+                return { x: cx + r * rx * Math.cos(a), y: cy + d.z * H + r * ry * Math.sin(a), depth: Math.sin(a) * r };
+            }).sort((p, q) => p.depth - q.depth);
+            // back edges
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.ellipse(cx, cy - H / 2, rx, ry, 0, Math.PI, 2 * Math.PI); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(cx, cy + H / 2, rx, ry, 0, Math.PI, 2 * Math.PI); ctx.stroke();
+            pts.forEach(p => {
+                ctx.fillStyle = COL.sky; ctx.globalAlpha = 0.35 + 0.5 * (p.depth + 1) / 2;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 1.9, 0, Math.PI * 2); ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = '#64748b';
+            ctx.beginPath(); ctx.ellipse(cx, cy - H / 2, rx, ry, 0, 0, 2 * Math.PI); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(cx, cy + H / 2, rx, ry, 0, 0, Math.PI); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx - rx, cy - H / 2); ctx.lineTo(cx - rx, cy + H / 2); ctx.moveTo(cx + rx, cy - H / 2); ctx.lineTo(cx + rx, cy + H / 2); ctx.stroke();
+            // volume element dv
+            const bx = cx + rx * 0.25 * Math.cos(tGlobal * 0.5), by = cy + H * 0.15 * Math.sin(tGlobal * 0.7);
+            ctx.strokeStyle = COL.indigo; ctx.lineWidth = 2; ctx.fillStyle = 'rgba(79, 70, 229, 0.18)';
+            ctx.fillRect(bx - 10, by - 10, 20, 20); ctx.strokeRect(bx - 10, by - 10, 20, 20);
+            ctx.beginPath(); ctx.moveTo(bx - 10, by - 10); ctx.lineTo(bx - 4, by - 16); ctx.lineTo(bx + 16, by - 16); ctx.lineTo(bx + 16, by + 4); ctx.lineTo(bx + 10, by + 10);
+            ctx.moveTo(bx + 10, by - 10); ctx.lineTo(bx + 16, by - 16); ctx.stroke();
+            label(ctx, 'dv', bx + 24, by - 14, COL.indigo, '600 13px Inter, sans-serif');
+        }
+
+        // =========================================================
+        // Section 2 — line charge  ρℓ = a zⁿ
+        // =========================================================
+        const line = { n: 1 };
+        const unitA = n => n === 0 ? '\\mathrm{C/m}' : n === 1 ? '\\mathrm{C/m^2}' : '\\mathrm{C/m^3}';
+        const unitAtxt = n => n === 0 ? 'C/m' : n === 1 ? 'C/m²' : 'C/m³';
+
+        function updateLineMath() {
+            const Lcm = parseFloat(document.getElementById('slider-line-L').value), L = Lcm / 100;
+            const a = parseFloat(document.getElementById('slider-line-a').value), n = line.n;
+            document.getElementById('val-line-L').innerText = `${Lcm} cm`;
+            document.getElementById('val-line-a').innerText = `${a.toFixed(1)} ${unitAtxt(n)}`;
+            const Q = a * Math.pow(L, n + 1) / (n + 1);
+            const zn = n === 0 ? '' : n === 1 ? 'z' : 'z^2';
+            const s1 = document.getElementById('math-line-step1');
+            const s2 = document.getElementById('math-line-step2');
+            const s3 = document.getElementById('math-line-result');
+            s1.innerHTML = `$$Q = \\int_0^{L} ${a.toFixed(1)}\\,${zn}\\, dz$$`;
+            s2.innerHTML = `$$Q = ${a.toFixed(1)}\\left[\\frac{z^{${n + 1}}}{${n + 1}}\\right]_0^{${L.toFixed(2)}} = \\frac{a L^{${n + 1}}}{${n + 1}}$$`;
+            s3.innerHTML = `$$Q = \\frac{${a.toFixed(1)} \\times (${L.toFixed(2)})^{${n + 1}}}{${n + 1}} = ${texQ(Q)}$$`;
+            typeset([s1, s2, s3]);
+            drawLine();
+        }
+
+        function drawLine() {
+            const c = setupCanvas('canvas-line-charge'); if (!c) return;
+            const { ctx, w, h } = c;
+            const Lcm = parseFloat(document.getElementById('slider-line-L').value), L = Lcm / 100;
+            const a = parseFloat(document.getElementById('slider-line-a').value), n = line.n;
+            const N = parseInt(document.getElementById('slider-line-N').value, 10);
+            document.getElementById('val-line-N').innerText = N;
+            const rho = z => a * Math.pow(z, n);
+            const Q = a * Math.pow(L, n + 1) / (n + 1);
+            const dz = L / N;
+            let S = 0; for (let i = 0; i < N; i++) S += rho(i * dz) * dz;     // left Riemann sum
+            document.getElementById('ro-line-exact').innerText = fmtQ(Q);
+            document.getElementById('ro-line-sum').innerText = fmtQ(S);
+            document.getElementById('ro-line-err').innerText = (Q > 0 ? (100 * (S - Q) / Q) : 0).toFixed(1) + '%';
+
+            ctx.clearRect(0, 0, w, h);
+            const x0 = 60, x1 = w - 30, tubeY = 50, tubeH = 34;
+            const Lmax = 0.25, tubeW = (x1 - x0) * (L / Lmax);
+
+            // Tube with charge dots (density ∝ zⁿ, sampled deterministically)
+            ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
+            ctx.fillRect(x0, tubeY - tubeH / 2, tubeW, tubeH); ctx.strokeRect(x0, tubeY - tubeH / 2, tubeW, tubeH);
+            const r = rng(3), count = 170;
+            ctx.fillStyle = COL.sky;
+            for (let i = 0; i < count; i++) {
+                const u = (i + r()) / count;
+                const zN = Math.pow(u, 1 / (n + 1));          // inverse-CDF sampling for ρ ∝ zⁿ
+                ctx.beginPath(); ctx.arc(x0 + zN * tubeW, tubeY + (r() - 0.5) * (tubeH - 10), 2, 0, Math.PI * 2); ctx.fill();
+            }
+            label(ctx, 'ống', x0 - 8, tubeY, COL.muted, '12px Inter, sans-serif', 'right');
+
+            // Plot of ρℓ(z) with Riemann rectangles
+            const px0 = x0, py0 = h - 34, pH = h - 34 - 92;
+            const yOf = v => py0 - (v / (rho(L) * 1.1 || 1)) * pH;
+            ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(px0, py0); ctx.lineTo(x1, py0); ctx.moveTo(px0, py0); ctx.lineTo(px0, py0 - pH - 4); ctx.stroke();
+            for (let i = 0; i < N; i++) {
+                const za = i * dz, xa = px0 + (za / Lmax) * (x1 - x0), xw = (dz / Lmax) * (x1 - x0);
+                const yv = yOf(rho(za));
+                ctx.fillStyle = 'rgba(79, 70, 229, 0.18)'; ctx.strokeStyle = 'rgba(79, 70, 229, 0.7)';
+                ctx.fillRect(xa, yv, xw, py0 - yv); ctx.strokeRect(xa, yv, xw, py0 - yv);
+            }
+            ctx.strokeStyle = COL.sky; ctx.lineWidth = 2.2; ctx.beginPath();
+            for (let k = 0; k <= 100; k++) {
+                const z = L * k / 100, x = px0 + (z / Lmax) * (x1 - x0), y = yOf(rho(z));
+                if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            label(ctx, 'ρℓ(z)', px0 + 6, py0 - pH + 2, COL.sky);
+            label(ctx, 'z = 0', px0, py0 + 14, COL.slate, '12px Inter, sans-serif', 'center');
+            label(ctx, `z = L = ${Lcm} cm`, px0 + tubeW, py0 + 14, COL.slate, '12px Inter, sans-serif', 'center');
+            arrow(ctx, x1 - 30, py0 + 14, 26, 0, COL.amber, 1, 1.5, 6);
+            label(ctx, 'z', x1 + 2, py0 + 26, COL.amber, 'italic 600 13px Inter, sans-serif');
+            label(ctx, `diện tích tô = Σ ρℓ(zᵢ) Δz  (N = ${N})`, x1, py0 - pH + 2, COL.indigo, '12px Inter, sans-serif', 'right');
+        }
+
+        // =========================================================
+        // Section 3 — disk  ρs = ρ0 (r/R)ⁿ
+        // =========================================================
+        const disk = { n: 1 };
+        function updateDiskMath() {
+            const Rcm = parseFloat(document.getElementById('slider-disk-R').value), R = Rcm / 100;
+            const rho0 = parseFloat(document.getElementById('slider-disk-rho0').value), n = disk.n;
+            document.getElementById('val-disk-R').innerText = `${Rcm.toFixed(1)} cm`;
+            document.getElementById('val-disk-rho0').innerText = `${rho0.toFixed(1)} C/m²`;
+            const Q = 2 * Math.PI * rho0 * R * R / (n + 2);
+            const s = document.getElementById('math-disk-step'), res = document.getElementById('math-disk-result');
+            const integrand = n === 0 ? 'r' : n === 1 ? 'r^2' : 'r^3';
+            s.innerHTML = `$$Q = 2\\pi \\frac{\\rho_0}{R^{${n}}}\\int_0^R ${integrand}\\, dr = \\frac{2\\pi \\rho_0 R^2}{${n + 2}}$$`;
+            res.innerHTML = `$$Q = \\frac{2\\pi (${rho0.toFixed(1)})(${R.toFixed(3)})^2}{${n + 2}} = ${texQ(Q)}$$`;
+            typeset([s, res]);
+            drawDisk();
+        }
+
+        function drawDisk() {
+            const c = setupCanvas('canvas-surface-disk'); if (!c) return;
+            const { ctx, w, h } = c;
+            const Rcm = parseFloat(document.getElementById('slider-disk-R').value), R = Rcm / 100;
+            const rho0 = parseFloat(document.getElementById('slider-disk-rho0').value), n = disk.n;
+            const f = parseFloat(document.getElementById('slider-disk-ring').value);
+            document.getElementById('val-disk-ring').innerText = f.toFixed(2);
+            const Q = 2 * Math.PI * rho0 * R * R / (n + 2);
+            const dr = R / 20, rr = f * R;
+            const dQ = rho0 * Math.pow(f, n) * 2 * Math.PI * rr * dr;
+            const Qin = Q * Math.pow(f, n + 2);
+            document.getElementById('ro-disk-dq').innerText = fmtQ(dQ);
+            document.getElementById('ro-disk-qin').innerText = (100 * Math.pow(f, n + 2)).toFixed(0) + '% của Q';
+
+            ctx.clearRect(0, 0, w, h);
+            const split = w * 0.5;
+            const cx = split / 2, cy = h / 2, Rmax = Math.min(split, h) * 0.42;
+            const Rpx = Rmax * (Rcm / 6);
+
+            // density shading via radial gradient
+            const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Rpx);
+            for (let k = 0; k <= 10; k++) {
+                const v = n === 0 ? 1 : Math.pow(k / 10, n);
+                g.addColorStop(k / 10, `rgba(217, 119, 6, ${0.08 + 0.7 * v})`);
+            }
+            ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, Rpx, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = COL.amber; ctx.lineWidth = 1.5; ctx.stroke();
+
+            // ring element
+            const rpx = f * Rpx, drpx = Rpx / 20;
+            ctx.strokeStyle = COL.indigo; ctx.lineWidth = Math.max(2, drpx);
+            ctx.globalAlpha = 0.85; ctx.beginPath(); ctx.arc(cx, cy, rpx, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+            // radius line
+            ctx.setLineDash([4, 4]); ctx.strokeStyle = COL.slate; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Rpx, cy); ctx.stroke(); ctx.setLineDash([]);
+            label(ctx, `R = ${Rcm.toFixed(1)} cm`, cx + Rpx / 2, cy - 10, COL.text, '600 12px Inter, sans-serif', 'center');
+            label(ctx, 'vành: ds = 2πr dr', cx, cy - Rpx - 14 < 10 ? 12 : cy - Rpx - 12, COL.indigo, '600 12px Inter, sans-serif', 'center');
+
+            // Graph: ρs(r)/ρ0 and Q(r)/Q
+            const gx0 = split + 30, gx1 = w - 20, gy0 = h - 34, gy1 = 30;
+            ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(gx0, gy0); ctx.lineTo(gx1, gy0); ctx.moveTo(gx0, gy0); ctx.lineTo(gx0, gy1); ctx.stroke();
+            const X = t => gx0 + t * (gx1 - gx0), Y = v => gy0 - v * (gy0 - gy1);
+            const curve = (fn, color) => {
+                ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.beginPath();
+                for (let k = 0; k <= 100; k++) { const t = k / 100; if (k === 0) ctx.moveTo(X(t), Y(fn(t))); else ctx.lineTo(X(t), Y(fn(t))); }
+                ctx.stroke();
+            };
+            curve(t => n === 0 ? 1 : Math.pow(t, n), COL.amber);
+            curve(t => Math.pow(t, n + 2), COL.emerald);
+            ctx.strokeStyle = COL.indigo; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(X(f), gy0); ctx.lineTo(X(f), gy1); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = COL.emerald; ctx.beginPath(); ctx.arc(X(f), Y(Math.pow(f, n + 2)), 4, 0, Math.PI * 2); ctx.fill();
+            label(ctx, 'ρs(r) / ρ0', gx0 + 6, gy1 - 12, COL.amber);
+            label(ctx, 'Q(r) / Q', gx0 + 90, gy1 - 12, COL.emerald);
+            label(ctx, '0', gx0, gy0 + 14, COL.slate, '12px Inter, sans-serif', 'center');
+            label(ctx, 'r = R', gx1, gy0 + 14, COL.slate, '12px Inter, sans-serif', 'center');
+        }
+
+        // =========================================================
+        // Section 4 — current density J = ρv u through a tilted surface
+        // =========================================================
+        let cdParticles = [];
+        function drawCurrent(dt) {
+            const c = setupCanvas('canvas-current-density'); if (!c) return;
+            const { ctx, w, h } = c;
+            const rhov = parseFloat(document.getElementById('slider-cd-rhov').value);
+            const u = parseFloat(document.getElementById('slider-cd-u').value);
+            const thDeg = parseFloat(document.getElementById('slider-cd-angle').value), th = thDeg * Math.PI / 180;
+            const J = rhov * u, A = Math.PI, Aeff = A * Math.cos(th), I = J * Aeff;
+            document.getElementById('val-cd-rhov').innerText = rhov.toFixed(1) + ' C/m³';
+            document.getElementById('val-cd-u').innerText = u.toFixed(1) + ' m/s';
+            document.getElementById('val-cd-angle').innerText = thDeg + '°';
+            document.getElementById('ro-cd-J').innerText = J.toFixed(1) + ' A/m²';
+            document.getElementById('ro-cd-Aeff').innerText = Aeff.toFixed(2) + ' m²';
+            document.getElementById('ro-cd-I').innerText = (Math.abs(I) < 5e-3 ? 0 : I).toFixed(2) + ' A';
+
+            const cx = w / 2, cy = h / 2 + 6, halfL = 70;
+            // particle count ∝ ρv
+            const target = Math.round(rhov * 45);
+            const r = Math.random;
+            while (cdParticles.length < target) cdParticles.push({ x: r() * w, y: 16 + r() * (h - 32), flash: 0 });
+            if (cdParticles.length > target) cdParticles.length = target;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // flux tube (only these charges cross the surface)
+            const hy = halfL * Math.cos(th);
+            ctx.fillStyle = 'rgba(5, 150, 105, 0.08)';
+            ctx.fillRect(0, cy - hy, w, 2 * hy);
+            ctx.strokeStyle = 'rgba(5, 150, 105, 0.45)'; ctx.setLineDash([5, 5]); ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, cy - hy); ctx.lineTo(w, cy - hy); ctx.moveTo(0, cy + hy); ctx.lineTo(w, cy + hy); ctx.stroke(); ctx.setLineDash([]);
+
+            // particles
+            const nx = Math.cos(th), ny = -Math.sin(th);     // surface normal (screen)
+            const tx = Math.sin(th), ty = Math.cos(th);       // along surface
+            cdParticles.forEach(p => {
+                const before = (p.x - cx) * nx + (p.y - cy) * ny;
+                p.x += u * 38 * dt;
+                const after = (p.x - cx) * nx + (p.y - cy) * ny;
+                const along = (p.x - cx) * tx + (p.y - cy) * ty;
+                if (before < 0 && after >= 0 && Math.abs(along) <= halfL) p.flash = 1;
+                if (p.x > w + 4) { p.x = -4; p.y = 16 + Math.random() * (h - 32); }
+                p.flash = Math.max(0, p.flash - dt * 2.5);
+                ctx.fillStyle = p.flash > 0 ? COL.emerald : COL.sky;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 2.4 + 2 * p.flash, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // J arrows
+            for (let y = 26; y < h; y += 56) arrow(ctx, 16, y, 46, 0, COL.rose, 0.8, 2, 7);
+            label(ctx, 'J = ρv u', 16, 12, COL.rose, '600 13px Inter, sans-serif');
+
+            // tilted surface (edge view of a disk of radius 1 m)
+            ctx.strokeStyle = COL.amber; ctx.lineWidth = 5; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(cx - tx * halfL, cy - ty * halfL); ctx.lineTo(cx + tx * halfL, cy + ty * halfL); ctx.stroke(); ctx.lineCap = 'butt';
+            arrow(ctx, cx, cy, nx * 55, ny * 55, COL.emerald, 1, 2.2, 8);
+            label(ctx, 'ds (pháp tuyến)', cx + nx * 62 + 4, cy + ny * 62 - 4, COL.emerald, '600 12px Inter, sans-serif');
+            if (thDeg > 0) {
+                ctx.strokeStyle = COL.slate; ctx.lineWidth = 1.2;
+                ctx.beginPath(); ctx.arc(cx, cy, 26, -th, 0); ctx.stroke();
+                label(ctx, 'θ', cx + 32, cy - 10, COL.slate, 'italic 600 13px Inter, sans-serif');
+            }
+            label(ctx, 'A cos θ', w - 12, cy - hy - 10, COL.emerald, '600 12px Inter, sans-serif', 'right');
+        }
+
+        // =========================================================
+        // Section 5 — convection vs conduction
+        // =========================================================
+        const conv = { parts: [], trail: [] };
+        (() => { const r = rng(5); for (let i = 0; i < 26; i++) conv.parts.push({ x: r() * 600, y: 0.15 + r() * 0.7 }); })();
+        function drawConvection(dt) {
+            const c = setupCanvas('canvas-convection'); if (!c) return;
+            const { ctx, w, h } = c;
+            const u = parseFloat(document.getElementById('slider-conv-u').value);
+            document.getElementById('val-conv-u').innerText = u.toFixed(1);
+            ctx.clearRect(0, 0, w, h);
+            conv.parts.forEach((p, i) => {
+                p.x += u * 70 * dt;
+                if (p.x > w + 5) { p.x = -5; if (i === 0) conv.trail = []; }
+                const y = p.y * h;
+                if (i === 0) { conv.trail.push([p.x, y]); if (conv.trail.length > 160) conv.trail.shift(); }
+                ctx.fillStyle = i === 0 ? COL.indigo : COL.sky;
+                ctx.beginPath(); ctx.arc(p.x, y, i === 0 ? 5 : 3.5, 0, Math.PI * 2); ctx.fill();
+            });
+            ctx.strokeStyle = 'rgba(79, 70, 229, 0.5)'; ctx.lineWidth = 2;
+            ctx.beginPath(); conv.trail.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke();
+            arrow(ctx, w - 70, 16, 54, 0, COL.rose, 0.9, 2, 7);
+            label(ctx, 'J', w - 80, 16, COL.rose, 'bold 13px Inter, sans-serif', 'right');
+            label(ctx, 'chân không — không có mạng tinh thể', 10, h - 12, COL.muted, '12px Inter, sans-serif');
+        }
+
+        const cond = { e: [], trail: [], init: false };
+        function drawConduction(dt) {
+            const c = setupCanvas('canvas-conduction'); if (!c) return;
+            const { ctx, w, h } = c;
+            const E = parseFloat(document.getElementById('slider-cond-E').value);
+            document.getElementById('val-cond-E').innerText = E.toFixed(1);
+            const vth = 150, tau = 0.12, accel = 260;    // thermal speed (px/s), mean free time (s), acceleration per unit E
+            const randV = () => { const a = Math.random() * Math.PI * 2, s = vth * (0.6 + 0.8 * Math.random()); return [s * Math.cos(a), s * Math.sin(a)]; };
+            if (!cond.init || cond.w !== w) {
+                cond.e = []; for (let i = 0; i < 28; i++) { const v = randV(); cond.e.push({ x: Math.random() * w, y: 8 + Math.random() * (h - 16), vx: v[0], vy: v[1], unwrapped: 0 }); }
+                cond.trail = []; cond.init = true; cond.w = w;
+            }
+            ctx.clearRect(0, 0, w, h);
+            // lattice ions
+            for (let x = 24; x < w; x += 40) for (let y = 20; y < h; y += 30) {
+                ctx.fillStyle = 'rgba(217, 119, 6, 0.85)'; ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill();
+                label(ctx, '+', x, y + 0.5, '#ffffff', 'bold 10px Inter, sans-serif', 'center');
+            }
+            cond.e.forEach((e, i) => {
+                e.vx += -E * accel * dt;                         // electrons accelerate opposite to E
+                if (Math.random() < dt / tau) { const v = randV(); e.vx = v[0]; e.vy = v[1]; }   // collision resets velocity
+                e.x += e.vx * dt; e.y += e.vy * dt;
+                if (e.y < 6) { e.y = 6; e.vy = Math.abs(e.vy); }
+                if (e.y > h - 6) { e.y = h - 6; e.vy = -Math.abs(e.vy); }
+                let wrapped = false;
+                if (e.x < 0) { e.x += w; wrapped = true; }
+                if (e.x > w) { e.x -= w; wrapped = true; }
+                if (i === 0) { if (wrapped) cond.trail = []; cond.trail.push([e.x, e.y]); if (cond.trail.length > 220) cond.trail.shift(); }
+                ctx.fillStyle = i === 0 ? COL.indigo : COL.rose;
+                ctx.beginPath(); ctx.arc(e.x, e.y, i === 0 ? 4.5 : 2.6, 0, Math.PI * 2); ctx.fill();
+            });
+            ctx.strokeStyle = 'rgba(79, 70, 229, 0.55)'; ctx.lineWidth = 1.6;
+            ctx.beginPath(); cond.trail.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke();
+            if (E > 0.05) {
+                ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(w - 150, 4, 146, 44);
+                arrow(ctx, w - 100, 16, 60, 0, COL.slate, 1, 2, 7); label(ctx, 'E', w - 110, 16, COL.slate, 'bold 13px Inter, sans-serif', 'right');
+                arrow(ctx, w - 100, 36, 60, 0, COL.rose, 1, 2, 7); label(ctx, 'J', w - 110, 36, COL.rose, 'bold 13px Inter, sans-serif', 'right');
+                label(ctx, '← chiều trôi của e⁻', 10, h - 12, COL.indigo, '600 12px Inter, sans-serif');
+            } else {
+                label(ctx, 'E = 0: chuyển động hỗn loạn, dòng tổng bằng 0', 10, h - 12, COL.indigo, '600 12px Inter, sans-serif');
+            }
+        }
+
+        // =========================================================
+        // Quiz
+        // =========================================================
+        const QUIZ = [
+            { q: 'Đơn vị SI của mật độ điện tích khối $\\rho_{\\mathrm{v}}$ và mật độ dòng $\\mathbf{J}$ là gì?',
+              opts: ['$\\mathrm{C/m}$ và $\\mathrm{A/m}$', '$\\mathrm{C/m^3}$ và $\\mathrm{A/m^2}$', '$\\mathrm{C/m^2}$ và $\\mathrm{A/m^3}$'], ans: 1,
+              why: '$\\rho_{\\mathrm{v}}$ là điện tích trên một đơn vị thể tích; $\\mathbf{J}$ là dòng điện trên một đơn vị diện tích mà nó đi qua.' },
+            { q: 'Trong tọa độ cực $(r, \\phi)$, phần tử diện tích $ds$ của một đĩa phẳng là gì?',
+              opts: ['$dr\\, d\\phi$', '$r\\, dr\\, d\\phi$', '$r^2\\, dr\\, d\\phi$'], ans: 1,
+              why: 'Cung có góc $d\\phi$ tại bán kính $r$ có độ dài $r\\, d\\phi$, nên $ds = r\\, dr\\, d\\phi$.' },
+            { q: 'Một ống dọc trục $z$ từ $0$ đến $10\\ \\mathrm{cm}$ có $\\rho_{\\ell} = 2z\\ \\mathrm{C/m}$. Điện tích tổng là:',
+              opts: ['$10\\ \\mathrm{mC}$', '$20\\ \\mathrm{mC}$', '$0.2\\ \\mathrm{C}$'], ans: 0,
+              why: '$Q = \\int_0^{0.1} 2z\\, dz = (0.1)^2 = 0.01\\ \\mathrm{C}$.' },
+            { q: 'Mật độ dòng đều $\\mathbf{J}$ đi qua một mặt phẳng có pháp tuyến hợp với $\\mathbf{J}$ góc $60^\\circ$. So với $\\theta = 0^\\circ$, dòng điện:',
+              opts: ['Không đổi', 'Giảm một nửa', 'Bằng không'], ans: 1,
+              why: '$I = JA\\cos\\theta$ và $\\cos 60^\\circ = 0.5$.' },
+            { q: 'Vì sao dòng electron trong dây đồng được xếp vào loại dòng điện dẫn?',
+              opts: ['Electron trôi qua mạng các ion cố định và va chạm trên đường đi.', 'Cả dây dẫn chuyển động với vận tốc $\\mathbf{u}$.', 'Các ion dương mang dòng điện.'], ans: 0,
+              why: 'Dòng điện dẫn là điện tích trôi so với vật liệu chứa nó và tuân theo $\\mathbf{J} = \\sigma\\mathbf{E}$.' },
+            { q: 'Một đám mây điện tích có $\\rho_{\\mathrm{v}} = -2\\ \\mathrm{C/m^3}$ chuyển động với vận tốc $\\mathbf{u} = 3\\hat{\\mathbf{z}}\\ \\mathrm{m/s}$. Mật độ dòng đối lưu của nó là:',
+              opts: ['$6\\hat{\\mathbf{z}}\\ \\mathrm{A/m^2}$', '$-1.5\\hat{\\mathbf{z}}\\ \\mathrm{A/m^2}$', '$-6\\hat{\\mathbf{z}}\\ \\mathrm{A/m^2}$'], ans: 2,
+              why: '$\\mathbf{J} = \\rho_{\\mathrm{v}}\\mathbf{u} = (-2)(3\\hat{\\mathbf{z}})$: điện tích âm chuyển động theo $+z$ tương ứng với dòng điện theo $-z$.' }
+        ];
+        let quizScore = 0; const quizAnswered = {};
+        function renderQuiz() {
+            document.getElementById('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Câu ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            document.getElementById('quiz-score').innerText = `Điểm: 0 / ${QUIZ.length}`;
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = document.getElementById(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Đúng. ' : '✗ Sai — đáp án đúng là ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            document.getElementById('quiz-score').innerText = `Điểm: ${quizScore} / ${QUIZ.length}`;
+            if (Object.keys(quizAnswered).length === QUIZ.length) document.getElementById('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(); if (window.EM && EM.typeset) EM.typeset(document.getElementById('quiz-container')); else typeset([document.getElementById('quiz-container')]); document.getElementById('quiz-reset').classList.add('hidden');
+        }
+
+        // =========================================================
+        // Main loop — only visible canvases are redrawn
+        // =========================================================
+        const visible = {};
+        function observe(ids) {
+            if (!('IntersectionObserver' in window)) { ids.forEach(id => visible[id] = true); return; }
+            const io = new IntersectionObserver(es => es.forEach(e => visible[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+            ids.forEach(id => io.observe(document.getElementById(id)));
+        }
+        let lastT = null;
+        function loop(now) {
+            const dt = lastT === null ? 1 / 60 : Math.min((now - lastT) / 1000, 0.05);
+            lastT = now; tGlobal += dt;
+            if (visible['canvas-demo-1d']) drawDemo1D();
+            if (visible['canvas-demo-2d']) drawDemo2D();
+            if (visible['canvas-demo-3d']) drawDemo3D();
+            if (visible['canvas-current-density']) drawCurrent(dt);
+            if (visible['canvas-convection']) drawConvection(dt);
+            if (visible['canvas-conduction']) drawConduction(dt);
+            requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('load', () => {
+            renderQuiz();
+            chipGroup('line-n-group', n => { line.n = n; updateLineMath(); });
+            chipGroup('disk-n-group', n => { disk.n = n; updateDiskMath(); });
+            ['slider-line-L', 'slider-line-a'].forEach(id => document.getElementById(id).addEventListener('input', updateLineMath));
+            document.getElementById('slider-line-N').addEventListener('input', drawLine);
+            ['slider-disk-R', 'slider-disk-rho0'].forEach(id => document.getElementById(id).addEventListener('input', updateDiskMath));
+            document.getElementById('slider-disk-ring').addEventListener('input', drawDisk);
+            window.addEventListener('resize', () => { drawLine(); drawDisk(); });
+            updateLineMath();
+            updateDiskMath();
+            observe(['canvas-demo-1d', 'canvas-demo-2d', 'canvas-demo-3d', 'canvas-current-density', 'canvas-convection', 'canvas-conduction']);
+            requestAnimationFrame(loop);
+            typeset();
+        });
+    </script>
+</body>
+</html>

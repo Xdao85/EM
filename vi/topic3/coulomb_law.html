@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Định luật Coulomb và điện trường - Học phần Trường điện từ</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20">
+                    <i data-lucide="zap" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">
+                        Định luật Coulomb và điện trường
+                    </h1>
+                </div>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('coulomb-law')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Định luật Coulomb</button>
+                <button onclick="scrollToSection('superposition')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="grid" class="w-3.5 h-3.5"></i><span>Chồng chất</span>
+                </button>
+                <button onclick="scrollToSection('ring-charge')" class="px-3 py-1.5 rounded-lg text-amber-800 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="circle-dot" class="w-3.5 h-3.5"></i><span>Vòng tích điện</span>
+                </button>
+                <button onclick="scrollToSection('disk-sheet')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="disc" class="w-3.5 h-3.5"></i><span>Đĩa &amp; mặt phẳng</span>
+                </button>
+                <button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Kiểm tra</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Section 1: Coulomb's law -->
+        <section id="coulomb-law" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20">
+                    <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Tĩnh điện
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                    Định luật Coulomb và cường độ điện trường
+                </h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                    Một điện tích điểm (point charge) $q$ tạo ra điện trường (electric field) $\mathbf{E}$ trong không gian xung quanh nó. Một điện tích thử (test charge) $q'$ đặt trong trường đó chịu lực Coulomb $\mathbf{F} = q'\mathbf{E}$, có độ lớn giảm tỉ lệ nghịch với bình phương khoảng cách. Trường mô tả ảnh hưởng của nguồn tại một vị trí; lực còn phụ thuộc điện tích đặt ở đó. Mô hình điện tích điểm áp dụng khi kích thước nguồn nhỏ so với khoảng cách đang xét.</p>
+            </div>
+
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-400/10 px-2.5 py-1 rounded-md">Điện trường</span>
+                        <span class="text-sm font-mono text-slate-600">$\mathrm{V}/\mathrm{m}$</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Trường của điện tích điểm</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">
+                        $$\mathbf{E} = \hat{\mathbf{R}}\, \frac{q}{4\pi\varepsilon R^2}$$
+                    </div>
+                    <p class="text-sm text-slate-700">$\hat{\mathbf{R}} = \mathbf{R}/R$ hướng từ $q$ đến điểm quan sát; $R$ là khoảng cách và $\varepsilon$ là độ điện thẩm (permittivity) của môi trường.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-400/10 px-2.5 py-1 rounded-md">Lực Coulomb</span>
+                        <span class="text-sm font-mono text-slate-600">$\mathrm{N}$</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Lực tác dụng lên điện tích thử</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">
+                        $$\mathbf{F} = q'\mathbf{E} = \hat{\mathbf{R}}\, \frac{q q'}{4\pi\varepsilon R^2}$$
+                    </div>
+                    <p class="text-sm text-slate-700">Các điện tích cùng dấu đẩy nhau ($\mathbf{F}$ theo hướng $+\hat{\mathbf{R}}$); trái dấu thì hút nhau. Lực tác dụng lên $q$ có cùng độ lớn và ngược chiều.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-400/10 px-2.5 py-1 rounded-md">Môi trường</span>
+                        <span class="text-sm font-mono text-slate-600">$\mathrm{F}/\mathrm{m}$</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Độ điện thẩm $\varepsilon$</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">
+                        $$\varepsilon = \varepsilon_{\mathrm{r}}\varepsilon_0, \quad \mathbf{D} = \varepsilon\mathbf{E}$$
+                    </div>
+                    <p class="text-sm text-slate-700">$\varepsilon_0 \approx 8.854 \times 10^{-12}\ \mathrm{F}/\mathrm{m}$. Một điện môi (dielectric) có $\varepsilon_{\mathrm{r}} > 1$ làm cả $\mathbf{E}$ lẫn $\mathbf{F}$ giảm đi $\varepsilon_{\mathrm{r}}$ lần.</p>
+                </div>
+            </div>
+
+            <!-- Point-charge explorer -->
+            <div class="relative mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 space-y-3">
+                    <div class="relative h-60 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                        <canvas id="canvas-single" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Điện tích nguồn $q$</span><span id="val-single-q" class="font-mono text-sky-800"></span></div>
+                            <input type="range" id="slider-single-q" min="-20" max="20" step="1" value="10" class="w-full accent-sky-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Điện tích thử $q'$</span><span id="val-single-qp" class="font-mono text-rose-700"></span></div>
+                            <input type="range" id="slider-single-qp" min="-10" max="10" step="1" value="2" class="w-full accent-rose-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Khoảng cách $R$</span><span id="val-single-r" class="font-mono text-amber-800"></span></div>
+                            <input type="range" id="slider-single-r" min="0.1" max="2" step="0.05" value="0.5" class="w-full accent-amber-600">
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-slate-700 block">Môi trường $\varepsilon_{\mathrm{r}}$</span>
+                            <select id="select-single-medium" class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-2 py-1.5 focus:outline-none focus:border-sky-500">
+                                <option value="1.0">Chân không / không khí (εr = 1.0)</option>
+                                <option value="2.1">Teflon (εr = 2.1)</option>
+                                <option value="3.8">Thạch anh (εr = 3.8)</option>
+                                <option value="80">Nước cất (εr = 80)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3 text-sm">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                            <i data-lucide="calculator" class="w-4 h-4 text-sky-800"></i> Máy tính điện tích điểm
+                        </h3>
+                        <div class="bg-slate-100/90 p-3 rounded-xl border border-slate-200 space-y-2">
+                            <div class="flex justify-between"><span class="text-slate-600">$|\mathbf{E}|$ tại $q'$</span><span id="res-single-E" class="font-mono font-bold text-sky-800"></span></div>
+                            <div class="flex justify-between"><span class="text-slate-600">$|\mathbf{F}|$ lên $q'$</span><span id="res-single-F" class="font-mono font-bold text-rose-700"></span></div>
+                            <div class="flex justify-between"><span class="text-slate-600">Lực tương ứng trong chân không</span><span id="res-single-F0" class="font-mono text-slate-700"></span></div>
+                        </div>
+                        <div id="res-single-dir" class="px-3 py-2 rounded-xl font-semibold text-center"></div>
+                    </div>
+                    <div class="h-28 rounded-xl bg-white border border-slate-200 overflow-hidden relative"><canvas id="canvas-single-graph" class="w-full h-full"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Superposition -->
+        <section id="superposition" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 1</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Chồng chất trường của các điện tích điểm</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        Trường tại $P$ là tổng vectơ của trường do từng điện tích tạo ra (nguyên lý chồng chất — superposition). Kéo $q_1$, $q_2$, $q_3$ hoặc $P$ trên lưới (1 ô = 1 m). Đổi dấu một nguồn và quan sát đóng góp của nó đảo chiều trước khi cộng vectơ. Các đóng góp bằng nhau có thể triệt tiêu tại một điểm dù trường của từng nguồn khác không.</p>
+                </div>
+                <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sm text-sky-800 shrink-0">
+                    $$\mathbf{E}(\mathbf{R}) = \frac{1}{4\pi\varepsilon_0}\sum_{i=1}^{N} \frac{q_i(\mathbf{R}-\mathbf{R}_i)}{|\mathbf{R}-\mathbf{R}_i|^3}$$
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="toggleSup('field', this)" class="chip on">Bản đồ trường</button>
+                        <button onclick="toggleSup('parallelogram', this, 'on-indigo')" class="chip on-indigo">Hình bình hành</button>
+                        <button id="chip-q3" onclick="toggleSup('q3', this, 'on-emerald')" class="chip">Thêm $q_3$</button>
+                        <button onclick="presetSuperposition()" class="chip">Đặt lại</button>
+                    </div>
+                    <div class="relative h-[420px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                        <canvas id="canvas-superposition" class="w-full h-full cursor-grab"></canvas>
+                        <div class="absolute bottom-3 left-3 bg-white/90 border border-slate-200 px-3 py-2 rounded-xl text-sm text-slate-700 pointer-events-none">
+                            Các mũi tên tại $P$ được vẽ cùng một tỉ lệ; bản đồ nền chỉ thể hiện hướng.
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-sky-800 font-semibold">$q_1$</span><span id="val-q1" class="font-mono text-sky-800"></span></div>
+                            <input type="range" id="slider-q1" min="-50" max="50" step="1" value="20" class="w-full accent-sky-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-rose-700 font-semibold">$q_2$</span><span id="val-q2" class="font-mono text-rose-700"></span></div>
+                            <input type="range" id="slider-q2" min="-50" max="50" step="1" value="-40" class="w-full accent-rose-600">
+                        </div>
+                        <div id="q3-row" class="space-y-1 opacity-40">
+                            <div class="flex justify-between"><span class="text-emerald-800 font-semibold">$q_3$</span><span id="val-q3" class="font-mono text-emerald-800"></span></div>
+                            <input type="range" id="slider-q3" min="-50" max="50" step="1" value="30" class="w-full accent-emerald-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-amber-800 font-semibold">Điện tích thử $q_p$</span><span id="val-qp" class="font-mono text-amber-800"></span></div>
+                            <input type="range" id="slider-qp" min="-20" max="20" step="1" value="5" class="w-full accent-amber-600">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 space-y-3 text-sm">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                        <i data-lucide="activity" class="w-4 h-4 text-emerald-800"></i> Tính toán vectơ trực tiếp
+                    </h3>
+                    <div class="bg-slate-100/90 p-3 rounded-xl border border-slate-200 space-y-1.5 font-mono">
+                        <div class="font-sans font-semibold text-slate-800">1. Vị trí (m)</div>
+                        <div id="tbl-pos" class="space-y-1"></div>
+                    </div>
+                    <div class="bg-slate-100/90 p-3 rounded-xl border border-slate-200 space-y-1.5 font-mono">
+                        <div class="font-sans font-semibold text-slate-800">2. Các thành phần trường tại $P$ (kV/m)</div>
+                        <div id="tbl-E" class="space-y-1"></div>
+                        <div class="border-t border-slate-200 pt-1.5 flex justify-between"><span class="text-emerald-800 font-bold font-sans">$\mathbf{E}$ tổng</span><span id="tbl-E-total" class="text-emerald-800 font-bold"></span></div>
+                        <div id="tbl-E-mag" class="text-right text-emerald-800"></div>
+                    </div>
+                    <div class="bg-slate-100/90 p-3 rounded-xl border border-slate-200 space-y-1.5 font-mono">
+                        <div class="font-sans font-semibold text-slate-800">3. Lực lên $q_p$: $\mathbf{F} = q_p\mathbf{E}$</div>
+                        <div class="flex justify-between"><span class="text-amber-800">$\mathbf{F}$</span><span id="tbl-F" class="text-amber-800 font-bold"></span></div>
+                        <div id="tbl-F-mag" class="text-right text-amber-800"></div>
+                    </div>
+                    <p class="text-slate-600">Nếu $q_p$ đổi dấu, $\mathbf{F}$ đổi chiều nhưng $\mathbf{E}$ thì không: trường là của các điện tích nguồn, không phải của điện tích thử.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Ring -->
+        <section id="ring-charge" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-amber-800 bg-amber-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 2</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Điện trường của vòng tích điện đều</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        Một vòng bán kính $b$ nằm trong mặt phẳng $x$–$y$ mang mật độ điện tích dài (line charge density) $\rho_{\ell}$. Tìm $\mathbf{E}$ tại $P(0, 0, h)$ trên trục của vòng. Hình động ghép mỗi phần tử với phần tử đối xứng qua tâm. Dùng các phần tử đối diện để thấy thành phần ngang triệt tiêu trên trục, còn thành phần dọc trục cộng lại. Phải xác định đối xứng trước khi thay tích phân vectơ bằng tích phân vô hướng.</p>
+                </div>
+                <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sm font-mono text-amber-800 shrink-0">Tổng điện tích $Q = 2\pi b\rho_{\ell}$</div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-96 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                        <canvas id="canvas-ring-3d" class="w-full h-full"></canvas>
+                        <div class="absolute top-3 left-3 bg-white/90 border border-slate-200 p-2.5 rounded-xl text-sm space-y-1 pointer-events-none">
+                            <div class="text-amber-800 font-bold">Tính đối xứng</div>
+                            <div class="text-slate-700">Thành phần xuyên tâm của $d\mathbf{E}_1$, $d\mathbf{E}_2$ triệt tiêu</div>
+                            <div class="text-slate-700">Thành phần $z$ cộng lại</div>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Bán kính $b$</span><span id="val-ring-b" class="font-mono text-amber-800"></span></div>
+                            <input type="range" id="slider-ring-b" min="0.5" max="5" step="0.25" value="2" class="w-full accent-amber-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Độ cao $h$</span><span id="val-ring-h" class="font-mono text-sky-800"></span></div>
+                            <input type="range" id="slider-ring-h" min="-6" max="8" step="0.2" value="3" class="w-full accent-sky-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">$\rho_{\ell}$</span><span id="val-ring-rhol" class="font-mono text-rose-700"></span></div>
+                            <input type="range" id="slider-ring-rhol" min="-20" max="20" step="1" value="5" class="w-full accent-rose-600">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3 text-sm text-slate-700">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                            <i data-lucide="sigma" class="w-4 h-4 text-amber-800"></i> Tích phân theo $\phi$
+                        </h3>
+                        <p>Phần tử $dl = b\,d\phi$ mang $dq = \rho_{\ell} b\, d\phi$ và tạo ra</p>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-amber-800">
+                            $$d\mathbf{E} = \frac{\rho_{\ell} b}{4\pi\varepsilon_0}\,\frac{-\hat{\mathbf{r}}\,b + \hat{\mathbf{z}}\,h}{(b^2+h^2)^{3/2}}\, d\phi$$
+                        </div>
+                        <p>Các số hạng $\hat{\mathbf{r}}$ triệt tiêu khi lấy quanh vòng, còn lại</p>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-sky-800">
+                            $$\mathbf{E} = \hat{\mathbf{z}}\,\frac{Q\,h}{4\pi\varepsilon_0 (b^2+h^2)^{3/2}}$$
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 font-mono">
+                            <div><span class="text-slate-600 block">$Q$</span><span id="ro-ring-Q" class="text-rose-700 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">$E_z$ tại $P$</span><span id="ro-ring-Ez" class="text-emerald-800 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">$|E|_{\max}$ tại</span><span id="ro-ring-hmax" class="text-sky-800 font-bold"></span></div>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <span class="text-sm font-semibold text-slate-700 block">$E_z$ theo $h$ (cực đại tại $h = \pm b/\sqrt{2}$)</span>
+                        <div class="h-36 bg-white border border-slate-200 rounded-xl overflow-hidden relative"><canvas id="canvas-ring-graph" class="w-full h-full"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Disk & sheet -->
+        <section id="disk-sheet" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="text-sm font-bold uppercase tracking-wider text-rose-700 bg-rose-400/10 px-2.5 py-1 rounded-md">Mô phỏng tương tác 3</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Đĩa tích điện và mặt phẳng vô hạn</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        Một đĩa bán kính $a$ với mật độ điện tích mặt (surface charge density) đều $\rho_{\mathrm{s}}$ là tập hợp các vòng bán kính $r$ mang điện tích $dq = 2\pi\rho_{\mathrm{s}} r\, dr$. Cộng trường của các vòng ta được trường của đĩa; cho $a \to \infty$ ta được mặt phẳng vô hạn.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 flex flex-col space-y-3">
+                    <div class="relative h-80 rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                        <canvas id="canvas-disk-rings" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Bán kính $a$</span><span id="val-disk-a" class="font-mono text-amber-800"></span></div>
+                            <input type="range" id="slider-disk-a" min="0.5" max="40" step="0.5" value="5" class="w-full accent-amber-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">Độ cao $h$</span><span id="val-disk-h" class="font-mono text-sky-800"></span></div>
+                            <input type="range" id="slider-disk-h" min="-8" max="8" step="0.2" value="3" class="w-full accent-sky-600">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-700">$\rho_{\mathrm{s}}$</span><span id="val-disk-rhos" class="font-mono text-rose-700"></span></div>
+                            <input type="range" id="slider-disk-rhos" min="1" max="50" step="1" value="10" class="w-full accent-rose-600">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3 text-sm text-slate-700">
+                        <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                            <i data-lucide="calculator" class="w-4 h-4 text-rose-700"></i> Tích phân theo bán kính
+                        </h3>
+                        <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-rose-700">
+                            $$\mathbf{E} = \hat{\mathbf{z}}\,\frac{\rho_{\mathrm{s}} h}{2\varepsilon_0}\int_0^a \frac{r\,dr}{(r^2+h^2)^{3/2}} = \pm\hat{\mathbf{z}}\,\frac{\rho_{\mathrm{s}}}{2\varepsilon_0}\left[1 - \frac{|h|}{\sqrt{a^2+h^2}}\right]$$
+                        </div>
+                        <div class="p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl text-indigo-700">
+                            <span class="font-bold block uppercase tracking-wider">Mặt phẳng vô hạn ($a \to \infty$)</span>
+                            $$\mathbf{E} = \pm\hat{\mathbf{z}}\,\frac{\rho_{\mathrm{s}}}{2\varepsilon_0}$$
+                            <span>đều: không phụ thuộc khoảng cách $|h|$</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-slate-200 font-mono">
+                            <div><span class="text-slate-600 block">Đĩa</span><span id="ro-disk-E" class="text-emerald-800 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">Mặt phẳng</span><span id="ro-sheet-E" class="text-indigo-700 font-bold"></span></div>
+                            <div><span class="text-slate-600 block">Tỉ số</span><span id="ro-disk-pct" class="text-amber-800 font-bold"></span></div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-700 bg-slate-100/90 p-2.5 rounded-lg border border-slate-200">
+                        <span class="font-semibold text-slate-900">Quy tắc kinh nghiệm:</span> khi $a \gtrsim 10|h|$, trường của đĩa sai khác giá trị của mặt phẳng vô hạn không quá khoảng 10%. $\mathbf{E}$ nhảy một lượng $\rho_{\mathrm{s}}/\varepsilon_0$ khi đi qua mặt phẳng.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Quiz -->
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Câu hỏi tự kiểm tra</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Làm lại</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Điểm: 0 / 6</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Học phần Trường điện từ — Định luật Coulomb</footer>
+
+    <script>
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+
+        function setupCanvas(id) {
+            const canvas = document.getElementById(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y);
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        }
+        function dashedLine(ctx, x1, y1, x2, y2, color, width = 1.2, dash = [5, 4]) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r, color) {
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // SI formatting
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p']];
+            for (const [f, p] of P) if (a >= f) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+
+        // =========================================================
+        // Section 1 — point charge & test charge
+        // =========================================================
+        function drawSingle() {
+            const q = parseFloat(document.getElementById('slider-single-q').value) * 1e-6;
+            const qp = parseFloat(document.getElementById('slider-single-qp').value) * 1e-6;
+            const R = parseFloat(document.getElementById('slider-single-r').value);
+            const er = parseFloat(document.getElementById('select-single-medium').value);
+            document.getElementById('val-single-q').innerText = sgn(q) + Math.abs(q * 1e6).toFixed(0) + ' µC';
+            document.getElementById('val-single-qp').innerText = sgn(qp) + Math.abs(qp * 1e6).toFixed(0) + ' µC';
+            document.getElementById('val-single-r').innerText = R.toFixed(2) + ' m';
+
+            const E = Math.abs(q) * K / (er * R * R), F = Math.abs(q * qp) * K / (er * R * R), F0 = F * er;
+            document.getElementById('res-single-E').innerText = fmtSI(E, 'V/m');
+            document.getElementById('res-single-F').innerText = fmtSI(F, 'N');
+            document.getElementById('res-single-F0').innerText = fmtSI(F0, 'N');
+            const dir = document.getElementById('res-single-dir');
+            if (q === 0 || qp === 0) {
+                dir.innerText = 'Không có lực: một trong hai điện tích bằng 0';
+                dir.className = 'px-3 py-2 rounded-xl font-semibold text-center bg-slate-200 text-slate-700';
+            } else if (q * qp > 0) {
+                dir.innerText = 'Lực đẩy: các điện tích cùng dấu đẩy nhau';
+                dir.className = 'px-3 py-2 rounded-xl font-semibold text-center bg-rose-500/10 border border-rose-500/30 text-rose-700';
+            } else {
+                dir.innerText = 'Lực hút: các điện tích trái dấu hút nhau';
+                dir.className = 'px-3 py-2 rounded-xl font-semibold text-center bg-sky-500/10 border border-sky-500/30 text-sky-800';
+            }
+
+            const c = setupCanvas('canvas-single'); if (!c) return;
+            const { ctx, w, h } = c;
+            ctx.clearRect(0, 0, w, h);
+            if (er > 1) { ctx.fillStyle = `rgba(245, 158, 11, ${Math.min(0.18, 0.04 + Math.log10(er) * 0.07)})`; ctx.fillRect(0, 0, w, h); label(ctx, `điện môi εr = ${er}`, 12, h - 14, COL.amber); }
+            const cy = h / 2 + 8;
+            const d = 40 + (R / 2) * (w - 160);
+            const xq = w / 2 - d / 2, xp = w / 2 + d / 2;
+            // radial field of q (direction only)
+            if (q !== 0) for (let k = 0; k < 16; k++) {
+                const a = (2 * Math.PI * k) / 16, r0 = 22, r1 = 48;
+                const s = q > 0 ? 1 : -1;
+                const x0 = xq + (s > 0 ? r0 : r1) * Math.cos(a), y0 = cy + (s > 0 ? r0 : r1) * Math.sin(a);
+                arrow(ctx, x0, y0, s * (r1 - r0) * Math.cos(a), s * (r1 - r0) * Math.sin(a), COL.sky, 0.35, 1.3, 5);
+            }
+            // distance marker
+            dashedLine(ctx, xq, cy + 36, xp, cy + 36, COL.muted, 1, [4, 3]);
+            label(ctx, `R = ${R.toFixed(2)} m`, (xq + xp) / 2, cy + 48, COL.slate, '600 12px Inter, sans-serif', 'center');
+            // forces (equal and opposite), length on a log scale
+            if (F > 0) {
+                const L = clamp(14 * (Math.log10(F) + 5), 10, 110);
+                const s = q * qp > 0 ? 1 : -1;     // +1 repulsive
+                arrow(ctx, xp + s * 14, cy, s * L, 0, COL.rose, 1, 3, 10);          // force on q'
+                arrow(ctx, xq - s * 19, cy, -s * L, 0, COL.rose, 0.55, 3, 10);      // equal and opposite force on q
+                label(ctx, `F = ${fmtSI(F, 'N')}`, xp, cy - 34, COL.rose, '600 12px Inter, sans-serif', 'center');
+                label(ctx, '−F', xq, cy - 34, COL.rose, '600 12px Inter, sans-serif', 'center');
+            }
+            chargeDisc(ctx, xq, cy, q, 16, q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            chargeDisc(ctx, xp, cy, qp, 11, qp > 0 ? COL.sky : qp < 0 ? COL.rose : COL.muted);
+            label(ctx, 'q', xq, cy + 26, COL.text, 'italic 600 13px Inter, sans-serif', 'center');
+            label(ctx, "q'", xp, cy + 22, COL.text, 'italic 600 13px Inter, sans-serif', 'center');
+            label(ctx, 'độ dài mũi tên ∝ log |F|', w - 10, 14, COL.muted, '12px Inter, sans-serif', 'right');
+
+            // F(R) graph on a log axis
+            const g = setupCanvas('canvas-single-graph'); if (!g) return;
+            const gx = g.ctx, gw = g.w, gh = g.h, pad = 26;
+            gx.clearRect(0, 0, gw, gh);
+            const Fof = r => Math.abs(q * qp) * K / (er * r * r);
+            if (F <= 0) { label(gx, 'F = 0', gw / 2, gh / 2, COL.muted, '600 12px Inter, sans-serif', 'center'); return; }
+            const lo = Math.log10(Fof(2)), hi = Math.log10(Fof(0.1));
+            const X = r => pad + Math.log10(r / 0.1) / Math.log10(20) * (gw - pad - 10), Y = f => gh - 20 - (Math.log10(f) - lo) / (hi - lo || 1) * (gh - 40);
+            gx.strokeStyle = COL.grid; gx.lineWidth = 1; gx.beginPath(); gx.moveTo(pad, 10); gx.lineTo(pad, gh - 20); gx.lineTo(gw - 10, gh - 20); gx.stroke();
+            gx.strokeStyle = COL.rose; gx.lineWidth = 2; gx.beginPath();
+            for (let k = 0; k <= 100; k++) { const r = 0.1 * Math.pow(20, k / 100); k ? gx.lineTo(X(r), Y(Fof(r))) : gx.moveTo(X(r), Y(Fof(r))); }
+            gx.stroke();
+            gx.fillStyle = COL.amber; gx.beginPath(); gx.arc(X(R), Y(F), 4.5, 0, Math.PI * 2); gx.fill();
+            label(gx, '|F| theo R (log–log): độ dốc −2', pad + 6, 12, COL.rose);
+            label(gx, '0.1 m', pad, gh - 8, COL.slate, '12px Inter, sans-serif', 'center');
+            label(gx, '2 m', gw - 16, gh - 8, COL.slate, '12px Inter, sans-serif', 'center');
+        }
+
+        // =========================================================
+        // Section 2 — superposition
+        // =========================================================
+        const sup = {
+            charges: [
+                { id: 'q1', x: -1.5, y: 0, color: COL.sky, name: 'q₁' },
+                { id: 'q2', x: 1.5, y: 0, color: COL.rose, name: 'q₂' },
+                { id: 'q3', x: 0, y: -1.5, color: COL.emerald, name: 'q₃' }
+            ],
+            P: { x: 0, y: 1.5 },
+            showField: true, showSum: true, useQ3: false, drag: null
+        };
+        function toggleSup(key, el, cls = 'on') {
+            if (key === 'field') { sup.showField = !sup.showField; el.classList.toggle(cls, sup.showField); }
+            if (key === 'parallelogram') { sup.showSum = !sup.showSum; el.classList.toggle(cls, sup.showSum); }
+            if (key === 'q3') { sup.useQ3 = !sup.useQ3; el.classList.toggle(cls, sup.useQ3); document.getElementById('q3-row').classList.toggle('opacity-40', !sup.useQ3); }
+            drawSuperposition();
+        }
+        function presetSuperposition() {
+            document.getElementById('slider-q1').value = 20; document.getElementById('slider-q2').value = -40;
+            document.getElementById('slider-q3').value = 30; document.getElementById('slider-qp').value = 5;
+            sup.charges[0].x = -1.5; sup.charges[0].y = 0; sup.charges[1].x = 1.5; sup.charges[1].y = 0; sup.charges[2].x = 0; sup.charges[2].y = -1.5;
+            sup.P = { x: 0, y: 1.5 };
+            drawSuperposition();
+        }
+        function supGeom(w, h) { const S = Math.min(w / 7.2, h / 5.2); return { S, ox: w / 2, oy: h / 2, toX: x => w / 2 + x * S, toY: y => h / 2 - y * S }; }
+        function activeCharges() {
+            const qv = ['slider-q1', 'slider-q2', 'slider-q3'].map(id => parseFloat(document.getElementById(id).value));
+            return sup.charges.slice(0, sup.useQ3 ? 3 : 2).map((c, i) => ({ ...c, q: qv[i] }));
+        }
+        function fieldAt(x, y, list, soft = 0) {
+            let ex = 0, ey = 0;
+            const parts = list.map(c => {
+                const rx = x - c.x, ry = y - c.y, r2 = rx * rx + ry * ry + soft, r = Math.sqrt(r2);
+                const k = K * c.q * 1e-6 / (r2 * r);
+                ex += k * rx; ey += k * ry;
+                return { ex: k * rx, ey: k * ry, r: Math.sqrt(rx * rx + ry * ry) };
+            });
+            return { ex, ey, parts };
+        }
+        const vec = (x, y, d = 1) => `(${sgn(x)}${Math.abs(x).toFixed(d)} x̂ ${sgn(y)} ${Math.abs(y).toFixed(d)} ŷ)`;
+
+        function drawSuperposition() {
+            const list = activeCharges();
+            const qp = parseFloat(document.getElementById('slider-qp').value);
+            list.forEach(c => document.getElementById('val-' + c.id).innerText = sgn(c.q) + Math.abs(c.q) + ' µC');
+            document.getElementById('val-q3').innerText = sgn(parseFloat(document.getElementById('slider-q3').value)) + Math.abs(parseFloat(document.getElementById('slider-q3').value)) + ' µC';
+            document.getElementById('val-qp').innerText = sgn(qp) + Math.abs(qp) + ' µC';
+
+            const c = setupCanvas('canvas-superposition'); if (!c) return;
+            const { ctx, w, h } = c, G = supGeom(w, h);
+            ctx.clearRect(0, 0, w, h);
+            // grid
+            ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            for (let x = -4; x <= 4; x++) { ctx.beginPath(); ctx.moveTo(G.toX(x), 0); ctx.lineTo(G.toX(x), h); ctx.stroke(); }
+            for (let y = -3; y <= 3; y++) { ctx.beginPath(); ctx.moveTo(0, G.toY(y)); ctx.lineTo(w, G.toY(y)); ctx.stroke(); }
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(0, G.oy); ctx.lineTo(w, G.oy); ctx.moveTo(G.ox, 0); ctx.lineTo(G.ox, h); ctx.stroke();
+            label(ctx, 'x (m)', w - 8, G.oy - 10, COL.muted, '12px Inter, sans-serif', 'right');
+            label(ctx, 'y (m)', G.ox + 8, 12, COL.muted, '12px Inter, sans-serif');
+
+            // direction map
+            if (sup.showField) {
+                const step = 0.4;
+                for (let x = -3.4; x <= 3.4; x += step) for (let y = -2.4; y <= 2.4; y += step) {
+                    if (list.some(q => Math.hypot(x - q.x, y - q.y) < 0.28)) continue;
+                    const f = fieldAt(x, y, list, 0.01), m = Math.hypot(f.ex, f.ey);
+                    if (m < 1) continue;
+                    const alpha = clamp((Math.log10(m) - 3) / 3, 0.12, 0.7), L = step * G.S * 0.6;
+                    const ux = f.ex / m, uy = -f.ey / m;
+                    arrow(ctx, G.toX(x) - ux * L / 2, G.toY(y) - uy * L / 2, ux * L, uy * L, COL.slate, alpha, 1.2, 5);
+                }
+            }
+
+            // vectors at P
+            const f = fieldAt(sup.P.x, sup.P.y, list);
+            const tooClose = f.parts.some(p => p.r < 0.08);
+            const px = G.toX(sup.P.x), py = G.toY(sup.P.y);
+            const Enet = Math.hypot(f.ex, f.ey);
+            if (!tooClose) {
+                const maxE = Math.max(Enet, ...f.parts.map(p => Math.hypot(p.ex, p.ey)));
+                const sc = maxE > 0 ? 110 / maxE : 0;
+                // construction: tip-to-tail chain (or parallelogram for two charges)
+                if (sup.showSum) {
+                    if (list.length === 2) {
+                        const a = f.parts[0], b = f.parts[1];
+                        dashedLine(ctx, px + a.ex * sc, py - a.ey * sc, px + (a.ex + b.ex) * sc, py - (a.ey + b.ey) * sc, COL.indigo);
+                        dashedLine(ctx, px + b.ex * sc, py - b.ey * sc, px + (a.ex + b.ex) * sc, py - (a.ey + b.ey) * sc, COL.indigo);
+                    } else {
+                        let tx = px, ty = py;
+                        f.parts.forEach((p, i) => { if (i > 0) arrow(ctx, tx, ty, p.ex * sc, -p.ey * sc, list[i].color, 0.45, 1.5, 6, [5, 4]); tx += p.ex * sc; ty -= p.ey * sc; });
+                    }
+                }
+                f.parts.forEach((p, i) => {
+                    arrow(ctx, px, py, p.ex * sc, -p.ey * sc, list[i].color, 0.95, 2.2, 9);
+                    label(ctx, 'E' + ['₁', '₂', '₃'][i], px + p.ex * sc * 1.08 + 6, py - p.ey * sc * 1.08, list[i].color, 'bold 13px Inter, sans-serif');
+                });
+                arrow(ctx, px, py, f.ex * sc, -f.ey * sc, COL.emerald, 1, 4, 12);
+                label(ctx, 'E', px + f.ex * sc * 1.1 + 6, py - f.ey * sc * 1.1, COL.emerald, 'bold 15px Inter, sans-serif');
+                if (qp !== 0 && Enet > 0) {
+                    const L = 30 + 60 * Math.abs(qp) / 20, s = Math.sign(qp);
+                    arrow(ctx, px, py, s * f.ex / Enet * L, -s * f.ey / Enet * L, COL.amber, 1, 3, 10, [7, 4]);
+                    label(ctx, 'F', px + s * f.ex / Enet * (L + 12), py - s * f.ey / Enet * (L + 12), COL.amber, 'bold 14px Inter, sans-serif', 'center');
+                }
+            }
+
+            list.forEach(q => {
+                chargeDisc(ctx, G.toX(q.x), G.toY(q.y), q.q, 15, q.q > 0 ? COL.sky : q.q < 0 ? COL.rose : COL.muted);
+                ctx.strokeStyle = q.color; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(G.toX(q.x), G.toY(q.y), 19, 0, Math.PI * 2); ctx.stroke();
+                label(ctx, `${q.name} ${sgn(q.q)}${Math.abs(q.q)} µC`, G.toX(q.x), G.toY(q.y) + 32, q.color, '600 12px Inter, sans-serif', 'center');
+            });
+            ctx.beginPath(); ctx.arc(px, py, 9, 0, Math.PI * 2); ctx.fillStyle = COL.amber; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            label(ctx, 'P', px, py + 0.5, '#ffffff', 'bold 11px Inter, sans-serif', 'center');
+
+            // table
+            document.getElementById('tbl-pos').innerHTML = list.map(q => `<div class="flex justify-between"><span style="color:${({[COL.sky]:'#075985',[COL.rose]:'#9f1239',[COL.amber]:'#92400e',[COL.emerald]:'#065f46'})[q.color] || '#0f172a'}">${q.name}</span><span>(${q.x.toFixed(2)}, ${q.y.toFixed(2)})</span></div>`).join('')
+                + `<div class="flex justify-between"><span class="text-amber-800">P</span><span>(${sup.P.x.toFixed(2)}, ${sup.P.y.toFixed(2)})</span></div>`;
+            if (tooClose) {
+                document.getElementById('tbl-E').innerHTML = '<div class="text-rose-700 font-sans">P trùng với một điện tích — trường tại đó không xác định.</div>';
+                ['tbl-E-total', 'tbl-E-mag', 'tbl-F', 'tbl-F-mag'].forEach(id => document.getElementById(id).innerText = '—');
+                return;
+            }
+            document.getElementById('tbl-E').innerHTML = f.parts.map((p, i) => `<div class="flex justify-between gap-2"><span style="color:${({[COL.sky]:'#075985',[COL.rose]:'#9f1239',[COL.amber]:'#92400e',[COL.emerald]:'#065f46'})[list[i].color] || '#0f172a'}">E${['₁', '₂', '₃'][i]} (R=${p.r.toFixed(2)} m)</span><span>${vec(p.ex / 1e3, p.ey / 1e3)}</span></div>`).join('');
+            document.getElementById('tbl-E-total').innerText = vec(f.ex / 1e3, f.ey / 1e3);
+            const ang = (Math.atan2(f.ey, f.ex) * 180 / Math.PI + 360) % 360;
+            document.getElementById('tbl-E-mag').innerText = `|E| = ${fmtSI(Enet, 'V/m')}, ∠${ang.toFixed(1)}°`;
+            const Fx = qp * 1e-6 * f.ex, Fy = qp * 1e-6 * f.ey;
+            document.getElementById('tbl-F').innerText = vec(Fx, Fy, 3) + ' N';
+            document.getElementById('tbl-F-mag').innerText = `|F| = ${fmtSI(Math.hypot(Fx, Fy), 'N')}`;
+        }
+
+        function attachSupDrag() {
+            const cv = document.getElementById('canvas-superposition');
+            const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height }; };
+            cv.addEventListener('pointerdown', e => {
+                const p = pos(e), G = supGeom(p.w, p.h);
+                const cands = [{ key: 'P', x: sup.P.x, y: sup.P.y }, ...sup.charges.slice(0, sup.useQ3 ? 3 : 2).map((c, i) => ({ key: i, x: c.x, y: c.y }))];
+                const hit = cands.find(c => Math.hypot(G.toX(c.x) - p.x, G.toY(c.y) - p.y) < 22);
+                if (hit) { sup.drag = hit.key; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; }
+            });
+            cv.addEventListener('pointermove', e => {
+                if (sup.drag === null) return;
+                const p = pos(e), G = supGeom(p.w, p.h);
+                const x = clamp((p.x - G.ox) / G.S, -3.4, 3.4), y = clamp((G.oy - p.y) / G.S, -2.4, 2.4);
+                const snap = v => Math.round(v * 20) / 20;
+                if (sup.drag === 'P') { sup.P.x = snap(x); sup.P.y = snap(y); } else { sup.charges[sup.drag].x = snap(x); sup.charges[sup.drag].y = snap(y); }
+                drawSuperposition();
+            });
+            const end = () => { sup.drag = null; cv.style.cursor = 'grab'; };
+            cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+        }
+
+        // =========================================================
+        // Section 3 — ring (animated)
+        // =========================================================
+        let ringPhi = 0;
+        function ringParams() {
+            const b = parseFloat(document.getElementById('slider-ring-b').value), hc = parseFloat(document.getElementById('slider-ring-h').value);
+            const rl = parseFloat(document.getElementById('slider-ring-rhol').value);
+            return { bcm: b, hcm: hc, b: b / 100, h: hc / 100, rl: rl * 1e-9, rlnc: rl };
+        }
+        const ringEz = (Q, b, h) => K * Q * h / Math.pow(b * b + h * h, 1.5);
+
+        function updateRingReadouts() {
+            const p = ringParams(), Q = 2 * Math.PI * p.b * p.rl;
+            document.getElementById('val-ring-b').innerText = p.bcm.toFixed(2) + ' cm';
+            document.getElementById('val-ring-h').innerText = p.hcm.toFixed(1) + ' cm';
+            document.getElementById('val-ring-rhol').innerText = sgn(p.rlnc) + Math.abs(p.rlnc) + ' nC/m';
+            document.getElementById('ro-ring-Q').innerText = fmtSI(Q, 'C');
+            document.getElementById('ro-ring-Ez').innerText = fmtSI(ringEz(Q, p.b, p.h), 'V/m');
+            document.getElementById('ro-ring-hmax').innerText = '±' + (p.bcm / Math.SQRT2).toFixed(2) + ' cm';
+            drawRingGraph();
+        }
+
+        function drawRing(dt) {
+            ringPhi += dt * 0.9;
+            const p = ringParams(), Q = 2 * Math.PI * p.b * p.rl;
+            const c = setupCanvas('canvas-ring-3d'); if (!c) return;
+            const { ctx, w, h } = c;
+            ctx.clearRect(0, 0, w, h);
+            const cy = h * 0.56, cx = w / 2;
+            const S = Math.min((cy - 26) / 8, (h - cy - 18) / 6, (w * 0.42) / 5);
+            const DEPTH = 0.45;
+            const proj = (x, y, z) => [cx + x * S, cy - z * S + y * S * DEPTH];
+            const pos = p.rl >= 0, ringCol = pos ? COL.sky : COL.rose;
+
+            // axis
+            dashedLine(ctx, cx, h - 8, cx, 8, COL.muted, 1.2);
+            label(ctx, 'z', cx + 8, 12, COL.slate, 'italic 600 13px Inter, sans-serif');
+            // ring (back half, charges, front half)
+            ctx.strokeStyle = ringCol; ctx.lineWidth = 3; ctx.globalAlpha = 0.45;
+            ctx.beginPath(); ctx.ellipse(cx, cy, p.bcm * S, p.bcm * S * DEPTH, 0, Math.PI, 2 * Math.PI); ctx.stroke(); ctx.globalAlpha = 1;
+            ctx.beginPath(); ctx.ellipse(cx, cy, p.bcm * S, p.bcm * S * DEPTH, 0, 0, Math.PI); ctx.stroke();
+            for (let k = 0; k < 24; k++) {
+                const a = 2 * Math.PI * k / 24, [x, y] = proj(p.bcm * Math.cos(a), p.bcm * Math.sin(a), 0);
+                label(ctx, pos ? '+' : '−', x, y, ringCol, 'bold 11px Inter, sans-serif', 'center');
+            }
+            // b label
+            dashedLine(ctx, cx, cy, cx + p.bcm * S, cy, COL.slate, 1, [3, 3]);
+            label(ctx, 'b', cx + p.bcm * S / 2, cy + 10, COL.slate, 'italic 600 13px Inter, sans-serif', 'center');
+
+            const [Px, Py] = proj(0, 0, p.hcm);
+            // pair of opposite elements
+            const Ld = 70;
+            const Rl = Math.hypot(p.bcm, p.hcm);
+            [ringPhi, ringPhi + Math.PI].forEach((a, i) => {
+                const ex = p.bcm * Math.cos(a), ey = p.bcm * Math.sin(a);
+                const [sx, sy] = proj(ex, ey, 0);
+                dashedLine(ctx, sx, sy, Px, Py, COL.muted, 1, [3, 3]);
+                ctx.beginPath(); ctx.arc(sx, sy, 6, 0, Math.PI * 2); ctx.fillStyle = COL.amber; ctx.fill();
+                label(ctx, 'dl' + (i + 1), sx + (Math.cos(a) >= 0 ? 10 : -30), sy - 10, COL.amber);
+                if (Rl < 1e-6) return;
+                const s = pos ? 1 : -1;
+                const ux = -ex / Rl * s, uy = -ey / Rl * s, uz = p.hcm / Rl * s;     // unit dE direction
+                const dX = ux * Ld, dY = -uz * Ld + uy * Ld * DEPTH;
+                arrow(ctx, Px, Py, dX, dY, COL.amber, 0.95, 2.2, 8);
+                // radial part (dashed) and z part
+                arrow(ctx, Px, Py, ux * Ld, uy * Ld * DEPTH, COL.rose, 0.7, 1.6, 6, [4, 3]);
+                label(ctx, 'dE' + (i + 1), Px + dX * 1.12 + (dX >= 0 ? 4 : -28), Py + dY * 1.12, COL.amber);
+            });
+            // net field
+            const Ez = ringEz(Q, p.b, p.h), Emax = Math.abs(ringEz(Q, p.b, p.b / Math.SQRT2)) || 1;
+            if (Math.abs(Ez) > 1e-9) arrow(ctx, Px + 3, Py, 0, -Ez / Emax * 90, COL.emerald, 1, 4.5, 12);
+            ctx.beginPath(); ctx.arc(Px, Py, 7, 0, Math.PI * 2); ctx.fillStyle = COL.indigo; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+            label(ctx, `P(0, 0, ${p.hcm.toFixed(1)} cm)`, Px + 14, Py + (p.hcm >= 0 ? 16 : -16), COL.indigo);
+            label(ctx, Math.abs(p.hcm) < 0.05 ? 'E = 0 tại tâm' : 'E (tổng, xanh lá)', w - 10, h - 14, COL.emerald, '600 12px Inter, sans-serif', 'right');
+            label(ctx, 'nét đứt đỏ: thành phần xuyên tâm triệt tiêu', w - 10, h - 32, COL.rose, '12px Inter, sans-serif', 'right');
+        }
+
+        function drawRingGraph() {
+            const p = ringParams(), Q = 2 * Math.PI * p.b * p.rl;
+            const c = setupCanvas('canvas-ring-graph'); if (!c) return;
+            const { ctx, w, h } = c, pad = 14, midY = h / 2;
+            ctx.clearRect(0, 0, w, h);
+            const X = hc => pad + (hc + 6) / 14 * (w - 2 * pad);
+            const Emax = Math.abs(ringEz(Q, p.b, p.b / Math.SQRT2)) || 1;
+            const Y = E => midY - E / Emax * (h / 2 - 14);
+            ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(pad, midY); ctx.lineTo(w - pad, midY); ctx.moveTo(X(0), 6); ctx.lineTo(X(0), h - 6); ctx.stroke();
+            [-1, 1].forEach(s => dashedLine(ctx, X(s * p.bcm / Math.SQRT2), 6, X(s * p.bcm / Math.SQRT2), h - 6, COL.sky, 1, [3, 3]));
+            ctx.strokeStyle = COL.emerald; ctx.lineWidth = 2.2; ctx.beginPath();
+            for (let k = 0; k <= 200; k++) { const hc = -6 + 14 * k / 200, E = ringEz(Q, p.b, hc / 100); k ? ctx.lineTo(X(hc), Y(E)) : ctx.moveTo(X(hc), Y(E)); }
+            ctx.stroke();
+            ctx.fillStyle = COL.amber; ctx.beginPath(); ctx.arc(X(p.hcm), Y(ringEz(Q, p.b, p.h)), 5, 0, Math.PI * 2); ctx.fill();
+            label(ctx, '−6 cm', pad, h - 8, COL.slate, '12px Inter, sans-serif');
+            label(ctx, '+8 cm', w - pad, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            label(ctx, 'h', X(0) + 6, h - 8, COL.slate, 'italic 600 12px Inter, sans-serif');
+        }
+
+        // =========================================================
+        // Section 4 — disk & infinite sheet
+        // =========================================================
+        let diskT = 0;
+        function diskParams() {
+            const a = parseFloat(document.getElementById('slider-disk-a').value), hc = parseFloat(document.getElementById('slider-disk-h').value);
+            const rs = parseFloat(document.getElementById('slider-disk-rhos').value);
+            return { acm: a, hcm: hc, a: a / 100, h: hc / 100, rs: rs * 1e-9, rsnc: rs };
+        }
+        const diskRatio = (a, h) => Math.sign(h) * (1 - Math.abs(h) / Math.sqrt(a * a + h * h));
+        function updateDiskReadouts() {
+            const p = diskParams(), Es = p.rs / (2 * EPS0);
+            document.getElementById('val-disk-a').innerText = p.acm.toFixed(1) + ' cm';
+            document.getElementById('val-disk-h').innerText = p.hcm.toFixed(1) + ' cm';
+            document.getElementById('val-disk-rhos').innerText = p.rsnc.toFixed(0) + ' nC/m²';
+            const f = Math.abs(p.h) < 1e-6 ? 1 : Math.abs(diskRatio(p.a, p.h));
+            document.getElementById('ro-disk-E').innerText = fmtSI(Es * f, 'V/m');
+            document.getElementById('ro-sheet-E').innerText = fmtSI(Es, 'V/m');
+            document.getElementById('ro-disk-pct').innerText = (100 * f).toFixed(1) + '%';
+        }
+        function drawDisk(dt) {
+            diskT += dt;
+            const p = diskParams();
+            const c = setupCanvas('canvas-disk-rings'); if (!c) return;
+            const { ctx, w, h } = c;
+            ctx.clearRect(0, 0, w, h);
+            const sceneW = w * 0.55, cx = sceneW / 2, cy = h / 2;
+            const S = (h / 2 - 34) / 8;
+            const aPx = p.acm * S, maxR = sceneW * 0.46, drawR = Math.min(aPx, maxR);
+            // disk / sheet
+            const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, drawR);
+            g.addColorStop(0, 'rgba(225, 29, 72, 0.28)');
+            g.addColorStop(aPx > maxR ? 1 : 0.98, 'rgba(225, 29, 72, 0.28)');
+            g.addColorStop(1, aPx > maxR ? 'rgba(225, 29, 72, 0.02)' : 'rgba(225, 29, 72, 0.28)');
+            ctx.save(); ctx.translate(cx, cy); ctx.scale(1, 0.3);
+            ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, drawR, 0, Math.PI * 2); ctx.fill();
+            if (aPx <= maxR) { ctx.strokeStyle = COL.rose; ctx.lineWidth = 2 / 0.3 * 0.5; ctx.stroke(); }
+            // sweeping ring element
+            const rr = drawR * (0.5 + 0.45 * Math.sin(diskT * 0.8));
+            ctx.strokeStyle = COL.amber; ctx.lineWidth = 3 / 0.3; ctx.globalAlpha = 0.8;
+            ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+            ctx.restore();
+            if (aPx > maxR) label(ctx, `a = ${p.acm} cm (vượt ra ngoài khung)`, cx, cy + drawR * 0.3 + 16, COL.rose, '600 12px Inter, sans-serif', 'center');
+            else label(ctx, `a = ${p.acm} cm`, cx, cy + drawR * 0.3 + 16, COL.rose, '600 12px Inter, sans-serif', 'center');
+            label(ctx, 'vòng dr', cx + rr + 6, cy - 4, COL.amber);
+            // axis and P
+            dashedLine(ctx, cx, 6, cx, h - 6, COL.muted);
+            const Py = cy - p.hcm * S;
+            const ratio = Math.abs(p.h) < 1e-6 ? 1 : diskRatio(p.a, p.h);
+            const dirSign = Math.abs(p.h) < 1e-6 ? 1 : Math.sign(p.h);
+            const Lref = 80;
+            arrow(ctx, cx + 16, Py, 0, -dirSign * Lref, COL.indigo, 0.7, 2, 9, [6, 4]);
+            if (Math.abs(ratio) > 0.005) arrow(ctx, cx - 4, Py, 0, -dirSign * Math.abs(ratio) * Lref, COL.emerald, 1, 4.5, 12);
+            ctx.beginPath(); ctx.arc(cx, Py, 7, 0, Math.PI * 2); ctx.fillStyle = COL.sky; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+            label(ctx, `P, h = ${p.hcm.toFixed(1)} cm`, cx + 26, Py + (dirSign > 0 ? 14 : -14), COL.sky);
+            label(ctx, 'đĩa', 10, 14, COL.emerald); label(ctx, 'mặt phẳng (nét đứt)', 42, 14, COL.indigo);
+            if (Math.abs(p.h) < 1e-6) label(ctx, 'trên bề mặt: E = ρs/2ε₀ ngay phía trên', cx, h - 12, COL.slate, '12px Inter, sans-serif', 'center');
+
+            // graph: E_z / (ρs/2ε0) vs h
+            const gx0 = sceneW + 30, gx1 = w - 14, gy = h / 2, gH = h / 2 - 30;
+            const X = hc => gx0 + (hc + 8) / 16 * (gx1 - gx0), Y = v => gy - v * gH;
+            ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(gx0, gy); ctx.lineTo(gx1, gy); ctx.moveTo(X(0), gy - gH - 8); ctx.lineTo(X(0), gy + gH + 8); ctx.stroke();
+            ctx.save(); ctx.strokeStyle = COL.indigo; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+            ctx.beginPath(); ctx.moveTo(gx0, Y(-1)); ctx.lineTo(X(0), Y(-1)); ctx.moveTo(X(0), Y(1)); ctx.lineTo(gx1, Y(1)); ctx.stroke(); ctx.restore();
+            ctx.strokeStyle = COL.emerald; ctx.lineWidth = 2.4; ctx.beginPath();
+            let first = true;
+            for (let k = 0; k <= 200; k++) {
+                const hc = -8 + 16 * k / 200; if (Math.abs(hc) < 1e-9) { first = true; continue; }
+                const v = diskRatio(p.acm, hc);
+                if (first) { ctx.moveTo(X(hc), Y(v)); first = false; } else ctx.lineTo(X(hc), Y(v));
+            }
+            ctx.stroke();
+            const vNow = Math.abs(p.h) < 1e-6 ? 1 : ratio;
+            ctx.fillStyle = COL.amber; ctx.beginPath(); ctx.arc(X(p.hcm), Y(vNow), 5, 0, Math.PI * 2); ctx.fill();
+            label(ctx, 'Ez / (ρs/2ε₀)', gx0, 14, COL.text);
+            label(ctx, '+1', gx0 - 6, Y(1), COL.slate, '12px Inter, sans-serif', 'right');
+            label(ctx, '−1', gx0 - 6, Y(-1), COL.slate, '12px Inter, sans-serif', 'right');
+            label(ctx, '−8', gx0, gy + gH + 20, COL.slate, '12px Inter, sans-serif', 'center');
+            label(ctx, '+8 cm', gx1, gy + gH + 20, COL.slate, '12px Inter, sans-serif', 'right');
+            label(ctx, 'h', X(0) + 6, gy + gH + 20, COL.slate, 'italic 600 12px Inter, sans-serif');
+        }
+
+        // =========================================================
+        // Quiz
+        // =========================================================
+        const QUIZ = [
+            { q: 'Hai điện tích được chuyển từ chân không vào một môi trường có $\\varepsilon_{\\mathrm{r}} = 4$ với cùng khoảng cách. Lực Coulomb:',
+              opts: ['tăng 4 lần', 'giảm 4 lần', 'không đổi'], ans: 1, why: '$F \\propto 1/\\varepsilon = 1/(\\varepsilon_{\\mathrm{r}}\\varepsilon_0)$.' },
+            { q: 'Vì sao $\\mathbf{E} = 0$ tại tâm của một vòng tích điện đều?',
+              opts: ['Các phần tử đối xứng qua tâm tạo ra các trường triệt tiêu nhau từng cặp.', 'Vì $h = 0$ làm điện tích bằng 0.', 'Vì mật độ điện tích bằng 0 tại gốc tọa độ.'], ans: 0, why: 'Tại $h = 0$ mỗi $d\\mathbf{E}$ hoàn toàn hướng xuyên tâm, và các phần tử đối diện triệt tiêu nhau chính xác.' },
+            { q: 'Trên trục của vòng bán kính $b$, $|\\mathbf{E}|$ lớn nhất ở đâu?',
+              opts: ['$h = 0$', '$h = b$', '$h = b/\\sqrt{2}$'], ans: 2, why: 'Đặt $dE_z/dh = 0$ cho $h/(b^2+h^2)^{3/2}$ ta được $h^2 = b^2/2$.' },
+            { q: 'Vì sao trường của một mặt phẳng vô hạn tích điện đều không phụ thuộc khoảng cách $|h|$?',
+              opts: ['Khi ra xa, diện tích nằm trong một hình nón bất kỳ tăng theo $R^2$, bù trừ đúng sự suy giảm $1/R^2$.', 'Vì $\\varepsilon_0$ thay đổi theo khoảng cách.', 'Vì mặt phẳng không có điện tích tổng.'], ans: 0, why: 'Trong công thức của đĩa, $|h|/\\sqrt{a^2+h^2} \\to 0$ khi $a \\to \\infty$ với mọi $h$.' },
+            { q: 'Hai điện tích bằng nhau $+q$ đặt tại $(\\pm d, 0)$. Trường tại gốc tọa độ:',
+              opts: ['bằng 0', 'gấp đôi trường của một điện tích', 'hướng theo $\\hat{\\mathbf{y}}$'], ans: 0, why: 'Hai thành phần có cùng độ lớn và ngược chiều nhau.' },
+            { q: 'Điện tích thử $q_p$ tại $P$ được đổi từ $+5\\ \\mu\\mathrm{C}$ thành $-5\\ \\mu\\mathrm{C}$. Điều gì xảy ra?',
+              opts: ['Cả $\\mathbf{E}$ và $\\mathbf{F}$ đều đổi chiều', '$\\mathbf{E}$ không đổi; $\\mathbf{F}$ đổi chiều', 'Cả hai đều không đổi'], ans: 1, why: '$\\mathbf{E}$ do các điện tích nguồn quyết định; $\\mathbf{F} = q_p\\mathbf{E}$ đổi theo dấu của $q_p$.' }
+        ];
+        let quizScore = 0; const quizAnswered = {};
+        function renderQuiz() {
+            document.getElementById('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Câu ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            document.getElementById('quiz-score').innerText = `Điểm: 0 / ${QUIZ.length}`;
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = document.getElementById(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Đúng. ' : '✗ Sai — đáp án đúng là ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            document.getElementById('quiz-score').innerText = `Điểm: ${quizScore} / ${QUIZ.length}`;
+            if (Object.keys(quizAnswered).length === QUIZ.length) document.getElementById('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(); if (window.EM && EM.typeset) EM.typeset(document.getElementById('quiz-container')); else typeset([document.getElementById('quiz-container')]); document.getElementById('quiz-reset').classList.add('hidden');
+        }
+
+        // =========================================================
+        // Main loop (animated canvases only when visible)
+        // =========================================================
+        const visible = {};
+        function observe(ids) {
+            if (!('IntersectionObserver' in window)) { ids.forEach(id => visible[id] = true); return; }
+            const io = new IntersectionObserver(es => es.forEach(e => visible[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+            ids.forEach(id => io.observe(document.getElementById(id)));
+        }
+        let lastT = null;
+        function loop(now) {
+            const dt = lastT === null ? 1 / 60 : Math.min((now - lastT) / 1000, 0.05);
+            lastT = now;
+            if (visible['canvas-ring-3d']) drawRing(dt);
+            if (visible['canvas-disk-rings']) drawDisk(dt);
+            requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('load', () => {
+            renderQuiz();
+            ['slider-single-q', 'slider-single-qp', 'slider-single-r'].forEach(id => document.getElementById(id).addEventListener('input', drawSingle));
+            document.getElementById('select-single-medium').addEventListener('change', drawSingle);
+            ['slider-q1', 'slider-q2', 'slider-q3', 'slider-qp'].forEach(id => document.getElementById(id).addEventListener('input', drawSuperposition));
+            ['slider-ring-b', 'slider-ring-h', 'slider-ring-rhol'].forEach(id => document.getElementById(id).addEventListener('input', updateRingReadouts));
+            ['slider-disk-a', 'slider-disk-h', 'slider-disk-rhos'].forEach(id => document.getElementById(id).addEventListener('input', updateDiskReadouts));
+            attachSupDrag();
+            window.addEventListener('resize', () => { drawSingle(); drawSuperposition(); drawRingGraph(); });
+            drawSingle(); drawSuperposition(); updateRingReadouts(); updateDiskReadouts();
+            observe(['canvas-ring-3d', 'canvas-disk-rings']);
+            requestAnimationFrame(loop);
+            typeset();
+        });
+    </script>
+</body>
+</html>

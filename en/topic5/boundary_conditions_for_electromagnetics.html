@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html class="em-pending" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boundary Conditions for Electromagnetics - Interactive Electromagnetics Module</title>
+    <link rel="stylesheet" href="../../assets/vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="../../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../assets/css/em.css">
+    <script src="../../assets/vendor/katex/katex.min.js"></script>
+    <script src="../../assets/vendor/katex/auto-render.min.js"></script>
+    <script src="../../assets/js/em.js"></script>
+<!-- Lucide Icons -->
+    <script src="../../assets/vendor/lucide/lucide.min.js"></script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        .glass-card {
+            background: rgba(241, 245, 249, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(2, 132, 199, 0.45);
+        }
+        canvas { touch-action: none; display: block; }
+        /* Toggle chips used by the simulations */
+        .chip {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: #94a3b8; color: #0f172a; }
+        .chip.on {
+            background: rgba(14, 165, 233, 0.12);
+            border-color: rgba(2, 132, 199, 0.5);
+            color: #0369a1;
+        }
+        .chip.on-rose { background: rgba(244, 63, 94, 0.10); border-color: rgba(225, 29, 72, 0.45); color: #be123c; }
+        .chip.on-amber { background: rgba(245, 158, 11, 0.12); border-color: rgba(217, 119, 6, 0.5); color: #b45309; }
+        .chip.on-indigo { background: rgba(99, 102, 241, 0.12); border-color: rgba(79, 70, 229, 0.45); color: #4338ca; }
+        .chip.on-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(5, 150, 105, 0.45); color: #047857; }
+        /* long formulas scroll sideways only, never clipped vertically */
+        .tex-box { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-br from-sky-500 via-indigo-500 to-rose-500 rounded-xl text-white shadow-lg shadow-sky-500/20"><i data-lucide="layers" class="w-6 h-6"></i></div>
+                <h1 class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-600 via-indigo-600 to-rose-600">Boundary Conditions for Electromagnetics</h1>
+            </div>
+            <nav class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                <button onclick="scrollToSection('overview')" class="px-3 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition">Overview</button>
+<button onclick="scrollToSection('sim')" class="px-3 py-1.5 rounded-lg text-sky-800 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 transition flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5"></i><span>Interface Solver</span></button>
+<button onclick="scrollToSection('table')" class="px-3 py-1.5 rounded-lg text-rose-700 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition flex items-center gap-1.5"><i data-lucide="table" class="w-3.5 h-3.5"></i><span>Summary</span></button>
+<button onclick="scrollToSection('quiz')" class="px-3 py-1.5 rounded-lg text-emerald-800 hover:bg-emerald-500/10 transition">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="overview" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-sky-500/10 text-sky-800 border border-sky-500/20"><i data-lucide="book-open" class="w-3.5 h-3.5"></i> Time-Varying Fields · Boundary Conditions</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Fields Across an Interface, Static or Not</h2>
+                <p class="text-slate-700 text-sm sm:text-base leading-relaxed">The boundary conditions derived for electrostatic and magnetostatic fields remain valid for time-varying fields. They follow from the integral forms of Maxwell's equations applied to vanishingly thin pillboxes and loops, and the time-derivative terms drop out as the pillbox or loop shrinks. Here $\hat{\mathbf{n}}_2$ is the unit normal pointing out of medium 2 into medium 1. The limiting argument assumes finite fields and their time derivatives near the interface. Surface charge and current remain because they are concentrated on the boundary; the conditions must hold at each instant.</p>
+            </div>
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider bg-sky-500/10 px-2.5 py-1 rounded-md">1. Electric Field</span>
+                    <h3 class="text-base font-bold text-slate-900">Tangential E, normal D</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-sky-800 text-sm">$$\hat{\mathbf{n}}_2\times(\mathbf{E}_1 - \mathbf{E}_2) = 0,\qquad \hat{\mathbf{n}}_2\cdot(\mathbf{D}_1 - \mathbf{D}_2) = \rho_{\mathrm{s}}$$</div>
+                    <p class="text-sm text-slate-700">$E_{1\mathrm{t}} = E_{2\mathrm{t}}$; $D_{1\mathrm{n}} - D_{2\mathrm{n}} = \rho_{\mathrm{s}}$.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-rose-700 uppercase tracking-wider bg-rose-500/10 px-2.5 py-1 rounded-md">2. Magnetic Field</span>
+                    <h3 class="text-base font-bold text-slate-900">Tangential H, normal B</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-rose-700 text-sm">$$\hat{\mathbf{n}}_2\times(\mathbf{H}_1 - \mathbf{H}_2) = \mathbf{J}_{\mathrm{s}},\qquad \hat{\mathbf{n}}_2\cdot(\mathbf{B}_1 - \mathbf{B}_2) = 0$$</div>
+                    <p class="text-sm text-slate-700">$B_{1\mathrm{n}} = B_{2\mathrm{n}}$; a surface current makes $\mathbf{H}_{\mathrm{t}}$ jump.</p>
+                </div><div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-amber-800 uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-md">3. Why Still Valid</span>
+                    <h3 class="text-base font-bold text-slate-900">Shrinking the path</h3>
+                    <div class="bg-slate-100/90 p-2.5 rounded-xl border border-slate-200 text-center text-amber-800 text-sm">$$\oint_C\mathbf{E}\cdot d\mathbf{l} = -\int_S\frac{\partial\mathbf{B}}{\partial t}\cdot d\mathbf{s}\ \xrightarrow{\ \Delta h\to0\ }\ 0$$</div>
+                    <p class="text-sm text-slate-700">The area of the thin loop goes to zero, so $\partial\mathbf{B}/\partial t$ (and likewise $\partial\mathbf{D}/\partial t$) contributes nothing; only true surface charges and currents survive.</p>
+                </div>
+            </div>
+        </section>
+        <section id="sim" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-sky-800 bg-sky-400/10 px-2.5 py-1 rounded-md">Interactive Simulation</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Interface Solver for E, D, H and B</h2>
+                <p class="text-sm text-slate-600 mt-1">Medium 1 is on top, medium 2 below, $\hat{\mathbf{n}}_2 = \hat{\mathbf{z}}$ points up. Choose the fields in medium 1, the materials, and any surface charge $\rho_{\mathrm{s}}$ or surface current $\mathbf{J}_{\mathrm{s}} = \hat{\mathbf{y}}J_{\mathrm{s}}$ ($\hat{\mathbf{y}} = \hat{\mathbf{z}}\times\hat{\mathbf{x}}$ points into the page, ⊗, for tangential $\hat{\mathbf{x}}$ to the right). The fields in medium 2 follow from the four conditions. Press <b>Oscillate</b>: every quantity varies as $\cos\omega t$, and the conditions hold at each instant. Make medium 2 a perfect conductor to see which components must vanish. Start with equal materials and no surface sources, then introduce one change at a time. The display enforces interface relations; it does not by itself construct a complete propagating-wave solution in both regions.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5"><span class="text-sm text-slate-600">Medium 2:</span><div id="b-m2" class="flex flex-wrap gap-1.5 "><button data-v="diel" class="chip on">Dielectric / magnetic</button><button data-v="pec" class="chip">Perfect conductor</button></div><span class="mx-1 text-slate-600">|</span><span class="text-sm text-slate-600">Show:</span><div id="b-showE" class="flex flex-wrap gap-1.5 "><button data-v="E" class="chip on">$\mathbf{E}$</button><button data-v="D" class="chip">$\mathbf{D}/\varepsilon_0$</button></div><div id="b-showH" class="flex flex-wrap gap-1.5 "><button data-v="H" class="chip on">$\mathbf{H}$</button><button data-v="B" class="chip">$\mathbf{B}/\mu_0$</button></div><span class="mx-1 text-slate-600">|</span><button id="b-osc" class="chip">Oscillate</button></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6"><div class="lg:col-span-6 flex flex-col space-y-3"><div class="relative h-[360px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-be" class="w-full h-full"></canvas></div></div><div class="lg:col-span-6 flex flex-col space-y-3"><div class="relative h-[360px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden "><canvas id="cv-bh" class="w-full h-full"></canvas></div></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6"><div class="lg:col-span-4 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="text-sm font-semibold text-slate-600">Medium 1 (top)</div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$\varepsilon_{\mathrm{r}1}$</span><input type="range" id="b-e1" min="1" max="10" step="0.5" value="2" class="flex-1 min-w-0 accent-sky-600"><span id="val-b-e1" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$\mu_{\mathrm{r}1}$</span><input type="range" id="b-m1" min="1" max="10" step="0.5" value="1" class="flex-1 min-w-0 accent-rose-600"><span id="val-b-m1" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="text-sm font-semibold text-slate-600 pt-1">Medium 2 (bottom)</div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$\varepsilon_{\mathrm{r}2}$</span><input type="range" id="b-e2" min="1" max="10" step="0.5" value="6" class="flex-1 min-w-0 accent-sky-600"><span id="val-b-e2" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$\mu_{\mathrm{r}2}$</span><input type="range" id="b-m2r" min="1" max="10" step="0.5" value="4" class="flex-1 min-w-0 accent-rose-600"><span id="val-b-m2r" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div></div></div><div class="lg:col-span-4 space-y-4"><div class="glass-card rounded-2xl p-4 space-y-2 text-sm"><div class="text-sm font-semibold text-slate-600">Fields in medium 1</div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$|\mathbf{E}_1|$</span><input type="range" id="b-E" min="0" max="10" step="0.1" value="5" class="flex-1 min-w-0 accent-sky-600"><span id="val-b-E" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$\theta_{E1}$</span><input type="range" id="b-tE" min="0" max="180" step="1" value="40" class="flex-1 min-w-0 accent-sky-600"><span id="val-b-tE" class="w-20 shrink-0 text-right font-mono text-sky-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$|\mathbf{H}_1|$</span><input type="range" id="b-H" min="0" max="10" step="0.1" value="5" class="flex-1 min-w-0 accent-rose-600"><span id="val-b-H" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$\theta_{H1}$</span><input type="range" id="b-tH" min="0" max="180" step="1" value="30" class="flex-1 min-w-0 accent-rose-600"><span id="val-b-tH" class="w-20 shrink-0 text-right font-mono text-rose-700"></span></div>
+<div class="text-sm font-semibold text-slate-600 pt-1">Surface sources</div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$\rho_{\mathrm{s}}/\varepsilon_0$</span><input type="range" id="b-rs" min="-10" max="10" step="0.1" value="0" class="flex-1 min-w-0 accent-amber-600"><span id="val-b-rs" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div>
+<div class="flex items-center gap-3"><span class="w-16 shrink-0 text-slate-700">$J_{\mathrm{s}}$</span><input type="range" id="b-Js" min="-10" max="10" step="0.1" value="0" class="flex-1 min-w-0 accent-amber-600"><span id="val-b-Js" class="w-20 shrink-0 text-right font-mono text-amber-800"></span></div></div></div><div class="lg:col-span-4 space-y-4"><div class="bg-white/80 p-4 rounded-2xl border border-slate-200 space-y-2 font-mono text-sm"><div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$E_{1\mathrm{t}},\ E_{2\mathrm{t}}$</span><span id="ro-Et" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$D_{1\mathrm{n}},\ D_{2\mathrm{n}}$ (÷ε₀)</span><span id="ro-Dn" class="text-sky-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$D_{1\mathrm{n}} - D_{2\mathrm{n}} - \rho_{\mathrm{s}}$</span><span id="ro-Dchk" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">$H_{1\mathrm{t}},\ H_{2\mathrm{t}}$</span><span id="ro-Ht" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$B_{1\mathrm{n}},\ B_{2\mathrm{n}}$ (÷μ₀)</span><span id="ro-Bn" class="text-rose-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">$H_{1\mathrm{t}} - H_{2\mathrm{t}} - J_{\mathrm{s}}$</span><span id="ro-Hchk" class="text-emerald-800 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3 border-t border-slate-200 pt-2"><span class="font-sans text-slate-600">Angles $\theta_{E2}$, $\theta_{H2}$</span><span id="ro-ang" class="text-slate-700 font-bold text-right"></span></div>
+<div class="flex justify-between gap-3"><span class="font-sans text-slate-600">Note</span><span id="ro-note" class="text-slate-700 font-bold text-right"></span></div></div></div></div>
+        </section>
+        <section id="table" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <span class="text-sm font-bold uppercase tracking-wider text-emerald-800 bg-emerald-400/10 px-2.5 py-1 rounded-md">Reference</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Summary of Boundary Conditions</h2>
+                <p class="text-sm text-slate-600 mt-1">$\hat{\mathbf{n}}_2$ points out of medium 2. The perfect-conductor setting assumes no pre-existing internal magnetic flux and no field penetration, so the interior fields vanish. Perfect conductivity alone does not require an initially present static magnetic field to disappear.</p>
+            </div>
+            <div class="overflow-x-auto"><table class="w-full text-left text-sm border-collapse">
+                <thead><tr class="border-b border-slate-200 text-slate-600"><th class="p-3">Field component</th><th class="p-3">General form</th><th class="p-3">Medium 1 dielectric, medium 2 dielectric</th><th class="p-3">Medium 2 perfect conductor</th></tr></thead>
+                <tbody class="divide-y divide-slate-200 text-slate-700">
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-sky-800">Tangential E</td><td class="p-3">$\hat{\mathbf{n}}_2\times(\mathbf{E}_1 - \mathbf{E}_2) = 0$</td><td class="p-3">$E_{1\mathrm{t}} = E_{2\mathrm{t}}$</td><td class="p-3">$E_{1\mathrm{t}} = E_{2\mathrm{t}} = 0$</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-sky-800">Normal D</td><td class="p-3">$\hat{\mathbf{n}}_2\cdot(\mathbf{D}_1 - \mathbf{D}_2) = \rho_{\mathrm{s}}$</td><td class="p-3">$D_{1\mathrm{n}} - D_{2\mathrm{n}} = \rho_{\mathrm{s}}$</td><td class="p-3">$D_{1\mathrm{n}} = \rho_{\mathrm{s}}$, $D_{2\mathrm{n}} = 0$</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-rose-700">Tangential H</td><td class="p-3">$\hat{\mathbf{n}}_2\times(\mathbf{H}_1 - \mathbf{H}_2) = \mathbf{J}_{\mathrm{s}}$</td><td class="p-3">$H_{1\mathrm{t}} = H_{2\mathrm{t}}$ (no $\mathbf{J}_{\mathrm{s}}$ on a dielectric)</td><td class="p-3">$\hat{\mathbf{n}}_2\times\mathbf{H}_1 = \mathbf{J}_{\mathrm{s}}$, $H_{2\mathrm{t}} = 0$</td></tr>
+                    <tr class="hover:bg-slate-200/50"><td class="p-3 font-semibold text-rose-700">Normal B</td><td class="p-3">$\hat{\mathbf{n}}_2\cdot(\mathbf{B}_1 - \mathbf{B}_2) = 0$</td><td class="p-3">$B_{1\mathrm{n}} = B_{2\mathrm{n}}$</td><td class="p-3">$B_{1\mathrm{n}} = B_{2\mathrm{n}} = 0$</td></tr>
+                </tbody></table></div>
+        </section>
+
+        <section id="quiz" class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-emerald-500/20 text-emerald-800 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></span>
+                    <h2 class="text-2xl font-bold text-slate-900">Self-Assessment Quiz</h2>
+                </div>
+                <div class="flex items-center gap-2"><button id="quiz-reset" onclick="resetQuiz()" class="hidden text-sm font-semibold px-3 py-1 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100">↺ Try again</button><span id="quiz-score" class="text-sm font-semibold px-3 py-1 bg-slate-200 text-slate-700 rounded-full border border-slate-300">Score: 0 / 0</span></div>
+            </div>
+            <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 px-4 text-center text-sm text-slate-600">Electromagnetics Course Module — Time-Varying Boundary Conditions</footer>
+
+    <script>
+        // =========================================================
+        // Shared toolkit (same on every Topic 3 page)
+        // =========================================================
+        if (window.lucide) lucide.createIcons();
+        function scrollToSection(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        const COL = { sky: '#0284c7', rose: '#e11d48', amber: '#d97706', indigo: '#4f46e5', emerald: '#059669', violet: '#7c3aed', slate: '#475569', grid: '#e2e8f0', text: '#334155', muted: '#94a3b8' };
+        const EPS0 = 8.854187817e-12, K = 1 / (4 * Math.PI * EPS0);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const sgn = v => (v >= 0 ? '+' : '−');
+        const $ = id => document.getElementById(id);
+        const num = id => parseFloat($(id).value);
+        const setText = (id, t) => { const el = $(id); if (el) el.innerText = t; };
+
+        function setupCanvas(id) {
+            const canvas = $(id);
+            if (!canvas) return null;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+            if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            return { ctx, w: rect.width, h: rect.height };
+        }
+        function arrow(ctx, x, y, dx, dy, color, alpha = 1, width = 2, head = 8, dash = null) {
+            const len = Math.hypot(dx, dy);
+            if (len < 0.5) return;
+            ctx.save();
+            ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+            if (dash) ctx.setLineDash(dash);
+            const a = Math.atan2(dy, dx), hl = Math.min(head, len * 0.5);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx - hl * 0.6 * Math.cos(a), y + dy - hl * 0.6 * Math.sin(a)); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y + dy);
+            ctx.lineTo(x + dx - hl * Math.cos(a - 0.42), y + dy - hl * Math.sin(a - 0.42));
+            ctx.lineTo(x + dx - hl * Math.cos(a + 0.42), y + dy - hl * Math.sin(a + 0.42));
+            ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        function label(ctx, text, x, y, color = COL.text, font = '600 12px Inter, sans-serif', align = 'left') {
+            ctx.save(); ctx.fillStyle = color; ctx.font = font; ctx.textAlign = align; ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y); ctx.restore();
+        }
+        function line(ctx, x1, y1, x2, y2, color, width = 1.2, dash = null, alpha = 1) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
+        }
+        function chargeDisc(ctx, x, y, q, r = 12, color = null) {
+            const c = color || (q > 0 ? COL.sky : q < 0 ? COL.rose : COL.muted);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+            label(ctx, q > 0 ? '+' : q < 0 ? '−' : '0', x, y + 0.5, '#ffffff', `bold ${Math.round(r * 1.1)}px Inter, sans-serif`, 'center');
+        }
+        // direction-only field arrow: opacity encodes log |F|
+        function dirArrow(ctx, x, y, fx, fy, L, color, logMin, logSpan) {
+            const m = Math.hypot(fx, fy);
+            if (!(m > 0)) return;
+            const alpha = clamp((Math.log10(m) - logMin) / logSpan, 0.12, 0.85);
+            const ux = fx / m, uy = fy / m;
+            arrow(ctx, x - ux * L / 2, y - uy * L / 2, ux * L, uy * L, color, alpha, 1.3, 5);
+        }
+        // marching-squares contours of a scalar function (screen coords)
+        function contours(ctx, w, h, fn, levels, colorFn, step = 6, width = 1.2) {
+            const cols = Math.floor(w / step) + 2, rows = Math.floor(h / step) + 2, g = new Float32Array(cols * rows);
+            for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g[r * cols + c] = fn(c * step, r * step);
+            const seg = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+            ctx.save(); ctx.lineWidth = width;
+            levels.forEach(val => {
+                ctx.strokeStyle = colorFn(val); ctx.beginPath();
+                for (let r = 0; r < rows - 1; r++) for (let c = 0; c < cols - 1; c++) {
+                    const i = r * cols + c, v0 = g[i], v1 = g[i + 1], v2 = g[i + cols + 1], v3 = g[i + cols];
+                    if (!isFinite(v0 + v1 + v2 + v3)) continue;
+                    let s = 0; if (v0 >= val) s |= 1; if (v1 >= val) s |= 2; if (v2 >= val) s |= 4; if (v3 >= val) s |= 8;
+                    if (s === 0 || s === 15) continue;
+                    const x = c * step, y = r * step;
+                    const T = [x + step * ((val - v0) / (v1 - v0 || 1e-12)), y], R = [x + step, y + step * ((val - v1) / (v2 - v1 || 1e-12))];
+                    const B = [x + step * ((val - v3) / (v2 - v3 || 1e-12)), y + step], L = [x, y + step * ((val - v0) / (v3 - v0 || 1e-12))];
+                    switch (s) { case 1: case 14: seg(T, L); break; case 2: case 13: seg(T, R); break; case 3: case 12: seg(L, R); break; case 4: case 11: seg(R, B); break;
+                        case 5: seg(T, L); seg(R, B); break; case 6: case 9: seg(T, B); break; case 7: case 8: seg(L, B); break; case 10: seg(T, R); seg(L, B); break; }
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        // simple x–y plot frame; returns mapping helpers
+        function plotFrame(ctx, w, h, xmin, xmax, ymin, ymax, opts = {}) {
+            const L = opts.left ?? 40, R = opts.right ?? 12, T = opts.top ?? 22, B = opts.bottom ?? 26;
+            const X = x => L + (x - xmin) / (xmax - xmin) * (w - L - R);
+            const Y = y => h - B - (y - ymin) / (ymax - ymin) * (h - T - B);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(L, T - 6); ctx.lineTo(L, h - B); ctx.lineTo(w - R, h - B); ctx.stroke();
+            if (ymin < 0 && ymax > 0) { ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); }
+            ctx.restore();
+            if (opts.xlabel) label(ctx, opts.xlabel, w - R, h - 8, COL.slate, '12px Inter, sans-serif', 'right');
+            if (opts.ylabel) label(ctx, opts.ylabel, L + 4, 10, COL.slate, '600 12px Inter, sans-serif');
+            return { X, Y, L, R, T, B };
+        }
+        function curve(ctx, fn, x0, x1, X, Y, color, width = 2.2, n = 200, dash = null) {
+            ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash);
+            ctx.beginPath(); let pen = false;
+            for (let k = 0; k <= n; k++) {
+                const x = x0 + (x1 - x0) * k / n, y = fn(x);
+                if (!isFinite(y)) { pen = false; continue; }
+                if (!pen) { ctx.moveTo(X(x), Y(y)); pen = true; } else ctx.lineTo(X(x), Y(y));
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        function dot(ctx, x, y, color = COL.amber, r = 5) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+        function fmtSI(v, unit, digits = 3) {
+            const a = Math.abs(v);
+            if (!isFinite(v)) return '∞ ' + unit;
+            if (a === 0) return '0 ' + unit;
+            const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+            for (const [f, p] of P) if (a >= f * 0.9995) return (v / f).toPrecision(digits) + ' ' + p + unit;
+            return v.toExponential(2) + ' ' + unit;
+        }
+        const typeset = els => { if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {}); };
+        function chipToggle(state, key, el, cls = 'on') { state[key] = !state[key]; el.classList.toggle(cls, state[key]); return state[key]; }
+        function chipGroup(id, onChange) {
+            const g = $(id);
+            g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+                g.querySelectorAll('button').forEach(o => o.classList.remove('on'));
+                b.classList.add('on'); onChange(b.dataset.v);
+            }));
+        }
+        function onInputs(ids, fn) { ids.forEach(id => { const el = $(id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', fn); }); }
+        // pointer dragging on a canvas: pick(x, y) returns a handle or null; move(handle, x, y)
+        function draggable(id, pick, move, end) {
+            const cv = $(id); let handle = null;
+            const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r.width, r.height]; };
+            cv.addEventListener('pointerdown', e => { const [x, y, w, h] = pos(e); handle = pick(x, y, w, h); if (handle !== null && handle !== undefined) { cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; } });
+            cv.addEventListener('pointermove', e => { if (handle === null || handle === undefined) return; const [x, y, w, h] = pos(e); move(handle, x, y, w, h); });
+            const stop = () => { if (handle !== null && end) end(handle); handle = null; cv.style.cursor = ''; };
+            cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+        }
+
+        // ---------- Quiz engine ----------
+        let QUIZ = [], quizScore = 0; const quizAnswered = {};
+        function renderQuiz(items) {
+            QUIZ = items;
+            $('quiz-container').innerHTML = QUIZ.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 space-y-3">
+                    <span class="text-sm font-bold text-sky-800 uppercase tracking-wider">Question ${i + 1}</span>
+                    <p class="text-sm text-slate-800 font-medium">${item.q}</p>
+                    <div class="space-y-2 text-sm">
+                        ${item.opts.map((o, j) => `<button onclick="answerQuiz(${i}, ${j})" class="q${i}-btn w-full text-left p-3 rounded-xl bg-slate-100 border border-slate-200 hover:border-slate-300 transition">${String.fromCharCode(65 + j)}. ${o}</button>`).join('')}
+                    </div>
+                    <div id="q${i}-feedback" class="text-sm hidden p-2.5 rounded-xl"></div>
+                </div>`).join('');
+            setText('quiz-score', `Score: 0 / ${QUIZ.length}`);
+        }
+        function answerQuiz(i, j) {
+            if (quizAnswered[i]) return;
+            quizAnswered[i] = true;
+            const item = QUIZ[i], ok = j === item.ans;
+            document.querySelectorAll(`.q${i}-btn`).forEach((b, k) => {
+                b.disabled = true; b.classList.add('cursor-not-allowed');
+                if (k === item.ans) b.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                else if (k === j) b.classList.add('border-rose-500', 'bg-rose-500/10');
+                else b.classList.add('opacity-60');
+            });
+            if (ok) quizScore++;
+            const fb = $(`q${i}-feedback`);
+            fb.className = ok ? 'text-sm p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 font-medium'
+                              : 'text-sm p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 font-medium';
+            fb.innerHTML = (ok ? '✓ Correct. ' : '✗ Incorrect — the answer is ' + String.fromCharCode(65 + item.ans) + '. ') + item.why;
+            typeset([fb]);
+            setText('quiz-score', `Score: ${quizScore} / ${QUIZ.length}`);
+            if (Object.keys(quizAnswered).length === QUIZ.length) $('quiz-reset').classList.remove('hidden');
+        }
+        function resetQuiz() {
+            quizScore = 0; Object.keys(quizAnswered).forEach(k => delete quizAnswered[k]);
+            renderQuiz(QUIZ); if (window.EM && EM.typeset) EM.typeset($('quiz-container')); else typeset([$('quiz-container')]); $('quiz-reset').classList.add('hidden');
+        }
+
+        // ---------- Animation loop: only visible canvases are redrawn ----------
+        const ANIM = [], VISIBLE = {};
+        function animate(id, fn) { ANIM.push({ id, fn }); }
+        function startLoop() {
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver(es => es.forEach(e => VISIBLE[e.target.id] = e.isIntersecting), { rootMargin: '80px' });
+                ANIM.forEach(a => { const el = $(a.id); if (el) io.observe(el); });
+            } else ANIM.forEach(a => VISIBLE[a.id] = true);
+            let last = null;
+            const tick = now => {
+                const dt = last === null ? 1 / 60 : Math.min((now - last) / 1000, 0.05); last = now;
+                ANIM.forEach(a => { if (VISIBLE[a.id]) a.fn(dt); });
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        }
+
+        // =========================================================
+        // Magnetostatics toolkit (Topic 4)
+        // =========================================================
+        const MU0 = 4 * Math.PI * 1e-7;
+        // one-row sliders: fmts = { id: v => text }, onChange() called after every move
+        function bindSliders(fmts, onChange) {
+            Object.entries(fmts).forEach(([id, f]) => {
+                const el = $(id); if (!el) return;
+                const show = () => setText('val-' + id, f(+el.value));
+                el.addEventListener('input', () => { show(); onChange && onChange(id); });
+                show();
+            });
+        }
+        const val = id => +$(id).value;
+        // ⊙ (out of page) / ⊗ (into page) symbol
+        function currentDot(ctx, x, y, out, color = COL.amber, r = 9) {
+            ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = '#ffffff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = color;
+            if (out) { ctx.beginPath(); ctx.arc(x, y, r * 0.3, 0, 2 * Math.PI); ctx.fill(); }
+            else { const d = r * 0.55; ctx.beginPath(); ctx.moveTo(x - d, y - d); ctx.lineTo(x + d, y + d); ctx.moveTo(x + d, y - d); ctx.lineTo(x - d, y + d); ctx.stroke(); }
+            ctx.restore();
+        }
+        // complete elliptic integrals K(k), E(k) by the arithmetic-geometric mean (k = modulus)
+        function ellipKE(k) {
+            let a = 1, b = Math.sqrt(1 - k * k), c = k, sum = 0.5 * c * c, p = 1;
+            for (let i = 0; i < 30 && Math.abs(c) > 1e-15; i++) { const an = (a + b) / 2; c = (a - b) / 2; b = Math.sqrt(a * b); a = an; p *= 2; sum += 0.5 * p * c * c; }
+            const K = Math.PI / (2 * a); return [K, K * (1 - sum)];
+        }
+        // exact B of a circular loop (radius a, current I, in the z = 0 plane, axis z) at (r, z): [Br, Bz] in tesla
+        function loopB(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : r;
+            const q = (a + r) ** 2 + z * z, k2 = 4 * a * r / q, [K, E] = ellipKE(Math.sqrt(Math.min(k2, 1 - 1e-12)));
+            const d = (a - r) ** 2 + z * z, f = MU0 * I / (2 * Math.PI * Math.sqrt(q));
+            return [f * z / r * (-K + (a * a + r * r + z * z) / d * E), f * (K + (a * a - r * r - z * z) / d * E)];
+        }
+        // mutual inductance of two coaxial circular loops (Maxwell's formula)
+        function mutualLoops(a1, a2, d) {
+            const k = Math.sqrt(4 * a1 * a2 / ((a1 + a2) ** 2 + d * d)), [K, E] = ellipKE(Math.min(k, 1 - 1e-12));
+            return MU0 * Math.sqrt(a1 * a2) * ((2 / k - k) * K - 2 / k * E);
+        }
+        // trace a 2-D field line from (x, y) in world units; F(x, y) → [fx, fy]; returns array of points
+        function traceLine(F, x, y, dir, step, nmax, box) {
+            const pts = [[x, y]];
+            for (let i = 0; i < nmax; i++) {
+                const f1 = F(x, y), m1 = Math.hypot(...f1); if (!(m1 > 1e-30)) break;
+                const mx = x + dir * step / 2 * f1[0] / m1, my = y + dir * step / 2 * f1[1] / m1, f2 = F(mx, my), m2 = Math.hypot(...f2); if (!(m2 > 1e-30)) break;
+                x += dir * step * f2[0] / m2; y += dir * step * f2[1] / m2;
+                if (x < box[0] || x > box[1] || y < box[2] || y > box[3]) { pts.push([x, y]); break; }
+                pts.push([x, y]);
+                if (i > 20 && Math.hypot(x - pts[0][0], y - pts[0][1]) < step * 0.8) { pts.push(pts[0]); break; }   // closed loop
+            }
+            return pts;
+        }
+        function drawPath(ctx, pts, X, Y, color, width = 1.3, alpha = 0.8, arrowsEvery = 0) {
+            if (pts.length < 2) return;
+            ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.stroke(); ctx.restore();
+            if (arrowsEvery) for (let i = arrowsEvery; i < pts.length - 1; i += arrowsEvery) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; const dx = X(x1) - X(x0), dy = Y(y1) - Y(y0), m = Math.hypot(dx, dy) || 1; arrow(ctx, X(x0), Y(y0), dx / m * 8, dy / m * 8, color, alpha, width, 6); }
+        }
+        // world ↔ screen mapping helper for a rectangular view
+        function view2D(w, h, xmin, xmax, ymin, ymax, pad = 12) {
+            const s = Math.min((w - 2 * pad) / (xmax - xmin), (h - 2 * pad) / (ymax - ymin)), ox = (w - s * (xmax - xmin)) / 2, oy = (h - s * (ymax - ymin)) / 2;
+            return { s, X: x => ox + (x - xmin) * s, Y: y => h - oy - (y - ymin) * s, x: px => xmin + (px - ox) / s, y: py => ymin + (h - oy - py) / s };
+        }
+        const fmtE = (v, d = 3) => !isFinite(v) ? '—' : v === 0 ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-2 ? v.toExponential(d - 1) : (+v.toPrecision(d)).toString());
+        const redrawOnResize = (ids, fn) => { const f = () => requestAnimationFrame(fn); if ('ResizeObserver' in window) { const ro = new ResizeObserver(f); ids.forEach(id => $(id) && ro.observe($(id).parentElement)); } window.addEventListener('resize', f); };
+        // vector potential A_φ of a circular loop; field lines in the meridian plane are contours of ψ = r·A_φ
+        function loopAphi(a, I, r, z) {
+            r = Math.abs(r) < 1e-9 ? 1e-9 : Math.abs(r);
+            const k2 = 4 * a * r / ((a + r) ** 2 + z * z), k = Math.sqrt(Math.min(k2, 1 - 1e-12)), [K, E] = ellipKE(k);
+            return MU0 * I / (Math.PI * k) * Math.sqrt(a / r) * ((1 - k2 / 2) * K - E);
+        }
+        // =========================================================
+        // Time-varying fields toolkit (Topic 5)
+        // =========================================================
+        const C0 = 299792458;
+        // rolling history buffer
+        function Trace(n = 500) { return { d: [], n, push(v) { this.d.push(v); if (this.d.length > this.n) this.d.shift(); }, clear() { this.d = []; } }; }
+        // oscilloscope: series = [{ tr: Trace or array, color, label, dash, scale }], ymax symmetric range
+        function scope(id, series, ymax, opts = {}) {
+            const c = setupCanvas(id); if (!c) return null; const { ctx, w, h } = c, L = opts.left ?? 54, R = 12, T = 22, B = 22;
+            const X = i => L + i / ((opts.n ?? 500) - 1) * (w - L - R), Y = v => T + (h - T - B) / 2 * (1 - v / ymax);
+            ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+            for (let k = 0; k <= 8; k++) { const x = L + k * (w - L - R) / 8; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, h - B); ctx.stroke(); }
+            [-1, -0.5, 0, 0.5, 1].forEach(f => { ctx.beginPath(); ctx.moveTo(L, Y(f * ymax)); ctx.lineTo(w - R, Y(f * ymax)); ctx.stroke(); });
+            ctx.strokeStyle = '#94a3b8'; ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(w - R, Y(0)); ctx.stroke(); ctx.restore();
+            label(ctx, opts.ylab ? `${opts.ylab}` : fmtE(ymax), L - 6, T + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            label(ctx, opts.ylab0 ?? '0', L - 6, Y(0) + 4, COL.muted, '11px Inter, sans-serif', 'right');
+            series.forEach(s => { const d = s.tr.d || s.tr, sc = s.scale ?? 1; if (d.length < 2) return; ctx.save(); ctx.strokeStyle = s.color; ctx.lineWidth = s.width ?? 2.2; if (s.dash) ctx.setLineDash(s.dash); ctx.beginPath();
+                const off = (opts.n ?? 500) - d.length; d.forEach((v, i) => { const y = Y(clamp(v * sc, -ymax * 1.05, ymax * 1.05)); i ? ctx.lineTo(X(i + off), y) : ctx.moveTo(X(i + off), y); }); ctx.stroke(); ctx.restore(); });
+            let lx = L + 8; series.forEach(s => { if (!s.label) return; ctx.save(); ctx.font = '600 12px Inter, sans-serif'; const tw = ctx.measureText(s.label).width; ctx.restore(); ctx.save(); ctx.strokeStyle = s.color; ctx.lineWidth = 2.5; if (s.dash) ctx.setLineDash(s.dash); ctx.beginPath(); ctx.moveTo(lx, 12); ctx.lineTo(lx + 16, 12); ctx.stroke(); ctx.restore(); label(ctx, s.label, lx + 20, 16, s.color, '600 12px Inter, sans-serif'); lx += tw + 36; });
+            if (opts.xlab) label(ctx, opts.xlab, w - R, h - 6, COL.muted, '11px Inter, sans-serif', 'right');
+            return { ctx, w, h, X, Y };
+        }
+        const deg = r => r * 180 / Math.PI;
+        // small play/pause helper bound to a chip button
+        function playButton(id, state, key = 'run') { const b = $(id); if (!b) return; b.addEventListener('click', () => { state[key] = !state[key]; b.textContent = state[key] ? 'Pause' : 'Play'; b.classList.toggle('on', state[key]); }); }
+        const fmtT = s => { const a = Math.abs(s); return a >= 86400 * 365 ? (s / (86400 * 365)).toPrecision(3) + ' yr' : a >= 86400 ? (s / 86400).toPrecision(3) + ' days' : a >= 3600 ? (s / 3600).toPrecision(3) + ' h' : a >= 60 ? (s / 60).toPrecision(3) + ' min' : fmtSI(s, 's'); };
+        // =========================================================
+        // Boundary conditions (time-varying)
+        // =========================================================
+        const BC = { m2: 'diel', showE: 'E', showH: 'H', osc: false, ph: 0 };
+        function solveBC() {
+            const f = BC.osc ? Math.cos(BC.ph) : 1, e1 = val('b-e1'), m1 = val('b-m1'), pec = BC.m2 === 'pec', e2 = val('b-e2'), m2 = val('b-m2r');
+            const tE = val('b-tE') * Math.PI / 180, tH = val('b-tH') * Math.PI / 180;
+            let E1 = [val('b-E') * Math.sin(tE) * f, val('b-E') * Math.cos(tE) * f], H1 = [val('b-H') * Math.sin(tH) * f, val('b-H') * Math.cos(tH) * f];
+            let rs = val('b-rs') * f, Js = val('b-Js') * f, E2, H2;
+            if (pec) { E1 = [0, E1[1]]; H1 = [H1[0], 0]; E2 = [0, 0]; H2 = [0, 0]; rs = e1 * E1[1]; Js = H1[0]; }
+            else { E2 = [E1[0], (e1 * E1[1] - rs) / e2]; H2 = [H1[0] - Js, m1 * H1[1] / m2]; }
+            return { f, e1, m1, e2: pec ? 1 : e2, m2: pec ? 1 : m2, pec, E1, E2, H1, H2, rs, Js };
+        }
+        function panel(id, S, kind) {
+            const c = setupCanvas(id); if (!c) return; const { ctx, w, h } = c, cy = h / 2, cx = w / 2;
+            ctx.save(); ctx.fillStyle = 'rgba(2,132,199,0.05)'; ctx.fillRect(0, 0, w, cy); ctx.fillStyle = S.pec ? 'rgba(100,116,139,0.28)' : 'rgba(217,119,6,0.08)'; ctx.fillRect(0, cy, w, h - cy); ctx.restore();
+            line(ctx, 0, cy, w, cy, COL.slate, 2);
+            const isE = kind === 'E', show = isE ? BC.showE : BC.showH, col = isE ? COL.sky : COL.rose;
+            const k1 = show === 'E' ? 1 : show === 'D' ? S.e1 : show === 'H' ? 1 : S.m1, k2 = show === 'E' ? 1 : show === 'D' ? S.e2 : show === 'H' ? 1 : S.m2;
+            const V1 = isE ? S.E1 : S.H1, V2 = isE ? S.E2 : S.H2;
+            if (Math.abs(S.f) > 0.2) { const pk = Math.max(Math.hypot(...V1) * k1, Math.hypot(...V2) * k2) / Math.abs(S.f); BC['sc' + kind] = (h * 0.21) / Math.max(pk, 1); }
+            const sc = BC['sc' + kind] || 8;
+            [[V1, k1, cy - h * 0.25, '1'], [V2, k2, cy + h * 0.25, '2']].forEach(([V, k, y, m]) => {
+                const vx = V[0] * k * sc, vy = V[1] * k * sc, L = Math.hypot(vx, vy);
+                if (L > 1) { line(ctx, cx - vx / 2, y + vy / 2, cx + vx / 2, y + vy / 2, col, 1.2, [4, 4], 0.6); line(ctx, cx + vx / 2, y + vy / 2, cx + vx / 2, y - vy / 2, col, 1.2, [4, 4], 0.6); arrow(ctx, cx - vx / 2, y + vy / 2, vx, -vy, col, 1, 3, 12); }
+                else dot(ctx, cx, y, col, 4);
+                label(ctx, `${show}${m === '1' ? '₁' : '₂'}${show === 'D' ? '/ε₀' : show === 'B' ? '/μ₀' : ''}`, cx + Math.abs(vx) / 2 + 14, y + 4, col, 'bold 14px Inter, sans-serif');
+            });
+            // surface sources
+            if (isE && Math.abs(S.rs) > 0.05) { const n = Math.min(14, Math.round(Math.abs(S.rs) * 1.5) + 1); for (let i = 0; i < n; i++) label(ctx, S.rs > 0 ? '+' : '−', 20 + (w - 40) * (i + 0.5) / n, cy + 5, S.rs > 0 ? COL.rose : COL.sky, 'bold 15px Inter, sans-serif', 'center'); }
+            if (!isE && Math.abs(S.Js) > 0.05) { const n = Math.min(12, Math.round(Math.abs(S.Js)) + 1); for (let i = 0; i < n; i++) currentDot(ctx, 20 + (w - 40) * (i + 0.5) / n, cy, S.Js < 0, COL.amber, 6); }
+            label(ctx, `medium 1: ε_r = ${S.e1}, μ_r = ${S.m1}`, 10, 18, COL.slate, '600 12px Inter, sans-serif');
+            label(ctx, S.pec ? 'medium 2: perfect conductor (all fields zero)' : `medium 2: ε_r = ${S.e2}, μ_r = ${S.m2}`, 10, h - 10, COL.slate, '600 12px Inter, sans-serif');
+            arrow(ctx, w - 24, cy - 4, 0, -30, COL.slate, 1, 1.8, 7); label(ctx, 'n̂₂', w - 30, cy - 40, COL.slate, 'bold 12px Inter, sans-serif', 'right');
+        }
+        function drawBC(dt) {
+            if (BC.osc) BC.ph += dt * 1.6;
+            const S = solveBC(), a = v => (Math.atan2(v[0], v[1]) * 180 / Math.PI).toFixed(1) + '°';
+            setText('ro-Et', `${S.E1[0].toFixed(2)}, ${S.E2[0].toFixed(2)} V/m`); setText('ro-Dn', `${(S.e1 * S.E1[1]).toFixed(2)}, ${(S.e2 * S.E2[1] * (S.pec ? 0 : 1)).toFixed(2)}`); setText('ro-Dchk', (S.e1 * S.E1[1] - (S.pec ? 0 : S.e2 * S.E2[1]) - S.rs).toFixed(3));
+            setText('ro-Ht', `${S.H1[0].toFixed(2)}, ${S.H2[0].toFixed(2)} A/m`); setText('ro-Bn', `${(S.m1 * S.H1[1]).toFixed(2)}, ${(S.pec ? 0 : S.m2 * S.H2[1]).toFixed(2)}`); setText('ro-Hchk', (S.H1[0] - S.H2[0] - S.Js).toFixed(3));
+            setText('ro-ang', S.pec ? '— (no field in a perfect conductor)' : `${a(S.E2)}, ${a(S.H2)}`);
+            setText('ro-note', S.pec ? `forced: E₁t = 0, B₁n = 0; ρ_s/ε₀ = ${S.rs.toFixed(2)}, J_s = ${S.Js.toFixed(2)} A/m` : BC.osc ? `all fields × cos ωt = ${S.f.toFixed(2)}` : 'static snapshot');
+            panel('cv-be', S, 'E'); panel('cv-bh', S, 'H');
+        }
+        chipGroup('b-m2', k => { BC.m2 = k; drawBC(0); }); chipGroup('b-showE', k => { BC.showE = k; drawBC(0); }); chipGroup('b-showH', k => { BC.showH = k; drawBC(0); });
+        $('b-osc').addEventListener('click', e => { chipToggle(BC, 'osc', e.currentTarget); BC.ph = 0; drawBC(0); });
+        const f1 = v => v.toFixed(1);
+        bindSliders({ 'b-e1': f1, 'b-m1': f1, 'b-e2': f1, 'b-m2r': f1, 'b-E': v => f1(v) + ' V/m', 'b-tE': v => v.toFixed(0) + '°', 'b-H': v => f1(v) + ' A/m', 'b-tH': v => v.toFixed(0) + '°', 'b-rs': v => f1(v) + ' V/m', 'b-Js': v => f1(v) + ' A/m' }, () => drawBC(0));
+        animate('cv-be', dt => { if (BC.osc) drawBC(dt); });
+        redrawOnResize(['cv-be', 'cv-bh'], () => drawBC(0));
+        drawBC(0); startLoop();
+        renderQuiz([
+            { q: 'Are the static boundary conditions valid for time-varying fields?', opts: ['No, they must be rederived with extra terms', 'Yes: the $\\partial/\\partial t$ terms vanish as the pillbox or loop shrinks to zero thickness', 'Only for $\\mathbf{E}$', 'Only at low frequency'], ans: 1, why: 'The flux of $\\partial\\mathbf{B}/\\partial t$ or $\\partial\\mathbf{D}/\\partial t$ through a loop of zero area is zero. Use "Oscillate" to see the conditions hold at every instant.' },
+            { q: 'With $\\hat{\\mathbf{n}}_2$ pointing from medium 2 into medium 1, the normal-D condition reads', opts: ['$\\hat{\\mathbf{n}}_2\\cdot(\\mathbf{D}_1 - \\mathbf{D}_2) = \\rho_{\\mathrm{s}}$', '$\\hat{\\mathbf{n}}_2\\cdot(\\mathbf{D}_2 - \\mathbf{D}_1) = \\rho_{\\mathrm{s}}$', '$\\mathbf{D}_1 = \\mathbf{D}_2$ always', '$\\hat{\\mathbf{n}}_2\\times\\mathbf{D}_1 = \\rho_{\\mathrm{s}}$'], ans: 0, why: 'Gauss\'s law on a pillbox: the flux out through the top (medium 1) minus the flux into the bottom equals the enclosed surface charge.' },
+            { q: 'A surface current $\\mathbf{J}_{\\mathrm{s}}$ causes a discontinuity in', opts: ['normal $\\mathbf{B}$', 'tangential $\\mathbf{H}$', 'tangential $\\mathbf{E}$', 'normal $\\mathbf{D}$'], ans: 1, why: '$\\hat{\\mathbf{n}}_2\\times(\\mathbf{H}_1 - \\mathbf{H}_2) = \\mathbf{J}_{\\mathrm{s}}$. Normal $\\mathbf{B}$ is always continuous.' },
+            { q: 'At the surface of a perfect conductor, which field components can be nonzero just outside?', opts: ['Tangential E and normal B', 'Normal E and tangential H', 'All four', 'None'], ans: 1, why: '$E_{1\\mathrm{t}} = 0$ and $B_{1\\mathrm{n}} = 0$; the normal $\\mathbf{D}$ ends on $\\rho_{\\mathrm{s}}$ and the tangential $\\mathbf{H}$ is carried by $\\mathbf{J}_{\\mathrm{s}}$.' },
+            { q: 'Medium 1 has $\\mu_{\\mathrm{r}} = 1$ and medium 2 has $\\mu_{\\mathrm{r}} = 4$, with no surface current. Compared with medium 1, $\\mathbf{H}$ in medium 2 is', opts: ['bent toward the normal', 'bent away from the normal (toward the interface)', 'unchanged', 'zero'], ans: 1, why: '$H_{\\mathrm{t}}$ is the same but $H_{2\\mathrm{n}} = H_{1\\mathrm{n}}/4$, so $\\mathbf{H}_2$ lies closer to the interface: $\\tan\\theta_2/\\tan\\theta_1 = \\mu_2/\\mu_1$.' },
+            { q: 'Medium 1 has $\\varepsilon_{\\mathrm{r}1} = 2$ and medium 2 has $\\varepsilon_{\\mathrm{r}2} = 8$, with no surface charge. The ratio $E_{1\\mathrm{n}}/E_{2\\mathrm{n}}$ is', opts: ['1/4', '1', '4', '16'], ans: 2, why: 'With $\\rho_{\\mathrm{s}} = 0$ the normal $\\mathbf{D}$ is continuous: $\\varepsilon_1E_{1\\mathrm{n}} = \\varepsilon_2E_{2\\mathrm{n}}$, so $E_{1\\mathrm{n}}/E_{2\\mathrm{n}} = \\varepsilon_{\\mathrm{r}2}/\\varepsilon_{\\mathrm{r}1} = 4$. The tangential $\\mathbf{E}$ stays continuous.' }
+        ]);
+
+    </script>
+</body>
+</html>
