@@ -620,7 +620,10 @@
         function sysToCart(sys, u) { return sys === 'cart' ? u : sys === 'cyl' ? COORD.cyl2cart(u) : COORD.sph2cart(u); }
         function cartToSys(sys, c) { return sys === 'cart' ? c : sys === 'cyl' ? COORD.cart2cyl(c) : COORD.cart2sph(c); }
         const fmtN = (v, d = 3) => !isFinite(v) ? '—' : (Math.abs(v) < 5 * Math.pow(10, -d) ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-3 ? v.toExponential(2) : (+v.toFixed(d)).toString()));
-        const fmtVec = (v, sys, d = 3) => v.map((c, i) => `${i ? (c < 0 && fmtN(c, d) !== '0' ? '− ' : '+ ') : (c < 0 && fmtN(c, d) !== '0' ? '−' : '')}${fmtN(Math.abs(c), d)} ${SYS[sys].plain[i]}`).join(' ');
+        const fmtVec = (v, sys, d = 3) => {
+            const tex = v.map((c, i) => `${i ? (c < 0 && fmtN(c, d) !== '0' ? ' - ' : ' + ') : (c < 0 && fmtN(c, d) !== '0' ? '-' : '')}${fmtN(Math.abs(c), d)} ${SYS[sys].hats[i]}`).join(' ').replace(/\\/g, '\\');
+            return katex.renderToString(tex, { throwOnError: true });
+        };
 
         // =========================================================
         // Symbolic engine: differentiation + simplification + TeX
@@ -1025,7 +1028,7 @@
             }
             function readInputs() { return isVec ? [0, 1, 2].map(i => $('in-f' + i).value.trim() || '0') : ($('in-f').value.trim() || '0'); }
             function buildPresets() {
-                $('preset-box').innerHTML = cfg.presets[S.sys].map((p, i) => `<button data-i="${i}" class="chip">${p.label}</button>`).join('');
+                $('preset-box').innerHTML = cfg.presets[S.sys].map((p, i) => `<button data-i="${i}" class="chip">${katex.renderToString(p.labelTex, { throwOnError: true })}${p.labelNote}</button>`).join('');
                 $('preset-box').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { S.src[S.sys] = cfg.presets[S.sys][+b.dataset.i].f; fillInputs(); compile(); }));
             }
             function compile() {
@@ -1082,10 +1085,10 @@
                 const u = U(S.Pc), c = S.Pc, sy = S.sys;
                 const pS = sy === 'cart' ? `(${u.map(v => fmtN(v, 2)).join(', ')})` : sy === 'cyl' ? `(${fmtN(u[0], 2)}, ${deg(u[1])}, ${fmtN(u[2], 2)})` : `(${fmtN(u[0], 2)}, ${deg(u[1])}, ${deg(u[2])})`;
                 setText('ro-p', pS); setText('ro-pc', `(${c.map(v => fmtN(v, 2)).join(', ')})`);
-                setText('ro-f', isVec ? fmtVec(Fsys(u), sy) : fmtN(scalar(c), 4));
+                $('ro-f').innerHTML = isVec ? fmtVec(Fsys(u), sy) : fmtN(scalar(c), 4);
                 const r = result(c), a = analytic(c);
-                setText('ro-num', Array.isArray(r) ? fmtVec(r, sy) : fmtN(r, 4));
-                setText('ro-ana', a === null ? 'dữ liệu tùy chỉnh' : Array.isArray(a) ? fmtVec(a, sy) : fmtN(a, 4));
+                $('ro-num').innerHTML = Array.isArray(r) ? fmtVec(r, sy) : fmtN(r, 4);
+                $('ro-ana').innerHTML = a === null ? 'dữ liệu tùy chỉnh' : Array.isArray(a) ? fmtVec(a, sy) : fmtN(a, 4);
                 if ($('ro-mag')) setText('ro-mag', Array.isArray(r) ? fmtN(V3.len(r), 4) : '');
                 if (kind === 'grad') {
                     const d = dirVec(), g = gradCart(c), gp = [g[PL().ia], g[PL().ib]];
@@ -1270,25 +1273,25 @@
         // =========================================================
         const PRESETS = {
             cart: [
-                { label: '−y x̂ + x ŷ (quay)', f: ['-y', 'x', '0'], res: ['0', '0', '2'], resTex: `\\nabla\\times\\mathbf{F} = ${HZ}\\,(1 + 1) = 2\\,${HZ}` },
-                { label: 'y x̂ (dòng trượt)', f: ['y', '0', '0'], res: ['0', '0', '-1'], resTex: `\\nabla\\times\\mathbf{F} = -${HZ}\\,\\frac{\\partial y}{\\partial y} = -${HZ}` },
-                { label: 'z ŷ', f: ['0', 'z', '0'], res: ['-1', '0', '0'], resTex: `\\nabla\\times\\mathbf{F} = ${HX}\\left(0 - \\frac{\\partial z}{\\partial z}\\right) = -${HX}` },
-                { label: 'y² x̂ + x ŷ + z² ẑ', f: ['y^2', 'x', 'z^2'], res: ['0', '0', '1 - 2y'], resTex: `\\nabla\\times\\mathbf{F} = ${HZ}\\,(1 - 2y)` },
-                { label: 'x x̂ + y ŷ + z ẑ (hướng tâm)', f: ['x', 'y', 'z'], res: ['0', '0', '0'], resTex: `\\nabla\\times\\mathbf{F} = 0 \\quad (\\mathbf{F} = \\nabla\\tfrac12 R^2)` }
+                { label: '−y x̂ + x ŷ (quay)', labelTex: "-y \\hat{\\boldsymbol{x}} + x \\hat{\\boldsymbol{y}}", labelNote: " (quay)", f: ['-y', 'x', '0'], res: ['0', '0', '2'], resTex: `\\nabla\\times\\mathbf{F} = ${HZ}\\,(1 + 1) = 2\\,${HZ}` },
+                { label: 'y x̂ (dòng trượt)', labelTex: "y \\hat{\\boldsymbol{x}}", labelNote: " (dòng trượt)", f: ['y', '0', '0'], res: ['0', '0', '-1'], resTex: `\\nabla\\times\\mathbf{F} = -${HZ}\\,\\frac{\\partial y}{\\partial y} = -${HZ}` },
+                { label: 'z ŷ', labelTex: "z \\hat{\\boldsymbol{y}}", labelNote: "", f: ['0', 'z', '0'], res: ['-1', '0', '0'], resTex: `\\nabla\\times\\mathbf{F} = ${HX}\\left(0 - \\frac{\\partial z}{\\partial z}\\right) = -${HX}` },
+                { label: 'y² x̂ + x ŷ + z² ẑ', labelTex: "y^{2} \\hat{\\boldsymbol{x}} + x \\hat{\\boldsymbol{y}} + z^{2} \\hat{\\boldsymbol{z}}", labelNote: "", f: ['y^2', 'x', 'z^2'], res: ['0', '0', '1 - 2y'], resTex: `\\nabla\\times\\mathbf{F} = ${HZ}\\,(1 - 2y)` },
+                { label: 'x x̂ + y ŷ + z ẑ (hướng tâm)', labelTex: "x \\hat{\\boldsymbol{x}} + y \\hat{\\boldsymbol{y}} + z \\hat{\\boldsymbol{z}}", labelNote: " (hướng tâm)", f: ['x', 'y', 'z'], res: ['0', '0', '0'], resTex: `\\nabla\\times\\mathbf{F} = 0 \\quad (\\mathbf{F} = \\nabla\\tfrac12 R^2)` }
             ],
             cyl: [
-                { label: 'r φ̂ (quay vật rắn)', f: ['0', 'r', '0'], res: ['0', '0', '2'], resTex: `\\nabla\\times\\mathbf{F} = ${HZ}\\,\\frac{1}{r}\\frac{\\partial}{\\partial r}(r^2) = 2\\,${HZ}` },
-                { label: 'φ̂ / r (H của dòng điện thẳng)', f: ['0', '1/r', '0'], res: ['0', '0', '0'], resTex: `\\nabla\\times\\mathbf{F} = ${HZ}\\,\\frac{1}{r}\\frac{\\partial}{\\partial r}(1) = 0 \\quad (r \\ne 0)` },
-                { label: 'r r̂ + z ẑ', f: ['r', '0', 'z'], res: ['0', '0', '0'], resTex: '\\nabla\\times\\mathbf{F} = 0' },
-                { label: 'r² ẑ', f: ['0', '0', 'r^2'], res: ['0', '-2r', '0'], resTex: `\\nabla\\times\\mathbf{F} = -${HP}\\,\\frac{\\partial r^2}{\\partial r} = -2r\\,${HP}` },
-                { label: 'r cos φ φ̂', f: ['0', 'r*cos(phi)', '0'], res: ['0', '0', '2cos(phi)'], resTex: `\\nabla\\times\\mathbf{F} = ${HZ}\\,\\frac{1}{r}\\frac{\\partial}{\\partial r}(r^2\\cos\\phi) = 2\\cos\\phi\\,${HZ}` }
+                { label: 'r φ̂ (quay vật rắn)', labelTex: "r \\hat{\\boldsymbol{\\phi}}", labelNote: " (quay vật rắn)", f: ['0', 'r', '0'], res: ['0', '0', '2'], resTex: `\\nabla\\times\\mathbf{F} = ${HZ}\\,\\frac{1}{r}\\frac{\\partial}{\\partial r}(r^2) = 2\\,${HZ}` },
+                { label: 'φ̂ / r (H của dòng điện thẳng)', labelTex: "\\hat{\\boldsymbol{\\phi}} / r", labelNote: " (H của dòng điện thẳng)", f: ['0', '1/r', '0'], res: ['0', '0', '0'], resTex: `\\nabla\\times\\mathbf{F} = ${HZ}\\,\\frac{1}{r}\\frac{\\partial}{\\partial r}(1) = 0 \\quad (r \\ne 0)` },
+                { label: 'r r̂ + z ẑ', labelTex: "r \\hat{\\boldsymbol{r}} + z \\hat{\\boldsymbol{z}}", labelNote: "", f: ['r', '0', 'z'], res: ['0', '0', '0'], resTex: '\\nabla\\times\\mathbf{F} = 0' },
+                { label: 'r² ẑ', labelTex: "r^{2} \\hat{\\boldsymbol{z}}", labelNote: "", f: ['0', '0', 'r^2'], res: ['0', '-2r', '0'], resTex: `\\nabla\\times\\mathbf{F} = -${HP}\\,\\frac{\\partial r^2}{\\partial r} = -2r\\,${HP}` },
+                { label: 'r cos φ φ̂', labelTex: "r \\cos  \\phi  \\hat{\\boldsymbol{\\phi}}", labelNote: "", f: ['0', 'r*cos(phi)', '0'], res: ['0', '0', '2cos(phi)'], resTex: `\\nabla\\times\\mathbf{F} = ${HZ}\\,\\frac{1}{r}\\frac{\\partial}{\\partial r}(r^2\\cos\\phi) = 2\\cos\\phi\\,${HZ}` }
             ],
             sph: [
-                { label: 'R sin θ φ̂ (= −y x̂ + x ŷ)', f: ['0', '0', 'R*sin(theta)'], res: ['2cos(theta)', '-2sin(theta)', '0'], resTex: `\\nabla\\times\\mathbf{F} = ${HRR}\\,2\\cos\\theta - ${HT}\\,2\\sin\\theta = 2\\,${HZ}` },
-                { label: 'R φ̂', f: ['0', '0', 'R'], res: ['cos(theta)/sin(theta)', '-2', '0'], resTex: `\\nabla\\times\\mathbf{F} = ${HRR}\\cot\\theta - 2\\,${HT}` },
-                { label: 'R R̂', f: ['R', '0', '0'], res: ['0', '0', '0'], resTex: '\\nabla\\times\\mathbf{F} = 0' },
-                { label: 'φ̂ /(R sin θ) (xoáy đường)', f: ['0', '0', '1/(R*sin(theta))'], res: ['0', '0', '0'], resTex: '\\nabla\\times\\mathbf{F} = 0 \\quad (\\sin\\theta \\ne 0)' },
-                { label: 'R θ̂', f: ['0', 'R', '0'], res: ['0', '0', '2'], resTex: `\\nabla\\times\\mathbf{F} = ${HP}\\,\\frac{1}{R}\\frac{\\partial}{\\partial R}(R^2) = 2\\,${HP}` }
+                { label: 'R sin θ φ̂ (= −y x̂ + x ŷ)', labelTex: "R \\sin  \\theta  \\hat{\\boldsymbol{\\phi}} (= -y \\hat{\\boldsymbol{x}} + x \\hat{\\boldsymbol{y}})", labelNote: "", f: ['0', '0', 'R*sin(theta)'], res: ['2cos(theta)', '-2sin(theta)', '0'], resTex: `\\nabla\\times\\mathbf{F} = ${HRR}\\,2\\cos\\theta - ${HT}\\,2\\sin\\theta = 2\\,${HZ}` },
+                { label: 'R φ̂', labelTex: "R \\hat{\\boldsymbol{\\phi}}", labelNote: "", f: ['0', '0', 'R'], res: ['cos(theta)/sin(theta)', '-2', '0'], resTex: `\\nabla\\times\\mathbf{F} = ${HRR}\\cot\\theta - 2\\,${HT}` },
+                { label: 'R R̂', labelTex: "R \\hat{\\boldsymbol{R}}", labelNote: "", f: ['R', '0', '0'], res: ['0', '0', '0'], resTex: '\\nabla\\times\\mathbf{F} = 0' },
+                { label: 'φ̂ /(R sin θ) (xoáy đường)', labelTex: "\\hat{\\boldsymbol{\\phi}} /(R \\sin  \\theta )", labelNote: " (xoáy đường)", f: ['0', '0', '1/(R*sin(theta))'], res: ['0', '0', '0'], resTex: '\\nabla\\times\\mathbf{F} = 0 \\quad (\\sin\\theta \\ne 0)' },
+                { label: 'R θ̂', labelTex: "R \\hat{\\boldsymbol{\\theta}}", labelNote: "", f: ['0', 'R', '0'], res: ['0', '0', '2'], resTex: `\\nabla\\times\\mathbf{F} = ${HP}\\,\\frac{1}{R}\\frac{\\partial}{\\partial R}(R^2) = 2\\,${HP}` }
             ]
         };
         initOperatorPage({ kind: 'curl', presets: PRESETS, symbol: '(∇×F)·n̂', P0: [1.2, -0.9, 0.7] });

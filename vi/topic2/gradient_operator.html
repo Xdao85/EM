@@ -618,7 +618,10 @@
         function sysToCart(sys, u) { return sys === 'cart' ? u : sys === 'cyl' ? COORD.cyl2cart(u) : COORD.sph2cart(u); }
         function cartToSys(sys, c) { return sys === 'cart' ? c : sys === 'cyl' ? COORD.cart2cyl(c) : COORD.cart2sph(c); }
         const fmtN = (v, d = 3) => !isFinite(v) ? '—' : (Math.abs(v) < 5 * Math.pow(10, -d) ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-3 ? v.toExponential(2) : (+v.toFixed(d)).toString()));
-        const fmtVec = (v, sys, d = 3) => v.map((c, i) => `${i ? (c < 0 && fmtN(c, d) !== '0' ? '− ' : '+ ') : (c < 0 && fmtN(c, d) !== '0' ? '−' : '')}${fmtN(Math.abs(c), d)} ${SYS[sys].plain[i]}`).join(' ');
+        const fmtVec = (v, sys, d = 3) => {
+            const tex = v.map((c, i) => `${i ? (c < 0 && fmtN(c, d) !== '0' ? ' - ' : ' + ') : (c < 0 && fmtN(c, d) !== '0' ? '-' : '')}${fmtN(Math.abs(c), d)} ${SYS[sys].hats[i]}`).join(' ').replace(/\\/g, '\\');
+            return katex.renderToString(tex, { throwOnError: true });
+        };
 
         // =========================================================
         // Symbolic engine: differentiation + simplification + TeX
@@ -1023,7 +1026,7 @@
             }
             function readInputs() { return isVec ? [0, 1, 2].map(i => $('in-f' + i).value.trim() || '0') : ($('in-f').value.trim() || '0'); }
             function buildPresets() {
-                $('preset-box').innerHTML = cfg.presets[S.sys].map((p, i) => `<button data-i="${i}" class="chip">${p.label}</button>`).join('');
+                $('preset-box').innerHTML = cfg.presets[S.sys].map((p, i) => `<button data-i="${i}" class="chip">${katex.renderToString(p.labelTex, { throwOnError: true })}${p.labelNote}</button>`).join('');
                 $('preset-box').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { S.src[S.sys] = cfg.presets[S.sys][+b.dataset.i].f; fillInputs(); compile(); }));
             }
             function compile() {
@@ -1080,10 +1083,10 @@
                 const u = U(S.Pc), c = S.Pc, sy = S.sys;
                 const pS = sy === 'cart' ? `(${u.map(v => fmtN(v, 2)).join(', ')})` : sy === 'cyl' ? `(${fmtN(u[0], 2)}, ${deg(u[1])}, ${fmtN(u[2], 2)})` : `(${fmtN(u[0], 2)}, ${deg(u[1])}, ${deg(u[2])})`;
                 setText('ro-p', pS); setText('ro-pc', `(${c.map(v => fmtN(v, 2)).join(', ')})`);
-                setText('ro-f', isVec ? fmtVec(Fsys(u), sy) : fmtN(scalar(c), 4));
+                $('ro-f').innerHTML = isVec ? fmtVec(Fsys(u), sy) : fmtN(scalar(c), 4);
                 const r = result(c), a = analytic(c);
-                setText('ro-num', Array.isArray(r) ? fmtVec(r, sy) : fmtN(r, 4));
-                setText('ro-ana', a === null ? 'hàm tự nhập' : Array.isArray(a) ? fmtVec(a, sy) : fmtN(a, 4));
+                $('ro-num').innerHTML = Array.isArray(r) ? fmtVec(r, sy) : fmtN(r, 4);
+                $('ro-ana').innerHTML = a === null ? 'hàm tự nhập' : Array.isArray(a) ? fmtVec(a, sy) : fmtN(a, 4);
                 if ($('ro-mag')) setText('ro-mag', Array.isArray(r) ? fmtN(V3.len(r), 4) : '');
                 if (kind === 'grad') {
                     const d = dirVec(), g = gradCart(c), gp = [g[PL().ia], g[PL().ib]];
@@ -1268,25 +1271,25 @@
         // =========================================================
         const PRESETS = {
             cart: [
-                { label: 'x² + y² + z²', f: 'x^2 + y^2 + z^2', res: ['2x', '2y', '2z'], resTex: `\\nabla F = ${HX}\\,2x + ${HY}\\,2y + ${HZ}\\,2z = 2\\mathbf{R}` },
-                { label: 'sin x cos y', f: 'sin(x)*cos(y)', res: ['cos(x)cos(y)', '-sin(x)sin(y)', '0'], resTex: `\\nabla F = ${HX}\\cos x\\cos y - ${HY}\\sin x\\sin y` },
-                { label: 'xy − z²', f: 'x*y - z^2', res: ['y', 'x', '-2z'], resTex: `\\nabla F = ${HX}\\,y + ${HY}\\,x - ${HZ}\\,2z` },
-                { label: 'e^{−(x²+y²)/2}', f: 'exp(-(x^2+y^2)/2)', res: ['-x exp(-(x^2+y^2)/2)', '-y exp(-(x^2+y^2)/2)', '0'], resTex: `\\nabla F = -\\left(${HX}\\,x + ${HY}\\,y\\right)e^{-(x^2+y^2)/2}` },
-                { label: 'V = 1/√(x²+y²+z²)', f: '1/sqrt(x^2+y^2+z^2)', res: ['-x/(x^2+y^2+z^2)^1.5', '-y/(x^2+y^2+z^2)^1.5', '-z/(x^2+y^2+z^2)^1.5'], resTex: `\\nabla F = -\\frac{${HX}\\,x + ${HY}\\,y + ${HZ}\\,z}{(x^2+y^2+z^2)^{3/2}} = -\\frac{\\hat{\\mathbf{R}}}{R^2}` }
+                { label: 'x² + y² + z²', labelTex: "x^{2} + y^{2} + z^{2}", labelNote: "", f: 'x^2 + y^2 + z^2', res: ['2x', '2y', '2z'], resTex: `\\nabla F = ${HX}\\,2x + ${HY}\\,2y + ${HZ}\\,2z = 2\\mathbf{R}` },
+                { label: 'sin x cos y', labelTex: "\\sin  x \\cos  y", labelNote: "", f: 'sin(x)*cos(y)', res: ['cos(x)cos(y)', '-sin(x)sin(y)', '0'], resTex: `\\nabla F = ${HX}\\cos x\\cos y - ${HY}\\sin x\\sin y` },
+                { label: 'xy − z²', labelTex: "xy - z^{2}", labelNote: "", f: 'x*y - z^2', res: ['y', 'x', '-2z'], resTex: `\\nabla F = ${HX}\\,y + ${HY}\\,x - ${HZ}\\,2z` },
+                { label: 'e^{−(x²+y²)/2}', labelTex: "e^{-(x^{2}+y^{2})/2}", labelNote: "", f: 'exp(-(x^2+y^2)/2)', res: ['-x exp(-(x^2+y^2)/2)', '-y exp(-(x^2+y^2)/2)', '0'], resTex: `\\nabla F = -\\left(${HX}\\,x + ${HY}\\,y\\right)e^{-(x^2+y^2)/2}` },
+                { label: 'V = 1/√(x²+y²+z²)', labelTex: "V = 1/\\sqrt{x^{2}+y^{2}+z^{2}}", labelNote: "", f: '1/sqrt(x^2+y^2+z^2)', res: ['-x/(x^2+y^2+z^2)^1.5', '-y/(x^2+y^2+z^2)^1.5', '-z/(x^2+y^2+z^2)^1.5'], resTex: `\\nabla F = -\\frac{${HX}\\,x + ${HY}\\,y + ${HZ}\\,z}{(x^2+y^2+z^2)^{3/2}} = -\\frac{\\hat{\\mathbf{R}}}{R^2}` }
             ],
             cyl: [
-                { label: 'r² cos 2φ + z²', f: 'r^2*cos(2*phi) + z^2', res: ['2r cos(2phi)', '-2r sin(2phi)', '2z'], resTex: `\\nabla F = ${HR}\\,2r\\cos 2\\phi - ${HP}\\,2r\\sin 2\\phi + ${HZ}\\,2z` },
-                { label: 'r e^{−r²} sin φ', f: 'r*exp(-r^2)*sin(phi)', res: ['(1-2r^2)exp(-r^2)sin(phi)', 'exp(-r^2)cos(phi)', '0'], resTex: `\\nabla F = e^{-r^2}\\left[${HR}\\,(1-2r^2)\\sin\\phi + ${HP}\\cos\\phi\\right]` },
-                { label: '1/(r+0.5) + z', f: '1/(r+0.5) + z', res: ['-1/(r+0.5)^2', '0', '1'], resTex: `\\nabla F = -${HR}\\,\\frac{1}{(r+0.5)^2} + ${HZ}` },
-                { label: 'r² z cos φ', f: 'r^2*z*cos(phi)', res: ['2r z cos(phi)', '-r z sin(phi)', 'r^2 cos(phi)'], resTex: `\\nabla F = ${HR}\\,2rz\\cos\\phi - ${HP}\\,rz\\sin\\phi + ${HZ}\\,r^2\\cos\\phi` },
-                { label: 'ln r (V của điện tích dài)', f: 'ln(r)', res: ['1/r', '0', '0'], resTex: `\\nabla F = ${HR}\\,\\frac{1}{r}` }
+                { label: 'r² cos 2φ + z²', labelTex: "r^{2} \\cos  2\\phi  + z^{2}", labelNote: "", f: 'r^2*cos(2*phi) + z^2', res: ['2r cos(2phi)', '-2r sin(2phi)', '2z'], resTex: `\\nabla F = ${HR}\\,2r\\cos 2\\phi - ${HP}\\,2r\\sin 2\\phi + ${HZ}\\,2z` },
+                { label: 'r e^{−r²} sin φ', labelTex: "r e^{-r^{2}} \\sin  \\phi ", labelNote: "", f: 'r*exp(-r^2)*sin(phi)', res: ['(1-2r^2)exp(-r^2)sin(phi)', 'exp(-r^2)cos(phi)', '0'], resTex: `\\nabla F = e^{-r^2}\\left[${HR}\\,(1-2r^2)\\sin\\phi + ${HP}\\cos\\phi\\right]` },
+                { label: '1/(r+0.5) + z', labelTex: "1/(r+0.5) + z", labelNote: "", f: '1/(r+0.5) + z', res: ['-1/(r+0.5)^2', '0', '1'], resTex: `\\nabla F = -${HR}\\,\\frac{1}{(r+0.5)^2} + ${HZ}` },
+                { label: 'r² z cos φ', labelTex: "r^{2} z \\cos  \\phi ", labelNote: "", f: 'r^2*z*cos(phi)', res: ['2r z cos(phi)', '-r z sin(phi)', 'r^2 cos(phi)'], resTex: `\\nabla F = ${HR}\\,2rz\\cos\\phi - ${HP}\\,rz\\sin\\phi + ${HZ}\\,r^2\\cos\\phi` },
+                { label: 'ln r (V của điện tích dài)', labelTex: "\\ln  r", labelNote: " (V của điện tích dài)", f: 'ln(r)', res: ['1/r', '0', '0'], resTex: `\\nabla F = ${HR}\\,\\frac{1}{r}` }
             ],
             sph: [
-                { label: 'R² sin²θ cos φ', f: 'R^2*sin(theta)^2*cos(phi)', res: ['2R sin(theta)^2 cos(phi)', '2R sin(theta)cos(theta)cos(phi)', '-R sin(theta)sin(phi)'], resTex: `\\nabla F = ${HRR}\\,2R\\sin^2\\theta\\cos\\phi + ${HT}\\,2R\\sin\\theta\\cos\\theta\\cos\\phi - ${HP}\\,R\\sin\\theta\\sin\\phi` },
-                { label: 'R sin θ sin φ (= y)', f: 'R*sin(theta)*sin(phi)', res: ['sin(theta)sin(phi)', 'cos(theta)sin(phi)', 'cos(phi)'], resTex: `\\nabla F = ${HRR}\\sin\\theta\\sin\\phi + ${HT}\\cos\\theta\\sin\\phi + ${HP}\\cos\\phi = ${HY}` },
-                { label: 'e^{−R/2} cos θ', f: 'exp(-R/2)*cos(theta)', res: ['-0.5 exp(-R/2)cos(theta)', '-exp(-R/2)sin(theta)/R', '0'], resTex: `\\nabla F = -e^{-R/2}\\left[${HRR}\\,\\tfrac12\\cos\\theta + ${HT}\\,\\frac{\\sin\\theta}{R}\\right]` },
-                { label: '1/R (V của điện tích điểm)', f: '1/R', res: ['-1/R^2', '0', '0'], resTex: `\\nabla F = -${HRR}\\,\\frac{1}{R^2}` },
-                { label: 'cos θ / R² (V lưỡng cực)', f: 'cos(theta)/R^2', res: ['-2cos(theta)/R^3', '-sin(theta)/R^3', '0'], resTex: `\\nabla F = -\\frac{1}{R^3}\\left(${HRR}\\,2\\cos\\theta + ${HT}\\sin\\theta\\right)` }
+                { label: 'R² sin²θ cos φ', labelTex: "R^{2} \\sin ^{2}\\theta  \\cos  \\phi ", labelNote: "", f: 'R^2*sin(theta)^2*cos(phi)', res: ['2R sin(theta)^2 cos(phi)', '2R sin(theta)cos(theta)cos(phi)', '-R sin(theta)sin(phi)'], resTex: `\\nabla F = ${HRR}\\,2R\\sin^2\\theta\\cos\\phi + ${HT}\\,2R\\sin\\theta\\cos\\theta\\cos\\phi - ${HP}\\,R\\sin\\theta\\sin\\phi` },
+                { label: 'R sin θ sin φ (= y)', labelTex: "R \\sin  \\theta  \\sin  \\phi  (= y)", labelNote: "", f: 'R*sin(theta)*sin(phi)', res: ['sin(theta)sin(phi)', 'cos(theta)sin(phi)', 'cos(phi)'], resTex: `\\nabla F = ${HRR}\\sin\\theta\\sin\\phi + ${HT}\\cos\\theta\\sin\\phi + ${HP}\\cos\\phi = ${HY}` },
+                { label: 'e^{−R/2} cos θ', labelTex: "e^{-R/2} \\cos  \\theta ", labelNote: "", f: 'exp(-R/2)*cos(theta)', res: ['-0.5 exp(-R/2)cos(theta)', '-exp(-R/2)sin(theta)/R', '0'], resTex: `\\nabla F = -e^{-R/2}\\left[${HRR}\\,\\tfrac12\\cos\\theta + ${HT}\\,\\frac{\\sin\\theta}{R}\\right]` },
+                { label: '1/R (V của điện tích điểm)', labelTex: "1/R", labelNote: " (V của điện tích điểm)", f: '1/R', res: ['-1/R^2', '0', '0'], resTex: `\\nabla F = -${HRR}\\,\\frac{1}{R^2}` },
+                { label: 'cos θ / R² (V lưỡng cực)', labelTex: "\\cos  \\theta  / R^{2}", labelNote: " (V lưỡng cực)", f: 'cos(theta)/R^2', res: ['-2cos(theta)/R^3', '-sin(theta)/R^3', '0'], resTex: `\\nabla F = -\\frac{1}{R^3}\\left(${HRR}\\,2\\cos\\theta + ${HT}\\sin\\theta\\right)` }
             ]
         };
         initOperatorPage({ kind: 'grad', presets: PRESETS, symbol: '∇F', P0: [1.5, -1, 0.8] });

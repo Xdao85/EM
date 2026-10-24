@@ -1022,7 +1022,7 @@
             }
             function readInputs() { return isVec ? [0, 1, 2].map(i => $('in-f' + i).value.trim() || '0') : ($('in-f').value.trim() || '0'); }
             function buildPresets() {
-                $('preset-box').innerHTML = cfg.presets[S.sys].map((p, i) => `<button data-i="${i}" class="chip">${p.label}</button>`).join('');
+                $('preset-box').innerHTML = cfg.presets[S.sys].map((p, i) => `<button data-i="${i}" class="chip">${katex.renderToString(p.labelTex, { throwOnError: true })}${p.labelNote}</button>`).join('');
                 $('preset-box').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { S.src[S.sys] = cfg.presets[S.sys][+b.dataset.i].f; fillInputs(); compile(); }));
             }
             function compile() {
@@ -1267,25 +1267,25 @@
         // =========================================================
         const PRESETS = {
             cart: [
-                { label: 'x² + y² + z²', f: 'x^2 + y^2 + z^2', res: '6', resTex: '\\nabla^2 F = 2 + 2 + 2 = 6' },
-                { label: 'x² − y² (harmonic)', f: 'x^2 - y^2', res: '0', resTex: '\\nabla^2 F = 2 - 2 = 0' },
-                { label: 'x³ + y³ + z³', f: 'x^3 + y^3 + z^3', res: '6x + 6y + 6z', resTex: '\\nabla^2 F = 6x + 6y + 6z' },
-                { label: 'sin x cos y', f: 'sin(x)*cos(y)', res: '-2sin(x)cos(y)', resTex: '\\nabla^2 F = -\\sin x\\cos y - \\sin x\\cos y = -2F' },
-                { label: 'e^{−(x²+y²+z²)}', f: 'exp(-(x^2+y^2+z^2))', res: '(4(x^2+y^2+z^2) - 6)exp(-(x^2+y^2+z^2))', resTex: '\\nabla^2 F = \\left(4R^2 - 6\\right)e^{-R^2}' }
+                { label: 'x² + y² + z²', labelTex: "x^{2} + y^{2} + z^{2}", labelNote: "", f: 'x^2 + y^2 + z^2', res: '6', resTex: '\\nabla^2 F = 2 + 2 + 2 = 6' },
+                { label: 'x² − y² (harmonic)', labelTex: "x^{2} - y^{2}", labelNote: " (harmonic)", f: 'x^2 - y^2', res: '0', resTex: '\\nabla^2 F = 2 - 2 = 0' },
+                { label: 'x³ + y³ + z³', labelTex: "x^{3} + y^{3} + z^{3}", labelNote: "", f: 'x^3 + y^3 + z^3', res: '6x + 6y + 6z', resTex: '\\nabla^2 F = 6x + 6y + 6z' },
+                { label: 'sin x cos y', labelTex: "\\sin  x \\cos  y", labelNote: "", f: 'sin(x)*cos(y)', res: '-2sin(x)cos(y)', resTex: '\\nabla^2 F = -\\sin x\\cos y - \\sin x\\cos y = -2F' },
+                { label: 'e^{−(x²+y²+z²)}', labelTex: "e^{-(x^{2}+y^{2}+z^{2})}", labelNote: "", f: 'exp(-(x^2+y^2+z^2))', res: '(4(x^2+y^2+z^2) - 6)exp(-(x^2+y^2+z^2))', resTex: '\\nabla^2 F = \\left(4R^2 - 6\\right)e^{-R^2}' }
             ],
             cyl: [
-                { label: 'r² + z²', f: 'r^2 + z^2', res: '6', resTex: '\\nabla^2 F = \\frac{1}{r}\\frac{\\partial}{\\partial r}(2r^2) + 2 = 6' },
-                { label: 'r² cos 2φ (harmonic)', f: 'r^2*cos(2*phi)', res: '0', resTex: '\\nabla^2 F = 4\\cos 2\\phi - \\frac{4r^2\\cos 2\\phi}{r^2} = 0' },
-                { label: 'ln r (line charge V)', f: 'ln(r)', res: '0', resTex: '\\nabla^2 F = \\frac{1}{r}\\frac{\\partial}{\\partial r}(1) = 0 \\quad (r \\ne 0)' },
-                { label: 'e^{−r} sin z', f: 'exp(-r)*sin(z)', res: '-exp(-r)*sin(z)/r', resTex: '\\nabla^2 F = \\left(1 - \\frac{1}{r} - 1\\right)e^{-r}\\sin z = -\\frac{e^{-r}\\sin z}{r}' },
-                { label: 'r² (uniform charge)', f: 'r^2', res: '4', resTex: '\\nabla^2 F = \\frac{1}{r}\\frac{\\partial}{\\partial r}(2r^2) = 4' }
+                { label: 'r² + z²', labelTex: "r^{2} + z^{2}", labelNote: "", f: 'r^2 + z^2', res: '6', resTex: '\\nabla^2 F = \\frac{1}{r}\\frac{\\partial}{\\partial r}(2r^2) + 2 = 6' },
+                { label: 'r² cos 2φ (harmonic)', labelTex: "r^{2} \\cos  2\\phi ", labelNote: " (harmonic)", f: 'r^2*cos(2*phi)', res: '0', resTex: '\\nabla^2 F = 4\\cos 2\\phi - \\frac{4r^2\\cos 2\\phi}{r^2} = 0' },
+                { label: 'ln r (line charge V)', labelTex: "\\ln  r", labelNote: " (line charge V)", f: 'ln(r)', res: '0', resTex: '\\nabla^2 F = \\frac{1}{r}\\frac{\\partial}{\\partial r}(1) = 0 \\quad (r \\ne 0)' },
+                { label: 'e^{−r} sin z', labelTex: "e^{-r} \\sin  z", labelNote: "", f: 'exp(-r)*sin(z)', res: '-exp(-r)*sin(z)/r', resTex: '\\nabla^2 F = \\left(1 - \\frac{1}{r} - 1\\right)e^{-r}\\sin z = -\\frac{e^{-r}\\sin z}{r}' },
+                { label: 'r² (uniform charge)', labelTex: "r^{2}", labelNote: " (uniform charge)", f: 'r^2', res: '4', resTex: '\\nabla^2 F = \\frac{1}{r}\\frac{\\partial}{\\partial r}(2r^2) = 4' }
             ],
             sph: [
-                { label: 'R²', f: 'R^2', res: '6', resTex: '\\nabla^2 F = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}(2R^3) = 6' },
-                { label: '1/R (point charge V)', f: '1/R', res: '0', resTex: '\\nabla^2 F = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}(-1) = 0 \\quad (R \\ne 0)' },
-                { label: 'R sin θ cos φ (= x)', f: 'R*sin(theta)*cos(phi)', res: '0', resTex: '\\nabla^2 F = \\frac{2\\sin\\theta\\cos\\phi}{R} + \\frac{(\\cos 2\\theta/\\sin\\theta)\\cos\\phi}{R} - \\frac{\\cos\\phi}{R\\sin\\theta} = 0' },
-                { label: 'cos θ / R² (dipole V)', f: 'cos(theta)/R^2', res: '0', resTex: '\\nabla^2 F = \\frac{2\\cos\\theta}{R^4} - \\frac{2\\cos\\theta}{R^4} = 0' },
-                { label: 'e^{−R}', f: 'exp(-R)', res: 'exp(-R)*(1 - 2/R)', resTex: '\\nabla^2 F = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left(-R^2 e^{-R}\\right) = e^{-R}\\left(1 - \\frac{2}{R}\\right)' }
+                { label: 'R²', labelTex: "R^{2}", labelNote: "", f: 'R^2', res: '6', resTex: '\\nabla^2 F = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}(2R^3) = 6' },
+                { label: '1/R (point charge V)', labelTex: "1/R", labelNote: " (point charge V)", f: '1/R', res: '0', resTex: '\\nabla^2 F = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}(-1) = 0 \\quad (R \\ne 0)' },
+                { label: 'R sin θ cos φ (= x)', labelTex: "R \\sin  \\theta  \\cos  \\phi  (= x)", labelNote: "", f: 'R*sin(theta)*cos(phi)', res: '0', resTex: '\\nabla^2 F = \\frac{2\\sin\\theta\\cos\\phi}{R} + \\frac{(\\cos 2\\theta/\\sin\\theta)\\cos\\phi}{R} - \\frac{\\cos\\phi}{R\\sin\\theta} = 0' },
+                { label: 'cos θ / R² (dipole V)', labelTex: "\\cos  \\theta  / R^{2}", labelNote: " (dipole V)", f: 'cos(theta)/R^2', res: '0', resTex: '\\nabla^2 F = \\frac{2\\cos\\theta}{R^4} - \\frac{2\\cos\\theta}{R^4} = 0' },
+                { label: 'e^{−R}', labelTex: "e^{-R}", labelNote: "", f: 'exp(-R)', res: 'exp(-R)*(1 - 2/R)', resTex: '\\nabla^2 F = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left(-R^2 e^{-R}\\right) = e^{-R}\\left(1 - \\frac{2}{R}\\right)' }
             ]
         };
         initOperatorPage({ kind: 'lap', presets: PRESETS, symbol: '∇²F', P0: [1.2, -0.9, 0.7] });

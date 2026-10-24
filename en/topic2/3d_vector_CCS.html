@@ -534,20 +534,24 @@
             cyl: [['r', 0.05, 3.5, 0.05, 1], ['φ (°)', 0, 359, 1, D2R], ['z', -3, 3, 0.05, 1]],
             sph: [['R', 0.1, 4, 0.05, 1], ['θ (°)', 1, 179, 1, D2R], ['φ (°)', 0, 359, 1, D2R]]
         };
-        const CL = { cart: ['A_x', 'A_y', 'A_z'], cyl: ['A_r', 'A_φ', 'A_z'], sph: ['A_R', 'A_θ', 'A_φ'] };
+        const CL = { cart: ['A<sub>x</sub>', 'A<sub>y</sub>', 'A<sub>z</sub>'], cyl: ['A<sub>r</sub>', 'A<sub>φ</sub>', 'A<sub>z</sub>'], sph: ['A<sub>R</sub>', 'A<sub>θ</sub>', 'A<sub>φ</sub>'] };
         const HATS = { cart: ['x̂', 'ŷ', 'ẑ'], cyl: ['r̂', 'φ̂', 'ẑ'], sph: ['R̂', 'θ̂', 'φ̂'] };
         const S = { inSys: 'cart', dec: 'cyl', pos: false, guides: true, Pc: [1.5, -2, 1.2], Ac: [1, 2.5, 1.2] };
         const toS = (sy, c) => { const u = sy === 'cart' ? c.slice() : sy === 'cyl' ? COORD.cart2cyl(c) : COORD.cart2sph(c); const i = sy === 'cyl' ? 1 : 2; if (sy !== 'cart' && u[i] < 0) u[i] += 2 * Math.PI; return u; };
         const toC = (sy, u) => sy === 'cart' ? u.slice() : sy === 'cyl' ? COORD.cyl2cart(u) : COORD.sph2cart(u);
         const basisAt = (sy, c) => { const u = toS(sy, c); return sy === 'cart' ? [[1, 0, 0], [0, 1, 0], [0, 0, 1]] : sy === 'cyl' ? COORD.basisCyl(u[1]) : COORD.basisSph(u[1], u[2]); };
         const f2 = v => (Math.abs(v) < 5e-3 ? 0 : v).toFixed(2);
-        const comps = (sy, v) => v.map((c, i) => `${i ? (c < 0 && f2(c) !== '0.00' ? ' − ' : ' + ') : (c < 0 && f2(c) !== '0.00' ? '−' : '')}${f2(Math.abs(c))}${HATS[sy][i]}`).join('');
+        const comps = (sy, v) => {
+            const symbols = { cart: ['x', 'y', 'z'], cyl: ['r', '\\phi', 'z'], sph: ['R', '\\theta', '\\phi'] };
+            const tex = v.map((c, i) => `${i ? (c < 0 && f2(c) !== '0.00' ? ' - ' : ' + ') : (c < 0 && f2(c) !== '0.00' ? '-' : '')}${f2(Math.abs(c))}\\,\\hat{\\boldsymbol{${symbols[sy][i]}}}`).join('');
+            return katex.renderToString(tex, { throwOnError: true });
+        }
         const view = new View3D('cv-3d', { range: 3.9, center: [0, 0, 1], onChange: () => draw() });
         viewButtons('view-group', view);
 
         function syncSliders() {
             const sy = S.inSys, u = toS(sy, S.Pc), B = basisAt(sy, S.Pc), a = fromCartVec(S.Ac, B);
-            PS[sy].forEach(([lab, mn, mx, st, f], i) => { const el = $('q' + i); el.min = mn; el.max = mx; el.step = st; el.value = clamp(u[i] / f, mn, mx); setText('lab-q' + i, lab); });             [0, 1, 2].forEach(i => {$('c' + i).value = clamp(a[i], -5, 5); setText('lab-c' + i, CL[sy][i]); });
+            PS[sy].forEach(([lab, mn, mx, st, f], i) => { const el = $('q' + i); el.min = mn; el.max = mx; el.step = st; el.value = clamp(u[i] / f, mn, mx); setText('lab-q' + i, lab); });             [0, 1, 2].forEach(i => {$('c' + i).value = clamp(a[i], -5, 5); $('lab-c' + i).innerHTML = CL[sy][i]; });
         }
         function readSliders() {
             const sy = S.inSys;
@@ -567,7 +571,7 @@
             [0, 1, 2].forEach(i => setText('val-c' + i, num('c' + i).toFixed(1)));
             const cy = fromCartVec(A, basisAt('cyl', P)), sp = fromCartVec(A, basisAt('sph', P)), uc = toS('cyl', P), us = toS('sph', P);
             setText('ro-p', `(${P.map(f2).join(', ')}) = (${f2(uc[0])}, ${(uc[1] / D2R).toFixed(0)}°, ${f2(uc[2])})cyl = (${f2(us[0])}, ${(us[1] / D2R).toFixed(0)}°, ${(us[2] / D2R).toFixed(0)}°)sph`);
-            setText('ro-cart', comps('cart', A)); setText('ro-cyl', comps('cyl', cy)); setText('ro-sph', comps('sph', sp));
+            $('ro-cart').innerHTML = comps('cart', A); $('ro-cyl').innerHTML = comps('cyl', cy); $('ro-sph').innerHTML = comps('sph', sp);
             setText('ro-mag', [A, cy, sp].map(v => V3.len(v).toFixed(3)).join(' = '));
             $('mat-cyl').innerHTML = matHTML('cyl');$('mat-sph').innerHTML = matHTML('sph');
 

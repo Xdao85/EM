@@ -121,7 +121,7 @@
                     <div class="flex flex-wrap items-center gap-1.5">
                         <button id="divthm-tg-field" class="chip on">Field F</button>
                         <button id="divthm-tg-norm" class="chip on-emerald">Normals</button>
-                        <button id="divthm-tg-heat" class="chip on-rose">Color by F·n̂</button>
+                        <button id="divthm-tg-heat" class="chip on-rose">Color by $\mathbf{F}\cdot\hat{\mathbf{n}}$</button>
                     </div>
                     <div class="relative h-[440px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="divthm-cv" class="w-full h-full"></canvas></div>
                 </div>
@@ -180,7 +180,7 @@
                     <div class="flex flex-wrap items-center gap-1.5">
                         <button id="stokes-tg-field" class="chip on">Field F</button>
                         <button id="stokes-tg-norm" class="chip on-emerald">Normals</button>
-                        <button id="stokes-tg-heat" class="chip on-rose">Color by (∇×F)·n̂</button>
+                        <button id="stokes-tg-heat" class="chip on-rose">Color by $(\nabla\times\mathbf{F})\cdot\hat{\mathbf{n}}$</button>
                         <button id="stokes-tg-anim" class="chip">Walk around C</button>
                     </div>
                     <div class="relative h-[440px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden"><canvas id="stokes-cv" class="w-full h-full"></canvas></div>
@@ -933,21 +933,21 @@
         // exact values; c = region center (for Stokes: circle center and plane height), in the field's coordinates
         const PRE = {
             stokes: [
-                { l: '−y x̂ + x ŷ', f: ['-y', 'x', '0'], ex: a => 2 * Math.PI * a * a, exl: '2πa²' },
-                { l: 'y x̂ (shear)', f: ['y', '0', '0'], ex: a => -Math.PI * a * a, exl: '−πa²' },
-                { l: '−y³ x̂ + x³ ŷ', f: ['-y^3', 'x^3', '0'], ex: (a, h, s, c) => 3 * Math.PI * (a ** 4 / 2 + a * a * r2c(c)), exl: '3π[a⁴/2 + a²(x₀²+y₀²)]' },
-                { l: 'z x̂ + x ŷ + y ẑ', f: ['z', 'x', 'y'], ex: a => Math.PI * a * a, exl: 'πa²' },
-                { l: 'yz x̂ − xz ŷ', f: ['y*z', '-x*z', '0'], ex: (a, h, s, c) => -2 * Math.PI * a * a * c[2], exl: '−2πa²z₀' },
-                { l: 'φ̂/r (line current)', f: ['-y/(x^2+y^2)', 'x/(x^2+y^2)', '0'], ex: (a, h, s, c) => Math.hypot(c[0], c[1]) < a ? TAU : 0, exl: '2π if C encircles the z-axis', sing: 'line' },
-                { l: 'x x̂ + y ŷ + z ẑ', f: ['x', 'y', 'z'], ex: () => 0, exl: '0 (curl-free)' }
+                { l: '−y x̂ + x ŷ', labelTex: "-y \\hat{\\boldsymbol{x}} + x \\hat{\\boldsymbol{y}}", labelNote: "", f: ['-y', 'x', '0'], ex: a => 2 * Math.PI * a * a, exl: '2πa²' },
+                { l: 'y x̂ (shear)', labelTex: "y \\hat{\\boldsymbol{x}}", labelNote: " (shear)", f: ['y', '0', '0'], ex: a => -Math.PI * a * a, exl: '−πa²' },
+                { l: '−y³ x̂ + x³ ŷ', labelTex: "-y^{3} \\hat{\\boldsymbol{x}} + x^{3} \\hat{\\boldsymbol{y}}", labelNote: "", f: ['-y^3', 'x^3', '0'], ex: (a, h, s, c) => 3 * Math.PI * (a ** 4 / 2 + a * a * r2c(c)), exl: '3π[a⁴/2 + a²(x₀²+y₀²)]' },
+                { l: 'z x̂ + x ŷ + y ẑ', labelTex: "z \\hat{\\boldsymbol{x}} + x \\hat{\\boldsymbol{y}} + y \\hat{\\boldsymbol{z}}", labelNote: "", f: ['z', 'x', 'y'], ex: a => Math.PI * a * a, exl: 'πa²' },
+                { l: 'yz x̂ − xz ŷ', labelTex: "yz \\hat{\\boldsymbol{x}} - xz \\hat{\\boldsymbol{y}}", labelNote: "", f: ['y*z', '-x*z', '0'], ex: (a, h, s, c) => -2 * Math.PI * a * a * c[2], exl: '−2πa²z₀' },
+                { l: 'φ̂/r (line current)', labelTex: "\\hat{\\boldsymbol{\\phi}}/r", labelNote: " (line current)", f: ['-y/(x^2+y^2)', 'x/(x^2+y^2)', '0'], ex: (a, h, s, c) => Math.hypot(c[0], c[1]) < a ? TAU : 0, exl: '2π if C encircles the z-axis', sing: 'line' },
+                { l: 'x x̂ + y ŷ + z ẑ', labelTex: "x \\hat{\\boldsymbol{x}} + y \\hat{\\boldsymbol{y}} + z \\hat{\\boldsymbol{z}}", labelNote: "", f: ['x', 'y', 'z'], ex: () => 0, exl: '0 (curl-free)' }
             ],
             divthm: [
-                { l: 'x x̂ + y ŷ + z ẑ', f: ['x', 'y', 'z'], ex: (a, h, s) => 3 * VOL(a, h, s), exl: '3 × volume' },
-                { l: 'x³ x̂ + y³ ŷ + z³ ẑ', f: ['x^3', 'y^3', 'z^3'], ex: (a, h, s, c) => (s === 'sphere' ? 12 * Math.PI * a ** 5 / 5 : s === 'cyl' ? 3 * (Math.PI * a ** 4 / 2 * h + Math.PI * a * a * h ** 3 / 12) : 24 * a ** 5) + 3 * VOL(a, h, s) * V3.dot(c, c), exl: '∫3R² dv' },
-                { l: '−y x̂ + x ŷ', f: ['-y', 'x', '0'], ex: () => 0, exl: '0 (solenoidal)' },
-                { l: 'xy x̂ + yz ŷ + zx ẑ', f: ['x*y', 'y*z', 'z*x'], ex: (a, h, s, c) => VOL(a, h, s) * (c[0] + c[1] + c[2]), exl: 'V(x₀ + y₀ + z₀)' },
-                { l: 'R̂/R² (point charge)', f: ['x/(x^2+y^2+z^2)^1.5', 'y/(x^2+y^2+z^2)^1.5', 'z/(x^2+y^2+z^2)^1.5'], ex: (a, h, s, c) => insideVol(s, a, h, c) ? 4 * Math.PI : 0, exl: '4π if the origin is inside', sing: 'point' },
-                { l: 'r̂/r (line charge)', f: ['x/(x^2+y^2)', 'y/(x^2+y^2)', '0'], ex: (a, h, s, c) => lineFlux(s, a, h, c), exl: '2π × length of z-axis inside', sing: 'line' }
+                { l: 'x x̂ + y ŷ + z ẑ', labelTex: "x \\hat{\\boldsymbol{x}} + y \\hat{\\boldsymbol{y}} + z \\hat{\\boldsymbol{z}}", labelNote: "", f: ['x', 'y', 'z'], ex: (a, h, s) => 3 * VOL(a, h, s), exl: '3 × volume' },
+                { l: 'x³ x̂ + y³ ŷ + z³ ẑ', labelTex: "x^{3} \\hat{\\boldsymbol{x}} + y^{3} \\hat{\\boldsymbol{y}} + z^{3} \\hat{\\boldsymbol{z}}", labelNote: "", f: ['x^3', 'y^3', 'z^3'], ex: (a, h, s, c) => (s === 'sphere' ? 12 * Math.PI * a ** 5 / 5 : s === 'cyl' ? 3 * (Math.PI * a ** 4 / 2 * h + Math.PI * a * a * h ** 3 / 12) : 24 * a ** 5) + 3 * VOL(a, h, s) * V3.dot(c, c), exl: '∫3R² dv' },
+                { l: '−y x̂ + x ŷ', labelTex: "-y \\hat{\\boldsymbol{x}} + x \\hat{\\boldsymbol{y}}", labelNote: "", f: ['-y', 'x', '0'], ex: () => 0, exl: '0 (solenoidal)' },
+                { l: 'xy x̂ + yz ŷ + zx ẑ', labelTex: "xy \\hat{\\boldsymbol{x}} + yz \\hat{\\boldsymbol{y}} + zx \\hat{\\boldsymbol{z}}", labelNote: "", f: ['x*y', 'y*z', 'z*x'], ex: (a, h, s, c) => VOL(a, h, s) * (c[0] + c[1] + c[2]), exl: 'V(x₀ + y₀ + z₀)' },
+                { l: 'R̂/R² (point charge)', labelTex: "\\hat{\\boldsymbol{R}}/R^{2}", labelNote: " (point charge)", f: ['x/(x^2+y^2+z^2)^1.5', 'y/(x^2+y^2+z^2)^1.5', 'z/(x^2+y^2+z^2)^1.5'], ex: (a, h, s, c) => insideVol(s, a, h, c) ? 4 * Math.PI : 0, exl: '4π if the origin is inside', sing: 'point' },
+                { l: 'r̂/r (line charge)', labelTex: "\\hat{\\boldsymbol{r}}/r", labelNote: " (line charge)", f: ['x/(x^2+y^2)', 'y/(x^2+y^2)', '0'], ex: (a, h, s, c) => lineFlux(s, a, h, c), exl: '2π × length of z-axis inside', sing: 'line' }
             ]
         };
         const VOL = (a, h, s) => s === 'sphere' ? 4 / 3 * Math.PI * a ** 3 : s === 'cyl' ? Math.PI * a * a * h : 8 * a ** 3;
@@ -1016,7 +1016,7 @@
             const S = { k, shape: cfg.shape0, field: true, norm: true, heat: true, anim: false, F: null, G: null, pre: 0, conv: null, t: 0, cache: null };
             const view = new View3D(k + '-cv', { range: 3.2, center: [0, 0, cfg.cz || 0], onChange: () => draw() });
             viewButtons(k + '-view', view);
-            $(k + '-presets').innerHTML = PRE[k].map((p, i) => `<button data-i="${i}" class="chip">${p.l}</button>`).join('');
+            $(k + '-presets').innerHTML = PRE[k].map((p, i) => `<button data-i="${i}" class="chip">${katex.renderToString(p.labelTex, { throwOnError: true })}${p.labelNote}</button>`).join('');
             $(k + '-presets').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { PRE[k][+b.dataset.i].f.forEach((s, i) => $(`${k}-f${i}`).value = s); apply(); }));
             function apply() {
                 const src = [0, 1, 2].map(i => $(`${k}-f${i}`).value.trim() || '0');

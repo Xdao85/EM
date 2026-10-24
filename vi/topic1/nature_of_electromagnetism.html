@@ -163,7 +163,7 @@
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Dòng điện $I$ (A)</span><input type="range" id="s-I" min="-20" max="20" step="0.5" value="10" class="flex-1 min-w-0 accent-indigo-600"><span id="v-I" class="w-24 shrink-0 text-right font-mono font-semibold text-indigo-700"></span></div>
         <div class="flex items-center gap-3 text-sm"><span class="w-28 shrink-0 text-slate-700">Bán kính đo $r$ (cm)</span><input type="range" id="s-rp" min="0.5" max="5" step="0.1" value="2" class="flex-1 min-w-0 accent-amber-600"><span id="v-rp" class="w-24 shrink-0 text-right font-mono font-semibold text-amber-800"></span></div>
-        <div class="flex flex-wrap gap-2"><button class="btn" data-bv="iso">Phối cảnh</button><button class="btn" data-bv="top">Trên xuống</button><button class="btn" data-bv="side">Bên cạnh</button><button id="b-spin" class="chip on">Tự xoay</button></div>
+        <div class="flex flex-wrap gap-2"><button class="btn" data-bv="iso">Phối cảnh</button><button class="btn" data-bv="top">Trên xuống</button><button class="btn" data-bv="side">Bên cạnh</button><button id="b-spin" class="chip on">Chuyển động theo B</button></div>
       </div>
     </div>
     <div class="lg:col-span-4 space-y-3">
@@ -576,7 +576,8 @@ onResize(drawEF);
 
 /* ---------- Sim 4: B around a wire (3D) ---------- */
 const BV = View3D('cv-b3', { range: 1.6, yaw: -2.3, pitch: 0.45 });
-const spin = chipToggle('b-spin');
+const animateField = chipToggle('b-spin');
+let fieldPhase = 0;
 document.querySelectorAll('[data-bv]').forEach(b => b.addEventListener('click', () => { const v = b.dataset.bv; if (v === 'iso') BV.setView(-2.3, 0.45); if (v === 'top') BV.setView(-2.3, 1.5); if (v === 'side') BV.setView(-Math.PI / 2, 0.02); }));
 bindSliders({ I: v => (v > 0 ? '+' : '') + v + ' A', rp: v => v.toFixed(1) + ' cm' }, () => {
   const I = val('s-I'), r = val('s-rp') / 100, B = MU0 * Math.abs(I) / (TAU * r);
@@ -584,8 +585,9 @@ bindSliders({ I: v => (v > 0 ? '+' : '') + v + ' A', rp: v => v.toFixed(1) + ' c
   $('ro-bE').textContent = (B / 50e-6).toFixed(2) + ' × 50 µT'; $('ro-bDir').textContent = I > 0 ? 'ngược chiều kim đồng hồ' : I < 0 ? 'cùng chiều kim đồng hồ' : 'không có';
 });
 animate($('cv-b3'), dt => {
-  if (spin()) BV.yaw += dt * 0.25;
+  // Move field markers along B; keep the camera independent of current direction.
   const c = BV.begin(), I = val('s-I'), s = Math.sign(I), rp = val('s-rp'), k = 0.33; // view units per cm
+  if (animateField()) fieldPhase = (fieldPhase + dt * 0.6 * s) % TAU;
   BV.line([0, 0, -1.5], [0, 0, 1.5], '#94a3b8', 1, [3, 4]);
   // rings
   const ringPts = (r, z) => { const p = []; for (let i = 0; i <= 64; i++) { const a = TAU * i / 64; p.push([r * Math.cos(a), r * Math.sin(a), z]); } return p; };
@@ -593,7 +595,7 @@ animate($('cv-b3'), dt => {
     const r = rc * k; BV.path(ringPts(r, z), 'rgba(79,70,229,0.28)', 1.2);
     if (!I) return;
     const L = clamp(0.5 * Math.abs(I) / 20 / rc, 0.05, 0.5);
-    for (let i = 0; i < 8; i++) { const a = TAU * i / 8 + rc * 0.3, x = r * Math.cos(a), y = r * Math.sin(a), tx = -Math.sin(a) * s, ty = Math.cos(a) * s;
+    for (let i = 0; i < 8; i++) { const a = TAU * i / 8 + rc * 0.3 + fieldPhase, x = r * Math.cos(a), y = r * Math.sin(a), tx = -Math.sin(a) * s, ty = Math.cos(a) * s;
       BV.arrow([x - tx * L / 2, y - ty * L / 2, z], [x + tx * L / 2, y + ty * L / 2, z], COL.sky, 2, 7); }
   }));
   // probe ring

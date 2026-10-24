@@ -619,7 +619,10 @@
         function sysToCart(sys, u) { return sys === 'cart' ? u : sys === 'cyl' ? COORD.cyl2cart(u) : COORD.sph2cart(u); }
         function cartToSys(sys, c) { return sys === 'cart' ? c : sys === 'cyl' ? COORD.cart2cyl(c) : COORD.cart2sph(c); }
         const fmtN = (v, d = 3) => !isFinite(v) ? '—' : (Math.abs(v) < 5 * Math.pow(10, -d) ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-3 ? v.toExponential(2) : (+v.toFixed(d)).toString()));
-        const fmtVec = (v, sys, d = 3) => v.map((c, i) => `${i ? (c < 0 && fmtN(c, d) !== '0' ? '− ' : '+ ') : (c < 0 && fmtN(c, d) !== '0' ? '−' : '')}${fmtN(Math.abs(c), d)} ${SYS[sys].plain[i]}`).join(' ');
+        const fmtVec = (v, sys, d = 3) => {
+            const tex = v.map((c, i) => `${i ? (c < 0 && fmtN(c, d) !== '0' ? ' - ' : ' + ') : (c < 0 && fmtN(c, d) !== '0' ? '-' : '')}${fmtN(Math.abs(c), d)} ${SYS[sys].hats[i]}`).join(' ').replace(/\\/g, '\\');
+            return katex.renderToString(tex, { throwOnError: true });
+        };
 
         // =========================================================
         // Symbolic engine: differentiation + simplification + TeX
@@ -1024,7 +1027,7 @@
             }
             function readInputs() { return isVec ? [0, 1, 2].map(i => $('in-f' + i).value.trim() || '0') : ($('in-f').value.trim() || '0'); }
             function buildPresets() {
-                $('preset-box').innerHTML = cfg.presets[S.sys].map((p, i) => `<button data-i="${i}" class="chip">${p.label}</button>`).join('');
+                $('preset-box').innerHTML = cfg.presets[S.sys].map((p, i) => `<button data-i="${i}" class="chip">${katex.renderToString(p.labelTex, { throwOnError: true })}${p.labelNote}</button>`).join('');
                 $('preset-box').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { S.src[S.sys] = cfg.presets[S.sys][+b.dataset.i].f; fillInputs(); compile(); }));
             }
             function compile() {
@@ -1081,10 +1084,10 @@
                 const u = U(S.Pc), c = S.Pc, sy = S.sys;
                 const pS = sy === 'cart' ? `(${u.map(v => fmtN(v, 2)).join(', ')})` : sy === 'cyl' ? `(${fmtN(u[0], 2)}, ${deg(u[1])}, ${fmtN(u[2], 2)})` : `(${fmtN(u[0], 2)}, ${deg(u[1])}, ${deg(u[2])})`;
                 setText('ro-p', pS); setText('ro-pc', `(${c.map(v => fmtN(v, 2)).join(', ')})`);
-                setText('ro-f', isVec ? fmtVec(Fsys(u), sy) : fmtN(scalar(c), 4));
+                $('ro-f').innerHTML = isVec ? fmtVec(Fsys(u), sy) : fmtN(scalar(c), 4);
                 const r = result(c), a = analytic(c);
-                setText('ro-num', Array.isArray(r) ? fmtVec(r, sy) : fmtN(r, 4));
-                setText('ro-ana', a === null ? 'dữ liệu tự nhập' : Array.isArray(a) ? fmtVec(a, sy) : fmtN(a, 4));
+                $('ro-num').innerHTML = Array.isArray(r) ? fmtVec(r, sy) : fmtN(r, 4);
+                $('ro-ana').innerHTML = a === null ? 'dữ liệu tự nhập' : Array.isArray(a) ? fmtVec(a, sy) : fmtN(a, 4);
                 if ($('ro-mag')) setText('ro-mag', Array.isArray(r) ? fmtN(V3.len(r), 4) : '');
                 if (kind === 'grad') {
                     const d = dirVec(), g = gradCart(c), gp = [g[PL().ia], g[PL().ib]];
@@ -1269,25 +1272,25 @@
         // =========================================================
         const PRESETS = {
             cart: [
-                { label: 'x x̂ + y ŷ + z ẑ', f: ['x', 'y', 'z'], res: '3', resTex: '\\nabla\\cdot\\mathbf{F} = 1 + 1 + 1 = 3' },
-                { label: '−y x̂ + x ŷ', f: ['-y', 'x', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = 0 \\quad\\text{(quay thuần túy, solenoid)}' },
-                { label: 'x² x̂ + y² ŷ + z² ẑ', f: ['x^2', 'y^2', 'z^2'], res: '2x + 2y + 2z', resTex: '\\nabla\\cdot\\mathbf{F} = 2x + 2y + 2z' },
-                { label: 'xy x̂ + yz ŷ + zx ẑ', f: ['x*y', 'y*z', 'z*x'], res: 'x + y + z', resTex: '\\nabla\\cdot\\mathbf{F} = y + z + x' },
-                { label: 'x e^{−y} x̂ + e^{−y} ŷ', f: ['x*exp(-y)', 'exp(-y)', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = e^{-y} - e^{-y} = 0' }
+                { label: 'x x̂ + y ŷ + z ẑ', labelTex: "x \\hat{\\boldsymbol{x}} + y \\hat{\\boldsymbol{y}} + z \\hat{\\boldsymbol{z}}", labelNote: "", f: ['x', 'y', 'z'], res: '3', resTex: '\\nabla\\cdot\\mathbf{F} = 1 + 1 + 1 = 3' },
+                { label: '−y x̂ + x ŷ', labelTex: "-y \\hat{\\boldsymbol{x}} + x \\hat{\\boldsymbol{y}}", labelNote: "", f: ['-y', 'x', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = 0 \\quad\\text{(quay thuần túy, solenoid)}' },
+                { label: 'x² x̂ + y² ŷ + z² ẑ', labelTex: "x^{2} \\hat{\\boldsymbol{x}} + y^{2} \\hat{\\boldsymbol{y}} + z^{2} \\hat{\\boldsymbol{z}}", labelNote: "", f: ['x^2', 'y^2', 'z^2'], res: '2x + 2y + 2z', resTex: '\\nabla\\cdot\\mathbf{F} = 2x + 2y + 2z' },
+                { label: 'xy x̂ + yz ŷ + zx ẑ', labelTex: "xy \\hat{\\boldsymbol{x}} + yz \\hat{\\boldsymbol{y}} + zx \\hat{\\boldsymbol{z}}", labelNote: "", f: ['x*y', 'y*z', 'z*x'], res: 'x + y + z', resTex: '\\nabla\\cdot\\mathbf{F} = y + z + x' },
+                { label: 'x e^{−y} x̂ + e^{−y} ŷ', labelTex: "x e^{-y} \\hat{\\boldsymbol{x}} + e^{-y} \\hat{\\boldsymbol{y}}", labelNote: "", f: ['x*exp(-y)', 'exp(-y)', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = e^{-y} - e^{-y} = 0' }
             ],
             cyl: [
-                { label: 'r r̂ + z ẑ', f: ['r', '0', 'z'], res: '3', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(r^2) + 1 = 3' },
-                { label: 'r̂ / r (điện tích dài)', f: ['1/r', '0', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(1) = 0 \\quad (r \\ne 0)' },
-                { label: 'r φ̂ (quay)', f: ['0', 'r', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial r}{\\partial\\phi} = 0' },
-                { label: 'r² r̂', f: ['r^2', '0', '0'], res: '3r', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(r^3) = 3r' },
-                { label: 'r cos φ r̂ − r sin φ φ̂', f: ['r*cos(phi)', '-r*sin(phi)', '0'], res: 'cos(phi)', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\,2r\\cos\\phi - \\frac{1}{r}\\,r\\cos\\phi = \\cos\\phi' }
+                { label: 'r r̂ + z ẑ', labelTex: "r \\hat{\\boldsymbol{r}} + z \\hat{\\boldsymbol{z}}", labelNote: "", f: ['r', '0', 'z'], res: '3', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(r^2) + 1 = 3' },
+                { label: 'r̂ / r (điện tích dài)', labelTex: "\\hat{\\boldsymbol{r}} / r", labelNote: " (điện tích dài)", f: ['1/r', '0', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(1) = 0 \\quad (r \\ne 0)' },
+                { label: 'r φ̂ (quay)', labelTex: "r \\hat{\\boldsymbol{\\phi}}", labelNote: " (quay)", f: ['0', 'r', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial r}{\\partial\\phi} = 0' },
+                { label: 'r² r̂', labelTex: "r^{2} \\hat{\\boldsymbol{r}}", labelNote: "", f: ['r^2', '0', '0'], res: '3r', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\frac{\\partial}{\\partial r}(r^3) = 3r' },
+                { label: 'r cos φ r̂ − r sin φ φ̂', labelTex: "r \\cos  \\phi  \\hat{\\boldsymbol{r}} - r \\sin  \\phi  \\hat{\\boldsymbol{\\phi}}", labelNote: "", f: ['r*cos(phi)', '-r*sin(phi)', '0'], res: 'cos(phi)', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{r}\\,2r\\cos\\phi - \\frac{1}{r}\\,r\\cos\\phi = \\cos\\phi' }
             ],
             sph: [
-                { label: 'R R̂', f: ['R', '0', '0'], res: '3', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}(R^3) = 3' },
-                { label: 'R̂ / R² (điện tích điểm)', f: ['1/R^2', '0', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}(1) = 0 \\quad (R \\ne 0)' },
-                { label: 'sin θ θ̂', f: ['0', 'sin(theta)', '0'], res: '2cos(theta)/R', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R\\sin\\theta}\\frac{\\partial}{\\partial\\theta}(\\sin^2\\theta) = \\frac{2\\cos\\theta}{R}' },
-                { label: 'e^{−R} R̂', f: ['exp(-R)', '0', '0'], res: 'exp(-R)*(2/R - 1)', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left(R^2 e^{-R}\\right) = e^{-R}\\left(\\frac{2}{R} - 1\\right)' },
-                { label: 'R cos θ R̂ − R sin θ θ̂', f: ['R*cos(theta)', '-R*sin(theta)', '0'], res: 'cos(theta)', resTex: '\\nabla\\cdot\\mathbf{F} = 3\\cos\\theta - 2\\cos\\theta = \\cos\\theta' }
+                { label: 'R R̂', labelTex: "R \\hat{\\boldsymbol{R}}", labelNote: "", f: ['R', '0', '0'], res: '3', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}(R^3) = 3' },
+                { label: 'R̂ / R² (điện tích điểm)', labelTex: "\\hat{\\boldsymbol{R}} / R^{2}", labelNote: " (điện tích điểm)", f: ['1/R^2', '0', '0'], res: '0', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}(1) = 0 \\quad (R \\ne 0)' },
+                { label: 'sin θ θ̂', labelTex: "\\sin  \\theta  \\hat{\\boldsymbol{\\theta}}", labelNote: "", f: ['0', 'sin(theta)', '0'], res: '2cos(theta)/R', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R\\sin\\theta}\\frac{\\partial}{\\partial\\theta}(\\sin^2\\theta) = \\frac{2\\cos\\theta}{R}' },
+                { label: 'e^{−R} R̂', labelTex: "e^{-R} \\hat{\\boldsymbol{R}}", labelNote: "", f: ['exp(-R)', '0', '0'], res: 'exp(-R)*(2/R - 1)', resTex: '\\nabla\\cdot\\mathbf{F} = \\frac{1}{R^2}\\frac{\\partial}{\\partial R}\\left(R^2 e^{-R}\\right) = e^{-R}\\left(\\frac{2}{R} - 1\\right)' },
+                { label: 'R cos θ R̂ − R sin θ θ̂', labelTex: "R \\cos  \\theta  \\hat{\\boldsymbol{R}} - R \\sin  \\theta  \\hat{\\boldsymbol{\\theta}}", labelNote: "", f: ['R*cos(theta)', '-R*sin(theta)', '0'], res: 'cos(theta)', resTex: '\\nabla\\cdot\\mathbf{F} = 3\\cos\\theta - 2\\cos\\theta = \\cos\\theta' }
             ]
         };
         initOperatorPage({ kind: 'div', presets: PRESETS, symbol: '∇·F', P0: [1.2, -0.9, 0.7] });
